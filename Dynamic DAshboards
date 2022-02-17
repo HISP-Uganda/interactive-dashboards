@@ -1,0 +1,44 @@
+List Dashboards
+  Dashboard
+    Name
+    Description
+    Theme
+    Filters
+      Periods
+      Organisation Units (Units and Groups)
+      Attributes
+    Sections
+      Title
+      Description
+      X-axis
+      Y-axis
+      Width
+      Height
+      Visualizations
+        Visualization
+          RealTime (True/False)
+          Refresh Rate
+          Type
+          Filters (ALL Possible)
+          ignoreFilter (true/false)
+          Data
+            Numerator (SQLView, Indicator, Data Element)
+            Denominator (SQLView, Indicator, Data Element)
+            hasDenominator (True/False)
+            Factor
+          Properties
+          Downloadable
+
+Core Features
+- Administration & Configuration
+- Sharing Settings
+- Fullscreen Mode (on all Smart TVs)
+- Print Dashboards
+- Export Dashboard and send to email
+- Presentation Mode (Per Dashboard, All Dashboards, Visualisations Selected)
+- Multiple and configurable Layouts for Dashboards (ODK, Excel, SQL, API, Elastic Search, etc.)
+- External Data Sources beyond DHIS2 ********************************
+- Flexible Color Themes for dashboards.
+- Public (DHIS2 and Portal Approach) and Secure Access
+
+
