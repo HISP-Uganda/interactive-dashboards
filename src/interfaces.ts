@@ -1,10 +1,12 @@
-interface Named {
+export interface Named {
   id: string;
-  name?: string;
+  name: string;
   description?: string;
 }
+
+export interface Category extends Named {}
 export interface Data {
-  dataSource?:
+  dataSource:
     | "DHIS2-SQL-VIEW"
     | "DHIS2-INDICATOR"
     | "DHIS2-DATA-ELEMENT"
@@ -38,7 +40,20 @@ export interface Section extends Named {
 export interface Filter {}
 
 export interface Dashboard extends Named {
+  category: Category;
   filters: Filter[];
   sections: Section[];
   isDefault: boolean;
+}
+
+export interface Store {
+  categories: Category[];
+  dashboards: Dashboard[];
+  sections: Section[];
+  visualizations: Visualization[];
+  category: string;
+  dashboard: string;
+  section: string;
+  visualization: string;
+  organisationUnits: Named[];
 }
