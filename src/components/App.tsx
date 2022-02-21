@@ -1,12 +1,12 @@
-import { Box } from "@chakra-ui/react";
+import { Box, Spinner } from "@chakra-ui/react";
 import {
+  createHashHistory,
   MakeGenerics,
   Outlet,
   ReactLocation,
   Router,
-  createHashHistory,
-  Link,
 } from "react-location";
+import { useInitials } from "../Queries";
 import { routes } from "../routes";
 
 type LocationGenerics = MakeGenerics<{
@@ -16,13 +16,20 @@ type LocationGenerics = MakeGenerics<{
 const history = createHashHistory();
 const location = new ReactLocation<LocationGenerics>({ history });
 
-const MyApp = () => (
-  <Box bg="yellow.400">
-    <Router location={location} routes={routes}>
-      <Link to="./village">Village</Link>
-      <Outlet />
-    </Router>
-  </Box>
-);
+const App = () => {
+  const { isLoading, isSuccess, isError, error } = useInitials();
 
-export default MyApp;
+  return (
+    <Box bg="yellow.400">
+      {isLoading && <Spinner />}
+      {isSuccess && (
+        <Router location={location} routes={routes}>
+          <Outlet />
+        </Router>
+      )}
+      {isError && <Box>{error.message}</Box>}
+    </Box>
+  );
+};
+
+export default App;
