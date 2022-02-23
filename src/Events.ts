@@ -15,3 +15,7 @@ export const loadDefaults = domain.createEvent<{
   visualizations: Visualization[];
   organisationUnits: Named[];
 }>();
+export const setSelectedUnits = domain.createEvent<string>();
+export const setUserUnits = domain.createEvent<any[]>();
+export const setSublevel = domain.createEvent<number>();
+export const setSublevels = domain.createEvent<any[]>();
