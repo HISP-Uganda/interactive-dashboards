@@ -20,7 +20,7 @@ const App = () => {
   const { isLoading, isSuccess, isError, error } = useInitials();
 
   return (
-    <Box bg="yellow.400">
+    <Box>
       {isLoading && <Spinner />}
       {isSuccess && (
         <Router location={location} routes={routes}>

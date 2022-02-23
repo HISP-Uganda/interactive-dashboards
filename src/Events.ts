@@ -9,9 +9,13 @@ import {
 
 export const createDashboard = domain.createEvent<Dashboard>();
 export const loadDefaults = domain.createEvent<{
-  dashboards: Dashboard[];
-  categories: Category[];
-  sections: Section[];
-  visualizations: Visualization[];
+  dashboards: string[];
+  categories: string[];
+  visualizations: string[];
   organisationUnits: Named[];
 }>();
+
+export const addCategory = domain.createEvent<string>();
+export const addDashboard = domain.createEvent<Dashboard>();
+export const addSection = domain.createEvent<void>();
+export const activateSection = domain.createEvent<string>();
