@@ -1,6 +1,8 @@
+import { Layout } from "react-grid-layout";
+
 export interface Named {
   id: string;
-  name: string;
+  name?: string;
   description?: string;
 }
 
@@ -30,29 +32,32 @@ export interface Visualization extends Named {
 }
 
 export interface Section extends Named {
-  x: number;
-  y: number;
-  height: number;
-  width: number;
-  visualizations: Visualization[];
+  layout: {
+    // xxl: Layout;
+    // lg: Layout;
+    md: Layout;
+    // sm: Layout;
+    // xs: Layout;
+    // xxs: Layout;
+  };
+  visualizations?: Visualization[];
 }
 
 export interface Filter {}
 
 export interface Dashboard extends Named {
-  category: Category;
-  filters: Filter[];
+  category?: string;
+  filters?: string[];
   sections: Section[];
-  isDefault: boolean;
+  isDefault?: boolean;
 }
 
 export interface Store {
-  categories: Category[];
-  dashboards: Dashboard[];
-  sections: Section[];
-  visualizations: Visualization[];
+  categories: string[];
+  dashboards: string[];
+  visualizations: string[];
   category: string;
-  dashboard: string;
+  dashboard: Dashboard;
   section: string;
   visualization: string;
   organisationUnits: Named[];
