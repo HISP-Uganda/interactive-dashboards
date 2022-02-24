@@ -1,8 +1,9 @@
-import { Stack } from "@chakra-ui/react";
+import { Flex, Stack } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { $store } from "../Store";
 import NewCategoryDialog from "./NewCategoryDialog";
 import NewDashboardDialog from "./NewDashboardDialog";
+import MenuDrawer from "./MenuDrawer";
 
 export default function Home() {
   const store = useStore($store);
@@ -11,6 +12,7 @@ export default function Home() {
     <Stack direction="row" spacing="10px">
       <NewCategoryDialog />
       <NewDashboardDialog />
+      <MenuDrawer />
     </Stack>
   );
 }
