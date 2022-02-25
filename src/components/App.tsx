@@ -1,4 +1,4 @@
-import { Box, Spinner } from "@chakra-ui/react";
+import { Box, Flex, Spinner } from "@chakra-ui/react";
 import {
   createHashHistory,
   MakeGenerics,
@@ -21,7 +21,16 @@ const App = () => {
 
   return (
     <Box>
-      {isLoading && <Spinner />}
+      {isLoading && (
+        <Flex
+          w="100%"
+          alignItems="center"
+          justifyContent="center"
+          h="calc(100vh - 48px)"
+        >
+          <Spinner />
+        </Flex>
+      )}
       {isSuccess && (
         <Router location={location} routes={routes}>
           <Outlet />
