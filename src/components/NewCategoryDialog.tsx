@@ -18,13 +18,13 @@ import {
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useForm } from "react-hook-form";
 import { addCategory } from "../Events";
-import { Category } from "../interfaces";
+import { ICategory } from "../interfaces";
 import { generateUid } from "../utils/uid";
 
 const NewCategoryDialog = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const engine = useDataEngine();
-  const defaultValues: Category = {
+  const defaultValues: ICategory = {
     id: generateUid(),
     name: "",
   };
@@ -32,9 +32,9 @@ const NewCategoryDialog = () => {
     handleSubmit,
     register,
     formState: { errors, isSubmitting },
-  } = useForm<Category, any>({ defaultValues });
+  } = useForm<ICategory, any>({ defaultValues });
 
-  const add = async (values: Category) => {
+  const add = async (values: ICategory) => {
     const mutation: any = {
       type: "create",
       resource: `dataStore/i-categories/${values.id}`,

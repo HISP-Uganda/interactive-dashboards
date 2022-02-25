@@ -1,8 +1,7 @@
-import { useQuery } from "react-query";
 import { useDataEngine } from "@dhis2/app-runtime";
-import { addDashboard, loadDefaults } from "./Events";
 import { fromPairs } from "lodash";
-import { Dashboard, Section } from "./interfaces";
+import { useQuery } from "react-query";
+import { addDashboard, loadDefaults } from "./Events";
 
 export const useInitials = () => {
   const engine = useDataEngine();
@@ -25,22 +24,32 @@ export const useInitials = () => {
     categories: {
       resource: "dataStore/i-categories",
     },
+    settings: {
+      resource: "dataStore/i-dashboard-settings/settings",
+    },
   };
   return useQuery<any, Error>(["initial"], async () => {
     const {
       me: { organisationUnits },
       dashboards,
       visualizations,
-      sections,
       categories,
+      settings,
     }: any = await engine.query(query);
+    if (settings && settings.default) {
+      const { dashboard } = await engine.query({
+        dashboard: {
+          resource: `dataStore/i-dashboards/${settings.default}`,
+        },
+      });
+      addDashboard(dashboard);
+    }
     loadDefaults({
       dashboards,
       visualizations,
       categories,
       organisationUnits,
     });
-    console.log(dashboards);
     return true;
   });
 };
