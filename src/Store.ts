@@ -4,13 +4,13 @@ import {
   addCategory,
   addDashboard,
   addSection,
-  loadDefaults
+  loadDefaults,
 } from "./Events";
-import { Section, Store } from "./interfaces";
+import { ISection, IStore } from "./interfaces";
 import { generateUid } from "./utils/uid";
 
 export const $store = domain
-  .createStore<Store>({
+  .createStore<IStore>({
     categories: [],
     dashboards: [],
     visualizations: [],
@@ -49,12 +49,12 @@ export const $store = domain
     const layout = {
       i: id,
       x: 0,
-      y: Infinity,
+      y: 0,
       w: 2,
       h: 2,
     };
 
-    const currentSection: Section = {
+    const currentSection: ISection = {
       layout: { md: layout },
       name: "test",
       id,
@@ -73,9 +73,6 @@ export const $store = domain
   });
 
 export const $layout = $store.map((state) => {
-  const md = state.dashboard.sections.map((s) => {
-    return s.layout.md;
-  });
-
+  const md = state.dashboard.sections.map((s) => s.layout.md);
   return { md };
 });

@@ -1,71 +1,109 @@
+import { useEffect } from "react";
 import {
   Box,
   Button,
-  Spinner,
-  Stack,
   Editable,
   EditableInput,
   EditablePreview,
   Spacer,
+  Spinner,
+  Stack,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure,
+  Text,
+  useMediaQuery,
 } from "@chakra-ui/react";
+import { useDataEngine } from "@dhis2/app-runtime";
 import { useStore } from "effector-react";
 import { fromPairs } from "lodash";
-import { Layout, Responsive, WidthProvider } from "react-grid-layout";
+import {
+  ItemCallback,
+  Layout,
+  Responsive,
+  WidthProvider,
+} from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import { useMatch } from "react-location";
-import { useQueryClient } from "react-query";
 import "react-resizable/css/styles.css";
-import { activateSection, addSection } from "../Events";
-import { Section } from "../interfaces";
+import { activateSection, addDashboard, addSection, deleteSection } from "../Events";
+import { ISection } from "../interfaces";
 import { useNamespaceKey } from "../Queries";
 import { $layout, $store } from "../Store";
-
 const ReactGridLayout = WidthProvider(Responsive);
+
 const Dashboard = () => {
-  const client = useQueryClient();
+  const [isDesktop] = useMediaQuery("(min-width: 1024px)");
+  const [isTablet] = useMediaQuery("(min-width: 768px)");
+  const [isPhone] = useMediaQuery("(min-width: 360px)");
+  const engine = useDataEngine();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const store = useStore($store);
+  const updateDashboard = async () => {
+    const mutation: any = {
+      type: "update",
+      resource: `dataStore/i-dashboards`,
+      data: store.dashboard,
+      id: store.dashboard.id,
+    };
+    await engine.mutate(mutation);
+  };
   const {
     params: { id },
   } = useMatch();
+
+  const itemCallback: ItemCallback = (layout: Layout[]) => {
+    const layouts = fromPairs(layout.map((l: Layout) => [l.i, l]));
+    const allSections = store.dashboard.sections.map((section: ISection) => {
+      return { ...section, layout: { md: layouts[section.id] } };
+    });
+    addDashboard({ ...store.dashboard, sections: allSections });
+  };
 
   const { isLoading, isSuccess, isError, data, error } = useNamespaceKey(
     "i-dashboards",
     id
   );
-  const store = useStore($store);
   const layout = useStore($layout);
-  const onLayoutChange = (layout: Layout[]) => {
-    const layouts = fromPairs(layout.map((l: Layout) => [l.i, l]));
-    const allSections = store.dashboard.sections.map((section: Section) => {
-      return { ...section, layout: layouts[section.id] };
-    });
-    // addDashboard({ ...store.dashboard, sections: allSections });
-  };
+  // useEffect(() => {}, [isDesktop, isTablet, isPhone]);
+
   return (
     <Stack>
       <Stack direction="row">
         <Button type="button" onClick={() => addSection()}>
           Add section
         </Button>
-        <Button type="button" onClick={() => addSection()}>
+        <Button type="button" onClick={() => deleteSection()}>
           Delete section
         </Button>
+        <Button type="button" onClick={() => updateDashboard()}>
+          Save Dashboard
+        </Button>
+        <Button onClick={onOpen}>Add Visualization</Button>
       </Stack>
       {isLoading && <Spinner />}
-      {isSuccess && (
+      {isSuccess && data && (
         <Box>
           <ReactGridLayout
-            margin={[0, 0]}
-            cols={{ xxl: 12, lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }}
+            margin={[5, 5]}
             layouts={layout}
-            onLayoutChange={onLayoutChange}
+            onDragStop={itemCallback}
+            verticalCompact={true}
+            autoSize={true}
+            preventCollision={false}
+            onResizeStop={itemCallback}
+            rowHeight={78}
           >
-            {store.dashboard?.sections.map((section: Section) => (
+            {store.dashboard.sections.map((section: ISection) => (
               <Stack
                 onClick={() => activateSection(section.id)}
                 border={store.section === section.id ? "red 1px solid" : "none"}
-                key={section.layout.md.i}
-                data-grid={section.layout.md.i}
-                p="5px"
+                key={section.id}
+                data-grid={section.layout.md}
               >
                 <Stack direction="row">
                   <Editable defaultValue={section.name}>
@@ -73,14 +111,39 @@ const Dashboard = () => {
                     <EditableInput />
                   </Editable>
                   <Spacer />
-                  <Button colorScheme="red" size="xs">X</Button>
+                  <Button colorScheme="red" size="xs">
+                    X
+                  </Button>
                 </Stack>
+                <Box>{section.layout.md.w}</Box>
               </Stack>
             ))}
           </ReactGridLayout>
         </Box>
       )}
       {isError && <Box>{error.message}</Box>}
+      <Modal isOpen={isOpen} onClose={onClose} size="6xl">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Modal Title</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody w="100%">
+            <Stack h="100%">
+              <Stack flex={1} h="100%" bg="green.100" direction="row">
+                <Stack bg="green.800" w="70%">
+                  <Text>Right</Text>
+                </Stack>
+                <Stack bg="green.900" flex={1}>
+                  <Text>Right</Text>
+                </Stack>
+              </Stack>
+              <Stack bg="green.600" h="300px">
+                <Text>Right</Text>
+              </Stack>
+            </Stack>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Stack>
   );
 };

@@ -1,13 +1,13 @@
 import { Layout } from "react-grid-layout";
 
-export interface Named {
+export interface INamed {
   id: string;
   name?: string;
   description?: string;
 }
 
-export interface Category extends Named {}
-export interface Data {
+export interface ICategory extends INamed {}
+export interface IData {
   dataSource:
     | "DHIS2-SQL-VIEW"
     | "DHIS2-INDICATOR"
@@ -15,23 +15,23 @@ export interface Data {
     | "OTHER";
 }
 
-export interface Numerator extends Data {}
-export interface Denominator extends Data {}
+export interface INumerator extends IData {}
+export interface IDenominator extends IData {}
 
-export interface Indicator extends Named {
-  numerator: Numerator;
-  denominator: Denominator;
+export interface IIndicator extends INamed {
+  numerator: INumerator;
+  denominator: IDenominator;
   factor: number;
 }
 
-export interface Visualization extends Named {
-  indicator: Indicator;
+export interface IVisualization extends INamed {
+  indicator: IIndicator;
   type: string;
   ignoreFilter: boolean;
   refreshInterval: number;
 }
 
-export interface Section extends Named {
+export interface ISection extends INamed {
   layout: {
     // xxl: Layout;
     // lg: Layout;
@@ -40,25 +40,25 @@ export interface Section extends Named {
     // xs: Layout;
     // xxs: Layout;
   };
-  visualizations?: Visualization[];
+  visualizations?: IVisualization[];
 }
 
-export interface Filter {}
+export interface IFilter {}
 
-export interface Dashboard extends Named {
+export interface IDashboard extends INamed {
   category?: string;
   filters?: string[];
-  sections: Section[];
+  sections: ISection[];
   isDefault?: boolean;
 }
 
-export interface Store {
+export interface IStore {
   categories: string[];
   dashboards: string[];
   visualizations: string[];
   category: string;
-  dashboard: Dashboard;
+  dashboard: IDashboard;
   section: string;
   visualization: string;
-  organisationUnits: Named[];
+  organisationUnits: INamed[];
 }

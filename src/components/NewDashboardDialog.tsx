@@ -1,7 +1,6 @@
 import {
   Box,
-  Button,
-  FormControl,
+  Button, Checkbox, FormControl,
   FormErrorMessage,
   FormLabel,
   Input,
@@ -11,23 +10,16 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  ModalOverlay,
-  Spinner,
-  Stack,
-  useDisclosure,
-  Select,
-  Textarea,
-  Checkbox,
+  ModalOverlay, Select, Spinner,
+  Stack, Textarea, useDisclosure
 } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useStore } from "effector-react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-location";
-import { addDashboard } from "../Events";
-import { Category, Dashboard } from "../interfaces";
+import { IDashboard } from "../interfaces";
 import { useNamespace } from "../Queries";
 import { $store } from "../Store";
-import { generateUid } from "../utils/uid";
 
 const NewCategoryDialog = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -40,16 +32,15 @@ const NewCategoryDialog = () => {
     handleSubmit,
     register,
     formState: { errors, isSubmitting },
-  } = useForm<Dashboard, any>({ defaultValues: store.dashboard });
+  } = useForm<IDashboard, any>({ defaultValues: store.dashboard });
 
-  const add = async (values: Dashboard) => {
+  const add = async (values: IDashboard) => {
     const mutation: any = {
       type: "create",
       resource: `dataStore/i-dashboards/${values.id}`,
       data: values,
     };
     await engine.mutate(mutation);
-    // addDashboard(values.id);
   };
   async function onSubmit(values: any) {
     await add({ ...values, sections: [], filters: [] });
