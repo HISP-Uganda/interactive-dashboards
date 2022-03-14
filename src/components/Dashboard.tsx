@@ -1,26 +1,29 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import {
   Box,
   Button,
   Editable,
   EditableInput,
   EditablePreview,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
   Spacer,
   Spinner,
   Stack,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
-  useDisclosure,
   Text,
+  useDisclosure,
   useMediaQuery,
+  SimpleGrid,
+  GridItem,
+  Flex,
 } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useStore } from "effector-react";
-import { fromPairs } from "lodash";
+import { fromPairs, maxBy } from "lodash";
 import {
   ItemCallback,
   Layout,
@@ -30,18 +33,37 @@ import {
 import "react-grid-layout/css/styles.css";
 import { useMatch } from "react-location";
 import "react-resizable/css/styles.css";
-import { activateSection, addDashboard, addSection } from "../Events";
+import {
+  activateSection,
+  addDashboard,
+  addSection,
+  deleteSection,
+} from "../Events";
 import { ISection } from "../interfaces";
 import { useNamespaceKey } from "../Queries";
 import { $layout, $store } from "../Store";
 const ReactGridLayout = WidthProvider(Responsive);
-
+const visualizationTypes = [
+  { name: "Single Value", id: "1", description: "Single Value Visualization" },
+  { name: "Bar Graph", id: "2", description: "Bar Graph Visualization" },
+  { name: "Map", id: "3", description: "Map Visualization" },
+  { name: "Pie Chart", id: "4", description: "Pie Chart Visualization" },
+  {
+    name: "Stacked Column",
+    id: "5",
+    description: "Stacked Column Visualization",
+  },
+  { name: "Column", id: "6", description: "Column Visualization" },
+  { name: "Stacked Bar", id: "7", description: "Stacked Bar Visualization" },
+  { name: "Line Graph", id: "8", description: "Line Graph Visualization" },
+];
 const Dashboard = () => {
   const [isDesktop] = useMediaQuery("(min-width: 1024px)");
   const [isTablet] = useMediaQuery("(min-width: 768px)");
   const [isPhone] = useMediaQuery("(min-width: 360px)");
   const engine = useDataEngine();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [rowHeight, setRowHeight] = useState<number>(100);
   const store = useStore($store);
   const updateDashboard = async () => {
     const mutation: any = {
@@ -68,12 +90,23 @@ const Dashboard = () => {
     "i-dashboards",
     id
   );
+  const autoFit = () => {
+    const layout = store.dashboard.sections.map((section) => section.layout.md);
+    const maxCoordinate = maxBy(layout, "y");
+    if (maxCoordinate) {
+      const height = (maxCoordinate.h + maxCoordinate.y) * rowHeight;
+      const availableHeight = window.innerHeight - 96;
+      const difference =
+        (height - availableHeight) / (maxCoordinate.h + maxCoordinate.y);
+      // console.log(difference, height - availableHeight);
+      setRowHeight(rowHeight - difference);
+    }
+  };
   const layout = useStore($layout);
   // useEffect(() => {}, [isDesktop, isTablet, isPhone]);
-
   return (
-    <Stack>
-      <Stack direction="row">
+    <Stack h="calc(100vh - 48px)">
+      <Stack direction="row" h="48px" pt="4px">
         <Button type="button" onClick={() => addSection()}>
           Add section
         </Button>
@@ -83,11 +116,14 @@ const Dashboard = () => {
         <Button type="button" onClick={() => updateDashboard()}>
           Save Dashboard
         </Button>
+        <Button type="button" onClick={() => autoFit()}>
+          Auto Fit
+        </Button>
         <Button onClick={onOpen}>Add Visualization</Button>
       </Stack>
       {isLoading && <Spinner />}
       {isSuccess && data && (
-        <Box>
+        <Box h="calc(100vh - 96px)" overflow="auto">
           <ReactGridLayout
             margin={[5, 5]}
             layouts={layout}
@@ -96,7 +132,7 @@ const Dashboard = () => {
             autoSize={true}
             preventCollision={false}
             onResizeStop={itemCallback}
-            rowHeight={78}
+            rowHeight={rowHeight}
           >
             {store.dashboard.sections.map((section: ISection) => (
               <Stack
@@ -111,9 +147,15 @@ const Dashboard = () => {
                     <EditableInput />
                   </Editable>
                   <Spacer />
-                  <Button colorScheme="red" size="xs">
-                    X
-                  </Button>
+                  {store.section === section.id ? (
+                    <Button
+                      colorScheme="red"
+                      size="xs"
+                      onClick={() => deleteSection(section.id)}
+                    >
+                      X
+                    </Button>
+                  ) : null}
                 </Stack>
                 <Box>{section.layout.md.w}</Box>
               </Stack>
@@ -125,20 +167,41 @@ const Dashboard = () => {
       <Modal isOpen={isOpen} onClose={onClose} size="6xl">
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Modal Title</ModalHeader>
+          <ModalHeader>Adding Visualization</ModalHeader>
           <ModalCloseButton />
           <ModalBody w="100%">
-            <Stack h="100%">
-              <Stack flex={1} h="100%" bg="green.100" direction="row">
-                <Stack bg="green.800" w="70%">
-                  <Text>Right</Text>
+            <Stack direction="row" h="600px">
+              <Stack w="70%">
+                <Stack h="60%">
+                  <Text>Visualization</Text>
                 </Stack>
-                <Stack bg="green.900" flex={1}>
-                  <Text>Right</Text>
-                </Stack>
+                <Stack></Stack>
               </Stack>
-              <Stack bg="green.600" h="300px">
-                <Text>Right</Text>
+              <Stack flex={1}>
+                <Stack h="60%" overflow="auto">
+                  <SimpleGrid
+                    columns={2}
+                    spacing="5px"
+                    minChildWidth="140px"
+                    textAlign="center"
+                    alignItems={"center"}
+                    justifyContent="center"
+                  >
+                    {visualizationTypes.map((v) => (
+                      <Flex
+                        key={v.id}
+                        alignItems="center"
+                        justifyContent="center"
+                        h="100px"
+                      >
+                        {v.name}
+                      </Flex>
+                    ))}
+                  </SimpleGrid>
+                </Stack>
+                <Stack>
+                  <Text>Right</Text>
+                </Stack>
               </Stack>
             </Stack>
           </ModalBody>
