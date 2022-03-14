@@ -20,7 +20,7 @@ const App = () => {
   const { isLoading, isSuccess, isError, error } = useInitials();
 
   return (
-    <Box>
+    <>
       {isLoading && (
         <Flex
           w="100%"
@@ -37,7 +37,7 @@ const App = () => {
         </Router>
       )}
       {isError && <Box>{error.message}</Box>}
-    </Box>
+    </>
   );
 };
 

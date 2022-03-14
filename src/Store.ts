@@ -4,6 +4,7 @@ import {
   addCategory,
   addDashboard,
   addSection,
+  deleteSection,
   loadDefaults,
 } from "./Events";
 import { ISection, IStore } from "./interfaces";
@@ -66,6 +67,14 @@ export const $store = domain
         ...state.dashboard,
         sections: [...state.dashboard.sections, currentSection],
       },
+    };
+  })
+  .on(deleteSection, (state, section) => {
+    const sections = state.dashboard.sections.filter((s) => s.id !== section);
+    return {
+      ...state,
+      dashboard: { ...state.dashboard, sections },
+      section: "",
     };
   })
   .on(activateSection, (state, section) => {
