@@ -13,7 +13,7 @@ import {
   ModalHeader,
   ModalOverlay,
   Stack,
-  useDisclosure
+  useDisclosure,
 } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useForm } from "react-hook-form";

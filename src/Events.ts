@@ -1,12 +1,12 @@
 import { domain } from "./Domain";
-import { IDashboard, INamed } from "./interfaces";
+import { IDashboard, INamed, IDataSource } from "./interfaces";
 
-export const createDashboard = domain.createEvent<IDashboard>();
 export const loadDefaults = domain.createEvent<{
   dashboards: string[];
   categories: string[];
   visualizations: string[];
   organisationUnits: INamed[];
+  dataSources: IDataSource[];
 }>();
 
 export const addCategory = domain.createEvent<string>();

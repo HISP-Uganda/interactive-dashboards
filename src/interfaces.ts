@@ -5,6 +5,15 @@ export interface INamed {
   name?: string;
   description?: string;
 }
+export interface Authentication {
+  username: string;
+  password: string;
+  url: string;
+}
+export interface IDataSource extends INamed {
+  type: "DHIS2" | "ELASTICSEARCH" | "API";
+  authentication: Authentication;
+}
 
 export interface ICategory extends INamed {}
 export interface IData {
@@ -30,7 +39,6 @@ export interface IVisualization extends INamed {
   ignoreFilter: boolean;
   refreshInterval: number;
 }
-
 export interface ISection extends INamed {
   layout: {
     // xxl: Layout;
@@ -50,6 +58,7 @@ export interface IDashboard extends INamed {
   filters?: string[];
   sections: ISection[];
   isDefault?: boolean;
+  published: boolean;
 }
 
 export interface IStore {
