@@ -1,11 +1,5 @@
 import { domain } from "./Domain";
-import {
-  IDashboard,
-  ICategory,
-  ISection,
-  IVisualization,
-  INamed,
-} from "./interfaces";
+import { IDashboard, INamed } from "./interfaces";
 
 export const createDashboard = domain.createEvent<IDashboard>();
 export const loadDefaults = domain.createEvent<{
@@ -18,5 +12,5 @@ export const loadDefaults = domain.createEvent<{
 export const addCategory = domain.createEvent<string>();
 export const addDashboard = domain.createEvent<IDashboard>();
 export const addSection = domain.createEvent<void>();
-export const deleteSection = domain.createEvent<void>();
+export const deleteSection = domain.createEvent<string>();
 export const activateSection = domain.createEvent<string>();
