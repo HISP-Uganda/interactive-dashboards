@@ -27,6 +27,9 @@ export const useInitials = () => {
     settings: {
       resource: "dataStore/i-dashboard-settings/settings",
     },
+    dataSources: {
+      resource: "dataStore/i-data-sources",
+    },
   };
   return useQuery<any, Error>(["initial"], async () => {
     const {
@@ -35,9 +38,10 @@ export const useInitials = () => {
       visualizations,
       categories,
       settings,
+      dataSources,
     }: any = await engine.query(query);
     if (settings && settings.default) {
-      const { dashboard } = await engine.query({
+      const { dashboard }: any = await engine.query({
         dashboard: {
           resource: `dataStore/i-dashboards/${settings.default}`,
         },
@@ -49,6 +53,7 @@ export const useInitials = () => {
       visualizations,
       categories,
       organisationUnits,
+      dataSources,
     });
     return true;
   });

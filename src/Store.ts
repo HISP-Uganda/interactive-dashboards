@@ -15,7 +15,7 @@ export const $store = domain
     categories: [],
     dashboards: [],
     visualizations: [],
-    dashboard: { id: generateUid(), sections: [] },
+    dashboard: { id: generateUid(), sections: [], published: false },
     category: "",
     section: "",
     visualization: "",
@@ -42,7 +42,7 @@ export const $store = domain
   .on(addDashboard, (state, dashboard) => {
     return {
       ...state,
-      dashboard,
+      dashboard: dashboard,
     };
   })
   .on(addSection, (state) => {
