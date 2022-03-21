@@ -37,6 +37,7 @@ import {
   addDashboard,
   addSection,
   deleteSection,
+  toggleDashboard,
 } from "../Events";
 import { ISection } from "../interfaces";
 import { useNamespaceKey } from "../Queries";
@@ -93,16 +94,17 @@ const Dashboard = () => {
   const increment = (value: number) => {
     setRowHeight(rowHeight + value);
   };
-
-  const publish = async () => {
-    await updateDashboard({ ...store.dashboard, published: true });
-    // addDashboard({ ...store.dashboard, published: true });
-  };
   const layout = useStore($layout);
+
+  const fitPage = () => {
+    const allLayouts = store.dashboard.sections.map(
+      (section) => section.layout.md
+    );
+  };
   // useEffect(() => {}, [isDesktop, isTablet, isPhone]);
   return (
     <Stack h="calc(100vh - 48px)">
-      <Stack direction="row" h="48px" pt="4px">
+      <Stack direction="row" h="48px">
         {!store.dashboard.published && (
           <>
             <Button type="button" onClick={() => addSection()}>
@@ -117,6 +119,9 @@ const Dashboard = () => {
             >
               Save Dashboard
             </Button>
+            <Button type="button" onClick={() => fitPage()}>
+              Fit Page
+            </Button>
             <Button type="button" onClick={() => increment(1)}>
               Increase
             </Button>
@@ -127,7 +132,12 @@ const Dashboard = () => {
             <Button onClick={onOpen}>Add Visualization</Button>
           </>
         )}
-        <Button onClick={publish}>Publish</Button>
+        {store.dashboard.published && (
+          <Button onClick={() => toggleDashboard(false)}>Edit</Button>
+        )}
+        {!store.dashboard.published && (
+          <Button onClick={() => toggleDashboard(true)}>Publish</Button>
+        )}
       </Stack>
       {isLoading && <Spinner />}
       {isSuccess && data && (
@@ -142,7 +152,7 @@ const Dashboard = () => {
             onResizeStop={itemCallback}
             containerPadding={[5, 5]}
             rowHeight={rowHeight}
-            isResizable={store.dashboard.published}
+            isResizable={!store.dashboard.published}
           >
             {store.dashboard.sections.map((section: ISection) => (
               <Stack

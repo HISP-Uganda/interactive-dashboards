@@ -17,12 +17,15 @@ import {
 } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useForm } from "react-hook-form";
+import { useQueryClient } from "react-query";
+
 import { addCategory } from "../Events";
 import { ICategory } from "../interfaces";
 import { generateUid } from "../utils/uid";
 
 const NewCategoryDialog = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const queryClient = useQueryClient();
   const engine = useDataEngine();
   const defaultValues: ICategory = {
     id: generateUid(),
@@ -42,6 +45,10 @@ const NewCategoryDialog = () => {
     };
     await engine.mutate(mutation);
     addCategory(values.id);
+    queryClient.setQueryData(["namespaces", "i-categories"], (old: any) => [
+      ...old,
+      values,
+    ]);
   };
   async function onSubmit(values: any) {
     await add(values);

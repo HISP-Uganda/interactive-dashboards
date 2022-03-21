@@ -3,9 +3,11 @@ import {
   activateSection,
   addCategory,
   addDashboard,
+  addDataSource,
   addSection,
   deleteSection,
   loadDefaults,
+  toggleDashboard,
 } from "./Events";
 import { ISection, IStore } from "./interfaces";
 import { generateUid } from "./utils/uid";
@@ -15,28 +17,37 @@ export const $store = domain
     categories: [],
     dashboards: [],
     visualizations: [],
-    dashboard: { id: generateUid(), sections: [], published: false },
+    dashboard: {
+      id: generateUid(),
+      sections: [],
+      published: false,
+    },
     category: "",
     section: "",
     visualization: "",
     organisationUnits: [],
+    hasDashboards: false,
+    hasDefaultDashboard: false,
+    dataSources: [],
   })
-  .on(
-    loadDefaults,
-    (state, { dashboards, visualizations, categories, organisationUnits }) => {
-      return {
-        ...state,
-        dashboards,
-        visualizations,
-        categories,
-        organisationUnits,
-      };
-    }
-  )
+  .on(loadDefaults, (state, { dashboards, categories, organisationUnits }) => {
+    return {
+      ...state,
+      dashboards,
+      categories,
+      organisationUnits,
+    };
+  })
   .on(addCategory, (state, category) => {
     return {
       ...state,
       categories: [...state.categories, category],
+    };
+  })
+  .on(addDataSource, (state, dataSource) => {
+    return {
+      ...state,
+      dataSources: [...state.dataSources, dataSource],
     };
   })
   .on(addDashboard, (state, dashboard) => {
@@ -79,6 +90,9 @@ export const $store = domain
   })
   .on(activateSection, (state, section) => {
     return { ...state, section };
+  })
+  .on(toggleDashboard, (state, published) => {
+    return { ...state, dashboard: { ...state.dashboard, published } };
   });
 
 export const $layout = $store.map((state) => {

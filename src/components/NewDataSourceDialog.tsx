@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Checkbox,
   FormControl,
   FormErrorMessage,
   FormLabel,
@@ -19,16 +20,20 @@ import {
 } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useForm } from "react-hook-form";
+import { useQueryClient } from "react-query";
+import { addDataSource } from "../Events";
 import { IDataSource } from "../interfaces";
 import { generateUid } from "../utils/uid";
 
 const NewDataSourceDialog = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const queryClient = useQueryClient();
   const engine = useDataEngine();
   const defaultValues: IDataSource = {
     id: generateUid(),
     name: "",
     type: "DHIS2",
+    isCurrentDHIS2: true,
     authentication: { username: "", password: "", url: "" },
   };
   const {
@@ -38,17 +43,21 @@ const NewDataSourceDialog = () => {
     formState: { errors, isSubmitting },
   } = useForm<IDataSource, any>({ defaultValues });
 
-  // const type = watch("type");
+  const type = watch("type");
+  const isCurrentDHIS2 = watch("isCurrentDHIS2");
 
   const add = async (values: IDataSource) => {
-    console.log(values);
-    // const mutation: any = {
-    //   type: "create",
-    //   resource: `dataStore/i-categories/${values.id}`,
-    //   data: values,
-    // };
-    // await engine.mutate(mutation);
-    // addCategory(values.id);
+    const mutation: any = {
+      type: "create",
+      resource: `dataStore/i-data-sources/${values.id}`,
+      data: values,
+    };
+    await engine.mutate(mutation);
+    addDataSource(values.id);
+    queryClient.setQueryData(["namespaces", "i-data-sources"], (old: any) => [
+      ...old,
+      values,
+    ]);
   };
   async function onSubmit(values: any) {
     await add(values);
@@ -69,7 +78,7 @@ const NewDataSourceDialog = () => {
             <ModalHeader>Adding Data Source</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <Stack spacing="10px">
+              <Stack spacing="20px">
                 <FormControl isInvalid={!!errors.id}>
                   <Input
                     id="id"
@@ -81,6 +90,36 @@ const NewDataSourceDialog = () => {
                     {errors.name && errors.name.message}
                   </FormErrorMessage>
                 </FormControl>
+                <FormControl isInvalid={!!errors.name} isRequired={true}>
+                  <FormLabel htmlFor="type">Data Source Type</FormLabel>
+                  <Select
+                    id="type"
+                    placeholder="Data Source Type"
+                    {...register("type", {
+                      required: "This is required",
+                    })}
+                  >
+                    <option value="DHIS2">DHIS2</option>
+                    <option value="ELASTICSEARCH">Elasticsearch</option>
+                    <option value="API">API</option>
+                  </Select>
+                  <FormErrorMessage>
+                    {errors.name && errors.name.message}
+                  </FormErrorMessage>
+                </FormControl>
+                {type === "DHIS2" && (
+                  <FormControl isInvalid={!!errors.name} isRequired={true}>
+                    <Checkbox
+                      {...register("isCurrentDHIS2")}
+                      colorScheme="green"
+                    >
+                      Is Current DHIS2
+                    </Checkbox>
+                    <FormErrorMessage>
+                      {errors.isCurrentDHIS2 && errors.isCurrentDHIS2.message}
+                    </FormErrorMessage>
+                  </FormControl>
+                )}
                 <FormControl isInvalid={!!errors.name} isRequired={true}>
                   <FormLabel htmlFor="name">Name</FormLabel>
                   <Input
@@ -99,62 +138,49 @@ const NewDataSourceDialog = () => {
                   </FormErrorMessage>
                 </FormControl>
 
-                <FormControl isInvalid={!!errors.name} isRequired={true}>
-                  <FormLabel htmlFor="type">Data Source Type</FormLabel>
-                  <Select
-                    id="type"
-                    placeholder="Data Source Type"
-                    {...register("type", {
-                      required: "This is required",
-                    })}
-                  >
-                    <option value="DHIS2">DHIS2</option>
-                    <option value="ELASTICSEARCH">Elasticsearch</option>
-                    <option value="API">API</option>
-                  </Select>
-                  <FormErrorMessage>
-                    {errors.name && errors.name.message}
-                  </FormErrorMessage>
-                </FormControl>
-                <FormControl isInvalid={!!errors.authentication?.url}>
-                  <FormLabel htmlFor="authentication.url">URL</FormLabel>
-                  <Input
-                    id="authentication.url"
-                    placeholder="url"
-                    {...register("authentication.url")}
-                  />
-                  <FormErrorMessage>
-                    {errors.authentication?.url?.message}
-                  </FormErrorMessage>
-                </FormControl>
+                {!isCurrentDHIS2 && (
+                  <>
+                    <FormControl isInvalid={!!errors.authentication?.url}>
+                      <FormLabel htmlFor="authentication.url">URL</FormLabel>
+                      <Input
+                        id="authentication.url"
+                        placeholder="url"
+                        {...register("authentication.url")}
+                      />
+                      <FormErrorMessage>
+                        {errors.authentication?.url?.message}
+                      </FormErrorMessage>
+                    </FormControl>
 
-                <FormControl isInvalid={!!errors.authentication?.username}>
-                  <FormLabel htmlFor="authentication.username">
-                    Username
-                  </FormLabel>
-                  <Input
-                    id="authentication.username"
-                    placeholder="username"
-                    {...register("authentication.username")}
-                  />
-                  <FormErrorMessage>
-                    {errors.authentication?.username?.message}
-                  </FormErrorMessage>
-                </FormControl>
+                    <FormControl isInvalid={!!errors.authentication?.username}>
+                      <FormLabel htmlFor="authentication.username">
+                        Username
+                      </FormLabel>
+                      <Input
+                        id="authentication.username"
+                        placeholder="username"
+                        {...register("authentication.username")}
+                      />
+                      <FormErrorMessage>
+                        {errors.authentication?.username?.message}
+                      </FormErrorMessage>
+                    </FormControl>
 
-                <FormControl isInvalid={!!errors.authentication?.password}>
-                  <FormLabel htmlFor="authentication.password">
-                    Password
-                  </FormLabel>
-                  <Input
-                    id="authentication.password"
-                    placeholder="password"
-                    {...register("authentication.password")}
-                  />
-                  <FormErrorMessage>
-                    {errors.authentication?.password?.message}
-                  </FormErrorMessage>
-                </FormControl>
+                    <FormControl isInvalid={!!errors.authentication?.password}>
+                      <FormLabel htmlFor="authentication.password">
+                        Password
+                      </FormLabel>
+                      <Input
+                        id="authentication.password"
+                        placeholder="password"
+                        {...register("authentication.password")}
+                      />
+                      <FormErrorMessage>
+                        {errors.authentication?.password?.message}
+                      </FormErrorMessage>
+                    </FormControl>
+                  </>
+                )}
 
                 <FormControl isInvalid={!!errors.description}>
                   <FormLabel htmlFor="description">Description</FormLabel>

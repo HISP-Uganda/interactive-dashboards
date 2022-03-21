@@ -6,55 +6,68 @@ import { addDashboard, loadDefaults } from "./Events";
 export const useInitials = () => {
   const engine = useDataEngine();
   const query = {
+    dashboards: {
+      resource: "dataStore/i-dashboards",
+    },
+    // visualizations: {
+    //   resource: "dataStore/i-visualizations",
+    // },
+    // sections: {
+    //   resource: "dataStore/i-sections",
+    // },
+    categories: {
+      resource: "dataStore/i-categories",
+    },
+    // settings: {
+    //   resource: "dataStore/i-dashboard-settings/settings",
+    // },
+    dataSources: {
+      resource: "dataStore/i-data-sources",
+    },
+  };
+
+  const ouQuery = {
     me: {
       resource: "me.json",
       params: {
         fields: "organisationUnits[id,name]",
       },
     },
-    dashboards: {
-      resource: "dataStore/i-dashboards",
-    },
-    visualizations: {
-      resource: "dataStore/i-visualizations",
-    },
-    sections: {
-      resource: "dataStore/i-sections",
-    },
-    categories: {
-      resource: "dataStore/i-categories",
-    },
-    settings: {
-      resource: "dataStore/i-dashboard-settings/settings",
-    },
-    dataSources: {
-      resource: "dataStore/i-data-sources",
-    },
   };
   return useQuery<any, Error>(["initial"], async () => {
     const {
       me: { organisationUnits },
-      dashboards,
-      visualizations,
-      categories,
-      settings,
-      dataSources,
-    }: any = await engine.query(query);
-    if (settings && settings.default) {
-      const { dashboard }: any = await engine.query({
-        dashboard: {
-          resource: `dataStore/i-dashboards/${settings.default}`,
-        },
+    }: any = await engine.query(ouQuery);
+    try {
+      const {
+        dashboards,
+        categories,
+        dataSources,
+      }: any = await engine.query(query);
+
+      // if (settings && settings.default) {
+      //   const { dashboard }: any = await engine.query({
+      //     dashboard: {
+      //       resource: `dataStore/i-dashboards/${settings.default}`,
+      //     },
+      //   });
+      //   addDashboard(dashboard);
+      // }
+      loadDefaults({
+        dashboards,
+        categories,
+        organisationUnits,
+        dataSources,
       });
-      addDashboard(dashboard);
+    } catch (error) {
+      loadDefaults({
+        dashboards: [],
+        categories: [],
+        organisationUnits,
+        dataSources: [],
+      });
     }
-    loadDefaults({
-      dashboards,
-      visualizations,
-      categories,
-      organisationUnits,
-      dataSources,
-    });
+
     return true;
   });
 };
@@ -67,16 +80,22 @@ export const useNamespace = (namespace: string) => {
     },
   };
   return useQuery<any, Error>(["namespaces", namespace], async () => {
-    const { namespaceKeys }: any = await engine.query(namespaceQuery);
-    const query: any = fromPairs(
-      namespaceKeys.map((n: string) => [
-        n,
-        {
-          resource: `dataStore/${namespace}/${n}`,
-        },
-      ])
-    );
-    return await engine.query(query);
+    try {
+      const { namespaceKeys }: any = await engine.query(namespaceQuery);
+      const query: any = fromPairs(
+        namespaceKeys.map((n: string) => [
+          n,
+          {
+            resource: `dataStore/${namespace}/${n}`,
+          },
+        ])
+      );
+      const allData = await engine.query(query);
+      return Object.values(allData);
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
   });
 };
 

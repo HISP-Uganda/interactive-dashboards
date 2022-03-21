@@ -13,6 +13,7 @@ export interface Authentication {
 export interface IDataSource extends INamed {
   type: "DHIS2" | "ELASTICSEARCH" | "API";
   authentication: Authentication;
+  isCurrentDHIS2: boolean;
 }
 
 export interface ICategory extends INamed {}
@@ -21,6 +22,7 @@ export interface IData {
     | "DHIS2-SQL-VIEW"
     | "DHIS2-INDICATOR"
     | "DHIS2-DATA-ELEMENT"
+    | "DHIS2-PROGRAM-INDICATOR"
     | "OTHER";
 }
 
@@ -53,6 +55,8 @@ export interface ISection extends INamed {
 
 export interface IFilter {}
 
+export interface IDataSource extends INamed {}
+
 export interface IDashboard extends INamed {
   category?: string;
   filters?: string[];
@@ -61,13 +65,17 @@ export interface IDashboard extends INamed {
   published: boolean;
 }
 
+
 export interface IStore {
   categories: string[];
   dashboards: string[];
+  dataSources: string[];
   visualizations: string[];
   category: string;
   dashboard: IDashboard;
   section: string;
   visualization: string;
   organisationUnits: INamed[];
+  hasDashboards: boolean;
+  hasDefaultDashboard: boolean;
 }
