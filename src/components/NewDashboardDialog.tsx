@@ -1,6 +1,8 @@
 import {
   Box,
-  Button, Checkbox, FormControl,
+  Button,
+  Checkbox,
+  FormControl,
   FormErrorMessage,
   FormLabel,
   Input,
@@ -10,8 +12,12 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  ModalOverlay, Select, Spinner,
-  Stack, Textarea, useDisclosure
+  ModalOverlay,
+  Select,
+  Spinner,
+  Stack,
+  Textarea,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useStore } from "effector-react";
@@ -20,6 +26,7 @@ import { useNavigate } from "react-location";
 import { IDashboard } from "../interfaces";
 import { useNamespace } from "../Queries";
 import { $store } from "../Store";
+import { generateUid } from "../utils/uid";
 
 const NewCategoryDialog = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -32,21 +39,39 @@ const NewCategoryDialog = () => {
     handleSubmit,
     register,
     formState: { errors, isSubmitting },
-  } = useForm<IDashboard, any>({ defaultValues: store.dashboard });
-
+  } = useForm<IDashboard, any>({
+    defaultValues: {
+      id: generateUid(),
+      name: "",
+      sections: [],
+      category: "",
+      description: "",
+    },
+  });
   const add = async (values: IDashboard) => {
     const mutation: any = {
       type: "create",
       resource: `dataStore/i-dashboards/${values.id}`,
       data: values,
     };
-    await engine.mutate(mutation);
+    
+    const mutation2: any = {
+      type: "update",
+      resource: `dataStore/i-dashboard-settings`,
+      data: { default: values.id },
+      id: "settings",
+    };
+
+    if (values.isDefault) {
+      await Promise.all([engine.mutate(mutation), engine.mutate(mutation2)]);
+    }
   };
   async function onSubmit(values: any) {
     await add({ ...values, sections: [], filters: [] });
     onClose();
     navigate({ to: `/dashboards/${values.id}` });
   }
+
   return (
     <Box>
       {isLoading && <Spinner />}
@@ -138,7 +163,7 @@ const NewCategoryDialog = () => {
                       Cancel
                     </Button>
                     <Button type="submit" isLoading={isSubmitting}>
-                      Save Category
+                      Add Dashboard
                     </Button>
                   </Stack>
                 </ModalFooter>

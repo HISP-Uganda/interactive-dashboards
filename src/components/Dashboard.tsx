@@ -1,29 +1,28 @@
-import { useState } from "react";
 import {
   Box,
   Button,
   Editable,
   EditableInput,
   EditablePreview,
+  Flex,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  SimpleGrid,
   Spacer,
   Spinner,
   Stack,
   Text,
   useDisclosure,
   useMediaQuery,
-  SimpleGrid,
-  GridItem,
-  Flex,
 } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useStore } from "effector-react";
 import { fromPairs, maxBy } from "lodash";
+import { useState } from "react";
 import {
   ItemCallback,
   Layout,
@@ -65,12 +64,12 @@ const Dashboard = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [rowHeight, setRowHeight] = useState<number>(50);
   const store = useStore($store);
-  const updateDashboard = async () => {
+  const updateDashboard = async (data: any) => {
     const mutation: any = {
       type: "update",
       resource: `dataStore/i-dashboards`,
-      data: store.dashboard,
-      id: store.dashboard.id,
+      data: data,
+      id: data.id,
     };
     await engine.mutate(mutation);
   };
@@ -90,36 +89,45 @@ const Dashboard = () => {
     "i-dashboards",
     id
   );
-  const autoFit = () => {
-    const layout = store.dashboard.sections.map((section) => section.layout.md);
-    const maxCoordinate = maxBy(layout, "y");
-    if (maxCoordinate) {
-      const height = (maxCoordinate.h + maxCoordinate.y) * rowHeight;
-      const availableHeight = window.innerHeight - 96;
-      const difference =
-        (height - availableHeight) / (maxCoordinate.h + maxCoordinate.y);
-      // console.log(difference, height - availableHeight);
-      setRowHeight(rowHeight - difference);
-    }
+
+  const increment = (value: number) => {
+    setRowHeight(rowHeight + value);
+  };
+
+  const publish = async () => {
+    await updateDashboard({ ...store.dashboard, published: true });
+    // addDashboard({ ...store.dashboard, published: true });
   };
   const layout = useStore($layout);
   // useEffect(() => {}, [isDesktop, isTablet, isPhone]);
   return (
     <Stack h="calc(100vh - 48px)">
       <Stack direction="row" h="48px" pt="4px">
-        <Button type="button" onClick={() => addSection()}>
-          Add section
-        </Button>
-        <Button type="button" onClick={() => addSection()}>
-          Delete section
-        </Button>
-        <Button type="button" onClick={() => updateDashboard()}>
-          Save Dashboard
-        </Button>
-        <Button type="button" onClick={() => autoFit()}>
-          Auto Fit
-        </Button>
-        <Button onClick={onOpen}>Add Visualization</Button>
+        {!store.dashboard.published && (
+          <>
+            <Button type="button" onClick={() => addSection()}>
+              Add section
+            </Button>
+            <Button type="button">
+              Delete section
+            </Button>
+            <Button
+              type="button"
+              onClick={() => updateDashboard(store.dashboard)}
+            >
+              Save Dashboard
+            </Button>
+            <Button type="button" onClick={() => increment(1)}>
+              Increase
+            </Button>
+            <Button type="button" onClick={() => increment(-1)}>
+              Reduce
+            </Button>
+            <Button onClick={onOpen}>Make Default Dashboard</Button>
+            <Button onClick={onOpen}>Add Visualization</Button>
+          </>
+        )}
+        <Button onClick={publish}>Publish</Button>
       </Stack>
       {isLoading && <Spinner />}
       {isSuccess && data && (
@@ -132,10 +140,13 @@ const Dashboard = () => {
             autoSize={true}
             preventCollision={false}
             onResizeStop={itemCallback}
+            containerPadding={[5, 5]}
             rowHeight={rowHeight}
+            isResizable={store.dashboard.published}
           >
             {store.dashboard.sections.map((section: ISection) => (
               <Stack
+                bg="yellow.300"
                 onClick={() => activateSection(section.id)}
                 border={store.section === section.id ? "red 1px solid" : "none"}
                 key={section.id}
@@ -157,7 +168,9 @@ const Dashboard = () => {
                     </Button>
                   ) : null}
                 </Stack>
-                <Box>{section.layout.md.w}</Box>
+                <Box>
+                  {section.layout.md.w}-{section.layout.md.h}
+                </Box>
               </Stack>
             ))}
           </ReactGridLayout>
