@@ -21,9 +21,9 @@ import {
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "react-query";
-import { addDataSource } from "../Events";
-import { IDataSource } from "../interfaces";
-import { generateUid } from "../utils/uid";
+import { addDataSource } from "../../Events";
+import { IDataSource } from "../../interfaces";
+import { generateUid } from "../../utils/uid";
 
 const NewDataSourceDialog = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();

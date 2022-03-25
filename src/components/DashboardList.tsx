@@ -6,12 +6,12 @@ import {
   Td,
   Th,
   Thead,
-  Tr
+  Tr,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-location";
 import { IDashboard } from "../interfaces";
 import { useNamespace } from "../Queries";
-import NewDashboardDialog from "./NewDashboardDialog";
+import NewDashboardDialog from "./dialogs/NewDashboardDialog";
 
 const DashboardList = () => {
   const navigate = useNavigate();

@@ -36,10 +36,11 @@ export interface IIndicator extends INamed {
 }
 
 export interface IVisualization extends INamed {
-  indicator: IIndicator;
+  indicator?: IIndicator;
   type: string;
-  ignoreFilter: boolean;
-  refreshInterval: number;
+  ignoreFilter?: boolean;
+  refreshInterval?: number;
+  dataSource?: IDataSource;
 }
 export interface ISection extends INamed {
   layout: {
@@ -50,7 +51,7 @@ export interface ISection extends INamed {
     // xs: Layout;
     // xxs: Layout;
   };
-  visualizations?: IVisualization[];
+  visualizations: IVisualization[];
 }
 
 export interface IFilter {}
@@ -65,16 +66,16 @@ export interface IDashboard extends INamed {
   published: boolean;
 }
 
-
 export interface IStore {
   categories: string[];
   dashboards: string[];
   dataSources: string[];
   visualizations: string[];
+  settings: string[];
   category: string;
   dashboard: IDashboard;
-  section: string;
-  visualization: string;
+  section: ISection | undefined;
+  visualization: IVisualization | undefined;
   organisationUnits: INamed[];
   hasDashboards: boolean;
   hasDefaultDashboard: boolean;

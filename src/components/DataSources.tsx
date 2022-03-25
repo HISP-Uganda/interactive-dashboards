@@ -15,14 +15,13 @@ import { IDataSource } from "../interfaces";
 
 import { useNamespace } from "../Queries";
 import { $store } from "../Store";
-import NewDataSourceDialog from "./NewDataSourceDialog";
+import NewDataSourceDialog from "./dialogs/NewDataSourceDialog";
 
 const DataSources = () => {
   const navigate = useNavigate();
   const store = useStore($store);
   const { isLoading, isSuccess, isError, data, error } =
     useNamespace("i-data-sources");
-
   return (
     <Stack>
       <Stack direction="row" spacing="10px">

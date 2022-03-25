@@ -13,7 +13,7 @@ import { useNavigate } from "react-location";
 import { $store } from "../Store";
 import { ICategory } from "../interfaces";
 import { useNamespace } from "../Queries";
-import NewCategoryDialog from "./NewCategoryDialog";
+import NewCategoryDialog from "./dialogs/NewCategoryDialog";
 import { useStore } from "effector-react";
 
 const Categories = () => {

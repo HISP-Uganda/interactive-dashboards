@@ -19,9 +19,9 @@ import { useDataEngine } from "@dhis2/app-runtime";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "react-query";
 
-import { addCategory } from "../Events";
-import { ICategory } from "../interfaces";
-import { generateUid } from "../utils/uid";
+import { addCategory } from "../../Events";
+import { ICategory } from "../../interfaces";
+import { generateUid } from "../../utils/uid";
 
 const NewCategoryDialog = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
