@@ -27,8 +27,8 @@ const DataSources = () => {
       <Stack direction="row" spacing="10px">
         <NewDataSourceDialog />
         {store.dataSources.length > 0 && (
-          <Button onClick={() => navigate({ to: "../categories" })}>
-            Categories
+          <Button onClick={() => navigate({ to: "../visualization-queries" })}>
+            Visualization Queries
           </Button>
         )}
       </Stack>

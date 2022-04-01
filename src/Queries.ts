@@ -1,7 +1,7 @@
 import { useDataEngine } from "@dhis2/app-runtime";
 import { fromPairs } from "lodash";
 import { useQuery } from "react-query";
-import { setCurrentDashboard, loadDefaults } from "./Events";
+import { setCurrentDashboard, loadDefaults, addPagination } from "./Events";
 
 const loadResource = async (engine: any, resource: string) => {
   const query = {
@@ -92,7 +92,112 @@ export const useNamespaceKey = (namespace: string, key: string) => {
   };
   return useQuery<boolean, Error>(["namespace", namespace, key], async () => {
     const { dashboard }: any = await engine.query(namespaceQuery);
-    setCurrentDashboard(dashboard);
     return true;
   });
+};
+
+export const useDataElements = (page: number, pageSize: number) => {
+  const engine = useDataEngine();
+  const namespaceQuery = {
+    elements: {
+      resource: "dataElements.json",
+      params: {
+        page,
+        pageSize,
+        filter: "domainType:eq:AGGREGATE",
+        fields: "id,name",
+      },
+    },
+  };
+  return useQuery<{ id: string; name: string }[], Error>(
+    ["data-elements", page, pageSize],
+    async () => {
+      const {
+        elements: {
+          dataElements,
+          pager: { total: totalDataElements },
+        },
+      }: any = await engine.query(namespaceQuery);
+      addPagination({ totalDataElements });
+      return dataElements;
+    }
+  );
+};
+
+export const useIndicators = (page: number, pageSize: number) => {
+  const engine = useDataEngine();
+  const query = {
+    elements: {
+      resource: "indicators.json",
+      params: {
+        page,
+        pageSize,
+        fields: "id,name",
+      },
+    },
+  };
+  return useQuery<{ id: string; name: string }[], Error>(
+    ["indicators", page, pageSize],
+    async () => {
+      const {
+        elements: {
+          indicators,
+          pager: { total: totalIndicators },
+        },
+      }: any = await engine.query(query);
+      addPagination({ totalIndicators });
+      return indicators;
+    }
+  );
+};
+
+export const useSQLViews = () => {
+  const engine = useDataEngine();
+  const query = {
+    elements: {
+      resource: "sqlViews.json",
+      params: {
+        paging: "false",
+        fields: "id,name",
+      },
+    },
+  };
+  return useQuery<{ id: string; name: string }[], Error>(
+    ["sql-views"],
+    async () => {
+      const {
+        elements: {
+          sqlViews,
+        },
+      }: any = await engine.query(query);
+      return sqlViews;
+    }
+  );
+};
+
+export const useProgramIndicators = (page: number, pageSize: number) => {
+  const engine = useDataEngine();
+  const query = {
+    elements: {
+      resource: "programIndicators.json",
+      params: {
+        page,
+        pageSize,
+        fields: "id,name",
+      },
+    },
+  };
+  return useQuery<{ id: string; name: string }[], Error>(
+    ["program-indicators", page, pageSize],
+    async () => {
+      const {
+        elements: {
+          programIndicators,
+          pager: { total: totalProgramIndicators },
+        },
+      }: any = await engine.query(query);
+      addPagination({ totalProgramIndicators });
+      return programIndicators;
+    }
+  );
 };

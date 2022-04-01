@@ -1,26 +1,32 @@
 import React, { ChangeEvent } from "react";
 import { Box, Select, Spinner } from "@chakra-ui/react";
 import { useNamespace } from "../Queries";
-import { IDataSource, INamed } from "../interfaces";
+import { IData, IDataSource, INamed } from "../interfaces";
 import { $store } from "../Store";
 import { useStore } from "effector-react";
+import { Event } from "effector";
 import { changeVisualizationDataSource } from "../Events";
 type NamespaceSelectProps = {
   namespace: string;
+  value: IData;
+  changeDataSource:Event<IDataSource>;
 };
-const NamespaceSelect = ({ namespace }: NamespaceSelectProps) => {
+const NamespaceSelect = ({
+  namespace,
+  value,
+  changeDataSource,
+}: NamespaceSelectProps) => {
   const { isLoading, isSuccess, data, isError, error } =
     useNamespace(namespace);
-  const store = useStore($store);
   return (
     <>
       {isLoading && <Spinner />}
       {isSuccess && (
         <Select
-          value={store.visualization?.dataSource?.id}
+          value={value.dataSource?.id}
           onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-            changeVisualizationDataSource(
-              data.find((d: IDataSource) => d.id === e.target.value)
+            changeDataSource(
+              data?.find((d: IDataSource) => d.id === e.target.value)
             )
           }
         >

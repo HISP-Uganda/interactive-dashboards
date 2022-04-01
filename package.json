@@ -18,6 +18,7 @@
     "react-error-overlay": "6.0.9"
   },
   "dependencies": {
+    "@ajna/pagination": "1.4.13",
     "@chakra-ui/react": "^1.8.3",
     "@dhis2/app-runtime": "^3.2.9",
     "@emotion/react": "^11.7.1",

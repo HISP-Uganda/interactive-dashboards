@@ -1,4 +1,5 @@
 import { Layout } from "react-grid-layout";
+import { Event } from "effector";
 
 export interface INamed {
   id: string;
@@ -10,6 +11,12 @@ export interface Authentication {
   password: string;
   url: string;
 }
+export interface IExpression {
+  id: string;
+  key: string;
+  value: string;
+  isGlobal: boolean;
+}
 export interface IDataSource extends INamed {
   type: "DHIS2" | "ELASTICSEARCH" | "API";
   authentication: Authentication;
@@ -17,22 +24,23 @@ export interface IDataSource extends INamed {
 }
 
 export interface ICategory extends INamed {}
-export interface IData {
-  dataSource:
-    | "DHIS2-SQL-VIEW"
-    | "DHIS2-INDICATOR"
-    | "DHIS2-DATA-ELEMENT"
-    | "DHIS2-PROGRAM-INDICATOR"
-    | "OTHER";
+export interface IData extends INamed {
+  dataSource: IDataSource | undefined;
+  expressions?: IExpression[];
+  type: "SQL_VIEW" | "ANALYTICS" | "OTHER";
+  typeId?: string;
+  dataDimensions?: {
+    [key: string]: {
+      type: string;
+      what: string;
+    };
+  };
 }
 
-export interface INumerator extends IData {}
-export interface IDenominator extends IData {}
-
 export interface IIndicator extends INamed {
-  numerator: INumerator;
-  denominator: IDenominator;
-  factor: number;
+  numerator: IData;
+  denominator: IData;
+  factor: string;
 }
 
 export interface IVisualization extends INamed {
@@ -57,13 +65,17 @@ export interface ISection extends INamed {
 export interface IFilter {}
 
 export interface IDataSource extends INamed {}
-
 export interface IDashboard extends INamed {
   category?: string;
   filters?: string[];
   sections: ISection[];
   isDefault?: boolean;
   published: boolean;
+}
+export interface Pagination {
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 export interface IStore {
@@ -79,4 +91,12 @@ export interface IStore {
   organisationUnits: INamed[];
   hasDashboards: boolean;
   hasDefaultDashboard: boolean;
+  paginations: { [key: string]: number };
+  indicator: IIndicator;
 }
+
+
+export type IndicatorProps = {
+  denNum: IData;
+  onChange: Event<{ id: string; what: string; type: string }>;
+};
