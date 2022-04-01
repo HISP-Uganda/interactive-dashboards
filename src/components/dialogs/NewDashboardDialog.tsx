@@ -23,10 +23,10 @@ import { useDataEngine } from "@dhis2/app-runtime";
 import { useStore } from "effector-react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-location";
-import { IDashboard } from "../interfaces";
-import { useNamespace } from "../Queries";
-import { $store } from "../Store";
-import { generateUid } from "../utils/uid";
+import { IDashboard } from "../../interfaces";
+import { useNamespace } from "../../Queries";
+import { $store } from "../../Store";
+import { generateUid } from "../../utils/uid";
 
 const NewCategoryDialog = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -54,13 +54,21 @@ const NewCategoryDialog = () => {
       resource: `dataStore/i-dashboards/${values.id}`,
       data: values,
     };
-    
-    const mutation2: any = {
-      type: "update",
-      resource: `dataStore/i-dashboard-settings`,
+
+    let mutation2: any = {
+      type: "create",
+      resource: `dataStore/i-dashboard-settings/settings`,
       data: { default: values.id },
-      id: "settings",
     };
+
+    if (store.settings.indexOf("settings") !== -1) {
+      mutation2 = {
+        type: "update",
+        resource: `dataStore/i-dashboard-settings`,
+        data: { default: values.id },
+        id: "settings",
+      };
+    }
 
     if (values.isDefault) {
       await Promise.all([engine.mutate(mutation), engine.mutate(mutation2)]);

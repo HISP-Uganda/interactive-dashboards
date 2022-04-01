@@ -13,6 +13,7 @@ export interface Authentication {
 export interface IDataSource extends INamed {
   type: "DHIS2" | "ELASTICSEARCH" | "API";
   authentication: Authentication;
+  isCurrentDHIS2: boolean;
 }
 
 export interface ICategory extends INamed {}
@@ -21,6 +22,7 @@ export interface IData {
     | "DHIS2-SQL-VIEW"
     | "DHIS2-INDICATOR"
     | "DHIS2-DATA-ELEMENT"
+    | "DHIS2-PROGRAM-INDICATOR"
     | "OTHER";
 }
 
@@ -34,10 +36,11 @@ export interface IIndicator extends INamed {
 }
 
 export interface IVisualization extends INamed {
-  indicator: IIndicator;
+  indicator?: IIndicator;
   type: string;
-  ignoreFilter: boolean;
-  refreshInterval: number;
+  ignoreFilter?: boolean;
+  refreshInterval?: number;
+  dataSource?: IDataSource;
 }
 export interface ISection extends INamed {
   layout: {
@@ -48,10 +51,12 @@ export interface ISection extends INamed {
     // xs: Layout;
     // xxs: Layout;
   };
-  visualizations?: IVisualization[];
+  visualizations: IVisualization[];
 }
 
 export interface IFilter {}
+
+export interface IDataSource extends INamed {}
 
 export interface IDashboard extends INamed {
   category?: string;
@@ -64,10 +69,14 @@ export interface IDashboard extends INamed {
 export interface IStore {
   categories: string[];
   dashboards: string[];
+  dataSources: string[];
   visualizations: string[];
+  settings: string[];
   category: string;
   dashboard: IDashboard;
-  section: string;
-  visualization: string;
+  section: ISection | undefined;
+  visualization: IVisualization | undefined;
   organisationUnits: INamed[];
+  hasDashboards: boolean;
+  hasDefaultDashboard: boolean;
 }

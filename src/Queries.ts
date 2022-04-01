@@ -1,60 +1,57 @@
 import { useDataEngine } from "@dhis2/app-runtime";
 import { fromPairs } from "lodash";
 import { useQuery } from "react-query";
-import { addDashboard, loadDefaults } from "./Events";
+import { setCurrentDashboard, loadDefaults } from "./Events";
+
+const loadResource = async (engine: any, resource: string) => {
+  const query = {
+    resource: {
+      resource: `dataStore/${resource}`,
+    },
+  };
+  try {
+    const { resource }: any = await engine.query(query);
+    return resource;
+  } catch (error) {
+    return [];
+  }
+};
 
 export const useInitials = () => {
   const engine = useDataEngine();
-  const query = {
+  const ouQuery = {
     me: {
       resource: "me.json",
       params: {
         fields: "organisationUnits[id,name]",
       },
     },
-    dashboards: {
-      resource: "dataStore/i-dashboards",
-    },
-    visualizations: {
-      resource: "dataStore/i-visualizations",
-    },
-    sections: {
-      resource: "dataStore/i-sections",
-    },
-    categories: {
-      resource: "dataStore/i-categories",
-    },
-    settings: {
-      resource: "dataStore/i-dashboard-settings/settings",
-    },
-    dataSources: {
-      resource: "dataStore/i-data-sources",
-    },
   };
   return useQuery<any, Error>(["initial"], async () => {
     const {
       me: { organisationUnits },
-      dashboards,
-      visualizations,
-      categories,
-      settings,
-      dataSources,
-    }: any = await engine.query(query);
-    if (settings && settings.default) {
-      const { dashboard }: any = await engine.query({
-        dashboard: {
-          resource: `dataStore/i-dashboards/${settings.default}`,
-        },
+    }: any = await engine.query(ouQuery);
+    try {
+      const dashboards = await loadResource(engine, "i-dashboards");
+      const categories = await loadResource(engine, "i-categories");
+      const dataSources = await loadResource(engine, "i-data-sources");
+      const settings = await loadResource(engine, "i-dashboard-settings");
+      loadDefaults({
+        dashboards,
+        categories,
+        organisationUnits,
+        dataSources,
+        settings,
       });
-      addDashboard(dashboard);
+    } catch (error) {
+      loadDefaults({
+        dashboards: [],
+        categories: [],
+        organisationUnits,
+        dataSources: [],
+        settings: [],
+      });
     }
-    loadDefaults({
-      dashboards,
-      visualizations,
-      categories,
-      organisationUnits,
-      dataSources,
-    });
     return true;
   });
 };
@@ -66,17 +63,23 @@ export const useNamespace = (namespace: string) => {
       resource: `dataStore/${namespace}`,
     },
   };
-  return useQuery<any, Error>(["namespaces", namespace], async () => {
-    const { namespaceKeys }: any = await engine.query(namespaceQuery);
-    const query: any = fromPairs(
-      namespaceKeys.map((n: string) => [
-        n,
-        {
-          resource: `dataStore/${namespace}/${n}`,
-        },
-      ])
-    );
-    return await engine.query(query);
+  return useQuery<any[], Error>(["namespaces", namespace], async () => {
+    try {
+      const { namespaceKeys }: any = await engine.query(namespaceQuery);
+      const query: any = fromPairs(
+        namespaceKeys.map((n: string) => [
+          n,
+          {
+            resource: `dataStore/${namespace}/${n}`,
+          },
+        ])
+      );
+      const allData = await engine.query(query);
+      return Object.values(allData);
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
   });
 };
 
@@ -89,7 +92,7 @@ export const useNamespaceKey = (namespace: string, key: string) => {
   };
   return useQuery<boolean, Error>(["namespace", namespace, key], async () => {
     const { dashboard }: any = await engine.query(namespaceQuery);
-    addDashboard(dashboard);
+    setCurrentDashboard(dashboard);
     return true;
   });
 };
