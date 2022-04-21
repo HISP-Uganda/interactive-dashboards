@@ -15,7 +15,6 @@ import { useStore } from "effector-react";
 import { ChangeEvent } from "react";
 import { changeVisualizationType } from "../../Events";
 import { $store } from "../../Store";
-import NamespaceSelect from "../NamespaceSelect";
 import SingleValueProperties from "../properties/SingleValueProperties";
 
 type NewVisualizationDialogProps = {
@@ -50,7 +49,6 @@ const NewVisualizationDialog = ({
               <Stack spacing="20px">
                 <Stack>
                   <Text>Data Source</Text>
-                  <NamespaceSelect namespace="i-data-sources" />
                 </Stack>
                 <Stack>
                   <Text>Visualization Type</Text>

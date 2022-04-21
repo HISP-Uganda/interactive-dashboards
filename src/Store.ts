@@ -11,8 +11,26 @@ import {
   changeVisualizationDataSource,
   changeVisualizationType,
   setCurrentVisualization,
+  addPagination,
+  changeDenominatorDataSource,
+  changeNumeratorDataSource,
+  addNumeratorExpression,
+  addDenominatorExpression,
+  changeIndicatorAttribute,
+  changeDenominatorExpressionValue,
+  changeNumeratorExpressionValue,
+  changeDenominatorAttribute,
+  changeNumeratorAttribute,
+  changeNumeratorDimension,
+  changeDenominatorDimension,
 } from "./Events";
-import { ISection, IStore, IVisualization } from "./interfaces";
+import {
+  IExpression,
+  IIndicator,
+  ISection,
+  IStore,
+  IVisualization,
+} from "./interfaces";
 import { generateUid } from "./utils/uid";
 
 export const $store = domain
@@ -29,6 +47,21 @@ export const $store = domain
     hasDashboards: false,
     hasDefaultDashboard: false,
     dataSources: [],
+    paginations: { totalDataElements: 0, totalSQLViews: 0, totalIndicators: 0 },
+    indicator: {
+      id: generateUid(),
+      numerator: {
+        id: generateUid(),
+        dataSource: undefined,
+        type: "ANALYTICS",
+      },
+      denominator: {
+        id: generateUid(),
+        dataSource: undefined,
+        type: "ANALYTICS",
+      },
+      factor: "1",
+    },
   })
   .on(
     loadDefaults,
@@ -129,6 +162,142 @@ export const $store = domain
         },
       };
     }
+  })
+  .on(addPagination, (state, pagination) => {
+    return {
+      ...state,
+      paginations: { ...state.paginations, ...pagination },
+    };
+  });
+
+export const $indicator = domain
+  .createStore<IIndicator>({
+    id: generateUid(),
+    numerator: {
+      id: generateUid(),
+      dataSource: undefined,
+      type: "ANALYTICS",
+      dataDimensions: {},
+    },
+    denominator: {
+      id: generateUid(),
+      dataSource: undefined,
+      type: "ANALYTICS",
+      dataDimensions: {},
+    },
+    name: "",
+    description: "",
+    factor: "1",
+  })
+  .on(changeIndicatorAttribute, (state, { attribute, value }) => {
+    return { ...state, [attribute]: value };
+  })
+  .on(changeDenominatorExpressionValue, (state, { attribute, value, id }) => {
+    const expressions = state.denominator.expressions?.map((ex) => {
+      if (ex.id === id) {
+        return { ...ex, [attribute]: value };
+      }
+      return ex;
+    });
+    return {
+      ...state,
+      denominator: { ...state.denominator, expressions },
+    };
+  })
+  .on(changeNumeratorExpressionValue, (state, { attribute, value, id }) => {
+    const expressions = state.numerator.expressions?.map((ex) => {
+      if (ex.id === id) {
+        return { ...ex, [attribute]: value };
+      }
+      return ex;
+    });
+
+    return {
+      ...state,
+      numerator: { ...state.numerator, expressions },
+    };
+  })
+  .on(addNumeratorExpression, (state, expression) => {
+    let expressions: IExpression[] = [];
+
+    if (state.numerator.expressions) {
+      expressions = state.numerator.expressions;
+    }
+    return {
+      ...state,
+      numerator: {
+        ...state.numerator,
+        expressions: [...expressions, expression],
+      },
+    };
+  })
+  .on(addDenominatorExpression, (state, expression) => {
+    let expressions: IExpression[] = [];
+
+    if (state.denominator.expressions) {
+      expressions = state.denominator.expressions;
+    }
+    return {
+      ...state,
+      denominator: {
+        ...state.denominator,
+        expressions: [...expressions, expression],
+      },
+    };
+  })
+  .on(changeDenominatorAttribute, (state, { attribute, value }) => {
+    return {
+      ...state,
+      denominator: {
+        ...state.denominator,
+        [attribute]: value,
+      },
+    };
+  })
+  .on(changeNumeratorAttribute, (state, { attribute, value }) => {
+    return {
+      ...state,
+      numerator: {
+        ...state.numerator,
+        [attribute]: value,
+      },
+    };
+  })
+  .on(changeDenominatorDataSource, (state, dataSource) => {
+    return {
+      ...state,
+      denominator: { ...state.denominator, dataSource },
+    };
+  })
+  .on(changeNumeratorDataSource, (state, dataSource) => {
+    return {
+      ...state,
+      numerator: { ...state.numerator, dataSource },
+    };
+  })
+  .on(changeNumeratorDimension, (state, { id, what, type }) => {
+    return {
+      ...state,
+      numerator: {
+        ...state.numerator,
+        dataDimensions: {
+          ...state.numerator.dataDimensions,
+          [id]: { what, type },
+        },
+      },
+    };
+  })
+  .on(changeDenominatorDimension, (state, { id, what, type }) => {
+    return {
+      ...state,
+      denominator: {
+        ...state.denominator,
+        dataDimensions: {
+          ...state.denominator.dataDimensions,
+          [id]: { what, type },
+        },
+      },
+    };
   });
 
 export const $layout = $store.map((state) => {

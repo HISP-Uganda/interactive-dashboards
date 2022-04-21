@@ -17,7 +17,7 @@ const onProxyRes = (proxyRes) => {
 };
 // proxy middleware options
 const options = {
-  target: "https://epivac.health.go.ug/", // target host
+  target: "https://play.dhis2.org/2.37.4", // target host
   onProxyReq,
   onProxyRes,
   changeOrigin: true, // needed for virtual hosted sites
