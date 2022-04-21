@@ -17,7 +17,7 @@ const onProxyRes = (proxyRes) => {
 };
 // proxy middleware options
 const options = {
-  target: "https://play.dhis2.org/2.37.4", // target host
+  target: "https://hmis-repo.health.go.ug", // target host
   onProxyReq,
   onProxyRes,
   changeOrigin: true, // needed for virtual hosted sites

@@ -17,12 +17,12 @@ import {
   Spinner,
   Stack,
   Textarea,
-  useDisclosure,
+  useDisclosure
 } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
+import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-location";
 import { IDashboard } from "../../interfaces";
 import { useNamespace } from "../../Queries";
 import { $store } from "../../Store";
@@ -43,7 +43,6 @@ const NewCategoryDialog = () => {
     defaultValues: {
       id: generateUid(),
       name: "",
-      sections: [],
       category: "",
       description: "",
     },
@@ -75,7 +74,7 @@ const NewCategoryDialog = () => {
     }
   };
   async function onSubmit(values: any) {
-    await add({ ...values, sections: [], filters: [] });
+    await add({ ...values, sections: [], filters: [], layouts: {} });
     onClose();
     navigate({ to: `/dashboards/${values.id}` });
   }
@@ -102,11 +101,14 @@ const NewCategoryDialog = () => {
                         {...register("id")}
                       />
                       <FormErrorMessage>
-                        {errors.name && errors.name.message}
+                        {errors.id && errors.id.message}
                       </FormErrorMessage>
                     </FormControl>
-                    <FormControl isInvalid={!!errors.name} isRequired={true}>
-                      <FormLabel htmlFor="name">Category</FormLabel>
+                    <FormControl
+                      isInvalid={!!errors.category}
+                      isRequired={true}
+                    >
+                      <FormLabel htmlFor="category">Category</FormLabel>
                       <Select
                         id="category"
                         placeholder="Select Category"
@@ -123,7 +125,7 @@ const NewCategoryDialog = () => {
                           ))}
                       </Select>
                       <FormErrorMessage>
-                        {errors.name && errors.name.message}
+                        {errors.category && errors.category.message}
                       </FormErrorMessage>
                     </FormControl>
                     <FormControl isInvalid={!!errors.name} isRequired={true}>
@@ -151,7 +153,7 @@ const NewCategoryDialog = () => {
                         {...register("description")}
                       />
                       <FormErrorMessage>
-                        {errors.name && errors.name.message}
+                        {errors.description && errors.description.message}
                       </FormErrorMessage>
                     </FormControl>
                     <FormControl isInvalid={!!errors.description}>
@@ -159,7 +161,7 @@ const NewCategoryDialog = () => {
                         Default Dashboard
                       </Checkbox>
                       <FormErrorMessage>
-                        {errors.name && errors.name.message}
+                        {errors.isDefault && errors.isDefault.message}
                       </FormErrorMessage>
                     </FormControl>
                   </Stack>

@@ -1,3 +1,4 @@
+import { ChangeEvent } from "react";
 import {
   Pagination,
   PaginationContainer,
@@ -20,19 +21,19 @@ import {
   Tr,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { ChangeEvent, useState } from "react";
+import { useState } from "react";
 import { IndicatorProps } from "../../interfaces";
-import { useDataElements } from "../../Queries";
+import { useOrganisationUnitGroups } from "../../Queries";
 import { $store } from "../../Store";
 import GlobalAndFilter from "./GlobalAndFilter";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
-const DataElements = ({ onChange, denNum }: IndicatorProps) => {
+const OrganizationUnitGroups = ({ denNum, onChange }: IndicatorProps) => {
   const store = useStore($store);
   const [dimension, setDimension] = useState<"filter" | "dimension">("filter");
-  const [useGlobal, setUseGlobal] = useState<boolean>(true);
+  const [useGlobal, setUseGlobal] = useState<boolean>(false);
   const {
     pages,
     pagesCount,
@@ -42,7 +43,7 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
     pageSize,
     setPageSize,
   } = usePagination({
-    total: store.paginations.totalDataElements,
+    total: store.paginations.totalOrganisationUnitGroups,
     limits: {
       outer: OUTER_LIMIT,
       inner: INNER_LIMIT,
@@ -52,33 +53,24 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
       currentPage: 1,
     },
   });
-  const { isLoading, isSuccess, isError, error, data } = useDataElements(
-    currentPage,
-    pageSize
-  );
-
+  const { isLoading, isSuccess, isError, error, data } =
+    useOrganisationUnitGroups(currentPage, pageSize);
   const handlePageChange = (nextPage: number) => {
     setCurrentPage(nextPage);
   };
-
   return (
-    <Stack>
+    <Stack spacing="20px">
       <GlobalAndFilter
         dimension={dimension}
         setDimension={setDimension}
         useGlobal={useGlobal}
         setUseGlobal={setUseGlobal}
-        hasGlobalFilter={false}
       />
       {isLoading && (
         <CircularProgress isIndeterminate color="blue.700" thickness={3} />
       )}
-      {isSuccess && (
-        <Table
-          variant="striped"
-          colorScheme="gray"
-          textTransform="none"
-        >
+      {isSuccess && !useGlobal && (
+        <Table variant="striped" colorScheme="gray" textTransform="none">
           <Thead>
             <Tr py={1}>
               <Th>
@@ -106,13 +98,13 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
                         onChange({
                           id: record.id,
                           type: dimension,
-                          what: "de",
+                          what: "oug",
                         });
                       } else {
                         onChange({
                           id: record.id,
                           type: dimension,
-                          what: "de",
+                          what: "oug",
                           remove: true,
                         });
                       }
@@ -127,39 +119,41 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
           </Tbody>
         </Table>
       )}
-      <Pagination
-        pagesCount={pagesCount}
-        currentPage={currentPage}
-        isDisabled={isDisabled}
-        onPageChange={handlePageChange}
-      >
-        <PaginationContainer
-          align="center"
-          justify="space-between"
-          p={4}
-          w="full"
+      {!useGlobal && (
+        <Pagination
+          pagesCount={pagesCount}
+          currentPage={currentPage}
+          isDisabled={isDisabled}
+          onPageChange={handlePageChange}
         >
-          <PaginationPrevious
-            _hover={{
-              bg: "yellow.400",
-            }}
-            bg="yellow.300"
+          <PaginationContainer
+            align="center"
+            justify="space-between"
+            p={4}
+            w="full"
           >
-            <Text>Previous</Text>
-          </PaginationPrevious>
-          <PaginationNext
-            _hover={{
-              bg: "yellow.400",
-            }}
-            bg="yellow.300"
-          >
-            <Text>Next</Text>
-          </PaginationNext>
-        </PaginationContainer>
-      </Pagination>
+            <PaginationPrevious
+              _hover={{
+                bg: "yellow.400",
+              }}
+              bg="yellow.300"
+            >
+              <Text>Previous</Text>
+            </PaginationPrevious>
+            <PaginationNext
+              _hover={{
+                bg: "yellow.400",
+              }}
+              bg="yellow.300"
+            >
+              <Text>Next</Text>
+            </PaginationNext>
+          </PaginationContainer>
+        </Pagination>
+      )}
       {isError && <Box>{error?.message}</Box>}
     </Stack>
   );
 };
 
-export default DataElements;
+export default OrganizationUnitGroups;

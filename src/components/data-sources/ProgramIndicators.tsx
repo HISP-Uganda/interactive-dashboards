@@ -1,3 +1,4 @@
+import { useState, ChangeEvent } from "react";
 import {
   Pagination,
   PaginationContainer,
@@ -22,16 +23,20 @@ import {
   RadioGroup,
   Radio,
   Stack,
+  Checkbox,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { IndicatorProps } from "../../interfaces";
 import { useProgramIndicators } from "../../Queries";
 import { $store } from "../../Store";
+import GlobalAndFilter from "./GlobalAndFilter";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
 const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
+  const [dimension, setDimension] = useState<"filter" | "dimension">("filter");
+  const [useGlobal, setUseGlobal] = useState<boolean>(true);
   const store = useStore($store);
   const {
     pages,
@@ -62,19 +67,28 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
   };
 
   return (
-    <Box>
+    <Stack>
+      <GlobalAndFilter
+        dimension={dimension}
+        setDimension={setDimension}
+        useGlobal={useGlobal}
+        setUseGlobal={setUseGlobal}
+        hasGlobalFilter={false}
+      />
       {isLoading && (
         <CircularProgress isIndeterminate color="blue.700" thickness={3} />
       )}
       {isSuccess && (
         <Table
           variant="striped"
-          size="sm"
           colorScheme="gray"
           textTransform="none"
         >
           <Thead>
             <Tr py={1}>
+              <Th>
+                <Checkbox />
+              </Th>
               <Th>
                 <Heading as="h6" size="xs" textTransform="none">
                   Id
@@ -85,31 +99,34 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
                   Name
                 </Heading>
               </Th>
-              <Th>
-                <Heading as="h6" size="xs" textTransform="none">
-                  Use as
-                </Heading>
-              </Th>
             </Tr>
           </Thead>
           <Tbody py={10}>
             {data.map((record: any) => (
               <Tr key={record.id}>
+                <Td>
+                  <Checkbox
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                      if (e.target.checked) {
+                        onChange({
+                          id: record.id,
+                          type: dimension,
+                          what: "pi",
+                        });
+                      } else {
+                        onChange({
+                          id: record.id,
+                          type: dimension,
+                          what: "pi",
+                          remove: true,
+                        });
+                      }
+                    }}
+                    checked={!!denNum.dataDimensions?.[record.id]}
+                  />
+                </Td>
                 <Td>{record.id}</Td>
                 <Td>{record.name}</Td>
-                <Td>
-                  <RadioGroup
-                    onChange={(type: string) =>
-                      onChange({ id: record.id, type, what: "pi" })
-                    }
-                    value={denNum.dataDimensions?.[record.id]?.type}
-                  >
-                    <Stack direction="row">
-                      <Radio value="dimension">Dimension</Radio>
-                      <Radio value="filter">Filter</Radio>
-                    </Stack>
-                  </RadioGroup>
-                </Td>
               </Tr>
             ))}
           </Tbody>
@@ -135,37 +152,6 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
           >
             <Text>Previous</Text>
           </PaginationPrevious>
-          {/* <PaginationPageGroup
-            isInline
-            align="center"
-            separator={
-              <PaginationSeparator
-                onClick={() => console.warn("I'm clicking the separator")}
-                bg="blue.300"
-                fontSize="sm"
-                w={14}
-                jumpSize={11}
-              />
-            }
-          >
-            {pages.map((page: number) => (
-              <PaginationPage
-                w={14}
-                bg="red.300"
-                key={`pagination_page_${page}`}
-                page={page}
-                fontSize="sm"
-                _hover={{
-                  bg: "green.300",
-                }}
-                _current={{
-                  bg: "green.300",
-                  fontSize: "sm",
-                  w: 14,
-                }}
-              />
-            ))}
-          </PaginationPageGroup> */}
           <PaginationNext
             _hover={{
               bg: "yellow.400",
@@ -177,7 +163,7 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
         </PaginationContainer>
       </Pagination>
       {isError && <Box>{error?.message}</Box>}
-    </Box>
+    </Stack>
   );
 };
 

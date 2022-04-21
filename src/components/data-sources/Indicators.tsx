@@ -2,10 +2,7 @@ import {
   Pagination,
   PaginationContainer,
   PaginationNext,
-  PaginationPage,
-  PaginationPageGroup,
   PaginationPrevious,
-  PaginationSeparator,
   usePagination,
 } from "@ajna/pagination";
 import {
@@ -20,21 +17,21 @@ import {
   Text,
   Th,
   Thead,
-  RadioGroup,
-  Radio,
   Tr,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { IData, IndicatorProps } from "../../interfaces";
+import { ChangeEvent, useState } from "react";
+import { IndicatorProps } from "../../interfaces";
 import { useIndicators } from "../../Queries";
 import { $store } from "../../Store";
+import GlobalAndFilter from "./GlobalAndFilter";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
-
-
 const Indicators = ({ denNum, onChange }: IndicatorProps) => {
+  const [dimension, setDimension] = useState<"filter" | "dimension">("filter");
+  const [useGlobal, setUseGlobal] = useState<boolean>(false);
   const store = useStore($store);
   const {
     pages,
@@ -65,28 +62,30 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
   };
 
   return (
-    <Box>
-      {isLoading && (
-        <CircularProgress isIndeterminate color="blue.700" thickness={3} />
-      )}
+    <Stack>
+        <GlobalAndFilter
+          dimension={dimension}
+          setDimension={setDimension}
+          useGlobal={useGlobal}
+          setUseGlobal={setUseGlobal}
+          hasGlobalFilter={false}
+        />
+      {isLoading && <CircularProgress isIndeterminate color="blue.700" />}
       {isSuccess && (
-        <Table
-          variant="striped"
-          size="sm"
-          colorScheme="gray"
-          textTransform="none"
-        >
+        <Table variant="striped" colorScheme="gray" textTransform="none">
           <Thead>
             <Tr py={1}>
+              <Th>
+                <Checkbox />
+              </Th>
               <Th>
                 <Heading as="h6" size="xs" textTransform="none">
                   Id
                 </Heading>
               </Th>
-              <Th><Heading as="h6" size="xs" textTransform="none">Name</Heading></Th>
               <Th>
                 <Heading as="h6" size="xs" textTransform="none">
-                  Use as
+                  Name
                 </Heading>
               </Th>
             </Tr>
@@ -94,21 +93,29 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
           <Tbody py={10}>
             {data.map((record: any) => (
               <Tr key={record.id}>
+                <Td>
+                  <Checkbox
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                      if (e.target.checked) {
+                        onChange({
+                          id: record.id,
+                          type: dimension,
+                          what: "i",
+                        });
+                      } else {
+                        onChange({
+                          id: record.id,
+                          type: dimension,
+                          what: "i",
+                          remove: true,
+                        });
+                      }
+                    }}
+                    checked={!!denNum.dataDimensions?.[record.id]}
+                  />
+                </Td>
                 <Td>{record.id}</Td>
                 <Td>{record.name}</Td>
-                <Td>
-                  <RadioGroup
-                    onChange={(type: string) =>
-                      onChange({ id: record.id, type, what: "i" })
-                    }
-                    value={denNum.dataDimensions?.[record.id]?.type}
-                  >
-                    <Stack direction="row">
-                      <Radio value="dimension">Dimension</Radio>
-                      <Radio value="filter">Filter</Radio>
-                    </Stack>
-                  </RadioGroup>
-                </Td>
               </Tr>
             ))}
           </Tbody>
@@ -134,37 +141,6 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
           >
             <Text>Previous</Text>
           </PaginationPrevious>
-          {/* <PaginationPageGroup
-            isInline
-            align="center"
-            separator={
-              <PaginationSeparator
-                onClick={() => console.warn("I'm clicking the separator")}
-                bg="blue.300"
-                fontSize="sm"
-                w={14}
-                jumpSize={11}
-              />
-            }
-          >
-            {pages.map((page: number) => (
-              <PaginationPage
-                w={14}
-                bg="red.300"
-                key={`pagination_page_${page}`}
-                page={page}
-                fontSize="sm"
-                _hover={{
-                  bg: "green.300",
-                }}
-                _current={{
-                  bg: "green.300",
-                  fontSize: "sm",
-                  w: 14,
-                }}
-              />
-            ))}
-          </PaginationPageGroup> */}
           <PaginationNext
             _hover={{
               bg: "yellow.400",
@@ -176,7 +152,7 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
         </PaginationContainer>
       </Pagination>
       {isError && <Box>{error?.message}</Box>}
-    </Box>
+    </Stack>
   );
 };
 

@@ -58,13 +58,13 @@ const NumDenDialog = ({
             <Stack>
               <Stack>
                 <Text>Data Source</Text>
-                <NamespaceSelect
+                {/* <NamespaceSelect
                   value={data}
                   namespace="i-data-sources"
                   changeDataSource={changeDataSource}
-                />
+                /> */}
               </Stack>
-              {displayDataSourceType(data.dataSource?.type)}
+              {/* {displayDataSourceType(data.dataSource?.type)} */}
 
               <Table size="sm" textTransform="none">
                 <Thead>
@@ -152,7 +152,7 @@ const NumDenDialog = ({
               <Button onClick={onClose} colorScheme="red">
                 Close
               </Button>
-              <Button colorScheme="blue">Save Visualization</Button>
+              <Button colorScheme="blue" onClick={onClose} >Save Visualization</Button>
             </Stack>
           </ModalFooter>
         </ModalContent>
