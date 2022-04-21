@@ -1,42 +1,25 @@
-import React, { ChangeEvent } from "react";
-import { Box, Select, Spinner } from "@chakra-ui/react";
-import { useNamespace } from "../Queries";
-import { IData, IDataSource, INamed } from "../interfaces";
-import { $store } from "../Store";
+import { Box, Spinner } from "@chakra-ui/react";
+import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { Event } from "effector";
-import { changeVisualizationDataSource } from "../Events";
-type NamespaceSelectProps = {
-  namespace: string;
-  value: IData;
-  changeDataSource:Event<IDataSource>;
-};
-const NamespaceSelect = ({
-  namespace,
-  value,
-  changeDataSource,
-}: NamespaceSelectProps) => {
-  const { isLoading, isSuccess, data, isError, error } =
-    useNamespace(namespace);
+import { changeDataSource } from "../Events";
+import { Option } from "../interfaces";
+import { useDataSources } from "../Queries";
+import { $dataSourceOptions, $indicator } from "../Store";
+const NamespaceSelect = () => {
+  const { isLoading, isSuccess, isError, error } = useDataSources();
+  const indicator = useStore($indicator);
+  const dataSourceOptions = useStore($dataSourceOptions);
   return (
     <>
       {isLoading && <Spinner />}
       {isSuccess && (
-        <Select
-          value={value.dataSource?.id}
-          onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-            changeDataSource(
-              data?.find((d: IDataSource) => d.id === e.target.value)
-            )
-          }
-        >
-          <option>Select Data Source</option>
-          {data.map((dataSource: INamed) => (
-            <option value={dataSource.id} key={dataSource.id}>
-              {dataSource.name}
-            </option>
-          ))}
-        </Select>
+        <Select<Option, false, GroupBase<Option>>
+          value={dataSourceOptions.find(
+            (d: Option) => d.value === indicator.dataSource
+          )}
+          onChange={(e) => changeDataSource(e?.value)}
+          options={dataSourceOptions}
+        />
       )}
       {isError && <Box>{error.message}</Box>}
     </>

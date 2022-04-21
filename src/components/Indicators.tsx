@@ -1,5 +1,4 @@
 import {
-  Button,
   Spinner,
   Stack,
   Table,
@@ -8,41 +7,25 @@ import {
   Th,
   Thead,
   Tr,
+  Spacer,
+  Button,
 } from "@chakra-ui/react";
-import { useStore } from "effector-react";
 import { useNavigate } from "@tanstack/react-location";
 import { IDataSource } from "../interfaces";
 import { useNamespace } from "../Queries";
-import { $store } from "../Store";
-import { generateUid } from "../utils/uid";
 
-const VisualizationQueries = () => {
+const Indicators = () => {
   const navigate = useNavigate();
-  const store = useStore($store);
   const { isLoading, isSuccess, isError, data, error } = useNamespace(
     "i-visualization-queries"
   );
   return (
-    <Stack>
-      <Stack direction="row" spacing="10px">
-        <Button
-          onClick={() =>
-            navigate({
-              to: "./form",
-              search: {
-                id: generateUid(),
-              },
-            })
-          }
-        >
-          Add Visualization Query
+    <Stack flex={1} p="10px">
+      <Stack direction="row">
+        <Spacer />{" "}
+        <Button onClick={() => navigate({ to: "/indicators/form" })}>
+          Add Visualization Data
         </Button>
-
-        {store.dataSources.length > 0 && (
-          <Button onClick={() => navigate({ to: "/categories" })}>
-            Categories
-          </Button>
-        )}
       </Stack>
       {isLoading && <Spinner />}
       {isSuccess && (
@@ -70,4 +53,4 @@ const VisualizationQueries = () => {
   );
 };
 
-export default VisualizationQueries;
+export default Indicators;

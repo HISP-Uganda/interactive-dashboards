@@ -1,3 +1,4 @@
+import { ChangeEvent } from "react";
 import {
   Pagination,
   PaginationContainer,
@@ -23,13 +24,11 @@ import {
   Tr,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
+import { IndicatorProps } from "../../interfaces";
 import { useSQLViews } from "../../Queries";
 import { $store } from "../../Store";
 
-const OUTER_LIMIT = 4;
-const INNER_LIMIT = 4;
-
-const SQLViews = () => {
+const SQLViews = ({ denNum, onChange }: IndicatorProps) => {
   const store = useStore($store);
   const { isLoading, isSuccess, isError, error, data } = useSQLViews();
 
@@ -41,7 +40,22 @@ const SQLViews = () => {
       {isSuccess && (
         <Stack>
           <Text>SQL View</Text>
-          <Select>
+          <Select
+            value={
+              data.find(
+                (d: any) =>
+                  Object.keys(denNum.dataDimensions).indexOf(d.id) !== -1
+              )?.id
+            }
+            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+              onChange({
+                id: e.target.value,
+                type: "dimension",
+                what: "v",
+              })
+            }
+          >
+            <option></option>
             {data.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.name}

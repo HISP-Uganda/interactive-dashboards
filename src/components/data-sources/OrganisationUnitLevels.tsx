@@ -1,3 +1,4 @@
+import { useState,ChangeEvent } from "react";
 import {
   Pagination,
   PaginationContainer,
@@ -10,6 +11,8 @@ import {
   Checkbox,
   CircularProgress,
   Heading,
+  Radio,
+  RadioGroup,
   Stack,
   Table,
   Tbody,
@@ -20,19 +23,18 @@ import {
   Tr,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
-import { useDataElements } from "../../Queries";
+import { useOrganisationUnitLevels } from "../../Queries";
 import { $store } from "../../Store";
 import GlobalAndFilter from "./GlobalAndFilter";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
-const DataElements = ({ onChange, denNum }: IndicatorProps) => {
-  const store = useStore($store);
+const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
   const [dimension, setDimension] = useState<"filter" | "dimension">("filter");
   const [useGlobal, setUseGlobal] = useState<boolean>(true);
+  const store = useStore($store);
   const {
     pages,
     pagesCount,
@@ -42,7 +44,7 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
     pageSize,
     setPageSize,
   } = usePagination({
-    total: store.paginations.totalDataElements,
+    total: store.paginations.totalOrganisationUnitLevels,
     limits: {
       outer: OUTER_LIMIT,
       inner: INNER_LIMIT,
@@ -52,10 +54,8 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
       currentPage: 1,
     },
   });
-  const { isLoading, isSuccess, isError, error, data } = useDataElements(
-    currentPage,
-    pageSize
-  );
+  const { isLoading, isSuccess, isError, error, data } =
+    useOrganisationUnitLevels(currentPage, pageSize);
 
   const handlePageChange = (nextPage: number) => {
     setCurrentPage(nextPage);
@@ -68,14 +68,14 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
         setDimension={setDimension}
         useGlobal={useGlobal}
         setUseGlobal={setUseGlobal}
-        hasGlobalFilter={false}
       />
       {isLoading && (
         <CircularProgress isIndeterminate color="blue.700" thickness={3} />
       )}
-      {isSuccess && (
+      {isSuccess && !useGlobal && (
         <Table
           variant="striped"
+          size="sm"
           colorScheme="gray"
           textTransform="none"
         >
@@ -106,13 +106,13 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
                         onChange({
                           id: record.id,
                           type: dimension,
-                          what: "de",
+                          what: "oul",
                         });
                       } else {
                         onChange({
                           id: record.id,
                           type: dimension,
-                          what: "de",
+                          what: "oul",
                           remove: true,
                         });
                       }
@@ -162,4 +162,4 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
   );
 };
 
-export default DataElements;
+export default OrganizationUnitLevels;

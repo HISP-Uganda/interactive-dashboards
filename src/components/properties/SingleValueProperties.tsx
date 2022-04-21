@@ -11,10 +11,9 @@ const SingleValueProperties = () => {
         <Tab>General</Tab>
         <Tab>Properties</Tab>
       </TabList>
-
       <TabPanels>
         <TabPanel>
-          {displayDataSourceType(store.visualization?.dataSource?.type)}
+          {/* {displayDataSourceType(store.visualization?.dataSource?.type)} */}
         </TabPanel>
         <TabPanel>
           <p>two!</p>
