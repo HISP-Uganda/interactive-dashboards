@@ -8,8 +8,9 @@ import {
   Th,
   Thead,
   Tr,
+  Spacer
 } from "@chakra-ui/react";
-import { useNavigate } from "react-location";
+import { useNavigate } from "@tanstack/react-location";
 import { $store } from "../Store";
 import { ICategory } from "../interfaces";
 import { useNamespace } from "../Queries";
@@ -22,14 +23,12 @@ const Categories = () => {
   const { isLoading, isSuccess, isError, data, error } =
     useNamespace("i-categories");
   return (
-    <Stack>
-      <Stack direction="row" spacing="10px">
-        <NewCategoryDialog />
-        {store.categories.length > 0 && (
-          <Button onClick={() => navigate({ to: "../dashboards" })}>
-            Dashboards
-          </Button>
-        )}
+    <Stack flex={1} p="10px">
+      <Stack direction="row">
+        <Spacer />{" "}
+        <Button onClick={() => navigate({ to: "/categories/form" })}>
+          Add Category
+        </Button>
       </Stack>
       {isLoading && <Spinner />}
       {isSuccess && (

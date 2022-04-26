@@ -25,14 +25,12 @@ import { useStore } from "effector-react";
 import { ChangeEvent, useState } from "react";
 import {
   addDenominatorExpression,
-  changeDenominatorDataSource,
   changeDenominatorDimension,
   changeDenominatorExpressionValue,
 } from "../../Events";
 import { $indicator } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import { displayDataSourceType } from "../data-sources";
-import NamespaceSelect from "../NamespaceSelect";
 
 const DenominatorDialog = () => {
   const [active, setActive] = useState<string>("");
@@ -56,19 +54,11 @@ const DenominatorDialog = () => {
                 <Text>Denominator Description</Text>
                 <Textarea value={indicator.denominator.description} />
               </Stack>
-              <Stack>
-                <Text>Data Source</Text>
-                <NamespaceSelect
-                  value={indicator.denominator}
-                  namespace="i-data-sources"
-                  changeDataSource={changeDenominatorDataSource}
-                />
-              </Stack>
-              {displayDataSourceType({
-                dataSourceType: indicator.denominator.dataSource?.type,
+              {/* {displayDataSourceType({
+                dataSourceType: indicator.dataSource?.type,
                 onChange: changeDenominatorDimension,
                 denNum: indicator.denominator,
-              })}
+              })} */}
 
               {indicator.denominator.type === "SQL_VIEW" && (
                 <Table size="sm" textTransform="none">
@@ -166,7 +156,9 @@ const DenominatorDialog = () => {
               <Button onClick={onClose} colorScheme="red">
                 Close
               </Button>
-              <Button colorScheme="blue">Save Denominator</Button>
+              <Button colorScheme="blue" onClick={onClose}>
+                Save Denominator
+              </Button>
             </Stack>
           </ModalFooter>
         </ModalContent>

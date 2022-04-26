@@ -27,19 +27,17 @@ import { ChangeEvent, useState } from "react";
 import {
   addNumeratorExpression,
   changeNumeratorAttribute,
-  changeNumeratorDataSource,
-  changeNumeratorExpressionValue,
   changeNumeratorDimension,
+  changeNumeratorExpressionValue,
 } from "../../Events";
-import { $indicator } from "../../Store";
+import { $dataSourceType, $indicator } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import { displayDataSourceType } from "../data-sources";
-import NamespaceSelect from "../NamespaceSelect";
-
 const NumeratorDialog = () => {
   const [active, setActive] = useState<string>("");
   const { isOpen, onOpen, onClose } = useDisclosure();
   const indicator = useStore($indicator);
+  const dataSourceType = useStore($dataSourceType);
   return (
     <Stack>
       <Button onClick={onOpen}>Numerator</Button>
@@ -75,14 +73,6 @@ const NumeratorDialog = () => {
                 />
               </Stack>
               <Stack>
-                <Text>Data Source</Text>
-                <NamespaceSelect
-                  value={indicator.numerator}
-                  namespace="i-data-sources"
-                  changeDataSource={changeNumeratorDataSource}
-                />
-              </Stack>
-              <Stack>
                 <Text>Type</Text>
                 <Select
                   value={indicator.numerator.type}
@@ -100,7 +90,7 @@ const NumeratorDialog = () => {
                 </Select>
               </Stack>
               {displayDataSourceType({
-                dataSourceType: indicator.numerator.dataSource?.type,
+                dataSourceType,
                 onChange: changeNumeratorDimension,
                 denNum: indicator.numerator,
               })}
@@ -198,10 +188,12 @@ const NumeratorDialog = () => {
           </ModalBody>
           <ModalFooter>
             <Stack direction="row">
-              <Button onClick={onClose} colorScheme="red">
+              {/* <Button onClick={onClose} colorScheme="red">
                 Close
+              </Button> */}
+              <Button colorScheme="blue" onClick={onClose}>
+                Save Numerator
               </Button>
-              <Button colorScheme="blue">Save Numerator</Button>
             </Stack>
           </ModalFooter>
         </ModalContent>

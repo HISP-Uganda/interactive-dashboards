@@ -1,5 +1,4 @@
 import {
-  Button,
   Spinner,
   Stack,
   Table,
@@ -8,44 +7,49 @@ import {
   Th,
   Thead,
   Tr,
+  Button,
+  Spacer,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { useNavigate } from "react-location";
+import { useNavigate } from "@tanstack/react-location";
 import { IDataSource } from "../interfaces";
 
-import { useNamespace } from "../Queries";
-import { $store } from "../Store";
-import NewDataSourceDialog from "./dialogs/NewDataSourceDialog";
-
+import { useDataSources } from "../Queries";
+import { $dataSources } from "../Store";
+import { setDataSource } from "../Events";
 const DataSources = () => {
   const navigate = useNavigate();
-  const store = useStore($store);
-  const { isLoading, isSuccess, isError, data, error } =
-    useNamespace("i-data-sources");
+  const { isLoading, isSuccess, isError, error } = useDataSources();
+  const dataSources = useStore($dataSources);
   return (
-    <Stack>
-      <Stack direction="row" spacing="10px">
-        <NewDataSourceDialog />
-        {store.dataSources.length > 0 && (
-          <Button onClick={() => navigate({ to: "../visualization-queries" })}>
-            Visualization Queries
-          </Button>
-        )}
+    <Stack flex={1} p="20px">
+      <Stack direction="row">
+        <Spacer />
+        <Button onClick={() => navigate({ to: "/data-sources/form" })}>
+          Add Data Source
+        </Button>
       </Stack>
       {isLoading && <Spinner />}
       {isSuccess && (
         <Table variant="simple">
           <Thead>
             <Tr>
-              <Th>Id</Th>
               <Th>Name</Th>
+              <Th>Description</Th>
             </Tr>
           </Thead>
           <Tbody>
-            {data.map((dataSource: IDataSource) => (
-              <Tr key={dataSource.id}>
-                <Td>{dataSource.id}</Td>
+            {dataSources.map((dataSource: IDataSource) => (
+              <Tr
+                key={dataSource.id}
+                cursor="pointer"
+                onClick={() => {
+                  setDataSource(dataSource);
+                  navigate({ to: "/data-sources/form" });
+                }}
+              >
                 <Td>{dataSource.name}</Td>
+                <Td>{dataSource.description}</Td>
               </Tr>
             ))}
           </Tbody>
