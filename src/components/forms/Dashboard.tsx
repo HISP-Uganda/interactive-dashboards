@@ -1,61 +1,54 @@
+import { ChevronDownIcon } from "@chakra-ui/icons";
 import {
-  Box,
   Button,
-  Icon,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Spacer,
-  Spinner,
   Stack,
-  Text,
-  useDisclosure,
 } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
-import { useMatch, useNavigate } from "@tanstack/react-location";
+import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { useCallback, useEffect } from "react";
 import { Layout, Layouts, Responsive, WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
-import { MdDashboard } from "react-icons/md";
 import "react-resizable/css/styles.css";
 import {
-  addSection,
   changeLayouts,
-  deleteSection,
   increment,
   setCurrentSection,
-  setCurrentVisualization,
+  setShowSider,
   toggle,
   toggleDashboard,
-} from "../Events";
-import { ISection, IVisualization } from "../interfaces";
-import { $dashboard, $section, createSection } from "../Store";
-import { generateUid } from "../utils/uid";
-import Visualization from "./visualizations/Visualization";
+} from "../../Events";
+import { FormGenerics, ISection } from "../../interfaces";
+import { $dashboard, $store, createSection } from "../../Store";
+import Visualization from "../visualizations/Visualization";
 const ReactGridLayout = WidthProvider(Responsive);
-
 const Dashboard = () => {
+  const search = useSearch<FormGenerics>();
   const navigate = useNavigate();
   const engine = useDataEngine();
   const updateDashboard = async (data: any) => {
-    const mutation: any = {
-      type: "update",
-      resource: `dataStore/i-dashboards`,
-      data: data,
-      id: data.id,
+    let mutation: any = {
+      type: "create",
+      resource: `dataStore/i-dashboards/${data.id}`,
+      data,
     };
+    if (search.edit) {
+      mutation = {
+        type: "update",
+        resource: `dataStore/i-dashboards`,
+        data: data,
+        id: data.id,
+      };
+    }
     await engine.mutate(mutation);
   };
-
-  // const { isLoading, isSuccess, isError, data, error } = useNamespaceKey(
-  //   "i-dashboards",
-  //   id
-  // );
-
-  const add = (visualization: IVisualization) => {
-    setCurrentVisualization(visualization);
-  };
+  const store = useStore($store);
   const dashboard = useStore($dashboard);
-  const currentSection = useStore($section);
-
   const escFunction = useCallback((event) => {
     if (event.keyCode === 27) {
       toggle();
@@ -68,22 +61,28 @@ const Dashboard = () => {
       document.removeEventListener("keydown", escFunction);
     };
   }, [escFunction]);
+
+  useEffect(() => {
+    setShowSider(false);
+  }, []);
   return (
     <Stack spacing="0">
       {dashboard.showTop && (
         <Stack
-          bg="yellow.100"
           direction="row"
           alignContent="center"
           alignItems="center"
           h="48px"
-          pr="5px"
+          p="5px"
         >
           {dashboard.mode === "edit" && (
             <>
               <Button
                 type="button"
-                onClick={() => navigate({ to: "/dashboards/section" })}
+                onClick={() => {
+                  setCurrentSection(createSection());
+                  navigate({ to: "/dashboards/section", search });
+                }}
               >
                 Add section
               </Button>
@@ -93,38 +92,26 @@ const Dashboard = () => {
               <Button type="button" onClick={() => increment(-1)}>
                 Reduce
               </Button>
-              {/* <Button
-                isDisabled={!currentSection}
-                onClick={() =>
-                  add({
-                    id: generateUid(),
-                    type: "",
-                    indicators: [],
-                  })
-                }
-              >
-                Add Visualization
-              </Button> */}
               {dashboard?.published && (
                 <Button onClick={() => toggleDashboard(false)}>Edit</Button>
               )}
               {!dashboard?.published && (
                 <Button onClick={() => toggleDashboard(true)}>Publish</Button>
               )}
-              <Button type="button" onClick={() => updateDashboard(dashboard)}>
-                Save Dashboard
-              </Button>
             </>
           )}
           <Spacer />
+          <Button type="button" onClick={() => updateDashboard(dashboard)}>
+            Save Dashboard
+          </Button>
           <Button onClick={() => toggle()}>Toggle</Button>
         </Stack>
       )}
       <Stack
         h={`calc(100vh - ${dashboard.showTop ? 96 : 48}px)`}
-        w={`calc(100vw - ${dashboard.showSider ? 48 : 0}px)`}
+        w={`calc(100vw - ${store.showSider ? 128 : 0}px)`}
         overflow="auto"
-        bg="gray.200"
+        bg="gray.50"
       >
         <ReactGridLayout
           margin={[5, 5]}
@@ -146,9 +133,6 @@ const Dashboard = () => {
                   setCurrentSection(section);
                 }
               }}
-              border={
-                currentSection?.i === section.i ? "red 1px solid" : "none"
-              }
               key={section.i}
               data-grid={section}
               spacing="2px"
@@ -156,25 +140,37 @@ const Dashboard = () => {
             >
               <Stack
                 direction="row"
-                bg="gray.500"
+                bg="gray.200"
                 h="30px"
                 fontSize="24px"
                 alignContent="center"
                 alignItems="center"
+                justifyContent="center"
+                justifyItems="center"
+                textAlign="center"
               >
-                <Text>{section.title}</Text>
-                <Spacer />
-                {section?.i === section.i && dashboard.mode === "edit" && (
-                  <Button
-                    colorScheme="red"
-                    size="xs"
-                    onClick={() => deleteSection(section.i)}
+                <Menu>
+                  <MenuButton
+                    _hover={{ bg: "none" }}
+                    bg="none"
+                    as={Button}
+                    rightIcon={<ChevronDownIcon />}
                   >
-                    X
-                  </Button>
-                )}
+                    {section.title}
+                  </MenuButton>
+                  <MenuList>
+                    <MenuItem
+                      onClick={() => {
+                        setCurrentSection(section);
+                        navigate({ to: "/dashboards/section" });
+                      }}
+                    >
+                      Edit
+                    </MenuItem>
+                  </MenuList>
+                </Menu>
               </Stack>
-              <Stack flex={1}>
+              <Stack flex={1} direction="row">
                 {section.visualizations.map((visualization) => (
                   <Visualization
                     key={visualization.id}

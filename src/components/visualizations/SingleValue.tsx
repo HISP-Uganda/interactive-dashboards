@@ -1,36 +1,43 @@
 import { Box, Spinner, Stack } from "@chakra-ui/react";
+import { useStore } from "effector-react";
 import Plot from "react-plotly.js";
 import { IVisualization } from "../../interfaces";
 import { useVisualization } from "../../Queries";
+import { $indicators, $dataSources } from "../../Store";
 import { processSingleValuedSQLViews } from "../processors";
 
 type SingleValueProps = {
-  visualization?: IVisualization;
+  visualization: IVisualization;
+  valueformat?: string;
+  prefix?: string;
+  suffix?: string;
+  valueSize?: number | undefined;
+  titleSize?: number | undefined;
+  valueColor?: string;
+  titleColor?: string;
 };
 
-const SingleValue = ({ visualization }: SingleValueProps) => {
-  const { isLoading, isSuccess, data, isError, error } =
-    useVisualization(visualization);
+const SingleValue = ({
+  visualization,
+  valueformat,
+  prefix,
+  suffix,
+  valueSize,
+  titleSize,
+  valueColor,
+  titleColor,
+}: SingleValueProps) => {
+  const indicators = useStore($indicators);
+  const dataSources = useStore($dataSources);
+  const { isLoading, isSuccess, data, isError, error } = useVisualization(
+    visualization,
+    indicators,
+    dataSources
+  );
   return (
-    <Stack w="100%" h="100%">
+    <Stack w="100%" h="100%" overflow="auto">
       {isLoading && <Spinner />}
-      {isSuccess && (
-        <Plot
-          data={[
-            {
-              type: "indicator",
-              mode: "number",
-              value: processSingleValuedSQLViews(data),
-            },
-          ]}
-          layout={{
-            margin: { t: 0, r: 0, l: 0, b: 0, pad: 0 },
-            autosize: true,
-          }}
-          style={{ width: "100%", height: "100%" }}
-          config={{ displayModeBar: false, responsive: true }}
-        />
-      )}
+      {isSuccess && <pre>{JSON.stringify(data, null, 2)}</pre>}
       {isError && <Box>{JSON.stringify(error)}</Box>}
     </Stack>
   );

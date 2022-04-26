@@ -1,15 +1,17 @@
 import { Route } from "@tanstack/react-location";
-import Categories from "./components/Categories";
-import Dashboard from "./components/Dashboard";
-import Dashboards from "./components/Dashboards";
-import DataSources from "./components/DataSources";
+import {
+  Categories,
+  Dashboards,
+  DataSources,
+  Indicators,
+} from "./components/lists";
 import {
   CategoryForm,
   DataSourceForm,
   IndicatorForm,
+  DashboardForm,
 } from "./components/forms";
 import Home from "./components/Home";
-import Indicators from "./components/Indicators";
 import Section from "./components/Section";
 
 export const routes: Route[] = [
@@ -35,7 +37,7 @@ export const routes: Route[] = [
     path: "/dashboards",
     children: [
       { path: "/", element: <Dashboards /> },
-      { path: "form", element: <Dashboard /> },
+      { path: "form", element: <DashboardForm /> },
       { path: "section", element: <Section /> },
     ],
   },

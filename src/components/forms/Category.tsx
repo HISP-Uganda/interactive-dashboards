@@ -7,18 +7,20 @@ import {
   Stack,
   Box,
   Textarea,
+  Spacer,
 } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "react-query";
 
 import { useStore } from "effector-react";
-import { addCategory } from "../../Events";
-import { ICategory } from "../../interfaces";
-import { $category } from "../../Store";
-import { useNavigate } from "@tanstack/react-location";
+import { addCategory, setCategory } from "../../Events";
+import { FormGenerics, ICategory } from "../../interfaces";
+import { $category, createCategory } from "../../Store";
+import { useNavigate, useSearch } from "@tanstack/react-location";
 
 const Category = () => {
+  const search = useSearch<FormGenerics>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const engine = useDataEngine();
@@ -30,14 +32,22 @@ const Category = () => {
   } = useForm<ICategory, any>({ defaultValues: category });
 
   const add = async (values: ICategory) => {
-    const mutation: any = {
+    let mutation: any = {
       type: "create",
       resource: `dataStore/i-categories/${values.id}`,
       data: values,
     };
+
+    if (search.edit) {
+      mutation = {
+        type: "update",
+        resource: `dataStore/i-categories`,
+        data: values,
+        id: values.id,
+      };
+    }
     await engine.mutate(mutation);
-    addCategory(values.id);
-    queryClient.setQueryData(["categories"], (old: any) => [...old, values]);
+    await queryClient.invalidateQueries(["categories"]);
   };
   async function onSubmit(values: any) {
     await add(values);
@@ -46,7 +56,7 @@ const Category = () => {
   return (
     <Box flex={1} p="10px">
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Stack spacing="10px">
+        <Stack spacing="20px">
           <FormControl isInvalid={!!errors.id}>
             <Input id="id" type="hidden" placeholder="id" {...register("id")} />
             <FormErrorMessage>
@@ -82,7 +92,16 @@ const Category = () => {
             </FormErrorMessage>
           </FormControl>
           <Stack spacing="30px" direction="row">
-            <Button colorScheme="red">Cancel</Button>
+            <Button
+              colorScheme="red"
+              onClick={() => {
+                setCategory(createCategory());
+                navigate({ to: "/categories" });
+              }}
+            >
+              Cancel
+            </Button>
+            <Spacer />
             <Button type="submit" isLoading={isSubmitting}>
               Save Category
             </Button>

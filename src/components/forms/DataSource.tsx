@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   Box,
   Button,
@@ -12,14 +13,16 @@ import {
   Textarea,
 } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
+import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "@tanstack/react-location";
 import { useQueryClient } from "react-query";
-import { IDataSource } from "../../interfaces";
-import { $dataSource } from "../../Store";
+import { setDataSource } from "../../Events";
+import { FormGenerics, IDataSource } from "../../interfaces";
+import { $dataSource, createDataSource } from "../../Store";
 
 const DataSource = () => {
+  const search = useSearch<FormGenerics>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const engine = useDataEngine();
@@ -28,6 +31,7 @@ const DataSource = () => {
     handleSubmit,
     register,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<IDataSource, any>({ defaultValues: dataSource });
 
@@ -35,22 +39,36 @@ const DataSource = () => {
   const isCurrentDHIS2 = watch("isCurrentDHIS2");
 
   const add = async (values: IDataSource) => {
-    const mutation: any = {
+    let mutation: any = {
       type: "create",
       resource: `dataStore/i-data-sources/${values.id}`,
       data: values,
     };
+    if (search.edit) {
+      mutation = {
+        type: "update",
+        resource: `dataStore/i-data-sources`,
+        data: values,
+        id: values.id,
+      };
+    }
     await engine.mutate(mutation);
-    queryClient.setQueryData(["data-sources"], (old: any) => [...old, values]);
+    await queryClient.invalidateQueries(["data-sources"]);
   };
   async function onSubmit(values: any) {
     await add(values);
     navigate({ to: "/data-sources" });
   }
+
+  useEffect(() => {
+    if (type !== "DHIS2" && isCurrentDHIS2) {
+      setValue("isCurrentDHIS2", false);
+    }
+  }, [type]);
   return (
     <Box flex={1} p="20px">
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Stack spacing="20px" w="100%">
+        <Stack spacing="20px">
           <FormControl isInvalid={!!errors.id}>
             <Input id="id" type="hidden" placeholder="id" {...register("id")} />
             <FormErrorMessage>
@@ -160,7 +178,10 @@ const DataSource = () => {
           <Stack spacing="30px" direction="row">
             <Button
               colorScheme="red"
-              onClick={() => navigate({ to: "/data-sources" })}
+              onClick={() => {
+                setDataSource(createDataSource());
+                navigate({ to: "/data-sources" });
+              }}
             >
               Cancel
             </Button>
