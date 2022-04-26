@@ -1,5 +1,6 @@
 import {
   ICategory,
+  IDashboard,
   IData,
   IDataSource,
   IDimension,
@@ -17,7 +18,14 @@ import {
   changeDefaults,
   setDataSources,
   setCategories,
+  setVisualizationQueries,
+  setDashboards,
 } from "./Events";
+import { encodeToBinary } from "./utils/utils";
+
+export const api = axios.create({
+  baseURL: "https://services.dhis2.hispuganda.org/",
+});
 
 export const queryDataSource = async (
   dataSource: IDataSource,
@@ -66,15 +74,24 @@ export const queryDataSource = async (
   return data;
 };
 
-const loadResource = async (engine: any, resource: string) => {
+const loadResource = async (engine: any, namespace: string) => {
   const query = {
     resource: {
-      resource: `dataStore/${resource}`,
+      resource: `dataStore/${namespace}`,
     },
   };
   try {
     const { resource }: any = await engine.query(query);
-    return resource;
+    const query1: any = fromPairs(
+      resource.map((n: string) => [
+        n,
+        {
+          resource: `dataStore/${namespace}/${n}`,
+        },
+      ])
+    );
+    const allData: { [key: string]: any } = await engine.query(query1);
+    return Object.values(allData);
   } catch (error) {
     return [];
   }
@@ -112,20 +129,15 @@ export const useInitials = () => {
       const dashboards = await loadResource(engine, "i-dashboards");
       const categories = await loadResource(engine, "i-categories");
       const dataSources = await loadResource(engine, "i-data-sources");
+      const visualizationQueries = await loadResource(
+        engine,
+        "i-visualization-queries"
+      );
       const settings = await loadResource(engine, "i-dashboard-settings");
-      loadDefaults({
-        dashboards,
-        categories,
-        organisationUnits: organisationUnits.map((unit: any) => {
-          return {
-            key: unit.id,
-            title: unit.name,
-            isLeaf: unit.leaf,
-          };
-        }),
-        dataSources,
-        settings,
-      });
+      setDashboards(dashboards);
+      setCategories(categories);
+      setDataSources(dataSources);
+      setVisualizationQueries(visualizationQueries);
       if (settings.length > 0) {
         const defaults = await loadSingleResource(
           engine,
@@ -142,15 +154,7 @@ export const useInitials = () => {
           }
         }
       }
-    } catch (error) {
-      loadDefaults({
-        dashboards: [],
-        categories: [],
-        organisationUnits,
-        dataSources: [],
-        settings: [],
-      });
-    }
+    } catch (error) {}
     return true;
   });
 };
@@ -187,6 +191,38 @@ export const useDataSources = () => {
   });
 };
 
+export const useDashboards = () => {
+  const engine = useDataEngine();
+  const namespaceQuery = {
+    namespaceKeys: {
+      resource: `dataStore/i-dashboards`,
+    },
+  };
+  return useQuery<boolean, Error>(["dashboards"], async () => {
+    try {
+      const { namespaceKeys }: any = await engine.query(namespaceQuery);
+      const query: any = fromPairs(
+        namespaceKeys.map((n: string) => [
+          n,
+          {
+            resource: `dataStore/dashboards/${n}`,
+          },
+        ])
+      );
+      const allData = await engine.query(query);
+      const dashboards = Object.values(allData).map((x) => {
+        let value = x as unknown as IDashboard;
+        return value;
+      });
+      setDashboards(dashboards);
+      return true;
+    } catch (error) {
+      console.error(error);
+      return true;
+    }
+  });
+};
+
 export const useCategories = () => {
   const engine = useDataEngine();
   const namespaceQuery = {
@@ -211,6 +247,38 @@ export const useCategories = () => {
         return value;
       });
       setCategories(categories);
+      return true;
+    } catch (error) {
+      console.error(error);
+      return true;
+    }
+  });
+};
+
+export const useVisualizationData = () => {
+  const engine = useDataEngine();
+  const namespaceQuery = {
+    namespaceKeys: {
+      resource: `dataStore/i-visualization-queries`,
+    },
+  };
+  return useQuery<boolean, Error>(["visualization-queries"], async () => {
+    try {
+      const { namespaceKeys }: any = await engine.query(namespaceQuery);
+      const query: any = fromPairs(
+        namespaceKeys.map((n: string) => [
+          n,
+          {
+            resource: `dataStore/i-visualization-queries/${n}`,
+          },
+        ])
+      );
+      const allData = await engine.query(query);
+      const visualizationQueries = Object.values(allData).map((x) => {
+        let value = x as unknown as IIndicator;
+        return value;
+      });
+      setVisualizationQueries(visualizationQueries);
       return true;
     } catch (error) {
       console.error(error);
@@ -497,72 +565,98 @@ const makeDHIS2Query = (data: IData) => {
   return "";
 };
 
-export const useVisualization = (visualization: IVisualization | undefined) => {
+export const useVisualization = (
+  visualization: IVisualization,
+  visualizationQueries: IIndicator[],
+  dataSources: IDataSource[]
+) => {
   const engine = useDataEngine();
-  return useQuery<any, Error>(["visualizations"], async () => {
-    // const allQueries = visualization?.indicators.flatMap(
-    //   (indicator: IIndicator) => {
-    //     if (indicator.dataSource?.isCurrentDHIS2) {
-    //       let queries = {};
-    //       if (
-    //         indicator.numerator.type === "ANALYTICS" &&
-    //         Object.keys(indicator.numerator.dataDimensions).length > 0
-    //       ) {
-    //         const params = makeDHIS2Query(indicator.numerator);
-    //         if (params) {
-    //           queries = {
-    //             numerator: {
-    //               resource: `analytics.json?${params}`,
-    //             },
-    //           };
-    //         }
-    //       } else if (
-    //         indicator.numerator.type === "SQL_VIEW" &&
-    //         Object.keys(indicator.numerator.dataDimensions).length > 0
-    //       ) {
-    //         queries = {
-    //           numerator: {
-    //             resource: `sqlViews/${
-    //               Object.keys(indicator.numerator.dataDimensions)[0]
-    //             }/data.json`,
-    //           },
-    //         };
-    //       }
-    //       if (!indicator.useInBuildIndicators) {
-    //         if (
-    //           indicator.denominator.type === "ANALYTICS" &&
-    //           Object.keys(indicator.denominator.dataDimensions).length > 0
-    //         ) {
-    //           const params = makeDHIS2Query(indicator.denominator);
-    //           if (params) {
-    //             queries = {
-    //               ...queries,
-    //               denominator: {
-    //                 resource: `analytics.json?${params}`,
-    //               },
-    //             };
-    //           }
-    //         } else if (
-    //           indicator.denominator.type === "SQL_VIEW" &&
-    //           Object.keys(indicator.denominator.dataDimensions).length > 0
-    //         ) {
-    //           queries = {
-    //             denominator: {
-    //               resource: `sqlViews/${
-    //                 Object.keys(indicator.denominator.dataDimensions)[0]
-    //               }/data.json`,
-    //             },
-    //           };
-    //         }
-    //       }
-    //       return engine.query(queries);
-    //     }
-    //   }
-    // );
-    // if (allQueries) {
-    //   return await Promise.all(allQueries);
-    // }
-
-    return [];
-  });
+  return useQuery<any, Error>(
+    ["visualizations", encodeToBinary(JSON.stringify(visualization))],
+    async () => {
+      const allQueries = visualization.indicators.flatMap((i: string) => {
+        const indicator = visualizationQueries.find((v) => v.id === i);
+        const dataSource = dataSources.find((d) => {
+          return d.id === indicator?.dataSource;
+        });
+        if (indicator && dataSource && dataSource.isCurrentDHIS2) {
+          let queries = {};
+          if (
+            indicator.numerator.type === "ANALYTICS" &&
+            Object.keys(indicator.numerator.dataDimensions).length > 0
+          ) {
+            const params = makeDHIS2Query(indicator.numerator);
+            if (params) {
+              queries = {
+                numerator: {
+                  resource: `analytics.json?${params}`,
+                },
+              };
+            }
+          } else if (
+            indicator.numerator.type === "SQL_VIEW" &&
+            Object.keys(indicator.numerator.dataDimensions).length > 0
+          ) {
+            queries = {
+              numerator: {
+                resource: `sqlViews/${
+                  Object.keys(indicator.numerator.dataDimensions)[0]
+                }/data.json`,
+              },
+            };
+          }
+          if (!indicator.useInBuildIndicators) {
+            if (
+              indicator.denominator.type === "ANALYTICS" &&
+              Object.keys(indicator.denominator.dataDimensions).length > 0
+            ) {
+              const params = makeDHIS2Query(indicator.denominator);
+              if (params) {
+                queries = {
+                  ...queries,
+                  denominator: {
+                    resource: `analytics.json?${params}`,
+                  },
+                };
+              }
+            } else if (
+              indicator.denominator.type === "SQL_VIEW" &&
+              Object.keys(indicator.denominator.dataDimensions).length > 0
+            ) {
+              queries = {
+                denominator: {
+                  resource: `sqlViews/${
+                    Object.keys(indicator.denominator.dataDimensions)[0]
+                  }/data.json`,
+                },
+              };
+            }
+          }
+          return engine.query(queries);
+        } else if (dataSource?.type === "ELASTICSEARCH") {
+          let queries: Promise<any>[] = [];
+          const api = axios.create({
+            baseURL: dataSource.authentication.url,
+          });
+          if (indicator && indicator.numerator.query) {
+            queries = [
+              ...queries,
+              api.post("", JSON.parse(indicator.numerator.query)),
+            ];
+          }
+          if (indicator && indicator.denominator.query) {
+            queries = [
+              ...queries,
+              api.post("", JSON.parse(indicator.denominator.query)),
+            ];
+          }
+          return queries;
+        }
+      });
+      if (allQueries) {
+        return await Promise.all(allQueries);
+      }
+      return [];
+    }
+  );
 };

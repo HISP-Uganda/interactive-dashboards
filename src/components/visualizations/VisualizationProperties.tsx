@@ -1,20 +1,14 @@
-import React from "react";
 import { IVisualization } from "../../interfaces";
-import SingleValue from "./SingleValue";
+import SingleValueProperties from "../properties/SingleValueProperties";
 
-type VisualizationProps = {
+type VizProps = {
   visualization: IVisualization;
 };
 
-const Visualization = ({ visualization }: VisualizationProps) => {
+const VisualizationProperties = ({ visualization }: VizProps) => {
   const displayProperties = (visualizationType: string | undefined) => {
     const allTypes: any = {
-      single: (
-        <SingleValue
-          visualization={visualization}
-          {...visualization.properties}
-        />
-      ),
+      single: <SingleValueProperties visualization={visualization} />,
     };
     if (visualizationType) {
       return allTypes[visualizationType] || null;
@@ -24,4 +18,4 @@ const Visualization = ({ visualization }: VisualizationProps) => {
   return <>{displayProperties(visualization.type)}</>;
 };
 
-export default Visualization;
+export default VisualizationProperties;

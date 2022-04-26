@@ -10,6 +10,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Select,
   Stack,
   Table,
   Tbody,
@@ -25,10 +26,11 @@ import { useStore } from "effector-react";
 import { ChangeEvent, useState } from "react";
 import {
   addDenominatorExpression,
+  changeDenominatorAttribute,
   changeDenominatorDimension,
   changeDenominatorExpressionValue,
 } from "../../Events";
-import { $indicator } from "../../Store";
+import { $dataSourceType, $indicator } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import { displayDataSourceType } from "../data-sources";
 
@@ -36,6 +38,8 @@ const DenominatorDialog = () => {
   const [active, setActive] = useState<string>("");
   const { isOpen, onOpen, onClose } = useDisclosure();
   const indicator = useStore($indicator);
+  const dataSourceType = useStore($dataSourceType);
+
   return (
     <Stack>
       <Button onClick={onOpen}>Denominator</Button>
@@ -48,17 +52,53 @@ const DenominatorDialog = () => {
             <Stack>
               <Stack>
                 <Text>Denominator Name</Text>
-                <Input value={indicator.denominator.name} />
+                <Input
+                  value={indicator.denominator.name}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    changeDenominatorAttribute({
+                      attribute: "name",
+                      value: e.target.value,
+                    })
+                  }
+                />
               </Stack>
               <Stack>
                 <Text>Denominator Description</Text>
-                <Textarea value={indicator.denominator.description} />
+                <Textarea
+                  value={indicator.denominator.description}
+                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                    changeDenominatorAttribute({
+                      attribute: "description",
+                      value: e.target.value,
+                    })
+                  }
+                />
               </Stack>
-              {/* {displayDataSourceType({
-                dataSourceType: indicator.dataSource?.type,
+
+              {dataSourceType === "DHIS2" && (
+                <Stack>
+                  <Text>Type</Text>
+                  <Select
+                    value={indicator.numerator.type}
+                    onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                      changeDenominatorAttribute({
+                        attribute: "type",
+                        value: e.target.value,
+                      })
+                    }
+                  >
+                    <option></option>
+                    <option value="SQL_VIEW">SQL Views</option>
+                    <option value="ANALYTICS">Analytics</option>
+                  </Select>
+                </Stack>
+              )}
+              {displayDataSourceType({
+                dataSourceType,
                 onChange: changeDenominatorDimension,
                 denNum: indicator.denominator,
-              })} */}
+                changeQuery: changeDenominatorAttribute,
+              })}
 
               {indicator.denominator.type === "SQL_VIEW" && (
                 <Table size="sm" textTransform="none">

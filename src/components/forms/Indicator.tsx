@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import {
   Box,
   Button,
@@ -10,50 +10,54 @@ import {
   Textarea,
 } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
+import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { ChangeEvent } from "react";
-import { useNavigate } from "@tanstack/react-location";
 import { useQueryClient } from "react-query";
 import {
-  changeDataSource,
   changeIndicatorAttribute,
   changeNumeratorDimension,
   changeUseIndicators,
+  setIndicator,
 } from "../../Events";
-import { $indicator, $hasDHIS2 } from "../../Store";
+import { FormGenerics } from "../../interfaces";
+import { $hasDHIS2, $indicator, createIndicator } from "../../Store";
+import { displayDataSourceType } from "../data-sources";
 import DenominatorDialog from "../dialogs/DenominatorDialog";
 import NumeratorDialog from "../dialogs/NumeratorDialog";
 import NamespaceSelect from "../NamespaceSelect";
-import { displayDataSourceType } from "../data-sources";
 const Indicator = () => {
+  const search = useSearch<FormGenerics>();
   const indicator = useStore($indicator);
   const hasDHIS2 = useStore($hasDHIS2);
+  const [loading, setLoading] = useState<boolean>(false);
   const engine = useDataEngine();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-
   const add = async () => {
-    const mutation: any = {
+    setLoading(true);
+    let mutation: any = {
       type: "create",
       resource: `dataStore/i-visualization-queries/${indicator.id}`,
       data: indicator,
     };
+    if (search.edit) {
+      mutation = {
+        type: "update",
+        resource: `dataStore/i-visualization-queries`,
+        id: indicator.id,
+        data: indicator,
+      };
+    }
     await engine.mutate(mutation);
-    queryClient.setQueryData(
-      ["namespaces", "i-visualization-queries"],
-      (old: any) => {
-        if (old) {
-          return [...old, indicator];
-        }
-        return [indicator];
-      }
-    );
+    await queryClient.invalidateQueries(["visualization-queries"]);
+    setLoading(false);
     navigate({ to: "/indicators" });
   };
 
   return (
-    <Stack flex={1}>
-      <Stack w="50%" p="20px" spacing="20px">
+    <Box flex={1} p="20px">
+      <Stack spacing="20px">
         <Stack>
           <Text>Data Source</Text>
           <NamespaceSelect />
@@ -120,11 +124,23 @@ const Indicator = () => {
             </Stack>
           </>
         )}
-          <Box textAlign="right">
-            <Button onClick={() => add()}>Save Indicator</Button>
-          </Box>
+        <Stack direction="row">
+          <Button
+            colorScheme="red"
+            onClick={() => {
+              setIndicator(createIndicator());
+              navigate({ to: "/indicators" });
+            }}
+          >
+            Cancel
+          </Button>
+          <Spacer />
+          <Button onClick={() => add()} isLoading={loading}>
+            Save Visualization Data
+          </Button>
+        </Stack>
       </Stack>
-    </Stack>
+    </Box>
   );
 };
 

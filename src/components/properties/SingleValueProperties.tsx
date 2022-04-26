@@ -1,25 +1,36 @@
 import React from "react";
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
+import {
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+  Stack,
+} from "@chakra-ui/react";
+import { HexColorInput } from "react-colorful";
 import { useStore } from "effector-react";
 import { $store } from "../../Store";
 import { displayDataSourceType } from "../data-sources";
-const SingleValueProperties = () => {
-  const store = useStore($store);
+import { IVisualization } from "../../interfaces";
+import { changeVisualizationProperties } from "../../Events";
+
+type SingleProps = {
+  visualization: IVisualization;
+};
+const SingleValueProperties = ({ visualization }: SingleProps) => {
   return (
-    <Tabs>
-      <TabList>
-        <Tab>General</Tab>
-        <Tab>Properties</Tab>
-      </TabList>
-      <TabPanels>
-        <TabPanel>
-          {/* {displayDataSourceType(store.visualization?.dataSource?.type)} */}
-        </TabPanel>
-        <TabPanel>
-          <p>two!</p>
-        </TabPanel>
-      </TabPanels>
-    </Tabs>
+    <Stack>
+      <HexColorInput
+        color={visualization.properties["valueColor"] || "none"}
+        onChange={(newColor: string) =>
+          changeVisualizationProperties({
+            visualization: visualization.id,
+            attribute: "valueColor",
+            value: newColor,
+          })
+        }
+      />
+    </Stack>
   );
 };
 

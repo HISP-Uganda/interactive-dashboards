@@ -12,11 +12,11 @@ import {
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { useNavigate } from "@tanstack/react-location";
-import { IDataSource } from "../interfaces";
+import { IDataSource } from "../../interfaces";
 
-import { useDataSources } from "../Queries";
-import { $dataSources } from "../Store";
-import { setDataSource } from "../Events";
+import { useDataSources } from "../../Queries";
+import { $dataSources } from "../../Store";
+import { setDataSource } from "../../Events";
 const DataSources = () => {
   const navigate = useNavigate();
   const { isLoading, isSuccess, isError, error } = useDataSources();
@@ -45,7 +45,10 @@ const DataSources = () => {
                 cursor="pointer"
                 onClick={() => {
                   setDataSource(dataSource);
-                  navigate({ to: "/data-sources/form" });
+                  navigate({
+                    to: "/data-sources/form",
+                    search: { edit: true },
+                  });
                 }}
               >
                 <Td>{dataSource.name}</Td>

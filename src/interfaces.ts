@@ -1,3 +1,4 @@
+import { MakeGenerics } from "@tanstack/react-location";
 import { OptionBase } from "chakra-react-select";
 import { Event } from "effector";
 import { Layout, Layouts } from "react-grid-layout";
@@ -32,6 +33,7 @@ export interface IDimension {
   };
 }
 export interface IData extends INamed {
+  query?: string;
   expressions?: IExpression[];
   type: "SQL_VIEW" | "ANALYTICS" | "OTHER";
   dataDimensions: IDimension;
@@ -49,6 +51,7 @@ export interface IVisualization extends INamed {
   indicators: string[];
   type: string;
   refreshInterval?: number;
+  properties: { [key: string]: any };
 }
 export interface ISection extends Layout {
   title: string;
@@ -93,7 +96,7 @@ export interface IStore {
   visualizations: string[];
   settings: string[];
   organisationUnits: DataNode[];
-  showSider:boolean;
+  showSider: boolean;
   hasDashboards: boolean;
   hasDefaultDashboard: boolean;
   paginations: { [key: string]: number };
@@ -109,3 +112,7 @@ export type IndicatorProps = {
     label?: string;
   }>;
 };
+
+export type FormGenerics = MakeGenerics<{
+  Search: { edit: boolean };
+}>;

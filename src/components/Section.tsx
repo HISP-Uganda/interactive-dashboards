@@ -1,51 +1,129 @@
+import { useEffect } from "react";
 import {
+  Accordion,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
+  Box,
   Button,
+  IconButton,
+  Input,
   Spacer,
+  Spinner,
   Stack,
   Text,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
-  Box,
-  IconButton,
-  Textarea,
-  Input,
-  Select,
 } from "@chakra-ui/react";
-import { MdKeyboardBackspace } from "react-icons/md";
-import React from "react";
-import { addVisualization2Section, setShowSider } from "../Events";
-import { $dashboard, $section } from "../Store";
+import { useNavigate, useSearch } from "@tanstack/react-location";
+import { GroupBase, MultiValue, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { IVisualization } from "../interfaces";
+import { ChangeEvent } from "react";
+import { MdKeyboardBackspace } from "react-icons/md";
+import {
+  addSection,
+  addVisualization2Section,
+  changeSectionAttribute,
+  changeVisualizationAttribute,
+  setCurrentSection,
+  setShowSider,
+} from "../Events";
+import { FormGenerics, IVisualization, Option } from "../interfaces";
+import { useVisualizationData } from "../Queries";
+import { $dashboard, $indicators, $section, createSection } from "../Store";
+import Visualization from "./visualizations/Visualization";
+import VisualizationProperties from "./visualizations/VisualizationProperties";
 
-const VisualizationTypes = () => {
+const chartTypes: Option[] = [
+  { value: "single", label: "Single Value" },
+  { value: "map", label: "Map" },
+  { value: "bar", label: "Bar" },
+  { value: "stacked bar", label: "Stacked Bar" },
+  { value: "column", label: "Column" },
+  { value: "stacked column", label: "Stacked Column" },
+  { value: "pie", label: "Pie" },
+  { value: "line", label: "Line" },
+];
+
+const VisualizationTypes = ({
+  visualization,
+}: {
+  visualization: IVisualization;
+}) => {
   return (
     <Stack>
       <Text>Visualization Type</Text>
-      <Select>
-        <option>Select Visualization Type</option>
-        <option value="single">Single Value</option>
-        <option value="map">Map</option>
-        <option value="bar">Bar</option>
-        <option value="stacked bar">Stacked Bar</option>
-        <option value="column">Column</option>
-        <option value="stacked column">Stacked Column</option>
-        <option value="pie">Pie</option>
-        <option value="line">Line</option>
-      </Select>
+      <Select<Option, false, GroupBase<Option>>
+        value={chartTypes.find((d: Option) => d.value === visualization.type)}
+        onChange={(e) =>
+          changeVisualizationAttribute({
+            attribute: "type",
+            value: e?.value,
+            visualization: visualization.id,
+          })
+        }
+        options={chartTypes}
+      />
+    </Stack>
+  );
+};
+const VisualizationQuery = ({
+  visualization,
+}: {
+  visualization: IVisualization;
+}) => {
+  const indicators = useStore($indicators);
+  const { isLoading, isSuccess, isError, error } = useVisualizationData();
+
+  return (
+    <Stack>
+      <Text>Visualization Query</Text>
+      {isLoading && <Spinner />}
+      {isSuccess && (
+        <Select<Option, true, GroupBase<Option>>
+          isMulti
+          value={indicators
+            .map((i) => {
+              const current: Option = {
+                value: i.id,
+                label: i.name || "",
+              };
+              return current;
+            })
+            .filter(
+              (d: Option) => visualization.indicators.indexOf(d.value) !== -1
+            )}
+          onChange={(e: MultiValue<Option>) => {
+            changeVisualizationAttribute({
+              attribute: "indicators",
+              value: e.map((v) => v.value),
+              visualization: visualization.id,
+            });
+          }}
+          options={indicators.map((i) => {
+            const current: Option = {
+              value: i.id,
+              label: i.name || "",
+            };
+            return current;
+          })}
+        />
+      )}
+      {isError && <pre>{JSON.stringify(error, null, 2)}</pre>}
     </Stack>
   );
 };
 
 const Section = () => {
+  const search = useSearch<FormGenerics>();
+  const navigate = useNavigate();
   const section = useStore($section);
   const dashboard = useStore($dashboard);
-  setShowSider(false);
+
+  // useEffect(() => {
+  //   setShowSider(false);
+  // }, []);
   return (
-    <Stack flex={1} p="10px">
+    <Stack flex={1} p="20px">
       <Stack direction="row">
         <Stack direction="row" alignItems="center" justifyItems="center">
           <IconButton
@@ -63,14 +141,28 @@ const Section = () => {
         <Spacer />
         <Stack direction="row" alignItems="center" justifyItems="center">
           <Button>Discard</Button>
-          <Button>Save</Button>
-          <Button>Apply</Button>
+          <Button
+            onClick={() => {
+              addSection(section);
+              navigate({ to: "/dashboards/form", search });
+            }}
+          >
+            Apply
+          </Button>
         </Stack>
       </Stack>
       <Stack></Stack>
       <Stack direction="row" spacing="20px">
-        <Stack w="75%" bg="yellow.100">
-          <Text>AAA</Text>
+        <Stack w="75%">
+          <Text textAlign="center">{section.title}</Text>
+          <Stack>
+            {section.visualizations.map((visualization: IVisualization) => (
+              <Visualization
+                key={visualization.id}
+                visualization={visualization}
+              />
+            ))}
+          </Stack>
         </Stack>
         <Stack w="25%">
           <Accordion>
@@ -84,15 +176,19 @@ const Section = () => {
               <AccordionPanel pb={4}>
                 <Stack>
                   <Text>Title</Text>
-                  <Input />
-                </Stack>
-                <Stack>
-                  <Text>Description</Text>
-                  <Textarea />
+                  <Input
+                    value={section.title}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      changeSectionAttribute({
+                        attribute: "title",
+                        value: e.target.value,
+                      })
+                    }
+                  />
                 </Stack>
               </AccordionPanel>
             </AccordionItem>
-            {section?.visualizations.map((visualization: IVisualization) => (
+            {section.visualizations.map((visualization: IVisualization) => (
               <AccordionItem key={visualization.id}>
                 <AccordionButton>
                   <Box flex="1" textAlign="left">
@@ -101,24 +197,28 @@ const Section = () => {
                   <AccordionIcon />
                 </AccordionButton>
                 <AccordionPanel pb={4}>
-                  <VisualizationTypes />
-
-                  <Accordion>
-                    <AccordionItem>
-                      <AccordionButton>
-                        <Box flex="1" textAlign="left">
-                          Visualization options
-                        </Box>
-                        <AccordionIcon />
-                      </AccordionButton>
-                      <AccordionPanel pb={4}></AccordionPanel>
-                    </AccordionItem>
-                  </Accordion>
+                  <Stack spacing="20px">
+                    <Stack>
+                      <Text>Title</Text>
+                      <Input
+                        value={visualization.name}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                          changeVisualizationAttribute({
+                            attribute: "name",
+                            value: e.target.value,
+                            visualization: visualization.id,
+                          })
+                        }
+                      />
+                    </Stack>
+                    <VisualizationTypes visualization={visualization} />
+                    <VisualizationQuery visualization={visualization} />
+                    <VisualizationProperties visualization={visualization} />
+                  </Stack>
                 </AccordionPanel>
               </AccordionItem>
             ))}
           </Accordion>
-          <pre>{JSON.stringify(dashboard, null, 2)}</pre>
           <Button onClick={() => addVisualization2Section()}>
             Add Visualization
           </Button>

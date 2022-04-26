@@ -1,5 +1,6 @@
 import {
   Button,
+  Spacer,
   Spinner,
   Stack,
   Table,
@@ -7,25 +8,23 @@ import {
   Td,
   Th,
   Thead,
-  Tr,
-  Spacer
+  Tr
 } from "@chakra-ui/react";
 import { useNavigate } from "@tanstack/react-location";
-import { $store } from "../Store";
-import { ICategory } from "../interfaces";
-import { useNamespace } from "../Queries";
-import NewCategoryDialog from "./dialogs/NewCategoryDialog";
 import { useStore } from "effector-react";
+import { setCategory } from "../../Events";
+import { ICategory } from "../../interfaces";
+import { useCategories } from "../../Queries";
+import { $categories } from "../../Store";
 
 const Categories = () => {
   const navigate = useNavigate();
-  const store = useStore($store);
-  const { isLoading, isSuccess, isError, data, error } =
-    useNamespace("i-categories");
+  const categories = useStore($categories);
+  const { isLoading, isSuccess, isError, error } = useCategories();
   return (
-    <Stack flex={1} p="10px">
+    <Stack flex={1} p="20px">
       <Stack direction="row">
-        <Spacer />{" "}
+        <Spacer />
         <Button onClick={() => navigate({ to: "/categories/form" })}>
           Add Category
         </Button>
@@ -35,15 +34,22 @@ const Categories = () => {
         <Table variant="simple">
           <Thead>
             <Tr>
-              <Th>Id</Th>
               <Th>Name</Th>
+              <Th>Description</Th>
             </Tr>
           </Thead>
           <Tbody>
-            {data.map((category: ICategory) => (
-              <Tr key={category.id}>
-                <Td>{category.id}</Td>
+            {categories.map((category: ICategory) => (
+              <Tr
+                key={category.id}
+                cursor="pointer"
+                onClick={() => {
+                  setCategory(category);
+                  navigate({ to: "/categories/form", search: { edit: true } });
+                }}
+              >
                 <Td>{category.name}</Td>
+                <Td>{category.description}</Td>
               </Tr>
             ))}
           </Tbody>
