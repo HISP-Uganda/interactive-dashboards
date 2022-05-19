@@ -13,6 +13,9 @@ import {
 } from "./components/forms";
 import Home from "./components/Home";
 import Section from "./components/Section";
+import DashboardCategories from "./components/lists/DashboardCategories";
+import Numerator from "./components/forms/Numerator";
+import Denominator from "./components/forms/Denominator";
 
 export const routes: Route[] = [
   {
@@ -42,6 +45,10 @@ export const routes: Route[] = [
     ],
   },
   {
+    path: "/dashboard-categories",
+    children: [{ path: "/", element: <DashboardCategories /> }],
+  },
+  {
     path: "/indicators",
     children: [
       {
@@ -50,7 +57,11 @@ export const routes: Route[] = [
       },
       {
         path: "form",
-        element: <IndicatorForm />,
+        children: [
+          { path: "/", element: <IndicatorForm /> },
+          { path: "/numerator", element: <Numerator /> },
+          { path: "/denominator", element: <Denominator /> },
+        ],
       },
     ],
   },

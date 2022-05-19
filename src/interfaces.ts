@@ -1,3 +1,4 @@
+import { RangeValue } from "rc-picker/lib/interface";
 import { MakeGenerics } from "@tanstack/react-location";
 import { OptionBase } from "chakra-react-select";
 import { Event } from "effector";
@@ -34,21 +35,22 @@ export interface IDimension {
 }
 export interface IData extends INamed {
   query?: string;
-  expressions?: IExpression[];
+  expressions?: { [key: string]: string };
   type: "SQL_VIEW" | "ANALYTICS" | "OTHER";
   dataDimensions: IDimension;
 }
 
 export interface IIndicator extends INamed {
-  numerator: IData;
-  denominator: IData;
+  numerator?: IData;
+  denominator?: IData;
   factor: string;
   dataSource?: string;
   useInBuildIndicators: boolean;
+  query?: string;
 }
 
 export interface IVisualization extends INamed {
-  indicators: string[];
+  indicator: string;
   type: string;
   refreshInterval?: number;
   properties: { [key: string]: any };
@@ -56,6 +58,7 @@ export interface IVisualization extends INamed {
 export interface ISection extends Layout {
   title: string;
   visualizations: IVisualization[];
+  direction: "row" | "column";
 }
 
 export interface IFilter {}
@@ -71,6 +74,7 @@ export interface IDashboard extends INamed {
   showSider: boolean;
   showTop: boolean;
   mode: "edit" | "view";
+  refreshInterval: string;
 }
 export interface Pagination {
   total: number;
@@ -90,26 +94,27 @@ export interface Option extends OptionBase {
 }
 
 export interface IStore {
-  categories: string[];
-  dashboards: string[];
-  dataSources: string[];
-  visualizations: string[];
-  settings: string[];
-  organisationUnits: DataNode[];
   showSider: boolean;
-  hasDashboards: boolean;
-  hasDefaultDashboard: boolean;
-  paginations: { [key: string]: number };
+  selectedOrganisation: string;
+  fixedPeriod: RangeValue<moment.Moment>;
+  relativePeriod: Option;
+  periodType: Option;
 }
 
 export type IndicatorProps = {
-  denNum: IData;
+  denNum?: IData;
   onChange: Event<{
     id: string;
     what: string;
     type: string;
     remove?: boolean;
+    replace?: boolean;
     label?: string;
+  }>;
+  dataSourceType?: string;
+  changeQuery?: Event<{
+    attribute: "name" | "description" | "type" | "query";
+    value: any;
   }>;
 };
 

@@ -1,5 +1,6 @@
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import {
+  Box,
   Button,
   Menu,
   MenuButton,
@@ -17,6 +18,7 @@ import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import {
   changeLayouts,
+  changeOrganisations,
   increment,
   setCurrentSection,
   setShowSider,
@@ -24,7 +26,17 @@ import {
   toggleDashboard,
 } from "../../Events";
 import { FormGenerics, ISection } from "../../interfaces";
-import { $dashboard, $store, createSection } from "../../Store";
+import {
+  $dashboard,
+  $expandedKeys,
+  $organisations,
+  $store,
+  createSection,
+} from "../../Store";
+import AutoRefreshPicker from "../AutoRefreshPicker";
+import DashboardFilter from "../filters/DashboardFilter";
+import OrgUnitTree from "../OrgUnitTree";
+import PeriodPicker from "../PeriodPicker";
 import Visualization from "../visualizations/Visualization";
 const ReactGridLayout = WidthProvider(Responsive);
 const Dashboard = () => {
@@ -49,6 +61,8 @@ const Dashboard = () => {
   };
   const store = useStore($store);
   const dashboard = useStore($dashboard);
+  const organisations = useStore($organisations);
+  const expandedKeys = useStore($expandedKeys);
   const escFunction = useCallback((event) => {
     if (event.keyCode === 27) {
       toggle();
@@ -75,9 +89,11 @@ const Dashboard = () => {
           h="48px"
           p="5px"
         >
+          <DashboardFilter />
           {dashboard.mode === "edit" && (
             <>
               <Button
+                size="sm"
                 type="button"
                 onClick={() => {
                   setCurrentSection(createSection());
@@ -86,30 +102,50 @@ const Dashboard = () => {
               >
                 Add section
               </Button>
-              <Button type="button" onClick={() => increment(1)}>
+              {/* <Button size="sm" type="button" onClick={() => increment(1)}>
                 Increase
               </Button>
-              <Button type="button" onClick={() => increment(-1)}>
+              <Button size="sm" type="button" onClick={() => increment(-1)}>
                 Reduce
               </Button>
               {dashboard?.published && (
-                <Button onClick={() => toggleDashboard(false)}>Edit</Button>
+                <Button size="sm" onClick={() => toggleDashboard(false)}>
+                  Edit
+                </Button>
               )}
               {!dashboard?.published && (
-                <Button onClick={() => toggleDashboard(true)}>Publish</Button>
-              )}
+                <Button size="sm" onClick={() => toggleDashboard(true)}>
+                  Publish
+                </Button>
+              )} */}
             </>
           )}
           <Spacer />
-          <Button type="button" onClick={() => updateDashboard(dashboard)}>
-            Save Dashboard
-          </Button>
-          <Button onClick={() => toggle()}>Toggle</Button>
+          <Box w="200px">
+            <OrgUnitTree
+              expandedKeys={expandedKeys}
+              initial={organisations}
+              value={store.selectedOrganisation}
+              onChange={(value) => changeOrganisations(value)}
+            />
+          </Box>
+          <PeriodPicker />
+          {dashboard.mode === "edit" && (
+            <Button
+              size="sm"
+              type="button"
+              onClick={() => updateDashboard(dashboard)}
+            >
+              Save
+            </Button>
+          )}
+          <AutoRefreshPicker />
+          {/* <Button  size='sm' onClick={() => toggle()}>Toggle</Button> */}
         </Stack>
       )}
       <Stack
         h={`calc(100vh - ${dashboard.showTop ? 96 : 48}px)`}
-        w={`calc(100vw - ${store.showSider ? 128 : 0}px)`}
+        w="100vw"
         overflow="auto"
         bg="gray.50"
       >
@@ -148,6 +184,7 @@ const Dashboard = () => {
                 justifyContent="center"
                 justifyItems="center"
                 textAlign="center"
+                
               >
                 <Menu>
                   <MenuButton
@@ -170,7 +207,7 @@ const Dashboard = () => {
                   </MenuList>
                 </Menu>
               </Stack>
-              <Stack flex={1} direction="row">
+              <Stack direction={section.direction} w="100%" h="100%">
                 {section.visualizations.map((visualization) => (
                   <Visualization
                     key={visualization.id}
@@ -183,7 +220,6 @@ const Dashboard = () => {
         </ReactGridLayout>
       </Stack>
     </Stack>
-    // <NewVisualizationDialog isOpen={isOpen} onClose={onClose} />
   );
 };
 

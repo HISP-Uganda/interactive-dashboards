@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   Button,
   Spacer,
@@ -8,11 +9,11 @@ import {
   Td,
   Th,
   Thead,
-  Tr
+  Tr,
 } from "@chakra-ui/react";
 import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { setCategory } from "../../Events";
+import { setCategory, setShowSider } from "../../Events";
 import { ICategory } from "../../interfaces";
 import { useCategories } from "../../Queries";
 import { $categories } from "../../Store";
@@ -21,6 +22,9 @@ const Categories = () => {
   const navigate = useNavigate();
   const categories = useStore($categories);
   const { isLoading, isSuccess, isError, error } = useCategories();
+  useEffect(() => {
+    setShowSider(true);
+  }, []);
   return (
     <Stack flex={1} p="20px">
       <Stack direction="row">

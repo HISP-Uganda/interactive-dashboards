@@ -9,13 +9,15 @@ import {
   Button,
   IconButton,
   Input,
+  Radio,
+  RadioGroup,
   Spacer,
   Spinner,
   Stack,
   Text,
 } from "@chakra-ui/react";
 import { useNavigate, useSearch } from "@tanstack/react-location";
-import { GroupBase, MultiValue, Select } from "chakra-react-select";
+import { GroupBase, Select, SingleValue } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { ChangeEvent } from "react";
 import { MdKeyboardBackspace } from "react-icons/md";
@@ -24,12 +26,11 @@ import {
   addVisualization2Section,
   changeSectionAttribute,
   changeVisualizationAttribute,
-  setCurrentSection,
   setShowSider,
 } from "../Events";
 import { FormGenerics, IVisualization, Option } from "../interfaces";
 import { useVisualizationData } from "../Queries";
-import { $dashboard, $indicators, $section, createSection } from "../Store";
+import { $dashboard, $indicators, $section } from "../Store";
 import Visualization from "./visualizations/Visualization";
 import VisualizationProperties from "./visualizations/VisualizationProperties";
 
@@ -37,9 +38,6 @@ const chartTypes: Option[] = [
   { value: "single", label: "Single Value" },
   { value: "map", label: "Map" },
   { value: "bar", label: "Bar" },
-  { value: "stacked bar", label: "Stacked Bar" },
-  { value: "column", label: "Column" },
-  { value: "stacked column", label: "Stacked Column" },
   { value: "pie", label: "Pie" },
   { value: "line", label: "Line" },
 ];
@@ -62,6 +60,7 @@ const VisualizationTypes = ({
           })
         }
         options={chartTypes}
+        isClearable
       />
     </Stack>
   );
@@ -79,8 +78,7 @@ const VisualizationQuery = ({
       <Text>Visualization Query</Text>
       {isLoading && <Spinner />}
       {isSuccess && (
-        <Select<Option, true, GroupBase<Option>>
-          isMulti
+        <Select<Option, false, GroupBase<Option>>
           value={indicators
             .map((i) => {
               const current: Option = {
@@ -89,13 +87,11 @@ const VisualizationQuery = ({
               };
               return current;
             })
-            .filter(
-              (d: Option) => visualization.indicators.indexOf(d.value) !== -1
-            )}
-          onChange={(e: MultiValue<Option>) => {
+            .filter((d: Option) => visualization.indicator === d.value)}
+          onChange={(e: SingleValue<Option>) => {
             changeVisualizationAttribute({
-              attribute: "indicators",
-              value: e.map((v) => v.value),
+              attribute: "indicator",
+              value: e?.value,
               visualization: visualization.id,
             });
           }}
@@ -106,6 +102,7 @@ const VisualizationQuery = ({
             };
             return current;
           })}
+          isClearable
         />
       )}
       {isError && <pre>{JSON.stringify(error, null, 2)}</pre>}
@@ -118,10 +115,9 @@ const Section = () => {
   const navigate = useNavigate();
   const section = useStore($section);
   const dashboard = useStore($dashboard);
-
-  // useEffect(() => {
-  //   setShowSider(false);
-  // }, []);
+  useEffect(() => {
+    setShowSider(false);
+  }, []);
   return (
     <Stack flex={1} p="20px">
       <Stack direction="row">
@@ -132,7 +128,7 @@ const Section = () => {
             aria-label="Search database"
             icon={<MdKeyboardBackspace />}
           />
-          <Stack direction="row" spacing="2px">
+          <Stack direction="row" spacing="2px" fontSize="16px">
             <Text>{dashboard.name}</Text>
             <Text>/</Text>
             <Text>Edit Section</Text>
@@ -140,8 +136,9 @@ const Section = () => {
         </Stack>
         <Spacer />
         <Stack direction="row" alignItems="center" justifyItems="center">
-          <Button>Discard</Button>
+          <Button size="sm">Discard</Button>
           <Button
+            size="sm"
             onClick={() => {
               addSection(section);
               navigate({ to: "/dashboards/form", search });
@@ -186,6 +183,23 @@ const Section = () => {
                     }
                   />
                 </Stack>
+                <Stack>
+                  <Text>Arrangement</Text>
+                  <RadioGroup
+                    onChange={(e: string) =>
+                      changeSectionAttribute({
+                        attribute: "direction",
+                        value: e,
+                      })
+                    }
+                    value={section.direction}
+                  >
+                    <Stack direction="row">
+                      <Radio value="row">Horizontal</Radio>
+                      <Radio value="column">Vertical</Radio>
+                    </Stack>
+                  </RadioGroup>
+                </Stack>
               </AccordionPanel>
             </AccordionItem>
             {section.visualizations.map((visualization: IVisualization) => (
@@ -211,8 +225,8 @@ const Section = () => {
                         }
                       />
                     </Stack>
-                    <VisualizationTypes visualization={visualization} />
                     <VisualizationQuery visualization={visualization} />
+                    <VisualizationTypes visualization={visualization} />
                     <VisualizationProperties visualization={visualization} />
                   </Stack>
                 </AccordionPanel>

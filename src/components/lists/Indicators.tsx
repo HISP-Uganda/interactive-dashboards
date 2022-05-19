@@ -1,16 +1,19 @@
+import { useEffect } from "react";
 import {
-  Button, Spacer, Spinner,
+  Button,
+  Spacer,
+  Spinner,
   Stack,
   Table,
   Tbody,
   Td,
   Th,
   Thead,
-  Tr
+  Tr,
 } from "@chakra-ui/react";
 import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { setIndicator } from "../../Events";
+import { setIndicator, setShowSider } from "../../Events";
 import { IIndicator } from "../../interfaces";
 import { useVisualizationData } from "../../Queries";
 import { $indicators } from "../../Store";
@@ -18,7 +21,10 @@ import { $indicators } from "../../Store";
 const Indicators = () => {
   const navigate = useNavigate();
   const indicators = useStore($indicators);
-  const { isLoading, isSuccess, isError, data, error } = useVisualizationData();
+  const { isLoading, isSuccess, isError, error } = useVisualizationData();
+  useEffect(() => {
+    setShowSider(true);
+  }, []);
   return (
     <Stack flex={1} p="20px">
       <Stack direction="row">

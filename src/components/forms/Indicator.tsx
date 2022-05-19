@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Box,
   Button,
@@ -12,24 +11,30 @@ import {
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useQueryClient } from "react-query";
 import {
   changeIndicatorAttribute,
   changeNumeratorDimension,
   changeUseIndicators,
   setIndicator,
+  setShowSider,
 } from "../../Events";
 import { FormGenerics } from "../../interfaces";
-import { $hasDHIS2, $indicator, createIndicator } from "../../Store";
+import {
+  $dataSourceType,
+  $hasDHIS2,
+  $indicator,
+  createIndicator,
+} from "../../Store";
 import { displayDataSourceType } from "../data-sources";
-import DenominatorDialog from "../dialogs/DenominatorDialog";
-import NumeratorDialog from "../dialogs/NumeratorDialog";
 import NamespaceSelect from "../NamespaceSelect";
 const Indicator = () => {
   const search = useSearch<FormGenerics>();
   const indicator = useStore($indicator);
   const hasDHIS2 = useStore($hasDHIS2);
+  const dataSourceType = useStore($dataSourceType);
+
   const [loading, setLoading] = useState<boolean>(false);
   const engine = useDataEngine();
   const queryClient = useQueryClient();
@@ -55,6 +60,10 @@ const Indicator = () => {
     navigate({ to: "/indicators" });
   };
 
+  useEffect(() => {
+    setShowSider(true);
+  }, []);
+
   return (
     <Box flex={1} p="20px">
       <Stack spacing="20px">
@@ -72,28 +81,28 @@ const Indicator = () => {
             Use DHIS2 Indicators
           </Checkbox>
         )}
+        <Stack>
+          <Text>Name</Text>
+          <Input
+            value={indicator.name}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              changeIndicatorAttribute({
+                attribute: "name",
+                value: e.target.value,
+              })
+            }
+          />
+        </Stack>
         {indicator.useInBuildIndicators ? (
           <Stack>
             {displayDataSourceType({
-              dataSourceType: "DHIS2",
+              dataSourceType,
               onChange: changeNumeratorDimension,
               denNum: indicator.numerator,
             })}
           </Stack>
         ) : (
           <>
-            <Stack>
-              <Text>Name</Text>
-              <Input
-                value={indicator.name}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  changeIndicatorAttribute({
-                    attribute: "name",
-                    value: e.target.value,
-                  })
-                }
-              />
-            </Stack>
             <Stack>
               <Text>Description</Text>
               <Textarea
@@ -119,8 +128,18 @@ const Indicator = () => {
               />
             </Stack>
             <Stack direction="row" spacing="50px">
-              <NumeratorDialog />
-              <DenominatorDialog />
+              {/* <NumeratorDialog />
+              <DenominatorDialog /> */}
+              <Button
+                onClick={() => navigate({ to: "/indicators/form/numerator" })}
+              >
+                Numerator
+              </Button>
+              <Button
+                onClick={() => navigate({ to: "/indicators/form/denominator" })}
+              >
+                Denominator
+              </Button>
             </Stack>
           </>
         )}

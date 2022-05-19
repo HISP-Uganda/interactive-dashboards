@@ -1,46 +1,49 @@
-import { combine, forward, sample } from "effector";
+import { combine } from "effector";
+import { fromPairs } from "lodash";
+import moment from "moment";
 import { domain } from "./Domain";
 import {
-  setCurrentSection,
-  addCategory,
-  setCurrentDashboard,
-  setDataSources,
-  addSection,
-  deleteSection,
-  loadDefaults,
-  toggleDashboard,
-  changeVisualizationDataSource,
-  changeVisualizationType,
-  setCurrentVisualization,
-  addPagination,
-  changeDenominatorDataSource,
-  changeNumeratorDataSource,
-  addNumeratorExpression,
   addDenominatorExpression,
-  changeIndicatorAttribute,
-  changeDenominatorExpressionValue,
-  changeNumeratorExpressionValue,
+  addNumeratorExpression,
+  addPagination,
+  addSection,
+  addVisualization2Section,
+  changeDataSource,
+  changeDefaults,
   changeDenominatorAttribute,
+  changeDenominatorDimension,
+  changeDenominatorExpressionValue,
+  changeIndicatorAttribute,
+  changeLayouts,
   changeNumeratorAttribute,
   changeNumeratorDimension,
-  changeDenominatorDimension,
-  changeDataSource,
-  changeUseIndicators,
-  setVisualizationQueries,
-  addVisualization2Section,
-  changeDefaults,
-  changeLayouts,
-  increment,
-  toggle,
-  setShowSider,
-  setDataSource,
-  setCategory,
-  setIndicator,
-  setCategories,
-  setDashboards,
-  changeVisualizationAttribute,
+  changeNumeratorExpressionValue,
+  changeOrganisations,
   changeSectionAttribute,
+  changeUseIndicators,
+  changeVisualizationAttribute,
   changeVisualizationProperties,
+  deleteSection,
+  increment,
+  setCategories,
+  setCategory,
+  setCurrentDashboard,
+  setCurrentSection,
+  setDashboards,
+  setDataSource,
+  setDataSources,
+  setExpandedKeys,
+  setIndicator,
+  setOrganisations,
+  setRefreshInterval,
+  setShowSider,
+  setVisualizationQueries,
+  toggle,
+  toggleDashboard,
+  updateVisualizationData,
+  onChangeFixedPeriod,
+  onChangeRelativeTime,
+  updateVisualizationMetadata,
 } from "./Events";
 import {
   ICategory,
@@ -65,6 +68,7 @@ export const createSection = (): ISection => {
     h: 1,
     title: "Example section",
     visualizations: [],
+    direction: "row",
   };
 };
 
@@ -107,137 +111,58 @@ export const createIndicator = (): IIndicator => {
     dataSource: "",
     description: "",
     factor: "1",
+    query: "",
     useInBuildIndicators: false,
   };
 };
 
-export const $store = domain
-  .createStore<IStore>({
-    categories: [],
-    dashboards: [],
-    visualizations: [],
-    settings: [],
-    organisationUnits: [],
-    hasDashboards: false,
-    hasDefaultDashboard: false,
-    showSider: true,
-    dataSources: [],
-    paginations: {
-      totalDataElements: 0,
-      totalSQLViews: 0,
-      totalIndicators: 0,
-      totalProgramIndicators: 0,
-      totalOrganisationUnitLevels: 0,
-      totalOrganisationUnitGroups: 0,
-    },
+export const $organisations = domain
+  .createStore<any[]>([])
+  .on(setOrganisations, (_, organisations) => organisations);
+export const $expandedKeys = domain
+  .createStore<string[]>([])
+  .on(setExpandedKeys, (_, expandedKeys) => expandedKeys);
+
+export const $paginations = domain
+  .createStore<{ [key: string]: number }>({
+    totalDataElements: 0,
+    totalSQLViews: 0,
+    totalIndicators: 0,
+    totalProgramIndicators: 0,
+    totalOrganisationUnitLevels: 0,
+    totalOrganisationUnitGroups: 0,
   })
-  .on(
-    loadDefaults,
-    (state, { dashboards, categories, organisationUnits, dataSources }) => {
-      return {
-        ...state,
-        dashboards,
-        categories,
-        organisationUnits,
-        dataSources,
-      };
-    }
-  )
-  // .on(addCategory, (state, category) => {
-  //   return {
-  //     ...state,
-  //     categories: [...state.categories, category],
-  //   };
-  // })
-  .on(setShowSider, (state, showSider) => {
-    return { ...state, showSider };
-  })
-  // .on(addDataSource, (state, dataSource) => {
-  //   return {
-  //     ...state,
-  //     dataSources: [...state.dataSources, dataSource],
-  //   };
-  // })
-  // .on(setCurrentDashboard, (state, dashboard) => {
-  //   return {
-  //     ...state,
-  //     dashboard: dashboard,
-  //   };
-  // })
-  // .on(addSection, (state) => {
-  //   const id = generateUid();
-  //   const layout = {
-  //     i: id,
-  //     x: 0,
-  //     y: 0,
-  //     w: 2,
-  //     h: 2,
-  //   };
-  //   const currentSection: ISection = {
-  //     layout: { md: layout },
-  //     name: "test",
-  //     visualizations: [],
-  //     id,
-  //   };
-  //   return {
-  //     ...state,
-  //     section: currentSection,
-  //     dashboard: {
-  //       ...state.dashboard,
-  //       sections: [...state.dashboard.sections, currentSection],
-  //     },
-  //   };
-  // })
-  // .on(deleteSection, (state, section) => {
-  //   if (state.dashboard) {
-  //     const sections = state.dashboard.sections.filter((s) => s.id !== section);
-  //     return {
-  //       ...state,
-  //       dashboard: { ...state.dashboard, sections },
-  //       section: undefined,
-  //     };
-  //   }
-  // })
-  // .on(setCurrentSection, (state, section) => {
-  //   return { ...state, section };
-  // })
-  // .on(toggleDashboard, (state, published) => {
-  //   return { ...state, dashboard: { ...state.dashboard, published } };
-  // })
-  .on(setCurrentVisualization, (state, visualization) => {
-    return {
-      ...state,
-      visualization,
-    };
-  })
-  // .on(changeVisualizationType, (state, type) => {
-  //   if (state.visualization) {
-  //     return {
-  //       ...state,
-  //       visualization: {
-  //         ...state.visualization,
-  //         type,
-  //       },
-  //     };
-  //   }
-  // })
-  // .on(changeVisualizationDataSource, (state, dataSource) => {
-  //   if (state.visualization) {
-  //     return {
-  //       ...state,
-  //       visualization: {
-  //         ...state.visualization,
-  //         dataSource,
-  //       },
-  //     };
-  //   }
-  // })
   .on(addPagination, (state, pagination) => {
     return {
       ...state,
-      paginations: { ...state.paginations, ...pagination },
+      ...pagination,
     };
   });
+
+export const $store = domain
+  .createStore<IStore>({
+    showSider: true,
+    selectedOrganisation: "",
+    fixedPeriod: [moment().startOf("month").subtract(1, "month"), moment()],
+    relativePeriod: { value: "LAST_MONTH", label: "Last Month" },
+    periodType: {
+      value: "fixed",
+      label: "Fixed",
+    },
+  })
+  .on(setShowSider, (state, showSider) => {
+    return { ...state, showSider };
+  })
+  .on(changeOrganisations, (state, selectedOrganisation) => {
+    return { ...state, selectedOrganisation };
+  })
+  .on(onChangeFixedPeriod, (state, { periodType, value }) => {
+    return { ...state, periodType, fixedPeriod: value };
+  })
+  .on(onChangeRelativeTime, (state, { periodType, value }) => {
+    return { ...state, periodType, relativePeriod: value };
+  });
+
 export const $dataSource = domain
   .createStore<IDataSource>(createDataSource())
   .on(setDataSource, (_, dataSource) => dataSource);
@@ -257,6 +182,7 @@ export const $dashboard = domain
     showTop: true,
     mode: "edit",
     name: "New Dashboard",
+    refreshInterval: "off",
   })
   .on(addSection, (state, section) => {
     const isNew = state.sections.find((s) => s.i === section.i);
@@ -310,6 +236,9 @@ export const $dashboard = domain
     } else if (state.showSider === false && state.showTop === false) {
       return { ...state, showTop: true, showSider: true };
     }
+  })
+  .on(setRefreshInterval, (state, refreshInterval) => {
+    return { ...state, refreshInterval };
   });
 
 export const $indicator = domain
@@ -317,89 +246,83 @@ export const $indicator = domain
   .on(changeIndicatorAttribute, (state, { attribute, value }) => {
     return { ...state, [attribute]: value };
   })
-  // .on(changeDenominatorExpressionValue, (state, { attribute, value, id }) => {
-  //   const expressions = state.denominator.expressions?.map((ex) => {
-  //     if (ex.id === id) {
-  //       return { ...ex, [attribute]: value };
-  //     }
-  //     return ex;
-  //   });
-  //   return {
-  //     ...state,
-  //     denominator: { ...state.denominator, expressions },
-  //   };
-  // })
-  // .on(changeNumeratorExpressionValue, (state, { attribute, value, id }) => {
-  //   const expressions = state.numerator.expressions?.map((ex) => {
-  //     if (ex.id === id) {
-  //       return { ...ex, [attribute]: value };
-  //     }
-  //     return ex;
-  //   });
-
-  //   return {
-  //     ...state,
-  //     numerator: { ...state.numerator, expressions },
-  //   };
-  // })
+  .on(changeDenominatorExpressionValue, (state, { attribute, value }) => {
+    if (state.denominator) {
+      return {
+        ...state,
+        denominator: {
+          ...state.denominator,
+          expressions: { ...state.denominator.expressions, [attribute]: value },
+        },
+      };
+    }
+  })
+  .on(changeNumeratorExpressionValue, (state, { attribute, value }) => {
+    if (state.numerator) {
+      return {
+        ...state,
+        numerator: {
+          ...state.numerator,
+          expressions: { ...state.numerator.expressions, [attribute]: value },
+        },
+      };
+    }
+  })
   // .on(addNumeratorExpression, (state, expression) => {
-  //   let expressions: IExpression[] = [];
+  //   if (state.numerator) {
+  //     let expressions: IExpression[] = [];
 
-  //   if (state.numerator.expressions) {
-  //     expressions = state.numerator.expressions;
+  //     if (state.numerator.expressions) {
+  //       expressions = state.numerator.expressions;
+  //     }
+  //     return {
+  //       ...state,
+  //       numerator: {
+  //         ...state.numerator,
+  //         expressions: [...expressions, expression],
+  //       },
+  //     };
   //   }
-  //   return {
-  //     ...state,
-  //     numerator: {
-  //       ...state.numerator,
-  //       expressions: [...expressions, expression],
-  //     },
-  //   };
   // })
   // .on(addDenominatorExpression, (state, expression) => {
-  //   let expressions: IExpression[] = [];
+  //   if (state.denominator) {
+  //     let expressions: IExpression[] = [];
 
-  //   if (state.denominator.expressions) {
-  //     expressions = state.denominator.expressions;
+  //     if (state.denominator.expressions) {
+  //       expressions = state.denominator.expressions;
+  //     }
+  //     return {
+  //       ...state,
+  //       denominator: {
+  //         ...state.denominator,
+  //         expressions: [...expressions, expression],
+  //       },
+  //     };
   //   }
-  //   return {
-  //     ...state,
-  //     denominator: {
-  //       ...state.denominator,
-  //       expressions: [...expressions, expression],
-  //     },
-  //   };
   // })
-  // .on(changeDenominatorAttribute, (state, { attribute, value }) => {
-  //   return {
-  //     ...state,
-  //     denominator: {
-  //       ...state.denominator,
-  //       [attribute]: value,
-  //     },
-  //   };
-  // })
-  .on(changeNumeratorAttribute, (state, { attribute, value }) => {
-    return {
-      ...state,
-      numerator: {
-        ...state.numerator,
-        [attribute]: value,
-      },
-    };
+  .on(changeDenominatorAttribute, (state, { attribute, value }) => {
+    if (state.denominator) {
+      return {
+        ...state,
+        denominator: {
+          ...state.denominator,
+          [attribute]: value,
+        },
+      };
+    }
   })
-  // .on(changeDenominatorDataSource, (state, dataSource) => {
-  //   return {
-  //     ...state,
-  //     denominator: { ...state.denominator, dataSource },
-  //   };
-  // })
-  // .on(changeNumeratorDataSource, (state, dataSource) => {
-  //   return {
-  //     ...state,
-  //     numerator: { ...state.numerator, dataSource },
-  //   };
-  // })
+  .on(changeNumeratorAttribute, (state, { attribute, value }) => {
+    console.log(attribute, value);
+    if (state.numerator) {
+      return {
+        ...state,
+        numerator: {
+          ...state.numerator,
+          [attribute]: value,
+        },
+      };
+    }
+  })
   .on(changeDataSource, (state, dataSource) => {
     return {
       ...state,
@@ -408,52 +331,93 @@ export const $indicator = domain
   })
   .on(
     changeNumeratorDimension,
-    (state, { id, what, type, remove, label = "" }) => {
-      if (remove) {
-        const { [id]: removed, ...others } = state.numerator.dataDimensions;
+    (state, { id, what, type, replace, remove, label = "" }) => {
+      if (state.numerator) {
+        if (remove) {
+          const { [id]: removed, ...others } = state.numerator.dataDimensions;
+          return {
+            ...state,
+            numerator: {
+              ...state.numerator,
+              dataDimensions: others,
+            },
+          };
+        }
+
+        if (replace) {
+          const working = fromPairs(
+            Object.entries(state.numerator.dataDimensions).filter(
+              ([i, d]) => d.what !== what
+            )
+          );
+          return {
+            ...state,
+            numerator: {
+              ...state.numerator,
+              dataDimensions: {
+                ...working,
+                [id]: { what, type, label },
+              },
+            },
+          };
+        }
         return {
           ...state,
           numerator: {
             ...state.numerator,
-            // dataDimensions: others,
+            dataDimensions: {
+              ...state.numerator.dataDimensions,
+              [id]: { what, type, label },
+            },
           },
         };
       }
-      return {
-        ...state,
-        numerator: {
-          ...state.numerator,
-          dataDimensions: {
-            ...state.numerator.dataDimensions,
-            [id]: { what, type, label },
-          },
-        },
-      };
     }
   )
   .on(
     changeDenominatorDimension,
-    (state, { id, what, type, remove, label = "" }) => {
-      if (remove) {
-        const { [id]: removed, ...others } = state.denominator.dataDimensions;
+    (state, { id, what, type, replace, remove, label = "" }) => {
+      if (state.denominator) {
+        if (remove) {
+          const { [id]: removed, ...others } = state.denominator.dataDimensions;
+          return {
+            ...state,
+            denominator: {
+              ...state.denominator,
+              dataDimensions: others,
+            },
+          };
+        }
+
+        if (replace) {
+          const working = fromPairs(
+            Object.entries(state.denominator.dataDimensions).filter(
+              ([_, d]) => d.what !== what
+            )
+          );
+          return {
+            ...state,
+            denominator: {
+              ...state.denominator,
+              dataDimensions: {
+                ...working,
+                [id]: { what, type, label },
+              },
+            },
+          };
+        }
+
         return {
           ...state,
           denominator: {
             ...state.denominator,
-            dataDimensions: others,
+            dataDimensions: {
+              ...state.denominator.dataDimensions,
+              [id]: { what, type, label },
+            },
           },
         };
       }
-      return {
-        ...state,
-        denominator: {
-          ...state.denominator,
-          dataDimensions: {
-            ...state.denominator.dataDimensions,
-            [id]: { what, type, label },
-          },
-        },
-      };
     }
   )
   .on(changeUseIndicators, (state, useInBuildIndicators) => {
@@ -467,7 +431,7 @@ export const $section = domain
   .on(addVisualization2Section, (state) => {
     const visualization: IVisualization = {
       id: generateUid(),
-      indicators: [],
+      indicator: "",
       type: "",
       name: `Visualization ${state.visualizations.length + 1}`,
       properties: {},
@@ -495,12 +459,17 @@ export const $section = domain
   .on(
     changeVisualizationProperties,
     (state, { attribute, value, visualization }) => {
-      const visualizations = state.visualizations.map((v: IVisualization) => {
-        if (v.id === visualization) {
-          return { ...v, properties: { ...v.properties, [attribute]: value } };
+      const visualizations: IVisualization[] = state.visualizations.map(
+        (v: IVisualization) => {
+          if (v.id === visualization) {
+            return {
+              ...v,
+              properties: { ...v.properties, [attribute]: value },
+            };
+          }
+          return v;
         }
-        return v;
-      });
+      );
       return { ...state, visualizations };
     }
   );
@@ -547,6 +516,46 @@ export const $dataSourceOptions = $dataSources.map((state) => {
     return current;
   });
 });
+
+export const $indicatorDataSourceTypes = combine(
+  $indicators,
+  $dataSources,
+  (indicators, dataSources) => {
+    const allIndicators = indicators.map((indicator) => {
+      const dataSource = dataSources.find(
+        (ds) => ds.id === indicator.dataSource
+      );
+      return [indicator.id, dataSource?.type || ""];
+    });
+    return fromPairs(allIndicators);
+  }
+);
+
+export const $visualizationData = domain
+  .createStore<{ [key: string]: any[] }>({})
+  .on(updateVisualizationData, (state, { visualizationId, data }) => {
+    return { ...state, [visualizationId]: data };
+  });
+export const $visualizationMetadata = domain
+  .createStore<{ [key: string]: any[] }>({})
+  .on(updateVisualizationMetadata, (state, { visualizationId, data }) => {
+    return { ...state, [visualizationId]: data };
+  });
+
+export const $dashboardCategory = combine(
+  $dashboard,
+  $categories,
+  (dashboard, categories) => {
+    const category = categories.find((c) => {
+      return c.id === dashboard.category;
+    });
+    if (category) {
+      return category.name;
+    }
+    return "Unknown category";
+  }
+);
+
 // forward({
 //   from: addSection,
 //   to: $section,

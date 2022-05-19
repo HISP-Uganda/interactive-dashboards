@@ -1,4 +1,3 @@
-import { ChangeEvent } from "react";
 import {
   Pagination,
   PaginationContainer,
@@ -9,8 +8,10 @@ import {
 import {
   Box,
   Checkbox,
-  CircularProgress,
+  Flex,
   Heading,
+  Input,
+  Spinner,
   Stack,
   Table,
   Tbody,
@@ -21,19 +22,23 @@ import {
   Tr,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
 import { useOrganisationUnitGroups } from "../../Queries";
-import { $store } from "../../Store";
+import { $store, $paginations } from "../../Store";
+import { globalIds } from "../../utils/utils";
 import GlobalAndFilter from "./GlobalAndFilter";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
 const OrganizationUnitGroups = ({ denNum, onChange }: IndicatorProps) => {
-  const store = useStore($store);
+  const paginations = useStore($paginations);
+
   const [dimension, setDimension] = useState<"filter" | "dimension">("filter");
+  const [q, setQ] = useState<string>("");
   const [useGlobal, setUseGlobal] = useState<boolean>(false);
+
   const {
     pages,
     pagesCount,
@@ -43,7 +48,7 @@ const OrganizationUnitGroups = ({ denNum, onChange }: IndicatorProps) => {
     pageSize,
     setPageSize,
   } = usePagination({
-    total: store.paginations.totalOrganisationUnitGroups,
+    total: paginations.totalOrganisationUnitGroups,
     limits: {
       outer: OUTER_LIMIT,
       inner: INNER_LIMIT,
@@ -54,23 +59,39 @@ const OrganizationUnitGroups = ({ denNum, onChange }: IndicatorProps) => {
     },
   });
   const { isLoading, isSuccess, isError, error, data } =
-    useOrganisationUnitGroups(currentPage, pageSize);
+    useOrganisationUnitGroups(currentPage, pageSize, q);
   const handlePageChange = (nextPage: number) => {
     setCurrentPage(nextPage);
   };
   return (
-    <Stack spacing="20px">
+    <Stack spacing="30px">
       <GlobalAndFilter
         dimension={dimension}
         setDimension={setDimension}
         useGlobal={useGlobal}
         setUseGlobal={setUseGlobal}
+        type="oug"
+        onChange={onChange}
+        id={globalIds[3].value}
       />
+      {!useGlobal && (
+        <Input
+          value={q}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setQ(e.target.value)}
+        />
+      )}
       {isLoading && (
-        <CircularProgress isIndeterminate color="blue.700" thickness={3} />
+        <Flex w="100%" alignItems="center" justifyContent="center">
+          <Spinner />
+        </Flex>
       )}
       {isSuccess && !useGlobal && (
-        <Table variant="striped" colorScheme="gray" textTransform="none">
+        <Table
+          size="sm"
+          variant="striped"
+          colorScheme="gray"
+          textTransform="none"
+        >
           <Thead>
             <Tr py={1}>
               <Th>
@@ -109,7 +130,7 @@ const OrganizationUnitGroups = ({ denNum, onChange }: IndicatorProps) => {
                         });
                       }
                     }}
-                    checked={!!denNum.dataDimensions?.[record.id]}
+                    checked={!!denNum?.dataDimensions?.[record.id]}
                   />
                 </Td>
                 <Td>{record.id}</Td>

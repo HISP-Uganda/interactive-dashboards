@@ -1,4 +1,6 @@
 import { SingleValue } from "chakra-react-select";
+import moment from "moment";
+import { RangeValue } from "rc-picker/lib/interface";
 import { Layout, Layouts } from "react-grid-layout";
 import { domain } from "./Domain";
 import {
@@ -6,7 +8,6 @@ import {
   ICategory,
   IDashboard,
   IDataSource,
-  IExpression,
   IIndicator,
   ISection,
   IVisualization,
@@ -46,22 +47,24 @@ export const setDataSource = domain.createEvent<IDataSource>();
 export const setCategory = domain.createEvent<ICategory>();
 export const setIndicator = domain.createEvent<IIndicator>();
 export const changeDenominatorDataSource = domain.createEvent<IDataSource>();
-export const addNumeratorExpression = domain.createEvent<IExpression>();
-export const addDenominatorExpression = domain.createEvent<IExpression>();
-export const removeNumeratorExpression = domain.createEvent<IExpression>();
-export const removeDenominatorExpression = domain.createEvent<IExpression>();
+export const addNumeratorExpression = domain.createEvent<{
+  key: string;
+  value: string;
+}>();
+export const addDenominatorExpression = domain.createEvent<{
+  key: string;
+  value: string;
+}>();
 export const changeLayouts = domain.createEvent<{
   currentLayout: Layout[];
   allLayouts: Layouts;
 }>();
 export const changeNumeratorExpressionValue = domain.createEvent<{
-  attribute: "key" | "value";
-  id: string;
+  attribute: string;
   value: string;
 }>();
 export const changeDenominatorExpressionValue = domain.createEvent<{
-  attribute: "key" | "value";
-  id: string;
+  attribute: string;
   value: string;
 }>();
 
@@ -84,6 +87,7 @@ export const changeNumeratorDimension = domain.createEvent<{
   what: string;
   type: string;
   remove?: boolean;
+  replace?: boolean;
   label?: string;
 }>();
 
@@ -92,6 +96,7 @@ export const changeDenominatorDimension = domain.createEvent<{
   what: string;
   type: string;
   remove?: boolean;
+  replace?: boolean;
   label?: string;
 }>();
 
@@ -118,4 +123,27 @@ export const changeVisualizationProperties = domain.createEvent<{
   visualization: string;
   attribute: string;
   value?: any;
+}>();
+
+export const updateVisualizationData = domain.createEvent<{
+  visualizationId: string;
+  data: any;
+}>();
+
+export const updateVisualizationMetadata = domain.createEvent<{
+  visualizationId: string;
+  data: any;
+}>();
+
+export const setOrganisations = domain.createEvent<any[]>();
+export const setExpandedKeys = domain.createEvent<string[]>();
+export const changeOrganisations = domain.createEvent<string>();
+export const setRefreshInterval = domain.createEvent<string>();
+export const onChangeFixedPeriod = domain.createEvent<{
+  periodType: Option;
+  value: RangeValue<moment.Moment>;
+}>();
+export const onChangeRelativeTime = domain.createEvent<{
+  periodType: Option;
+  value: Option;
 }>();

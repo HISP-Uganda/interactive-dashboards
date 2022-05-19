@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   Spinner,
   Stack,
@@ -13,14 +14,16 @@ import {
 import { useStore } from "effector-react";
 import { useNavigate } from "@tanstack/react-location";
 import { IDataSource } from "../../interfaces";
-
 import { useDataSources } from "../../Queries";
 import { $dataSources } from "../../Store";
-import { setDataSource } from "../../Events";
+import { setDataSource, setShowSider } from "../../Events";
 const DataSources = () => {
   const navigate = useNavigate();
   const { isLoading, isSuccess, isError, error } = useDataSources();
   const dataSources = useStore($dataSources);
+  useEffect(() => {
+    setShowSider(true);
+  }, []);
   return (
     <Stack flex={1} p="20px">
       <Stack direction="row">

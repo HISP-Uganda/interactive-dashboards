@@ -60,12 +60,13 @@ const App = () => {
         <Router location={location} routes={routes}>
           <Stack h="calc(100vh - 48px)" direction="row" spacing="0">
             {store.showSider && (
-              <Stack w="128px" alignItems="center" alignContent="center" bg="gray.100">
-                <Stack spacing="50px">
-                  <Text></Text>
-                  <Menus />
-                </Stack>
-                
+              <Stack
+                w="128px"
+                alignItems="center"
+                alignContent="center"
+                bg="gray.100"
+              >
+                <Menus />
               </Stack>
             )}
             <Outlet />

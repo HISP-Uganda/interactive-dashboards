@@ -1,3 +1,22 @@
+import { RangeValue } from "rc-picker/lib/interface";
+import { useDataEngine } from "@dhis2/app-runtime";
+import axios, { AxiosRequestConfig } from "axios";
+import { fromPairs } from "lodash";
+import { useQuery } from "react-query";
+import { db } from "./db";
+import {
+  addPagination,
+  changeDefaults,
+  setCategories,
+  setCurrentDashboard,
+  setDashboards,
+  setDataSources,
+  setExpandedKeys,
+  setOrganisations,
+  setVisualizationQueries,
+  updateVisualizationData,
+  updateVisualizationMetadata,
+} from "./Events";
 import {
   ICategory,
   IDashboard,
@@ -6,22 +25,9 @@ import {
   IDimension,
   IIndicator,
   IVisualization,
+  Option,
+  IExpression,
 } from "./interfaces";
-import { useDataEngine } from "@dhis2/app-runtime";
-import { fromPairs } from "lodash";
-import { useQuery } from "react-query";
-import axios, { AxiosRequestConfig } from "axios";
-import {
-  setCurrentDashboard,
-  loadDefaults,
-  addPagination,
-  changeDefaults,
-  setDataSources,
-  setCategories,
-  setVisualizationQueries,
-  setDashboards,
-} from "./Events";
-import { encodeToBinary } from "./utils/utils";
 
 export const api = axios.create({
   baseURL: "https://services.dhis2.hispuganda.org/",
@@ -122,10 +128,36 @@ export const useInitials = () => {
     },
   };
   return useQuery<any, Error>(["initial"], async () => {
-    const {
-      me: { organisationUnits },
-    }: any = await engine.query(ouQuery);
     try {
+      const facilities = await db.collection("facilities").get();
+      const expandedKeys = await db.collection("expanded").get();
+
+      if (facilities.length > 0) {
+        setOrganisations(facilities);
+        setExpandedKeys(expandedKeys.map((k: any) => k.value));
+      } else {
+        const {
+          me: { organisationUnits },
+        }: any = await engine.query(ouQuery);
+
+        const facilities: any[] = organisationUnits.map((unit: any) => {
+          const parent = {
+            id: unit.id,
+            pId: unit.pId || "",
+            value: unit.id,
+            title: unit.name,
+            isLeaf: unit.leaf,
+          };
+          return parent;
+        });
+        const toBeSaved = facilities.map((facility: any) => {
+          return { ...facility, _key: facility.id };
+        });
+        db.collection("facilities").set(toBeSaved, { keys: true });
+        setOrganisations(facilities);
+        setExpandedKeys([]);
+      }
+
       const dashboards = await loadResource(engine, "i-dashboards");
       const categories = await loadResource(engine, "i-categories");
       const dataSources = await loadResource(engine, "i-data-sources");
@@ -205,7 +237,7 @@ export const useDashboards = () => {
         namespaceKeys.map((n: string) => [
           n,
           {
-            resource: `dataStore/dashboards/${n}`,
+            resource: `dataStore/i-dashboards/${n}`,
           },
         ])
       );
@@ -341,21 +373,28 @@ export const useNamespaceKey2 = (namespace: string, key: string) => {
   });
 };
 
-export const useDataElements = (page: number, pageSize: number) => {
+export const useDataElements = (page: number, pageSize: number, q = "") => {
   const engine = useDataEngine();
+  let params: { [key: string]: any } = {
+    page,
+    pageSize,
+    fields: "id,name",
+  };
+
+  if (q) {
+    params = {
+      ...params,
+      filter: `identifiable:token:${q}&filter=domainType:eq:AGGREGATE`,
+    };
+  }
   const namespaceQuery = {
     elements: {
       resource: "dataElements.json",
-      params: {
-        page,
-        pageSize,
-        filter: "domainType:eq:AGGREGATE",
-        fields: "id,name",
-      },
+      params,
     },
   };
   return useQuery<{ id: string; name: string }[], Error>(
-    ["data-elements", page, pageSize],
+    ["data-elements", page, pageSize, q],
     async () => {
       const {
         elements: {
@@ -369,20 +408,26 @@ export const useDataElements = (page: number, pageSize: number) => {
   );
 };
 
-export const useIndicators = (page: number, pageSize: number) => {
+export const useIndicators = (page: number, pageSize: number, q = "") => {
   const engine = useDataEngine();
+
+  let params: { [key: string]: any } = {
+    page,
+    pageSize,
+    fields: "id,name",
+  };
+
+  if (q) {
+    params = { ...params, filter: `identifiable:token:${q}` };
+  }
   const query = {
     elements: {
       resource: "indicators.json",
-      params: {
-        page,
-        pageSize,
-        fields: "id,name",
-      },
+      params,
     },
   };
   return useQuery<{ id: string; name: string }[], Error>(
-    ["indicators", page, pageSize],
+    ["indicators", page, pageSize, q],
     async () => {
       const {
         elements: {
@@ -403,11 +448,11 @@ export const useSQLViews = () => {
       resource: "sqlViews.json",
       params: {
         paging: "false",
-        fields: "id,name",
+        fields: "id,name,sqlQuery",
       },
     },
   };
-  return useQuery<{ id: string; name: string }[], Error>(
+  return useQuery<{ id: string; name: string; sqlQuery: string }[], Error>(
     ["sql-views"],
     async () => {
       const {
@@ -418,16 +463,25 @@ export const useSQLViews = () => {
   );
 };
 
-export const useProgramIndicators = (page: number, pageSize: number) => {
+export const useProgramIndicators = (
+  page: number,
+  pageSize: number,
+  q = ""
+) => {
   const engine = useDataEngine();
+  let params: { [key: string]: any } = {
+    page,
+    pageSize,
+    fields: "id,name",
+  };
+
+  if (q) {
+    params = { ...params, filter: `identifiable:token:${q}` };
+  }
   const query = {
     elements: {
       resource: "programIndicators.json",
-      params: {
-        page,
-        pageSize,
-        fields: "id,name",
-      },
+      params,
     },
   };
   return useQuery<{ id: string; name: string }[], Error>(
@@ -445,16 +499,24 @@ export const useProgramIndicators = (page: number, pageSize: number) => {
   );
 };
 
-export const useOrganisationUnitGroups = (page: number, pageSize: number) => {
+export const useOrganisationUnitGroups = (
+  page: number,
+  pageSize: number,
+  q = ""
+) => {
   const engine = useDataEngine();
+  let params: { [key: string]: any } = {
+    page,
+    pageSize,
+    fields: "id,name",
+  };
+  if (q) {
+    params = { ...params, filter: `identifiable:token:${q}` };
+  }
   const query = {
     elements: {
       resource: "organisationUnitGroups.json",
-      params: {
-        page,
-        pageSize,
-        fields: "id,name",
-      },
+      params,
     },
   };
   return useQuery<{ id: string; name: string }[], Error>(
@@ -472,16 +534,24 @@ export const useOrganisationUnitGroups = (page: number, pageSize: number) => {
   );
 };
 
-export const useOrganisationUnitLevels = (page: number, pageSize: number) => {
+export const useOrganisationUnitLevels = (
+  page: number,
+  pageSize: number,
+  q = ""
+) => {
   const engine = useDataEngine();
+  let params: { [key: string]: any } = {
+    page,
+    pageSize,
+    fields: "id,level,name",
+  };
+  if (q) {
+    params = { ...params, filter: `identifiable:token:${q}` };
+  }
   const query = {
     elements: {
       resource: "organisationUnitLevels.json",
-      params: {
-        page,
-        pageSize,
-        fields: "id,level,name",
-      },
+      params,
     },
   };
   return useQuery<{ id: string; name: string; level: number }[], Error>(
@@ -530,133 +600,236 @@ const joinItems = (items: string[][], joiner: "dimension" | "filter") => {
     .join("&");
 };
 
-const makeDHIS2Query = (data: IData) => {
-  if (data.type === "ANALYTICS") {
-    const ouDimensions = findDimension(data.dataDimensions, "dimension", "ou");
-    const ouFilters = findDimension(data.dataDimensions, "filter", "ou");
-    const iDimensions = findDimension(data.dataDimensions, "dimension", "i");
-    const iFilters = findDimension(data.dataDimensions, "filter", "i");
-    const peDimensions = findDimension(data.dataDimensions, "dimension", "pe");
-    const peFilters = findDimension(data.dataDimensions, "filter", "pe");
+const makeDHIS2Query = (
+  data: IData,
+  globalFilters: { [key: string]: any } = {}
+) => {
+  const ouDimensions = findDimension(data.dataDimensions, "dimension", "ou");
+  const ouFilters = findDimension(data.dataDimensions, "filter", "ou");
+  const iDimensions = findDimension(data.dataDimensions, "dimension", "i");
+  const iFilters = findDimension(data.dataDimensions, "filter", "i");
+  const peDimensions = findDimension(data.dataDimensions, "dimension", "pe");
+  const peFilters = findDimension(data.dataDimensions, "filter", "pe");
+  console.log(globalFilters);
+  return [
+    joinItems(
+      [
+        [ouFilters, "ou"],
+        [iFilters, "dx"],
+        [peFilters, "pe"],
+      ],
+      "filter"
+    ),
+    joinItems(
+      [
+        [ouDimensions, "ou"],
+        [iDimensions, "dx"],
+        [peDimensions, "pe"],
+      ],
+      "dimension"
+    ),
+  ].join("&");
+};
 
-    return [
-      joinItems(
-        [
-          [ouFilters, "ou"],
-          [iFilters, "dx"],
-          [peFilters, "pe"],
-        ],
-        "filter"
-      ),
-      joinItems(
-        [
-          [ouDimensions, "ou"],
-          [iDimensions, "dx"],
-          [peDimensions, "pe"],
-        ],
-        "dimension"
-      ),
-    ].join("&");
+const makeSQLViewsQueries = (
+  expressions: { [key: string]: string } = {},
+  globalFilters: { [key: string]: any } = {},
+  filters: { [key: string]: any } = {}
+) => {
+  return Object.entries(expressions)
+    .map(([col, val]) => {
+      return `var=${col}:${val}`;
+    })
+    .join("&");
+};
+
+const generateDHIS2Query = (indicator: IIndicator) => {
+  let queries = {};
+  if (
+    indicator.numerator?.type === "ANALYTICS" &&
+    Object.keys(indicator.numerator.dataDimensions).length > 0
+  ) {
+    const params = makeDHIS2Query(indicator.numerator);
+    if (params) {
+      queries = {
+        numerator: {
+          resource: `analytics.json?${params}`,
+        },
+      };
+    }
+  } else if (
+    indicator.numerator?.type === "SQL_VIEW" &&
+    Object.keys(indicator.numerator.dataDimensions).length > 0
+  ) {
+    let currentParams = "";
+    const params = makeSQLViewsQueries(indicator.numerator.expressions);
+    if (params) {
+      currentParams = `?${params}`;
+    }
+    queries = {
+      numerator: {
+        resource: `sqlViews/${
+          Object.keys(indicator.numerator.dataDimensions)[0]
+        }/data.json${currentParams}`,
+      },
+    };
   }
-  if (data.type === "SQL_VIEW") {
+  if (
+    indicator.denominator?.type === "ANALYTICS" &&
+    Object.keys(indicator.denominator.dataDimensions).length > 0
+  ) {
+    const params = makeDHIS2Query(indicator.denominator);
+    if (params) {
+      queries = {
+        ...queries,
+        denominator: {
+          resource: `analytics.json?${params}`,
+        },
+      };
+    }
+  } else if (
+    indicator.denominator?.type === "SQL_VIEW" &&
+    Object.keys(indicator.denominator.dataDimensions).length > 0
+  ) {
+    queries = {
+      denominator: {
+        resource: `sqlViews/${
+          Object.keys(indicator.denominator.dataDimensions)[0]
+        }/data.json`,
+      },
+    };
   }
-  if (data.type === "OTHER") {
-  }
-  return "";
+  return queries;
+};
+
+const generateKeys = (
+  indicator: IIndicator,
+  selectedOrganisation?: string,
+  periodType?: Option,
+  relativePeriod?: Option,
+  fixedPeriod?: RangeValue<moment.Moment>
+) => {
+  const allKeys = Object.keys(indicator?.denominator?.dataDimensions || {});
 };
 
 export const useVisualization = (
   visualization: IVisualization,
-  visualizationQueries: IIndicator[],
-  dataSources: IDataSource[]
+  indicator?: IIndicator,
+  dataSource?: IDataSource,
+  selectedOrganisation?: string,
+  periodType?: Option,
+  relativePeriod?: Option,
+  fixedPeriod?: RangeValue<moment.Moment>,
+  refreshInterval?: string
 ) => {
   const engine = useDataEngine();
+  let currentInterval: boolean | number = false;
+  if (refreshInterval && refreshInterval !== "off") {
+    currentInterval = Number(refreshInterval) * 1000;
+  }
   return useQuery<any, Error>(
-    ["visualizations", encodeToBinary(JSON.stringify(visualization))],
+    ["visualizations", indicator?.id],
     async () => {
-      const allQueries = visualization.indicators.flatMap((i: string) => {
-        const indicator = visualizationQueries.find((v) => v.id === i);
-        const dataSource = dataSources.find((d) => {
-          return d.id === indicator?.dataSource;
-        });
-        if (indicator && dataSource && dataSource.isCurrentDHIS2) {
-          let queries = {};
-          if (
-            indicator.numerator.type === "ANALYTICS" &&
-            Object.keys(indicator.numerator.dataDimensions).length > 0
-          ) {
-            const params = makeDHIS2Query(indicator.numerator);
-            if (params) {
-              queries = {
-                numerator: {
-                  resource: `analytics.json?${params}`,
-                },
-              };
-            }
-          } else if (
-            indicator.numerator.type === "SQL_VIEW" &&
-            Object.keys(indicator.numerator.dataDimensions).length > 0
-          ) {
-            queries = {
-              numerator: {
-                resource: `sqlViews/${
-                  Object.keys(indicator.numerator.dataDimensions)[0]
-                }/data.json`,
-              },
-            };
+      if (indicator && dataSource && dataSource.isCurrentDHIS2) {
+        const queries = generateDHIS2Query(indicator);
+        const data = await engine.query(queries);
+        let processed: any[] = [];
+        let metadata = {};
+
+        if (data.numerator && data.denominator) {
+          const numerator: any = data.numerator;
+          const denominator: any = data.denominator;
+
+          let denRows = [];
+          let numRows = [];
+          let denHeaders: any[] = [];
+
+          if (numerator && numerator.listGrid) {
+            const { rows } = numerator.listGrid;
+            numRows = rows;
+          } else if (numerator) {
+            const {
+              rows,
+              metaData: { items },
+            } = numerator;
+            numRows = rows;
+            metadata = items;
           }
-          if (!indicator.useInBuildIndicators) {
-            if (
-              indicator.denominator.type === "ANALYTICS" &&
-              Object.keys(indicator.denominator.dataDimensions).length > 0
-            ) {
-              const params = makeDHIS2Query(indicator.denominator);
-              if (params) {
-                queries = {
-                  ...queries,
-                  denominator: {
-                    resource: `analytics.json?${params}`,
-                  },
-                };
-              }
-            } else if (
-              indicator.denominator.type === "SQL_VIEW" &&
-              Object.keys(indicator.denominator.dataDimensions).length > 0
-            ) {
-              queries = {
-                denominator: {
-                  resource: `sqlViews/${
-                    Object.keys(indicator.denominator.dataDimensions)[0]
-                  }/data.json`,
-                },
-              };
-            }
+
+          if (denominator && denominator.listGrid) {
+            const { headers, rows } = denominator.listGrid;
+            denRows = rows;
+            denHeaders = headers;
+          } else if (denominator) {
+            const {
+              headers,
+              rows,
+              metaData: { items },
+            } = denominator;
+            denRows = rows;
+            denHeaders = headers;
+            metadata = { ...metadata, ...items };
           }
-          return engine.query(queries);
-        } else if (dataSource?.type === "ELASTICSEARCH") {
-          let queries: Promise<any>[] = [];
-          const api = axios.create({
-            baseURL: dataSource.authentication.url,
+          const numerators = fromPairs<number>(
+            numRows.map((r: string[]) => [
+              r.slice(0, -1).join(""),
+              Number(r[r.length - 1]),
+            ])
+          );
+          processed = denRows.map((r: string[]) => {
+            const currentDenKey = r.slice(0, -1).join("");
+            const currentDenValue = Number(r[r.length - 1]);
+            return fromPairs(
+              denHeaders.map((h: any, i: number) => {
+                if (i === denHeaders.length - 1) {
+                  const currentNum = numerators[currentDenKey] || 0;
+                  return [h.name, (currentNum * 100) / currentDenValue];
+                }
+                return [h.name, r[i]];
+              })
+            );
           });
-          if (indicator && indicator.numerator.query) {
-            queries = [
-              ...queries,
-              api.post("", JSON.parse(indicator.numerator.query)),
-            ];
+        } else if (data.numerator) {
+          const numerator: any = data.numerator;
+          if (numerator && numerator.listGrid) {
+            const { headers, rows } = numerator.listGrid;
+            processed = rows.map((row: string[]) => {
+              return fromPairs(
+                headers.map((h: any, i: number) => [h.name, row[i]])
+              );
+            });
+          } else if (numerator) {
+            const {
+              headers,
+              rows,
+              metaData: { items },
+            } = numerator;
+            processed = rows.map((row: string[]) => {
+              return fromPairs(
+                headers.map((h: any, i: number) => [h.name, row[i]])
+              );
+            });
+            metadata = items;
           }
-          if (indicator && indicator.denominator.query) {
-            queries = [
-              ...queries,
-              api.post("", JSON.parse(indicator.denominator.query)),
-            ];
-          }
-          return queries;
         }
-      });
-      if (allQueries) {
-        return await Promise.all(allQueries);
+        updateVisualizationData({
+          visualizationId: visualization.id,
+          data: processed,
+        });
+        updateVisualizationMetadata({
+          visualizationId: visualization.id,
+          data: metadata,
+        });
+      } else if (dataSource?.type === "ELASTICSEARCH") {
+        const api = axios.create({
+          baseURL: dataSource.authentication.url,
+        });
+        if (indicator && indicator.query) {
+          api.post("", JSON.parse(indicator.query));
+        }
       }
-      return [];
-    }
+      return true;
+    },
+    { refetchInterval: currentInterval }
   );
 };

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   Button,
   Spacer,
@@ -12,7 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { setCurrentDashboard } from "../../Events";
+import { setCurrentDashboard, setShowSider } from "../../Events";
 import { IDashboard } from "../../interfaces";
 import { useDashboards } from "../../Queries";
 import { $dashboards } from "../../Store";
@@ -21,6 +22,9 @@ const Dashboards = () => {
   const navigate = useNavigate();
   const dashboards = useStore($dashboards);
   const { isLoading, isSuccess, isError, error } = useDashboards();
+  useEffect(() => {
+    setShowSider(true);
+  }, []);
   return (
     <Stack flex={1} p="20px">
       <Stack direction="row">
