@@ -26,11 +26,18 @@ import {
   addVisualization2Section,
   changeSectionAttribute,
   changeVisualizationAttribute,
+  setDashboards,
   setShowSider,
 } from "../Events";
 import { FormGenerics, IVisualization, Option } from "../interfaces";
 import { useVisualizationData } from "../Queries";
-import { $dashboard, $indicators, $section } from "../Store";
+import {
+  $dashboard,
+  $dashboards,
+  $indicators,
+  $section,
+  $store,
+} from "../Store";
 import Visualization from "./visualizations/Visualization";
 import VisualizationProperties from "./visualizations/VisualizationProperties";
 
@@ -72,7 +79,6 @@ const VisualizationQuery = ({
 }) => {
   const indicators = useStore($indicators);
   const { isLoading, isSuccess, isError, error } = useVisualizationData();
-
   return (
     <Stack>
       <Text>Visualization Query</Text>
@@ -115,6 +121,33 @@ const Section = () => {
   const navigate = useNavigate();
   const section = useStore($section);
   const dashboard = useStore($dashboard);
+  const dashboards = useStore($dashboards);
+  const store = useStore($store);
+
+  const onApply = () => {
+    addSection(section);
+    setDashboards(
+      dashboards.map((dash) => {
+        if (dash.id === dashboard.id) {
+          return { ...dash, sections: [...dash.sections, section] };
+        }
+        return dash;
+      })
+    );
+    navigate({
+      to: `/dashboards/${dashboard.id}`,
+      search: {
+        ...search,
+        category: dashboard.category,
+        periods: store.periods.map((i) => i.id),
+        organisations: store.organisations,
+        groups: store.groups,
+        levels: store.levels,
+        edit: true,
+      },
+    });
+  };
+
   useEffect(() => {
     setShowSider(false);
   }, []);
@@ -137,13 +170,7 @@ const Section = () => {
         <Spacer />
         <Stack direction="row" alignItems="center" justifyItems="center">
           <Button size="sm">Discard</Button>
-          <Button
-            size="sm"
-            onClick={() => {
-              addSection(section);
-              navigate({ to: "/dashboards/form", search });
-            }}
-          >
+          <Button size="sm" onClick={() => onApply()}>
             Apply
           </Button>
         </Stack>

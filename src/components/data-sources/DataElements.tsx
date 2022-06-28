@@ -34,9 +34,11 @@ const INNER_LIMIT = 4;
 
 const DataElements = ({ onChange, denNum }: IndicatorProps) => {
   const paginations = useStore($paginations);
-  const [dimension, setDimension] = useState<"filter" | "dimension">("filter");
+  const [dimension, setDimension] = useState<"filter" | "dimension">(
+    "dimension"
+  );
   const [q, setQ] = useState<string>("");
-  const [useGlobal, setUseGlobal] = useState<boolean>(true);
+  const [useGlobal, setUseGlobal] = useState<boolean>(false);
   const {
     pages,
     pagesCount,
@@ -74,7 +76,7 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
         useGlobal={useGlobal}
         setUseGlobal={setUseGlobal}
         hasGlobalFilter={false}
-        id={globalIds[3].value}
+        id={globalIds[6].value}
         type="de"
         onChange={onChange}
       />

@@ -1,10 +1,7 @@
 import { combine } from "effector";
 import { fromPairs } from "lodash";
-import moment from "moment";
 import { domain } from "./Domain";
 import {
-  addDenominatorExpression,
-  addNumeratorExpression,
   addPagination,
   addSection,
   addVisualization2Section,
@@ -18,13 +15,14 @@ import {
   changeNumeratorAttribute,
   changeNumeratorDimension,
   changeNumeratorExpressionValue,
-  changeOrganisations,
+  changePeriods,
   changeSectionAttribute,
   changeUseIndicators,
   changeVisualizationAttribute,
   changeVisualizationProperties,
   deleteSection,
   increment,
+  onChangeOrganisations,
   setCategories,
   setCategory,
   setCurrentDashboard,
@@ -41,15 +39,22 @@ import {
   toggle,
   toggleDashboard,
   updateVisualizationData,
-  onChangeFixedPeriod,
-  onChangeRelativeTime,
   updateVisualizationMetadata,
+  changeCategory,
+  changeDashboardName,
+  changeDashboardDescription,
+  changeSelectedDashboard,
+  changeSelectedCategory,
+  changeDataSourceId,
+  changeCategoryId,
+  changeDashboardId,
+  changeAdministration,
+  changeHasDashboards,
 } from "./Events";
 import {
   ICategory,
   IDashboard,
   IDataSource,
-  IExpression,
   IIndicator,
   ISection,
   IStore,
@@ -57,9 +62,9 @@ import {
   Option,
 } from "./interfaces";
 import { generateUid } from "./utils/uid";
+import { getRelativePeriods, relativePeriodTypes } from "./utils/utils";
 
-export const createSection = (): ISection => {
-  const id = generateUid();
+export const createSection = (id = generateUid()): ISection => {
   return {
     i: id,
     x: 0,
@@ -72,8 +77,7 @@ export const createSection = (): ISection => {
   };
 };
 
-export const createCategory = (): ICategory => {
-  const id = generateUid();
+export const createCategory = (id = generateUid()): ICategory => {
   return {
     id,
     name: "",
@@ -81,9 +85,9 @@ export const createCategory = (): ICategory => {
   };
 };
 
-export const createDataSource = (): IDataSource => {
+export const createDataSource = (id = generateUid()): IDataSource => {
   return {
-    id: generateUid(),
+    id,
     type: "DHIS2",
     authentication: {
       url: "",
@@ -94,9 +98,9 @@ export const createDataSource = (): IDataSource => {
   };
 };
 
-export const createIndicator = (): IIndicator => {
+export const createIndicator = (id = generateUid()): IIndicator => {
   return {
-    id: generateUid(),
+    id,
     numerator: {
       id: generateUid(),
       type: "ANALYTICS",
@@ -116,12 +120,21 @@ export const createIndicator = (): IIndicator => {
   };
 };
 
-export const $organisations = domain
-  .createStore<any[]>([])
-  .on(setOrganisations, (_, organisations) => organisations);
-export const $expandedKeys = domain
-  .createStore<string[]>([])
-  .on(setExpandedKeys, (_, expandedKeys) => expandedKeys);
+export const createDashboard = (id = generateUid()): IDashboard => {
+  return {
+    id,
+    sections: [],
+    published: false,
+    layouts: {},
+    itemHeight: 100,
+    showSider: true,
+    category: "uDWxMNyXZeo",
+    showTop: true,
+    mode: "edit",
+    name: "New Dashboard",
+    refreshInterval: "off",
+  };
+};
 
 export const $paginations = domain
   .createStore<{ [key: string]: number }>({
@@ -142,48 +155,63 @@ export const $paginations = domain
 export const $store = domain
   .createStore<IStore>({
     showSider: true,
-    selectedOrganisation: "",
-    fixedPeriod: [moment().startOf("month").subtract(1, "month"), moment()],
-    relativePeriod: { value: "LAST_MONTH", label: "Last Month" },
-    periodType: {
-      value: "fixed",
-      label: "Fixed",
-    },
+    periods: [{ id: "LAST_3_MONTHS", name: "Last 3 months" }],
+    organisations: [],
+    levels: [],
+    groups: [],
+    expandedKeys: [],
+    selectedCategory: "",
+    selectedDashboard: "",
+    isAdmin: false,
+    hasDashboards: false,
+  })
+  .on(setOrganisations, (state, organisations) => {
+    return { ...state, organisations };
+  })
+  .on(setExpandedKeys, (state, expandedKeys) => {
+    return { ...state, expandedKeys };
   })
   .on(setShowSider, (state, showSider) => {
     return { ...state, showSider };
   })
-  .on(changeOrganisations, (state, selectedOrganisation) => {
-    return { ...state, selectedOrganisation };
+  .on(
+    onChangeOrganisations,
+    (state, { levels, groups, organisations, expandedKeys }) => {
+      return { ...state, levels, groups, organisations, expandedKeys };
+    }
+  )
+  .on(changePeriods, (state, periods) => {
+    return { ...state, periods };
   })
-  .on(onChangeFixedPeriod, (state, { periodType, value }) => {
-    return { ...state, periodType, fixedPeriod: value };
+  .on(changeSelectedCategory, (state, selectedCategory) => {
+    return { ...state, selectedCategory };
   })
-  .on(onChangeRelativeTime, (state, { periodType, value }) => {
-    return { ...state, periodType, relativePeriod: value };
+  .on(changeSelectedDashboard, (state, selectedDashboard) => {
+    return { ...state, selectedDashboard };
+  })
+  .on(changeAdministration, (state, isAdmin) => {
+    return { ...state, isAdmin };
+  })
+  .on(changeHasDashboards, (state, hasDashboards) => {
+    return { ...state, hasDashboards };
   });
 
 export const $dataSource = domain
   .createStore<IDataSource>(createDataSource())
-  .on(setDataSource, (_, dataSource) => dataSource);
+  .on(setDataSource, (_, dataSource) => dataSource)
+  .on(changeDataSourceId, (state, id) => {
+    return { ...state, id };
+  });
 
 export const $category = domain
   .createStore<ICategory>(createCategory())
-  .on(setCategory, (_, category) => category);
+  .on(setCategory, (_, category) => category)
+  .on(changeCategoryId, (state, id) => {
+    return { ...state, id };
+  });
 
 export const $dashboard = domain
-  .createStore<IDashboard>({
-    id: generateUid(),
-    sections: [],
-    published: false,
-    layouts: {},
-    itemHeight: 100,
-    showSider: true,
-    showTop: true,
-    mode: "edit",
-    name: "New Dashboard",
-    refreshInterval: "off",
-  })
+  .createStore<IDashboard>(createDashboard())
   .on(addSection, (state, section) => {
     const isNew = state.sections.find((s) => s.i === section.i);
     let sections: ISection[] = state.sections;
@@ -197,7 +225,7 @@ export const $dashboard = domain
     } else {
       sections = [...sections, section];
     }
-    return { ...state, sections };
+    return { ...state, sections, layouts: {} };
   })
   .on(deleteSection, (state, section) => {
     const sections = state.sections.filter((s) => s.i !== section);
@@ -239,6 +267,18 @@ export const $dashboard = domain
   })
   .on(setRefreshInterval, (state, refreshInterval) => {
     return { ...state, refreshInterval };
+  })
+  .on(changeCategory, (state, category) => {
+    return { ...state, category };
+  })
+  .on(changeDashboardName, (state, name) => {
+    return { ...state, name };
+  })
+  .on(changeDashboardDescription, (state, description) => {
+    return { ...state, description };
+  })
+  .on(changeDashboardId, (state, id) => {
+    return { ...state, id };
   });
 
 export const $indicator = domain
@@ -246,28 +286,40 @@ export const $indicator = domain
   .on(changeIndicatorAttribute, (state, { attribute, value }) => {
     return { ...state, [attribute]: value };
   })
-  .on(changeDenominatorExpressionValue, (state, { attribute, value }) => {
-    if (state.denominator) {
-      return {
-        ...state,
-        denominator: {
-          ...state.denominator,
-          expressions: { ...state.denominator.expressions, [attribute]: value },
-        },
-      };
+  .on(
+    changeDenominatorExpressionValue,
+    (state, { attribute, value, isGlobal }) => {
+      if (state.denominator) {
+        return {
+          ...state,
+          denominator: {
+            ...state.denominator,
+            expressions: {
+              ...state.denominator.expressions,
+              [attribute]: { value, isGlobal },
+            },
+          },
+        };
+      }
     }
-  })
-  .on(changeNumeratorExpressionValue, (state, { attribute, value }) => {
-    if (state.numerator) {
-      return {
-        ...state,
-        numerator: {
-          ...state.numerator,
-          expressions: { ...state.numerator.expressions, [attribute]: value },
-        },
-      };
+  )
+  .on(
+    changeNumeratorExpressionValue,
+    (state, { attribute, value, isGlobal }) => {
+      if (state.numerator) {
+        return {
+          ...state,
+          numerator: {
+            ...state.numerator,
+            expressions: {
+              ...state.numerator.expressions,
+              [attribute]: { value, isGlobal },
+            },
+          },
+        };
+      }
     }
-  })
+  )
   // .on(addNumeratorExpression, (state, expression) => {
   //   if (state.numerator) {
   //     let expressions: IExpression[] = [];
@@ -312,7 +364,6 @@ export const $indicator = domain
     }
   })
   .on(changeNumeratorAttribute, (state, { attribute, value }) => {
-    console.log(attribute, value);
     if (state.numerator) {
       return {
         ...state,
@@ -500,11 +551,29 @@ export const $dataSourceType = combine(
   $indicator,
   $dataSources,
   (indicator, dataSources) => {
-    const dataSource = dataSources.find((ds) => ds.id === indicator.dataSource);
+    const dataSource: IDataSource | undefined = dataSources.find(
+      (ds) => ds.id === indicator.dataSource
+    );
     if (dataSource) {
       return dataSource.type;
     }
     return "";
+  }
+);
+
+export const $categoryDashboards = combine(
+  $dashboards,
+  $store,
+  (dashboards, store) => {
+    return dashboards
+      .filter((dashboard) => dashboard.category === store.selectedCategory)
+      .map((dataSource) => {
+        const current: Option = {
+          value: dataSource.id,
+          label: dataSource.name || "",
+        };
+        return current;
+      });
   }
 );
 export const $dataSourceOptions = $dataSources.map((state) => {
@@ -512,6 +581,16 @@ export const $dataSourceOptions = $dataSources.map((state) => {
     const current: Option = {
       value: dataSource.id,
       label: dataSource.name || "",
+    };
+    return current;
+  });
+});
+
+export const $categoryOptions = $categories.map((state) => {
+  return state.map((category) => {
+    const current: Option = {
+      value: category.id,
+      label: category.name || "",
     };
     return current;
   });
@@ -556,12 +635,20 @@ export const $dashboardCategory = combine(
   }
 );
 
-// forward({
-//   from: addSection,
-//   to: $section,
-// });
+export const $globalFilters = $store.map((state) => {
+  const periods = state.periods.flatMap(({ id }) => {
+    if (relativePeriodTypes.indexOf(id) !== -1) {
+      return getRelativePeriods(id);
+    }
+    return [id];
+  });
 
-// export const $layout = $store.map((state) => {
-//   const md = state.dashboard?.sections.map((s) => s.layout.md);
-//   return { md };
-// });
+  return {
+    m5D13FqKZwN: periods,
+    of2WvtwqbHR: state.groups,
+    GQhi6pRnTKF: state.levels,
+    mclvD0Z9mfT: state.organisations,
+  };
+});
+
+// $indicator.watch((i) => console.log(i));

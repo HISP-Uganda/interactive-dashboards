@@ -3,6 +3,8 @@ import {
   PaginationContainer,
   PaginationNext,
   PaginationPrevious,
+  PaginationPageGroup,
+  PaginationPage,
   usePagination,
 } from "@ajna/pagination";
 import {
@@ -33,7 +35,9 @@ const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
 const Indicators = ({ denNum, onChange }: IndicatorProps) => {
-  const [dimension, setDimension] = useState<"filter" | "dimension">("filter");
+  const [dimension, setDimension] = useState<"filter" | "dimension">(
+    "dimension"
+  );
   const [useGlobal, setUseGlobal] = useState<boolean>(false);
   const [q, setQ] = useState<string>("");
   const paginations = useStore($paginations);

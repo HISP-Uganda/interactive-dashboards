@@ -9,7 +9,7 @@ import {
 import { useStore } from "effector-react";
 import { IndicatorProps } from "../../interfaces";
 import { $indicator } from "../../Store";
-import DHIS2OrgUnitTree from "../DHIS2OrgUnitTree";
+import OrgUnitTree from "./OrgUnitTree";
 import DataElements from "./DataElements";
 import Indicators from "./Indicators";
 import OrganizationUnitGroups from "./OrganisationUnitGroups";
@@ -49,13 +49,7 @@ const DHIS2 = ({ onChange, denNum, changeQuery }: IndicatorProps) => {
               <Periods denNum={denNum} onChange={onChange} />
             </TabPanel>
             <TabPanel>
-              {/* <OrgUnitTree
-                expandedKeys={expandedKeys}
-                initial={organisations}
-                value={allOptions.length > 0 ? allOptions[0] : ""}
-                onChange={(value) => console.log("Yes")}
-              /> */}
-              <DHIS2OrgUnitTree/>
+              <OrgUnitTree denNum={denNum} onChange={onChange} />
             </TabPanel>
             <TabPanel>
               <OrganizationUnitGroups denNum={denNum} onChange={onChange} />

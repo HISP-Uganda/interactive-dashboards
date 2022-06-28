@@ -17,6 +17,7 @@ import { IDataSource } from "../../interfaces";
 import { useDataSources } from "../../Queries";
 import { $dataSources } from "../../Store";
 import { setDataSource, setShowSider } from "../../Events";
+import { generateUid } from "../../utils/uid";
 const DataSources = () => {
   const navigate = useNavigate();
   const { isLoading, isSuccess, isError, error } = useDataSources();
@@ -28,7 +29,9 @@ const DataSources = () => {
     <Stack flex={1} p="20px">
       <Stack direction="row">
         <Spacer />
-        <Button onClick={() => navigate({ to: "/data-sources/form" })}>
+        <Button
+          onClick={() => navigate({ to: `/data-sources/${generateUid()}` })}
+        >
           Add Data Source
         </Button>
       </Stack>
@@ -49,7 +52,7 @@ const DataSources = () => {
                 onClick={() => {
                   setDataSource(dataSource);
                   navigate({
-                    to: "/data-sources/form",
+                    to: `/data-sources/${dataSource.id}`,
                     search: { edit: true },
                   });
                 }}

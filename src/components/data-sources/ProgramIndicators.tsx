@@ -33,7 +33,9 @@ const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
 const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
-  const [dimension, setDimension] = useState<"filter" | "dimension">("filter");
+  const [dimension, setDimension] = useState<"filter" | "dimension">(
+    "dimension"
+  );
   const [useGlobal, setUseGlobal] = useState<boolean>(true);
   const [q, setQ] = useState<string>("");
   const paginations = useStore($paginations);

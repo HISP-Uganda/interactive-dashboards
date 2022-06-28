@@ -1,4 +1,3 @@
-import { RangeValue } from "rc-picker/lib/interface";
 import { MakeGenerics } from "@tanstack/react-location";
 import { OptionBase } from "chakra-react-select";
 import { Event } from "effector";
@@ -13,11 +12,11 @@ export interface Authentication {
   password: string;
   url: string;
 }
-export interface IExpression {
-  id: string;
-  key: string;
-  value: string;
-  isGlobal: boolean;
+export interface IExpressions {
+  [key: string]: {
+    value: any;
+    isGlobal?: boolean;
+  };
 }
 export interface IDataSource extends INamed {
   type: "DHIS2" | "ELASTICSEARCH" | "API";
@@ -35,7 +34,7 @@ export interface IDimension {
 }
 export interface IData extends INamed {
   query?: string;
-  expressions?: { [key: string]: string };
+  expressions?: IExpressions;
   type: "SQL_VIEW" | "ANALYTICS" | "OTHER";
   dataDimensions: IDimension;
 }
@@ -91,14 +90,29 @@ export interface DataNode {
 export interface Option extends OptionBase {
   label: string;
   value: string;
+  id?: string;
 }
 
+export type Item = {
+  id: string;
+  name: string;
+};
+
+export type PickerProps = {
+  selectedPeriods: Item[];
+  onChange: (periods: Item[]) => void;
+};
 export interface IStore {
   showSider: boolean;
-  selectedOrganisation: string;
-  fixedPeriod: RangeValue<moment.Moment>;
-  relativePeriod: Option;
-  periodType: Option;
+  organisations: React.Key[];
+  periods: Item[];
+  groups: string[];
+  levels: string[];
+  expandedKeys: React.Key[];
+  selectedCategory: string;
+  selectedDashboard: string;
+  isAdmin: boolean;
+  hasDashboards: boolean;
 }
 
 export type IndicatorProps = {
@@ -119,5 +133,18 @@ export type IndicatorProps = {
 };
 
 export type FormGenerics = MakeGenerics<{
-  Search: { edit: boolean };
+  Search: {
+    edit: boolean;
+    category: string;
+    periods: string[];
+    levels: string;
+    groups: string[];
+    organisations: string[];
+  };
 }>;
+
+export type OUTreeProps = {
+  units: DataNode[];
+  levels: Option[];
+  groups: Option[];
+};

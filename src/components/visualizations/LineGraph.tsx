@@ -2,7 +2,7 @@ import { useStore } from "effector-react";
 import React from "react";
 import Plot from "react-plotly.js";
 import { IVisualization } from "../../interfaces";
-import { $visualizationData } from "../../Store";
+import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { processGraphs } from "../processors";
 
 type LineGraphProps = {
@@ -13,14 +13,21 @@ type LineGraphProps = {
 
 const LineGraph = ({ visualization, category, series }: LineGraphProps) => {
   const visualizationData = useStore($visualizationData);
+  const metadata = useStore($visualizationMetadata);
   const data = visualizationData[visualization.id]
     ? visualizationData[visualization.id]
     : [];
   return (
     <Plot
-      data={processGraphs(data, "line", category, series)}
+      data={processGraphs(
+        data,
+        "line",
+        category,
+        series,
+        metadata[visualization.id]
+      )}
       layout={{
-        title: visualization.name,
+        // title: visualization.name,
         margin: {
           pad: 5,
           r: 5,

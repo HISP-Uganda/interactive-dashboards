@@ -1,18 +1,20 @@
-import { RangeValue } from "rc-picker/lib/interface";
 import { useDataEngine } from "@dhis2/app-runtime";
+import type { DataNode } from "antd/lib/tree";
 import axios, { AxiosRequestConfig } from "axios";
-import { fromPairs } from "lodash";
+import { fromPairs, max, uniq } from "lodash";
 import { useQuery } from "react-query";
-import { db } from "./db";
 import {
   addPagination,
+  changeAdministration,
   changeDefaults,
+  changeHasDashboards,
+  changeSelectedCategory,
+  changeSelectedDashboard,
+  onChangeOrganisations,
   setCategories,
   setCurrentDashboard,
   setDashboards,
   setDataSources,
-  setExpandedKeys,
-  setOrganisations,
   setVisualizationQueries,
   updateVisualizationData,
   updateVisualizationMetadata,
@@ -23,11 +25,12 @@ import {
   IData,
   IDataSource,
   IDimension,
+  IExpressions,
   IIndicator,
   IVisualization,
   Option,
-  IExpression,
 } from "./interfaces";
+import { getNestedKeys, traverse } from "./utils/utils";
 
 export const api = axios.create({
   baseURL: "https://services.dhis2.hispuganda.org/",
@@ -117,7 +120,7 @@ const loadSingleResource = async (engine: any, resource: string) => {
   }
 };
 
-export const useInitials = () => {
+export const useOrganisationUnits = () => {
   const engine = useDataEngine();
   const ouQuery = {
     me: {
@@ -126,38 +129,91 @@ export const useInitials = () => {
         fields: "organisationUnits[id,name,leaf]",
       },
     },
+    levels: {
+      resource: "organisationUnitLevels.json",
+      params: {
+        fields: "id,level,name",
+      },
+    },
+    groups: {
+      resource: "organisationUnitGroups.json",
+      params: {
+        fields: "id,name",
+      },
+    },
+  };
+
+  return useQuery<
+    { units: DataNode[]; levels: Option[]; groups: Option[] },
+    Error
+  >(["organisation-units"], async () => {
+    const {
+      me: { organisationUnits },
+      levels: { organisationUnitLevels },
+      groups: { organisationUnitGroups },
+    }: any = await engine.query(ouQuery);
+
+    const units: DataNode[] = organisationUnits.map((o: any) => {
+      return {
+        key: o.id,
+        title: o.name,
+        isLeaf: o.leaf,
+      };
+    });
+
+    const levels: Option[] = organisationUnitLevels.map(
+      ({ level, name }: any) => {
+        return {
+          label: name,
+          value: level,
+        };
+      }
+    );
+
+    const groups: Option[] = organisationUnitGroups.map(({ id, name }: any) => {
+      return {
+        label: name,
+        value: id,
+      };
+    });
+
+    return {
+      units,
+      levels,
+      groups,
+    };
+  });
+};
+
+export const useInitials = () => {
+  const engine = useDataEngine();
+  const ouQuery = {
+    me: {
+      resource: "me.json",
+      params: {
+        fields: "organisationUnits[id,name,leaf,level],authorities",
+      },
+    },
   };
   return useQuery<any, Error>(["initial"], async () => {
     try {
-      const facilities = await db.collection("facilities").get();
-      const expandedKeys = await db.collection("expanded").get();
+      const {
+        me: { organisationUnits, authorities },
+      }: any = await engine.query(ouQuery);
+      const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
 
-      if (facilities.length > 0) {
-        setOrganisations(facilities);
-        setExpandedKeys(expandedKeys.map((k: any) => k.value));
-      } else {
-        const {
-          me: { organisationUnits },
-        }: any = await engine.query(ouQuery);
+      changeAdministration(isAdmin);
+      const facilities: React.Key[] = organisationUnits.map(
+        (unit: any) => unit.id
+      );
+      const level = max(organisationUnits.map((unit: any) => unit.level));
 
-        const facilities: any[] = organisationUnits.map((unit: any) => {
-          const parent = {
-            id: unit.id,
-            pId: unit.pId || "",
-            value: unit.id,
-            title: unit.name,
-            isLeaf: unit.leaf,
-          };
-          return parent;
-        });
-        const toBeSaved = facilities.map((facility: any) => {
-          return { ...facility, _key: facility.id };
-        });
-        db.collection("facilities").set(toBeSaved, { keys: true });
-        setOrganisations(facilities);
-        setExpandedKeys([]);
-      }
-
+      onChangeOrganisations({
+        levels: [String(level)],
+        organisations: facilities,
+        groups: [],
+        expandedKeys: [],
+      });
       const dashboards = await loadResource(engine, "i-dashboards");
       const categories = await loadResource(engine, "i-categories");
       const dataSources = await loadResource(engine, "i-data-sources");
@@ -166,8 +222,28 @@ export const useInitials = () => {
         "i-visualization-queries"
       );
       const settings = await loadResource(engine, "i-dashboard-settings");
-      setDashboards(dashboards);
-      setCategories(categories);
+      if (isAdmin) {
+        setDashboards(dashboards);
+      } else {
+        const publishedDashboards = dashboards.filter(
+          (dashboard: IDashboard) => dashboard.published
+        );
+        setDashboards(publishedDashboards);
+        if (publishedDashboards.length > 0) {
+          setCurrentDashboard(publishedDashboards[0]);
+          changeSelectedDashboard(publishedDashboards[0].id);
+          changeSelectedCategory(publishedDashboards[0].category);
+          changeHasDashboards(true);
+        }
+      }
+      setCategories([
+        ...categories,
+        {
+          id: "uDWxMNyXZeo",
+          name: "Uncategorised",
+          description: "Uncategorised",
+        },
+      ]);
       setDataSources(dataSources);
       setVisualizationQueries(visualizationQueries);
       if (settings.length > 0) {
@@ -374,17 +450,19 @@ export const useNamespaceKey2 = (namespace: string, key: string) => {
 };
 
 export const useDataElements = (page: number, pageSize: number, q = "") => {
+  console.log(q);
   const engine = useDataEngine();
   let params: { [key: string]: any } = {
     page,
     pageSize,
     fields: "id,name",
+    order: "name:ASC",
   };
 
   if (q) {
     params = {
       ...params,
-      filter: `identifiable:token:${q}&filter=domainType:eq:AGGREGATE`,
+      filter: `identifiable:token:${q}`,
     };
   }
   const namespaceQuery = {
@@ -569,19 +647,6 @@ export const useOrganisationUnitLevels = (
   );
 };
 
-const useDataSourceQuery = (
-  dataSource: IDataSource,
-  url: string,
-  params: { [key: string]: any }
-) => {
-  return useQuery<any, Error>(
-    ["data-source", url, ...Object.values(params)],
-    async () => {
-      return queryDataSource(dataSource, url, params);
-    }
-  );
-};
-
 const findDimension = (dimension: IDimension, t: string, w: string) => {
   return Object.entries(dimension)
     .filter(([key, { what, type }]) => type === t && what === w)
@@ -610,21 +675,20 @@ const makeDHIS2Query = (
   const iFilters = findDimension(data.dataDimensions, "filter", "i");
   const peDimensions = findDimension(data.dataDimensions, "dimension", "pe");
   const peFilters = findDimension(data.dataDimensions, "filter", "pe");
-  console.log(globalFilters);
   return [
     joinItems(
       [
-        [ouFilters, "ou"],
-        [iFilters, "dx"],
-        [peFilters, "pe"],
+        [globalFilters[ouFilters]?.join(";") || ouFilters, "ou"],
+        [globalFilters[iFilters]?.join(";") || iFilters, "dx"],
+        [globalFilters[peFilters]?.join(";") || peFilters, "pe"],
       ],
       "filter"
     ),
     joinItems(
       [
-        [ouDimensions, "ou"],
-        [iDimensions, "dx"],
-        [peDimensions, "pe"],
+        [globalFilters[ouDimensions]?.join(";") || ouDimensions, "ou"],
+        [globalFilters[iDimensions]?.join(";") || iDimensions, "dx"],
+        [globalFilters[peDimensions]?.join(";") || peDimensions, "pe"],
       ],
       "dimension"
     ),
@@ -632,24 +696,32 @@ const makeDHIS2Query = (
 };
 
 const makeSQLViewsQueries = (
-  expressions: { [key: string]: string } = {},
-  globalFilters: { [key: string]: any } = {},
-  filters: { [key: string]: any } = {}
+  expressions: IExpressions = {},
+  globalFilters: { [key: string]: any } = {}
 ) => {
   return Object.entries(expressions)
-    .map(([col, val]) => {
-      return `var=${col}:${val}`;
+    .flatMap(([col, val]) => {
+      if (val.isGlobal) {
+        if (globalFilters[val.value]) {
+          return [`var=${col}:${globalFilters[val.value]}`];
+        }
+        return [];
+      }
+      return [`var=${col}:${val.value}`];
     })
     .join("&");
 };
 
-const generateDHIS2Query = (indicator: IIndicator) => {
+const generateDHIS2Query = (
+  indicator: IIndicator,
+  globalFilters: { [key: string]: any } = {}
+) => {
   let queries = {};
   if (
     indicator.numerator?.type === "ANALYTICS" &&
     Object.keys(indicator.numerator.dataDimensions).length > 0
   ) {
-    const params = makeDHIS2Query(indicator.numerator);
+    const params = makeDHIS2Query(indicator.numerator, globalFilters);
     if (params) {
       queries = {
         numerator: {
@@ -662,7 +734,10 @@ const generateDHIS2Query = (indicator: IIndicator) => {
     Object.keys(indicator.numerator.dataDimensions).length > 0
   ) {
     let currentParams = "";
-    const params = makeSQLViewsQueries(indicator.numerator.expressions);
+    const params = makeSQLViewsQueries(
+      indicator.numerator.expressions,
+      globalFilters
+    );
     if (params) {
       currentParams = `?${params}`;
     }
@@ -678,7 +753,7 @@ const generateDHIS2Query = (indicator: IIndicator) => {
     indicator.denominator?.type === "ANALYTICS" &&
     Object.keys(indicator.denominator.dataDimensions).length > 0
   ) {
-    const params = makeDHIS2Query(indicator.denominator);
+    const params = makeDHIS2Query(indicator.denominator, globalFilters);
     if (params) {
       queries = {
         ...queries,
@@ -691,11 +766,19 @@ const generateDHIS2Query = (indicator: IIndicator) => {
     indicator.denominator?.type === "SQL_VIEW" &&
     Object.keys(indicator.denominator.dataDimensions).length > 0
   ) {
+    let currentParams = "";
+    const params = makeSQLViewsQueries(
+      indicator.denominator.expressions,
+      globalFilters
+    );
+    if (params) {
+      currentParams = `?${params}`;
+    }
     queries = {
       denominator: {
         resource: `sqlViews/${
           Object.keys(indicator.denominator.dataDimensions)[0]
-        }/data.json`,
+        }/data.json${currentParams}`,
       },
     };
   }
@@ -703,35 +786,51 @@ const generateDHIS2Query = (indicator: IIndicator) => {
 };
 
 const generateKeys = (
-  indicator: IIndicator,
-  selectedOrganisation?: string,
-  periodType?: Option,
-  relativePeriod?: Option,
-  fixedPeriod?: RangeValue<moment.Moment>
+  indicator?: IIndicator,
+  globalFilters: { [key: string]: any } = {}
 ) => {
-  const allKeys = Object.keys(indicator?.denominator?.dataDimensions || {});
+  const numKeys = Object.keys(indicator?.numerator?.dataDimensions || {});
+  const denKeys = Object.keys(indicator?.denominator?.dataDimensions || {});
+  const numExpressions = Object.entries(
+    indicator?.numerator?.expressions || {}
+  ).map(([e, value]) => {
+    return value.value;
+  });
+  const denExpressions = Object.entries(
+    indicator?.denominator?.expressions || {}
+  ).map(([e, value]) => {
+    return value.value;
+  });
+
+  const all = uniq([
+    ...numKeys,
+    ...denKeys,
+    ...numExpressions,
+    ...denExpressions,
+  ]).flatMap((id) => {
+    return globalFilters[id] || [id];
+  });
+  return all;
 };
 
 export const useVisualization = (
   visualization: IVisualization,
   indicator?: IIndicator,
   dataSource?: IDataSource,
-  selectedOrganisation?: string,
-  periodType?: Option,
-  relativePeriod?: Option,
-  fixedPeriod?: RangeValue<moment.Moment>,
-  refreshInterval?: string
+  refreshInterval?: string,
+  globalFilters?: { [key: string]: any }
 ) => {
   const engine = useDataEngine();
   let currentInterval: boolean | number = false;
   if (refreshInterval && refreshInterval !== "off") {
     currentInterval = Number(refreshInterval) * 1000;
   }
+  const otherKeys = generateKeys(indicator, globalFilters);
   return useQuery<any, Error>(
-    ["visualizations", indicator?.id],
+    ["visualizations", indicator?.id, ...otherKeys],
     async () => {
       if (indicator && dataSource && dataSource.isCurrentDHIS2) {
-        const queries = generateDHIS2Query(indicator);
+        const queries = generateDHIS2Query(indicator, globalFilters);
         const data = await engine.query(queries);
         let processed: any[] = [];
         let metadata = {};
@@ -755,7 +854,6 @@ export const useVisualization = (
             numRows = rows;
             metadata = items;
           }
-
           if (denominator && denominator.listGrid) {
             const { headers, rows } = denominator.listGrid;
             denRows = rows;
@@ -821,11 +919,22 @@ export const useVisualization = (
           data: metadata,
         });
       } else if (dataSource?.type === "ELASTICSEARCH") {
-        const api = axios.create({
-          baseURL: dataSource.authentication.url,
-        });
         if (indicator && indicator.query) {
-          api.post("", JSON.parse(indicator.query));
+          const queryString = JSON.parse(
+            indicator.query
+              .replaceAll("${ou}", globalFilters?.["mclvD0Z9mfT"])
+              .replaceAll("${pe}", globalFilters?.["m5D13FqKZwN"])
+              .replaceAll("${le}", globalFilters?.["GQhi6pRnTKF"])
+              .replaceAll("${gp}", globalFilters?.["of2WvtwqbHR"])
+          );
+          const { data } = await axios.post(
+            dataSource.authentication.url,
+            queryString
+          );
+          updateVisualizationData({
+            visualizationId: visualization.id,
+            data: traverse(data, queryString),
+          });
         }
       }
       return true;

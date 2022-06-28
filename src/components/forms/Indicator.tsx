@@ -29,6 +29,9 @@ import {
 } from "../../Store";
 import { displayDataSourceType } from "../data-sources";
 import NamespaceSelect from "../NamespaceSelect";
+
+import "jsoneditor-react/es/editor.min.css";
+
 const Indicator = () => {
   const search = useSearch<FormGenerics>();
   const indicator = useStore($indicator);
@@ -59,10 +62,6 @@ const Indicator = () => {
     setLoading(false);
     navigate({ to: "/indicators" });
   };
-
-  useEffect(() => {
-    setShowSider(true);
-  }, []);
 
   return (
     <Box flex={1} p="20px">
@@ -117,9 +116,9 @@ const Indicator = () => {
             </Stack>
             <Stack>
               <Text>Factor Expression</Text>
-              <Textarea
+              <Input
                 value={indicator.factor}
-                onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   changeIndicatorAttribute({
                     attribute: "factor",
                     value: e.target.value,
@@ -127,20 +126,46 @@ const Indicator = () => {
                 }
               />
             </Stack>
-            <Stack direction="row" spacing="50px">
-              {/* <NumeratorDialog />
-              <DenominatorDialog /> */}
-              <Button
-                onClick={() => navigate({ to: "/indicators/form/numerator" })}
-              >
-                Numerator
-              </Button>
-              <Button
-                onClick={() => navigate({ to: "/indicators/form/denominator" })}
-              >
-                Denominator
-              </Button>
-            </Stack>
+
+            {dataSourceType === "ELASTICSEARCH" && (
+              <Stack>
+                <Text>Query</Text>
+                <Textarea
+                  rows={20}
+                  value={indicator.query}
+                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                    changeIndicatorAttribute({
+                      attribute: "query",
+                      value: e.target.value,
+                    })
+                  }
+                />
+              </Stack>
+            )}
+            {dataSourceType !== "ELASTICSEARCH" && (
+              <Stack direction="row" spacing="50px">
+                <Button
+                  onClick={() =>
+                    navigate({
+                      to: `/indicators/${indicator.id}/numerator`,
+                      search,
+                    })
+                  }
+                >
+                  Numerator
+                </Button>
+                <Button
+                  onClick={() =>
+                    navigate({
+                      to: `/indicators/${indicator.id}/denominator`,
+                      search,
+                    })
+                  }
+                >
+                  Denominator
+                </Button>
+              </Stack>
+            )}
           </>
         )}
         <Stack direction="row">
@@ -148,7 +173,7 @@ const Indicator = () => {
             colorScheme="red"
             onClick={() => {
               setIndicator(createIndicator());
-              navigate({ to: "/indicators" });
+              navigate({ to: "/indicators", search });
             }}
           >
             Cancel

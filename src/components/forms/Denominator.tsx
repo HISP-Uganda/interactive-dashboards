@@ -17,14 +17,14 @@ import {
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { ChangeEvent, useState } from "react";
-import { useNavigate } from "@tanstack/react-location";
+import { useNavigate, useSearch } from "@tanstack/react-location";
 
 import {
   changeDenominatorAttribute,
   changeDenominatorDimension,
   changeDenominatorExpressionValue,
 } from "../../Events";
-import { Option } from "../../interfaces";
+import { FormGenerics, Option } from "../../interfaces";
 import { $dataSourceType, $indicator } from "../../Store";
 import { getSearchParams, globalIds } from "../../utils/utils";
 import { displayDataSourceType } from "../data-sources";
@@ -34,7 +34,7 @@ const availableOptions: Option[] = [
   { value: "ANALYTICS", label: "Analytics" },
 ];
 const Denominator = () => {
-  const [useGlobal, setUseGlobal] = useState<boolean>(false);
+  const search = useSearch<FormGenerics>();
   const indicator = useStore($indicator);
   const dataSourceType = useStore($dataSourceType);
   const navigate = useNavigate();
@@ -109,11 +109,6 @@ const Denominator = () => {
                   Value
                 </Heading>
               </Th>
-              <Th>
-                <Heading as="h6" size="xs" textTransform="none">
-                  Actions
-                </Heading>
-              </Th>
             </Tr>
           </Thead>
           <Tbody py={10}>
@@ -124,39 +119,44 @@ const Denominator = () => {
                 </Td>
                 <Td>
                   <Checkbox
-                    isChecked={useGlobal}
+                    isChecked={
+                      indicator.denominator?.expressions?.[record].isGlobal
+                    }
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      setUseGlobal(e.target.checked)
+                      changeDenominatorExpressionValue({
+                        attribute: record,
+                        value: "",
+                        isGlobal: e.target.checked,
+                      })
                     }
                   />
                 </Td>
                 <Td>
-                  {useGlobal ? (
-                    <Stack>
-                      <Text>Global Filter</Text>
-                      <Select<Option, false, GroupBase<Option>>
-                        value={globalIds.find(
-                          (pt) =>
-                            pt.value ===
-                            indicator.denominator?.expressions?.[record]
-                        )}
-                        onChange={(e) =>
-                          changeDenominatorExpressionValue({
-                            attribute: record,
-                            value: e?.value || "",
-                          })
-                        }
-                        options={globalIds}
-                        isClearable
-                      />
-                    </Stack>
+                  {indicator.denominator?.expressions?.[record].isGlobal ? (
+                    <Select<Option, false, GroupBase<Option>>
+                      value={globalIds.find(
+                        (pt) =>
+                          pt.value ===
+                          indicator.denominator?.expressions?.[record].value
+                      )}
+                      onChange={(e) =>
+                        changeDenominatorExpressionValue({
+                          attribute: record,
+                          value: e?.value || "",
+                          isGlobal: true,
+                        })
+                      }
+                      options={globalIds}
+                      isClearable
+                    />
                   ) : (
                     <Input
-                      value={indicator.denominator?.expressions?.[record]}
+                      value={indicator.denominator?.expressions?.[record].value}
                       onChange={(e: ChangeEvent<HTMLInputElement>) =>
                         changeDenominatorExpressionValue({
                           attribute: record,
                           value: e.target.value,
+                          isGlobal: false,
                         })
                       }
                     />
@@ -170,7 +170,9 @@ const Denominator = () => {
       <Stack direction="row">
         {/* <Button colorScheme="red">Cancel</Button> */}
         <Spacer />
-        <Button onClick={() => navigate({ to: "/indicators/form" })}>OK</Button>
+        <Button onClick={() => navigate({ to: "/indicators/form", search })}>
+          OK
+        </Button>
       </Stack>
     </Stack>
   );

@@ -35,7 +35,7 @@ const INNER_LIMIT = 4;
 const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
   const [dimension, setDimension] = useState<"filter" | "dimension">("filter");
   const [q, setQ] = useState<string>("");
-  const [useGlobal, setUseGlobal] = useState<boolean>(true);
+  const [useGlobal, setUseGlobal] = useState<boolean>(false);
   const paginations = useStore($paginations);
 
   const {

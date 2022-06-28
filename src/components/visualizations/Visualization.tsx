@@ -2,7 +2,13 @@ import { Spinner } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { IVisualization } from "../../interfaces";
 import { useVisualization } from "../../Queries";
-import { $dashboard, $dataSources, $indicators, $store } from "../../Store";
+import {
+  $dashboard,
+  $dataSources,
+  $globalFilters,
+  $indicators,
+  $store,
+} from "../../Store";
 import BarGraph from "./BarGraph";
 import LineGraph from "./LineGraph";
 import MapChart from "./MapChart";
@@ -39,7 +45,7 @@ const getVisualization = (visualization: IVisualization) => {
 
 const Visualization = ({ visualization }: VisualizationProps) => {
   const indicators = useStore($indicators);
-  const store = useStore($store);
+  const globalFilters = useStore($globalFilters);
   const dataSources = useStore($dataSources);
   const dashboard = useStore($dashboard);
 
@@ -52,11 +58,8 @@ const Visualization = ({ visualization }: VisualizationProps) => {
     visualization,
     indicator,
     dataSource,
-    store.selectedOrganisation,
-    store.periodType,
-    store.relativePeriod,
-    store.fixedPeriod,
-    dashboard.refreshInterval
+    dashboard.refreshInterval,
+    globalFilters
   );
 
   return (

@@ -14,18 +14,19 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
+import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { ChangeEvent, useState } from "react";
-import { useNavigate } from "@tanstack/react-location";
+import { ChangeEvent } from "react";
 
 import {
   changeNumeratorAttribute,
   changeNumeratorDimension,
   changeNumeratorExpressionValue,
+  setVisualizationQueries,
 } from "../../Events";
-import { Option } from "../../interfaces";
-import { $dataSourceType, $indicator } from "../../Store";
+import { FormGenerics, Option } from "../../interfaces";
+import { $dataSourceType, $indicator, $indicators } from "../../Store";
 import { getSearchParams, globalIds } from "../../utils/utils";
 import { displayDataSourceType } from "../data-sources";
 
@@ -34,8 +35,9 @@ const availableOptions: Option[] = [
   { value: "ANALYTICS", label: "Analytics" },
 ];
 const Numerator = () => {
-  const [useGlobal, setUseGlobal] = useState<boolean>(false);
+  const search = useSearch<FormGenerics>();
   const indicator = useStore($indicator);
+  const indicators = useStore($indicators);
   const dataSourceType = useStore($dataSourceType);
   const navigate = useNavigate();
 
@@ -44,7 +46,7 @@ const Numerator = () => {
       <Stack>
         <Text>Numerator Name</Text>
         <Input
-          value={indicator.numerator?.name}
+          value={indicator.numerator?.name || ""}
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
             changeNumeratorAttribute({
               attribute: "name",
@@ -56,7 +58,7 @@ const Numerator = () => {
       <Stack>
         <Text>Numerator Description</Text>
         <Textarea
-          value={indicator.numerator?.description}
+          value={indicator.numerator?.description || ""}
           onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
             changeNumeratorAttribute({
               attribute: "description",
@@ -95,12 +97,12 @@ const Numerator = () => {
         <Table size="sm" textTransform="none">
           <Thead>
             <Tr py={1}>
-              <Th>
+              <Th w="50%">
                 <Heading as="h6" size="xs" textTransform="none">
                   Key
                 </Heading>
               </Th>
-              <Th>
+              <Th w="200px" textAlign="center">
                 <Heading as="h6" size="xs" textTransform="none">
                   Use Global Filter
                 </Heading>
@@ -118,41 +120,48 @@ const Numerator = () => {
                 <Td>
                   <Input readOnly value={record} />
                 </Td>
-                <Td>
+                <Td textAlign="center">
                   <Checkbox
-                    isChecked={useGlobal}
+                    isChecked={
+                      indicator.numerator?.expressions?.[record]?.isGlobal
+                    }
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      setUseGlobal(e.target.checked)
+                      changeNumeratorExpressionValue({
+                        attribute: record,
+                        value: "",
+                        isGlobal: e.target.checked,
+                      })
                     }
                   />
                 </Td>
                 <Td>
-                  {useGlobal ? (
-                    <Stack>
-                      <Text>Global Filter</Text>
-                      <Select<Option, false, GroupBase<Option>>
-                        value={globalIds.find(
-                          (pt) =>
-                            pt.value ===
-                            indicator.numerator?.expressions?.[record]
-                        )}
-                        onChange={(e) =>
-                          changeNumeratorExpressionValue({
-                            attribute: record,
-                            value: e?.value || "",
-                          })
-                        }
-                        options={globalIds}
-                        isClearable
-                      />
-                    </Stack>
+                  {indicator.numerator?.expressions?.[record]?.isGlobal ? (
+                    <Select<Option, false, GroupBase<Option>>
+                      value={globalIds.find(
+                        (pt) =>
+                          pt.value ===
+                          indicator.numerator?.expressions?.[record]?.value
+                      )}
+                      onChange={(e) =>
+                        changeNumeratorExpressionValue({
+                          attribute: record,
+                          value: e?.value || "",
+                          isGlobal: true,
+                        })
+                      }
+                      options={globalIds}
+                      isClearable
+                    />
                   ) : (
                     <Input
-                      value={indicator.numerator?.expressions?.[record]}
+                      value={
+                        indicator.numerator?.expressions?.[record]?.value || ""
+                      }
                       onChange={(e: ChangeEvent<HTMLInputElement>) =>
                         changeNumeratorExpressionValue({
                           attribute: record,
                           value: e.target.value,
+                          isGlobal: false,
                         })
                       }
                     />
@@ -163,11 +172,23 @@ const Numerator = () => {
           </Tbody>
         </Table>
       )}
-
       <Stack direction="row">
-        {/* <Button colorScheme="red">Cancel</Button> */}
         <Spacer />
-        <Button onClick={() => navigate({ to: "/indicators/form" })}>OK</Button>
+        <Button
+          onClick={() => {
+            setVisualizationQueries(
+              indicators.map((i) => {
+                if (i.id === indicator.id) {
+                  return indicator;
+                }
+                return i;
+              })
+            );
+            navigate({ to: `/indicators/${indicator.id}`, search });
+          }}
+        >
+          OK
+        </Button>
       </Stack>
     </Stack>
   );
