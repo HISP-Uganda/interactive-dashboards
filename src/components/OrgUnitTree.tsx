@@ -1,123 +1,113 @@
 import { useDataEngine } from "@dhis2/app-runtime";
-import { Tree } from "antd";
 import "antd/dist/antd.css";
-import { useStore } from "effector-react";
-import { Event } from "effector";
-import { flatten } from "lodash";
+import TreeSelect from "antd/lib/tree-select";
+import { flatten, uniqBy } from "lodash";
 import { useState } from "react";
-import { DataNode, IData } from "../interfaces";
-import { $store } from "../Store";
-import { Stack } from "@chakra-ui/react";
-import GlobalAndFilter from "./data-sources/GlobalAndFilter";
-
-const createQuery = (parent: any) => {
-  return {
-    organisations: {
-      resource: `organisationUnits.json`,
-      params: {
-        filter: `id:in:[${parent}]`,
-        paging: "false",
-        order: "shortName:desc",
-        fields: "children[id,name,path,leaf]",
-      },
-    },
-  };
-};
+import { db } from "../db";
 
 type OrgUnitTreeProps = {
-  denNum: IData;
-  onChange: Event<{ id: string; what: string; type: string; remove?: boolean }>;
+  initial: any[];
+  expandedKeys: string[];
+  onChange: (value: string) => void;
+  value: string;
 };
 
-function updateTreeData(
-  list: DataNode[],
-  key: React.Key,
-  children: DataNode[]
-): DataNode[] {
-  return list.map((node) => {
-    if (node.key === key) {
-      return {
-        ...node,
-        children,
-      };
-    }
-    if (node.children) {
-      return {
-        ...node,
-        children: updateTreeData(node.children, key, children),
-      };
-    }
-    return node;
-  });
-}
-
-const OrgUnitTree = ({ denNum, onChange }: OrgUnitTreeProps) => {
+const OrgUnitTree = ({
+  initial,
+  expandedKeys,
+  onChange,
+  value,
+}: OrgUnitTreeProps) => {
   const engine = useDataEngine();
-  const store = useStore($store);
-  const [treeData, setTreeData] = useState(store.organisationUnits);
-  const [dimension, setDimension] = useState<"filter" | "dimension">("filter");
-  const [useGlobal, setUseGlobal] = useState<boolean>(false);
-
-  const onCheck = (checkedKeysValue: any, other: any) => {
-    checkedKeysValue.checked.forEach((v: string) =>
-      onChange({ id: v, type: "filter", what: "ou" })
-    );
-    if (other.checked === false) {
-      onChange({
-        id: other.node.key,
-        type: "filter",
-        what: "ou",
-        remove: true,
-      });
+  const [treeData, setTreeData] = useState<any[]>(initial);
+  const [expanded, setExpanded] = useState<React.Key[]>(expandedKeys);
+  const onLoadData = async (parent: any) => {
+    try {
+      const parentChildren = treeData.find((t) => t.pId === parent.id);
+      if (parentChildren === undefined) {
+        const {
+          units: { organisationUnits },
+        }: any = await engine.query({
+          units: {
+            resource: "organisationUnits.json",
+            params: {
+              filter: `id:in:[${parent.id}]`,
+              paging: "false",
+              order: "shortName:desc",
+              fields: "children[id,name,path,leaf]",
+            },
+          },
+        });
+        const found = organisationUnits.map((unit: any) => {
+          return unit.children
+            .map((child: any) => {
+              return {
+                id: child.id,
+                pId: parent.id,
+                value: child.id,
+                title: child.name,
+                isLeaf: child.leaf,
+                _key: child.id,
+              };
+            })
+            .sort((a: any, b: any) => {
+              if (a.title > b.title) {
+                return 1;
+              }
+              if (a.title < b.title) {
+                return -1;
+              }
+              return 0;
+            });
+        });
+        const all: any[] = uniqBy(
+          [
+            ...treeData.map((a: any) => {
+              return { ...a, _key: a.id };
+            }),
+            ...flatten(found),
+          ],
+          "id"
+        );
+        db.collection("facilities").set(all, {
+          keys: true,
+        });
+        setTreeData(all);
+      }
+    } catch (e) {
+      console.log(e);
     }
   };
-
-  const onLoadData = async ({ key, children }: any) => {
-    const {
-      organisations: { organisationUnits },
-    }: any = await engine.query(createQuery(key));
-    const found = organisationUnits.map((unit: any) => {
-      return unit.children
-        .map((child: any) => {
-          return {
-            key: child.id,
-            title: child.name,
-            isLeaf: child.leaf,
-          };
-        })
-        .sort((a: any, b: any) => {
-          if (a.title > b.title) {
-            return 1;
-          }
-          if (a.title < b.title) {
-            return -1;
-          }
-          return 0;
-        });
-    });
-    setTreeData((origin) => updateTreeData(origin, key, flatten(found)));
+  const onTreeExpand = (expandedKeys: React.Key[]) => {
+    db.collection("expanded").set(
+      expandedKeys.map((k) => {
+        return {
+          value: k,
+          _key: k,
+        };
+      }),
+      {
+        keys: true,
+      }
+    );
+    setExpanded(expandedKeys);
   };
   return (
-    <Stack>
-      <GlobalAndFilter
-        dimension={dimension}
-        setDimension={setDimension}
-        useGlobal={useGlobal}
-        setUseGlobal={setUseGlobal}
-      />
-      {!useGlobal && (
-        <Tree
-          checkable
-          checkStrictly
-          loadData={onLoadData}
-          treeData={treeData}
-          onCheck={onCheck}
-          checkedKeys={Object.entries(denNum.dataDimensions)
-            .filter(([k, { what }]) => what === "ou")
-            .map(([key]) => key)}
-        />
-      )}
-    </Stack>
+    <TreeSelect
+      allowClear={true}
+      treeDataSimpleMode
+      style={{ width: "100%"}}
+      value={value}
+      listHeight={700}
+      treeExpandedKeys={expanded}
+      onTreeExpand={onTreeExpand}
+      dropdownStyle={{ overflow: "auto" }}
+      placeholder="Please select location"
+      onChange={onChange}
+      showSearch={true}
+      loadData={onLoadData}
+      treeData={treeData}
+    />
   );
 };
 

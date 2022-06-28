@@ -3,13 +3,17 @@ import {
   PaginationContainer,
   PaginationNext,
   PaginationPrevious,
+  PaginationPageGroup,
+  PaginationPage,
   usePagination,
 } from "@ajna/pagination";
 import {
   Box,
   Checkbox,
-  CircularProgress,
+  Flex,
   Heading,
+  Input,
+  Spinner,
   Stack,
   Table,
   Tbody,
@@ -23,16 +27,21 @@ import { useStore } from "effector-react";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
 import { useIndicators } from "../../Queries";
-import { $store } from "../../Store";
+import { $paginations } from "../../Store";
+import { globalIds } from "../../utils/utils";
 import GlobalAndFilter from "./GlobalAndFilter";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
 const Indicators = ({ denNum, onChange }: IndicatorProps) => {
-  const [dimension, setDimension] = useState<"filter" | "dimension">("filter");
+  const [dimension, setDimension] = useState<"filter" | "dimension">(
+    "dimension"
+  );
   const [useGlobal, setUseGlobal] = useState<boolean>(false);
-  const store = useStore($store);
+  const [q, setQ] = useState<string>("");
+  const paginations = useStore($paginations);
+
   const {
     pages,
     pagesCount,
@@ -42,7 +51,7 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
     pageSize,
     setPageSize,
   } = usePagination({
-    total: store.paginations.totalIndicators,
+    total: paginations.totalIndicators,
     limits: {
       outer: OUTER_LIMIT,
       inner: INNER_LIMIT,
@@ -54,7 +63,8 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
   });
   const { isLoading, isSuccess, isError, error, data } = useIndicators(
     currentPage,
-    pageSize
+    pageSize,
+    q
   );
 
   const handlePageChange = (nextPage: number) => {
@@ -62,17 +72,35 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
   };
 
   return (
-    <Stack>
-        <GlobalAndFilter
-          dimension={dimension}
-          setDimension={setDimension}
-          useGlobal={useGlobal}
-          setUseGlobal={setUseGlobal}
-          hasGlobalFilter={false}
+    <Stack spacing="30px">
+      <GlobalAndFilter
+        dimension={dimension}
+        setDimension={setDimension}
+        useGlobal={useGlobal}
+        setUseGlobal={setUseGlobal}
+        hasGlobalFilter={false}
+        type="i"
+        onChange={onChange}
+        id={globalIds[2].value}
+      />
+      {!useGlobal && (
+        <Input
+          value={q}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setQ(e.target.value)}
         />
-      {isLoading && <CircularProgress isIndeterminate color="blue.700" />}
+      )}
+      {isLoading && (
+        <Flex w="100%" alignItems="center" justifyContent="center">
+          <Spinner />
+        </Flex>
+      )}
       {isSuccess && (
-        <Table variant="striped" colorScheme="gray" textTransform="none">
+        <Table
+          size="sm"
+          variant="striped"
+          colorScheme="gray"
+          textTransform="none"
+        >
           <Thead>
             <Tr py={1}>
               <Th>
@@ -111,7 +139,7 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
                         });
                       }
                     }}
-                    checked={!!denNum.dataDimensions?.[record.id]}
+                    checked={!!denNum?.dataDimensions?.[record.id]}
                   />
                 </Td>
                 <Td>{record.id}</Td>
@@ -121,36 +149,38 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
           </Tbody>
         </Table>
       )}
-      <Pagination
-        pagesCount={pagesCount}
-        currentPage={currentPage}
-        isDisabled={isDisabled}
-        onPageChange={handlePageChange}
-      >
-        <PaginationContainer
-          align="center"
-          justify="space-between"
-          p={4}
-          w="full"
+      {!useGlobal && (
+        <Pagination
+          pagesCount={pagesCount}
+          currentPage={currentPage}
+          isDisabled={isDisabled}
+          onPageChange={handlePageChange}
         >
-          <PaginationPrevious
-            _hover={{
-              bg: "yellow.400",
-            }}
-            bg="yellow.300"
+          <PaginationContainer
+            align="center"
+            justify="space-between"
+            p={4}
+            w="full"
           >
-            <Text>Previous</Text>
-          </PaginationPrevious>
-          <PaginationNext
-            _hover={{
-              bg: "yellow.400",
-            }}
-            bg="yellow.300"
-          >
-            <Text>Next</Text>
-          </PaginationNext>
-        </PaginationContainer>
-      </Pagination>
+            <PaginationPrevious
+              _hover={{
+                bg: "yellow.400",
+              }}
+              bg="yellow.300"
+            >
+              <Text>Previous</Text>
+            </PaginationPrevious>
+            <PaginationNext
+              _hover={{
+                bg: "yellow.400",
+              }}
+              bg="yellow.300"
+            >
+              <Text>Next</Text>
+            </PaginationNext>
+          </PaginationContainer>
+        </Pagination>
+      )}
       {isError && <Box>{error?.message}</Box>}
     </Stack>
   );

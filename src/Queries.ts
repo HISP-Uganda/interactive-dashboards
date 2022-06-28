@@ -1,27 +1,36 @@
+import { useDataEngine } from "@dhis2/app-runtime";
+import type { DataNode } from "antd/lib/tree";
+import axios, { AxiosRequestConfig } from "axios";
+import { fromPairs, max, uniq } from "lodash";
+import { useQuery } from "react-query";
+import {
+  addPagination,
+  changeAdministration,
+  changeDefaults,
+  changeHasDashboards,
+  changeSelectedCategory,
+  changeSelectedDashboard,
+  onChangeOrganisations,
+  setCategories,
+  setCurrentDashboard,
+  setDashboards,
+  setDataSources,
+  setVisualizationQueries,
+  updateVisualizationData,
+  updateVisualizationMetadata,
+} from "./Events";
 import {
   ICategory,
   IDashboard,
   IData,
   IDataSource,
   IDimension,
+  IExpressions,
   IIndicator,
   IVisualization,
+  Option,
 } from "./interfaces";
-import { useDataEngine } from "@dhis2/app-runtime";
-import { fromPairs } from "lodash";
-import { useQuery } from "react-query";
-import axios, { AxiosRequestConfig } from "axios";
-import {
-  setCurrentDashboard,
-  loadDefaults,
-  addPagination,
-  changeDefaults,
-  setDataSources,
-  setCategories,
-  setVisualizationQueries,
-  setDashboards,
-} from "./Events";
-import { encodeToBinary } from "./utils/utils";
+import { getNestedKeys, traverse } from "./utils/utils";
 
 export const api = axios.create({
   baseURL: "https://services.dhis2.hispuganda.org/",
@@ -111,7 +120,7 @@ const loadSingleResource = async (engine: any, resource: string) => {
   }
 };
 
-export const useInitials = () => {
+export const useOrganisationUnits = () => {
   const engine = useDataEngine();
   const ouQuery = {
     me: {
@@ -120,12 +129,91 @@ export const useInitials = () => {
         fields: "organisationUnits[id,name,leaf]",
       },
     },
+    levels: {
+      resource: "organisationUnitLevels.json",
+      params: {
+        fields: "id,level,name",
+      },
+    },
+    groups: {
+      resource: "organisationUnitGroups.json",
+      params: {
+        fields: "id,name",
+      },
+    },
   };
-  return useQuery<any, Error>(["initial"], async () => {
+
+  return useQuery<
+    { units: DataNode[]; levels: Option[]; groups: Option[] },
+    Error
+  >(["organisation-units"], async () => {
     const {
       me: { organisationUnits },
+      levels: { organisationUnitLevels },
+      groups: { organisationUnitGroups },
     }: any = await engine.query(ouQuery);
+
+    const units: DataNode[] = organisationUnits.map((o: any) => {
+      return {
+        key: o.id,
+        title: o.name,
+        isLeaf: o.leaf,
+      };
+    });
+
+    const levels: Option[] = organisationUnitLevels.map(
+      ({ level, name }: any) => {
+        return {
+          label: name,
+          value: level,
+        };
+      }
+    );
+
+    const groups: Option[] = organisationUnitGroups.map(({ id, name }: any) => {
+      return {
+        label: name,
+        value: id,
+      };
+    });
+
+    return {
+      units,
+      levels,
+      groups,
+    };
+  });
+};
+
+export const useInitials = () => {
+  const engine = useDataEngine();
+  const ouQuery = {
+    me: {
+      resource: "me.json",
+      params: {
+        fields: "organisationUnits[id,name,leaf,level],authorities",
+      },
+    },
+  };
+  return useQuery<any, Error>(["initial"], async () => {
     try {
+      const {
+        me: { organisationUnits, authorities },
+      }: any = await engine.query(ouQuery);
+      const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
+
+      changeAdministration(isAdmin);
+      const facilities: React.Key[] = organisationUnits.map(
+        (unit: any) => unit.id
+      );
+      const level = max(organisationUnits.map((unit: any) => unit.level));
+
+      onChangeOrganisations({
+        levels: [String(level)],
+        organisations: facilities,
+        groups: [],
+        expandedKeys: [],
+      });
       const dashboards = await loadResource(engine, "i-dashboards");
       const categories = await loadResource(engine, "i-categories");
       const dataSources = await loadResource(engine, "i-data-sources");
@@ -134,8 +222,28 @@ export const useInitials = () => {
         "i-visualization-queries"
       );
       const settings = await loadResource(engine, "i-dashboard-settings");
-      setDashboards(dashboards);
-      setCategories(categories);
+      if (isAdmin) {
+        setDashboards(dashboards);
+      } else {
+        const publishedDashboards = dashboards.filter(
+          (dashboard: IDashboard) => dashboard.published
+        );
+        setDashboards(publishedDashboards);
+        if (publishedDashboards.length > 0) {
+          setCurrentDashboard(publishedDashboards[0]);
+          changeSelectedDashboard(publishedDashboards[0].id);
+          changeSelectedCategory(publishedDashboards[0].category);
+          changeHasDashboards(true);
+        }
+      }
+      setCategories([
+        ...categories,
+        {
+          id: "uDWxMNyXZeo",
+          name: "Uncategorised",
+          description: "Uncategorised",
+        },
+      ]);
       setDataSources(dataSources);
       setVisualizationQueries(visualizationQueries);
       if (settings.length > 0) {
@@ -205,7 +313,7 @@ export const useDashboards = () => {
         namespaceKeys.map((n: string) => [
           n,
           {
-            resource: `dataStore/dashboards/${n}`,
+            resource: `dataStore/i-dashboards/${n}`,
           },
         ])
       );
@@ -341,21 +449,30 @@ export const useNamespaceKey2 = (namespace: string, key: string) => {
   });
 };
 
-export const useDataElements = (page: number, pageSize: number) => {
+export const useDataElements = (page: number, pageSize: number, q = "") => {
+  console.log(q);
   const engine = useDataEngine();
+  let params: { [key: string]: any } = {
+    page,
+    pageSize,
+    fields: "id,name",
+    order: "name:ASC",
+  };
+
+  if (q) {
+    params = {
+      ...params,
+      filter: `identifiable:token:${q}`,
+    };
+  }
   const namespaceQuery = {
     elements: {
       resource: "dataElements.json",
-      params: {
-        page,
-        pageSize,
-        filter: "domainType:eq:AGGREGATE",
-        fields: "id,name",
-      },
+      params,
     },
   };
   return useQuery<{ id: string; name: string }[], Error>(
-    ["data-elements", page, pageSize],
+    ["data-elements", page, pageSize, q],
     async () => {
       const {
         elements: {
@@ -369,20 +486,26 @@ export const useDataElements = (page: number, pageSize: number) => {
   );
 };
 
-export const useIndicators = (page: number, pageSize: number) => {
+export const useIndicators = (page: number, pageSize: number, q = "") => {
   const engine = useDataEngine();
+
+  let params: { [key: string]: any } = {
+    page,
+    pageSize,
+    fields: "id,name",
+  };
+
+  if (q) {
+    params = { ...params, filter: `identifiable:token:${q}` };
+  }
   const query = {
     elements: {
       resource: "indicators.json",
-      params: {
-        page,
-        pageSize,
-        fields: "id,name",
-      },
+      params,
     },
   };
   return useQuery<{ id: string; name: string }[], Error>(
-    ["indicators", page, pageSize],
+    ["indicators", page, pageSize, q],
     async () => {
       const {
         elements: {
@@ -403,11 +526,11 @@ export const useSQLViews = () => {
       resource: "sqlViews.json",
       params: {
         paging: "false",
-        fields: "id,name",
+        fields: "id,name,sqlQuery",
       },
     },
   };
-  return useQuery<{ id: string; name: string }[], Error>(
+  return useQuery<{ id: string; name: string; sqlQuery: string }[], Error>(
     ["sql-views"],
     async () => {
       const {
@@ -418,16 +541,25 @@ export const useSQLViews = () => {
   );
 };
 
-export const useProgramIndicators = (page: number, pageSize: number) => {
+export const useProgramIndicators = (
+  page: number,
+  pageSize: number,
+  q = ""
+) => {
   const engine = useDataEngine();
+  let params: { [key: string]: any } = {
+    page,
+    pageSize,
+    fields: "id,name",
+  };
+
+  if (q) {
+    params = { ...params, filter: `identifiable:token:${q}` };
+  }
   const query = {
     elements: {
       resource: "programIndicators.json",
-      params: {
-        page,
-        pageSize,
-        fields: "id,name",
-      },
+      params,
     },
   };
   return useQuery<{ id: string; name: string }[], Error>(
@@ -445,16 +577,24 @@ export const useProgramIndicators = (page: number, pageSize: number) => {
   );
 };
 
-export const useOrganisationUnitGroups = (page: number, pageSize: number) => {
+export const useOrganisationUnitGroups = (
+  page: number,
+  pageSize: number,
+  q = ""
+) => {
   const engine = useDataEngine();
+  let params: { [key: string]: any } = {
+    page,
+    pageSize,
+    fields: "id,name",
+  };
+  if (q) {
+    params = { ...params, filter: `identifiable:token:${q}` };
+  }
   const query = {
     elements: {
       resource: "organisationUnitGroups.json",
-      params: {
-        page,
-        pageSize,
-        fields: "id,name",
-      },
+      params,
     },
   };
   return useQuery<{ id: string; name: string }[], Error>(
@@ -472,16 +612,24 @@ export const useOrganisationUnitGroups = (page: number, pageSize: number) => {
   );
 };
 
-export const useOrganisationUnitLevels = (page: number, pageSize: number) => {
+export const useOrganisationUnitLevels = (
+  page: number,
+  pageSize: number,
+  q = ""
+) => {
   const engine = useDataEngine();
+  let params: { [key: string]: any } = {
+    page,
+    pageSize,
+    fields: "id,level,name",
+  };
+  if (q) {
+    params = { ...params, filter: `identifiable:token:${q}` };
+  }
   const query = {
     elements: {
       resource: "organisationUnitLevels.json",
-      params: {
-        page,
-        pageSize,
-        fields: "id,level,name",
-      },
+      params,
     },
   };
   return useQuery<{ id: string; name: string; level: number }[], Error>(
@@ -495,19 +643,6 @@ export const useOrganisationUnitLevels = (page: number, pageSize: number) => {
       }: any = await engine.query(query);
       addPagination({ totalOrganisationUnitLevels });
       return organisationUnitLevels;
-    }
-  );
-};
-
-const useDataSourceQuery = (
-  dataSource: IDataSource,
-  url: string,
-  params: { [key: string]: any }
-) => {
-  return useQuery<any, Error>(
-    ["data-source", url, ...Object.values(params)],
-    async () => {
-      return queryDataSource(dataSource, url, params);
     }
   );
 };
@@ -530,133 +665,280 @@ const joinItems = (items: string[][], joiner: "dimension" | "filter") => {
     .join("&");
 };
 
-const makeDHIS2Query = (data: IData) => {
-  if (data.type === "ANALYTICS") {
-    const ouDimensions = findDimension(data.dataDimensions, "dimension", "ou");
-    const ouFilters = findDimension(data.dataDimensions, "filter", "ou");
-    const iDimensions = findDimension(data.dataDimensions, "dimension", "i");
-    const iFilters = findDimension(data.dataDimensions, "filter", "i");
-    const peDimensions = findDimension(data.dataDimensions, "dimension", "pe");
-    const peFilters = findDimension(data.dataDimensions, "filter", "pe");
+const makeDHIS2Query = (
+  data: IData,
+  globalFilters: { [key: string]: any } = {}
+) => {
+  const ouDimensions = findDimension(data.dataDimensions, "dimension", "ou");
+  const ouFilters = findDimension(data.dataDimensions, "filter", "ou");
+  const iDimensions = findDimension(data.dataDimensions, "dimension", "i");
+  const iFilters = findDimension(data.dataDimensions, "filter", "i");
+  const peDimensions = findDimension(data.dataDimensions, "dimension", "pe");
+  const peFilters = findDimension(data.dataDimensions, "filter", "pe");
+  return [
+    joinItems(
+      [
+        [globalFilters[ouFilters]?.join(";") || ouFilters, "ou"],
+        [globalFilters[iFilters]?.join(";") || iFilters, "dx"],
+        [globalFilters[peFilters]?.join(";") || peFilters, "pe"],
+      ],
+      "filter"
+    ),
+    joinItems(
+      [
+        [globalFilters[ouDimensions]?.join(";") || ouDimensions, "ou"],
+        [globalFilters[iDimensions]?.join(";") || iDimensions, "dx"],
+        [globalFilters[peDimensions]?.join(";") || peDimensions, "pe"],
+      ],
+      "dimension"
+    ),
+  ].join("&");
+};
 
-    return [
-      joinItems(
-        [
-          [ouFilters, "ou"],
-          [iFilters, "dx"],
-          [peFilters, "pe"],
-        ],
-        "filter"
-      ),
-      joinItems(
-        [
-          [ouDimensions, "ou"],
-          [iDimensions, "dx"],
-          [peDimensions, "pe"],
-        ],
-        "dimension"
-      ),
-    ].join("&");
+const makeSQLViewsQueries = (
+  expressions: IExpressions = {},
+  globalFilters: { [key: string]: any } = {}
+) => {
+  return Object.entries(expressions)
+    .flatMap(([col, val]) => {
+      if (val.isGlobal) {
+        if (globalFilters[val.value]) {
+          return [`var=${col}:${globalFilters[val.value]}`];
+        }
+        return [];
+      }
+      return [`var=${col}:${val.value}`];
+    })
+    .join("&");
+};
+
+const generateDHIS2Query = (
+  indicator: IIndicator,
+  globalFilters: { [key: string]: any } = {}
+) => {
+  let queries = {};
+  if (
+    indicator.numerator?.type === "ANALYTICS" &&
+    Object.keys(indicator.numerator.dataDimensions).length > 0
+  ) {
+    const params = makeDHIS2Query(indicator.numerator, globalFilters);
+    if (params) {
+      queries = {
+        numerator: {
+          resource: `analytics.json?${params}`,
+        },
+      };
+    }
+  } else if (
+    indicator.numerator?.type === "SQL_VIEW" &&
+    Object.keys(indicator.numerator.dataDimensions).length > 0
+  ) {
+    let currentParams = "";
+    const params = makeSQLViewsQueries(
+      indicator.numerator.expressions,
+      globalFilters
+    );
+    if (params) {
+      currentParams = `?${params}`;
+    }
+    queries = {
+      numerator: {
+        resource: `sqlViews/${
+          Object.keys(indicator.numerator.dataDimensions)[0]
+        }/data.json${currentParams}`,
+      },
+    };
   }
-  if (data.type === "SQL_VIEW") {
+  if (
+    indicator.denominator?.type === "ANALYTICS" &&
+    Object.keys(indicator.denominator.dataDimensions).length > 0
+  ) {
+    const params = makeDHIS2Query(indicator.denominator, globalFilters);
+    if (params) {
+      queries = {
+        ...queries,
+        denominator: {
+          resource: `analytics.json?${params}`,
+        },
+      };
+    }
+  } else if (
+    indicator.denominator?.type === "SQL_VIEW" &&
+    Object.keys(indicator.denominator.dataDimensions).length > 0
+  ) {
+    let currentParams = "";
+    const params = makeSQLViewsQueries(
+      indicator.denominator.expressions,
+      globalFilters
+    );
+    if (params) {
+      currentParams = `?${params}`;
+    }
+    queries = {
+      denominator: {
+        resource: `sqlViews/${
+          Object.keys(indicator.denominator.dataDimensions)[0]
+        }/data.json${currentParams}`,
+      },
+    };
   }
-  if (data.type === "OTHER") {
-  }
-  return "";
+  return queries;
+};
+
+const generateKeys = (
+  indicator?: IIndicator,
+  globalFilters: { [key: string]: any } = {}
+) => {
+  const numKeys = Object.keys(indicator?.numerator?.dataDimensions || {});
+  const denKeys = Object.keys(indicator?.denominator?.dataDimensions || {});
+  const numExpressions = Object.entries(
+    indicator?.numerator?.expressions || {}
+  ).map(([e, value]) => {
+    return value.value;
+  });
+  const denExpressions = Object.entries(
+    indicator?.denominator?.expressions || {}
+  ).map(([e, value]) => {
+    return value.value;
+  });
+
+  const all = uniq([
+    ...numKeys,
+    ...denKeys,
+    ...numExpressions,
+    ...denExpressions,
+  ]).flatMap((id) => {
+    return globalFilters[id] || [id];
+  });
+  return all;
 };
 
 export const useVisualization = (
   visualization: IVisualization,
-  visualizationQueries: IIndicator[],
-  dataSources: IDataSource[]
+  indicator?: IIndicator,
+  dataSource?: IDataSource,
+  refreshInterval?: string,
+  globalFilters?: { [key: string]: any }
 ) => {
   const engine = useDataEngine();
+  let currentInterval: boolean | number = false;
+  if (refreshInterval && refreshInterval !== "off") {
+    currentInterval = Number(refreshInterval) * 1000;
+  }
+  const otherKeys = generateKeys(indicator, globalFilters);
   return useQuery<any, Error>(
-    ["visualizations", encodeToBinary(JSON.stringify(visualization))],
+    ["visualizations", indicator?.id, ...otherKeys],
     async () => {
-      const allQueries = visualization.indicators.flatMap((i: string) => {
-        const indicator = visualizationQueries.find((v) => v.id === i);
-        const dataSource = dataSources.find((d) => {
-          return d.id === indicator?.dataSource;
-        });
-        if (indicator && dataSource && dataSource.isCurrentDHIS2) {
-          let queries = {};
-          if (
-            indicator.numerator.type === "ANALYTICS" &&
-            Object.keys(indicator.numerator.dataDimensions).length > 0
-          ) {
-            const params = makeDHIS2Query(indicator.numerator);
-            if (params) {
-              queries = {
-                numerator: {
-                  resource: `analytics.json?${params}`,
-                },
-              };
-            }
-          } else if (
-            indicator.numerator.type === "SQL_VIEW" &&
-            Object.keys(indicator.numerator.dataDimensions).length > 0
-          ) {
-            queries = {
-              numerator: {
-                resource: `sqlViews/${
-                  Object.keys(indicator.numerator.dataDimensions)[0]
-                }/data.json`,
-              },
-            };
+      if (indicator && dataSource && dataSource.isCurrentDHIS2) {
+        const queries = generateDHIS2Query(indicator, globalFilters);
+        const data = await engine.query(queries);
+        let processed: any[] = [];
+        let metadata = {};
+
+        if (data.numerator && data.denominator) {
+          const numerator: any = data.numerator;
+          const denominator: any = data.denominator;
+
+          let denRows = [];
+          let numRows = [];
+          let denHeaders: any[] = [];
+
+          if (numerator && numerator.listGrid) {
+            const { rows } = numerator.listGrid;
+            numRows = rows;
+          } else if (numerator) {
+            const {
+              rows,
+              metaData: { items },
+            } = numerator;
+            numRows = rows;
+            metadata = items;
           }
-          if (!indicator.useInBuildIndicators) {
-            if (
-              indicator.denominator.type === "ANALYTICS" &&
-              Object.keys(indicator.denominator.dataDimensions).length > 0
-            ) {
-              const params = makeDHIS2Query(indicator.denominator);
-              if (params) {
-                queries = {
-                  ...queries,
-                  denominator: {
-                    resource: `analytics.json?${params}`,
-                  },
-                };
-              }
-            } else if (
-              indicator.denominator.type === "SQL_VIEW" &&
-              Object.keys(indicator.denominator.dataDimensions).length > 0
-            ) {
-              queries = {
-                denominator: {
-                  resource: `sqlViews/${
-                    Object.keys(indicator.denominator.dataDimensions)[0]
-                  }/data.json`,
-                },
-              };
-            }
+          if (denominator && denominator.listGrid) {
+            const { headers, rows } = denominator.listGrid;
+            denRows = rows;
+            denHeaders = headers;
+          } else if (denominator) {
+            const {
+              headers,
+              rows,
+              metaData: { items },
+            } = denominator;
+            denRows = rows;
+            denHeaders = headers;
+            metadata = { ...metadata, ...items };
           }
-          return engine.query(queries);
-        } else if (dataSource?.type === "ELASTICSEARCH") {
-          let queries: Promise<any>[] = [];
-          const api = axios.create({
-            baseURL: dataSource.authentication.url,
+          const numerators = fromPairs<number>(
+            numRows.map((r: string[]) => [
+              r.slice(0, -1).join(""),
+              Number(r[r.length - 1]),
+            ])
+          );
+          processed = denRows.map((r: string[]) => {
+            const currentDenKey = r.slice(0, -1).join("");
+            const currentDenValue = Number(r[r.length - 1]);
+            return fromPairs(
+              denHeaders.map((h: any, i: number) => {
+                if (i === denHeaders.length - 1) {
+                  const currentNum = numerators[currentDenKey] || 0;
+                  return [h.name, (currentNum * 100) / currentDenValue];
+                }
+                return [h.name, r[i]];
+              })
+            );
           });
-          if (indicator && indicator.numerator.query) {
-            queries = [
-              ...queries,
-              api.post("", JSON.parse(indicator.numerator.query)),
-            ];
+        } else if (data.numerator) {
+          const numerator: any = data.numerator;
+          if (numerator && numerator.listGrid) {
+            const { headers, rows } = numerator.listGrid;
+            processed = rows.map((row: string[]) => {
+              return fromPairs(
+                headers.map((h: any, i: number) => [h.name, row[i]])
+              );
+            });
+          } else if (numerator) {
+            const {
+              headers,
+              rows,
+              metaData: { items },
+            } = numerator;
+            processed = rows.map((row: string[]) => {
+              return fromPairs(
+                headers.map((h: any, i: number) => [h.name, row[i]])
+              );
+            });
+            metadata = items;
           }
-          if (indicator && indicator.denominator.query) {
-            queries = [
-              ...queries,
-              api.post("", JSON.parse(indicator.denominator.query)),
-            ];
-          }
-          return queries;
         }
-      });
-      if (allQueries) {
-        return await Promise.all(allQueries);
+        updateVisualizationData({
+          visualizationId: visualization.id,
+          data: processed,
+        });
+        updateVisualizationMetadata({
+          visualizationId: visualization.id,
+          data: metadata,
+        });
+      } else if (dataSource?.type === "ELASTICSEARCH") {
+        if (indicator && indicator.query) {
+          const queryString = JSON.parse(
+            indicator.query
+              .replaceAll("${ou}", globalFilters?.["mclvD0Z9mfT"])
+              .replaceAll("${pe}", globalFilters?.["m5D13FqKZwN"])
+              .replaceAll("${le}", globalFilters?.["GQhi6pRnTKF"])
+              .replaceAll("${gp}", globalFilters?.["of2WvtwqbHR"])
+          );
+          const { data } = await axios.post(
+            dataSource.authentication.url,
+            queryString
+          );
+          updateVisualizationData({
+            visualizationId: visualization.id,
+            data: traverse(data, queryString),
+          });
+        }
       }
-      return [];
-    }
+      return true;
+    },
+    { refetchInterval: currentInterval }
   );
 };

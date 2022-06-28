@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Box,
   Button,
@@ -12,24 +11,33 @@ import {
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useQueryClient } from "react-query";
 import {
   changeIndicatorAttribute,
   changeNumeratorDimension,
   changeUseIndicators,
   setIndicator,
+  setShowSider,
 } from "../../Events";
 import { FormGenerics } from "../../interfaces";
-import { $hasDHIS2, $indicator, createIndicator } from "../../Store";
+import {
+  $dataSourceType,
+  $hasDHIS2,
+  $indicator,
+  createIndicator,
+} from "../../Store";
 import { displayDataSourceType } from "../data-sources";
-import DenominatorDialog from "../dialogs/DenominatorDialog";
-import NumeratorDialog from "../dialogs/NumeratorDialog";
 import NamespaceSelect from "../NamespaceSelect";
+
+import "jsoneditor-react/es/editor.min.css";
+
 const Indicator = () => {
   const search = useSearch<FormGenerics>();
   const indicator = useStore($indicator);
   const hasDHIS2 = useStore($hasDHIS2);
+  const dataSourceType = useStore($dataSourceType);
+
   const [loading, setLoading] = useState<boolean>(false);
   const engine = useDataEngine();
   const queryClient = useQueryClient();
@@ -72,28 +80,28 @@ const Indicator = () => {
             Use DHIS2 Indicators
           </Checkbox>
         )}
+        <Stack>
+          <Text>Name</Text>
+          <Input
+            value={indicator.name}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              changeIndicatorAttribute({
+                attribute: "name",
+                value: e.target.value,
+              })
+            }
+          />
+        </Stack>
         {indicator.useInBuildIndicators ? (
           <Stack>
             {displayDataSourceType({
-              dataSourceType: "DHIS2",
+              dataSourceType,
               onChange: changeNumeratorDimension,
               denNum: indicator.numerator,
             })}
           </Stack>
         ) : (
           <>
-            <Stack>
-              <Text>Name</Text>
-              <Input
-                value={indicator.name}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  changeIndicatorAttribute({
-                    attribute: "name",
-                    value: e.target.value,
-                  })
-                }
-              />
-            </Stack>
             <Stack>
               <Text>Description</Text>
               <Textarea
@@ -108,9 +116,9 @@ const Indicator = () => {
             </Stack>
             <Stack>
               <Text>Factor Expression</Text>
-              <Textarea
+              <Input
                 value={indicator.factor}
-                onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   changeIndicatorAttribute({
                     attribute: "factor",
                     value: e.target.value,
@@ -118,10 +126,46 @@ const Indicator = () => {
                 }
               />
             </Stack>
-            <Stack direction="row" spacing="50px">
-              <NumeratorDialog />
-              <DenominatorDialog />
-            </Stack>
+
+            {dataSourceType === "ELASTICSEARCH" && (
+              <Stack>
+                <Text>Query</Text>
+                <Textarea
+                  rows={20}
+                  value={indicator.query}
+                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                    changeIndicatorAttribute({
+                      attribute: "query",
+                      value: e.target.value,
+                    })
+                  }
+                />
+              </Stack>
+            )}
+            {dataSourceType !== "ELASTICSEARCH" && (
+              <Stack direction="row" spacing="50px">
+                <Button
+                  onClick={() =>
+                    navigate({
+                      to: `/indicators/${indicator.id}/numerator`,
+                      search,
+                    })
+                  }
+                >
+                  Numerator
+                </Button>
+                <Button
+                  onClick={() =>
+                    navigate({
+                      to: `/indicators/${indicator.id}/denominator`,
+                      search,
+                    })
+                  }
+                >
+                  Denominator
+                </Button>
+              </Stack>
+            )}
           </>
         )}
         <Stack direction="row">
@@ -129,7 +173,7 @@ const Indicator = () => {
             colorScheme="red"
             onClick={() => {
               setIndicator(createIndicator());
-              navigate({ to: "/indicators" });
+              navigate({ to: "/indicators", search });
             }}
           >
             Cancel

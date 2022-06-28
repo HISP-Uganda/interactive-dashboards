@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   Button,
   Spacer,
@@ -8,24 +9,30 @@ import {
   Td,
   Th,
   Thead,
-  Tr
+  Tr,
 } from "@chakra-ui/react";
 import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { setCategory } from "../../Events";
+import { setCategory, setShowSider } from "../../Events";
 import { ICategory } from "../../interfaces";
 import { useCategories } from "../../Queries";
 import { $categories } from "../../Store";
+import { generateUid } from "../../utils/uid";
 
 const Categories = () => {
   const navigate = useNavigate();
   const categories = useStore($categories);
   const { isLoading, isSuccess, isError, error } = useCategories();
+  useEffect(() => {
+    setShowSider(true);
+  }, []);
   return (
     <Stack flex={1} p="20px">
       <Stack direction="row">
         <Spacer />
-        <Button onClick={() => navigate({ to: "/categories/form" })}>
+        <Button
+          onClick={() => navigate({ to: `/categories/${generateUid()}` })}
+        >
           Add Category
         </Button>
       </Stack>
@@ -45,7 +52,10 @@ const Categories = () => {
                 cursor="pointer"
                 onClick={() => {
                   setCategory(category);
-                  navigate({ to: "/categories/form", search: { edit: true } });
+                  navigate({
+                    to: `/categories/${category.id}`,
+                    search: { edit: true },
+                  });
                 }}
               >
                 <Td>{category.name}</Td>

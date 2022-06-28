@@ -1,30 +1,28 @@
-import React from "react";
 import {
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
   Stack,
-  Text,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
 } from "@chakra-ui/react";
-import DataElements from "./DataElements";
-import Indicators from "./Indicators";
-import SQLViews from "./SQLViews";
-import ProgramIndicators from "./ProgramIndicators";
+import { useStore } from "effector-react";
 import { IndicatorProps } from "../../interfaces";
 import { $indicator } from "../../Store";
-import { useStore } from "effector-react";
-import OrgUnitTree from "../OrgUnitTree";
+import OrgUnitTree from "./OrgUnitTree";
+import DataElements from "./DataElements";
+import Indicators from "./Indicators";
 import OrganizationUnitGroups from "./OrganisationUnitGroups";
 import OrganizationUnitLevels from "./OrganisationUnitLevels";
 import Periods from "./Periods";
+import ProgramIndicators from "./ProgramIndicators";
+import SQLViews from "./SQLViews";
 
-const DHIS2 = ({ onChange, denNum }: IndicatorProps) => {
+const DHIS2 = ({ onChange, denNum, changeQuery }: IndicatorProps) => {
   const indicator = useStore($indicator);
   return (
     <Stack>
-      {denNum.type === "ANALYTICS" && (
+      {denNum?.type === "ANALYTICS" && (
         <Tabs>
           <TabList>
             <Tab>Indicators</Tab>
@@ -62,10 +60,14 @@ const DHIS2 = ({ onChange, denNum }: IndicatorProps) => {
           </TabPanels>
         </Tabs>
       )}
-      {denNum.type === "SQL_VIEW" && !indicator.useInBuildIndicators && (
-        <SQLViews denNum={denNum} onChange={onChange} />
+      {denNum?.type === "SQL_VIEW" && (
+        <SQLViews
+          denNum={denNum}
+          onChange={onChange}
+          changeQuery={changeQuery}
+        />
       )}
-      {denNum.type === "OTHER" && <Text>Coming soon</Text>}
+      {/* {denNum?.type === "OTHER" && <Text>Coming soon</Text>} */}
     </Stack>
   );
 };

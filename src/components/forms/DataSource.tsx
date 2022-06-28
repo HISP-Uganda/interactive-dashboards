@@ -17,7 +17,7 @@ import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "react-query";
-import { setDataSource } from "../../Events";
+import { setDataSource, setShowSider } from "../../Events";
 import { FormGenerics, IDataSource } from "../../interfaces";
 import { $dataSource, createDataSource } from "../../Store";
 
@@ -65,6 +65,10 @@ const DataSource = () => {
       setValue("isCurrentDHIS2", false);
     }
   }, [type]);
+
+  useEffect(() => {
+    setShowSider(true);
+  }, []);
   return (
     <Box flex={1} p="20px">
       <form onSubmit={handleSubmit(onSubmit)}>

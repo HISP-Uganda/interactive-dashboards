@@ -1,0 +1,40 @@
+{
+  "index": "repo",
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "dx": "wUDxFVBapIc jmpvzaJi5c0 JfOGWtiSj1J"
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "numerator": {
+      "filter": { "match": { "dx": "wUDxFVBapIc" } },
+      "aggs": {
+        "total": {
+          "terms": {
+            "field": "dx.keyword"
+          }
+        }
+      },
+      "aggs": {
+        "pe": {
+          "terms": {
+            "field": "monthly.keyword"
+          },
+          "aggs": {
+            "total": {
+              "sum": {
+                "field": "value"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

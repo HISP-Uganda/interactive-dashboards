@@ -1,36 +1,77 @@
+import { ChangeEvent } from "react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import {
   Button,
+  Input,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Spacer,
   Stack,
+  Text,
+  useDisclosure,
+  Textarea,
+  Checkbox,
 } from "@chakra-ui/react";
+import { GroupBase, Select } from "chakra-react-select";
+
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { Layout, Layouts, Responsive, WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import {
+  changeCategory,
+  changeDashboardDescription,
+  changeDashboardName,
   changeLayouts,
+  changePeriods,
+  changeSelectedCategory,
+  changeSelectedDashboard,
   increment,
+  setCurrentDashboard,
   setCurrentSection,
+  setDashboards,
   setShowSider,
-  toggle,
   toggleDashboard,
 } from "../../Events";
-import { FormGenerics, ISection } from "../../interfaces";
-import { $dashboard, $store, createSection } from "../../Store";
+import {
+  FormGenerics,
+  IDashboard,
+  ISection,
+  Item,
+  Option,
+} from "../../interfaces";
+import {
+  $categories,
+  $categoryOptions,
+  $dashboard,
+  $dashboards,
+  $store,
+  createSection,
+} from "../../Store";
+import AutoRefreshPicker from "../AutoRefreshPicker";
+import DashboardFilter from "../filters/DashboardFilter";
+import OUTree from "../OUTreeSelect";
+import PeriodPicker from "../PeriodPicker";
 import Visualization from "../visualizations/Visualization";
 const ReactGridLayout = WidthProvider(Responsive);
 const Dashboard = () => {
   const search = useSearch<FormGenerics>();
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
   const engine = useDataEngine();
+  const dashboards = useStore($dashboards);
   const updateDashboard = async (data: any) => {
     let mutation: any = {
       type: "create",
@@ -46,25 +87,44 @@ const Dashboard = () => {
       };
     }
     await engine.mutate(mutation);
+    onClose();
+  };
+  
+  const togglePublish = async (data: IDashboard, value: boolean) => {
+    let mutation: any = {
+      type: "update",
+      resource: `dataStore/i-dashboards`,
+      data: { ...data, published: true },
+      id: data.id,
+    };
+    await engine.mutate(mutation);
+    setDashboards(
+      dashboards.map((d) => {
+        if (data.id === d.id) {
+          return { ...d, published: value };
+        }
+        return d;
+      })
+    );
+    setCurrentDashboard({ ...data, published: value });
   };
   const store = useStore($store);
   const dashboard = useStore($dashboard);
-  const escFunction = useCallback((event) => {
-    if (event.keyCode === 27) {
-      toggle();
-    }
-  }, []);
-
-  useEffect(() => {
-    document.addEventListener("keydown", escFunction);
-    return () => {
-      document.removeEventListener("keydown", escFunction);
-    };
-  }, [escFunction]);
-
+  const categoryOptions = useStore($categoryOptions);
+  const onChangePeriods = (periods: Item[]) => {
+    changePeriods(periods);
+  };
   useEffect(() => {
     setShowSider(false);
+    // changeSelectedDashboard(dashboard.id);
+    // changeSelectedCategory(dashboard.category || "");
   }, []);
+  // useEffect(() => {
+  //   const search = dashboards.find((d) => d.id === store.selectedDashboard);
+  //   if (search) {
+  //     setCurrentDashboard(search);
+  //   }
+  // }, [store.selectedDashboard]);
   return (
     <Stack spacing="0">
       {dashboard.showTop && (
@@ -75,41 +135,63 @@ const Dashboard = () => {
           h="48px"
           p="5px"
         >
-          {dashboard.mode === "edit" && (
+          <DashboardFilter />
+
+          <Button size="sm" type="button" onClick={() => increment(1)}>
+            +
+          </Button>
+          <Button size="sm" type="button" onClick={() => increment(-1)}>
+            -
+          </Button>
+          <Spacer />
+          <Text>Filter</Text>
+          {store.isAdmin && (
             <>
               <Button
+                size="sm"
                 type="button"
                 onClick={() => {
                   setCurrentSection(createSection());
-                  navigate({ to: "/dashboards/section", search });
+                  navigate({
+                    to: `/dashboards/${dashboard.id}/section`,
+                    search,
+                  });
                 }}
               >
                 Add section
               </Button>
-              <Button type="button" onClick={() => increment(1)}>
-                Increase
+              <Button size="sm" type="button" onClick={onOpen}>
+                Save
               </Button>
-              <Button type="button" onClick={() => increment(-1)}>
-                Reduce
-              </Button>
-              {dashboard?.published && (
-                <Button onClick={() => toggleDashboard(false)}>Edit</Button>
+              {dashboard.published && (
+                <Button
+                  size="sm"
+                  onClick={() => togglePublish(dashboard, false)}
+                >
+                  Unpublish
+                </Button>
               )}
-              {!dashboard?.published && (
-                <Button onClick={() => toggleDashboard(true)}>Publish</Button>
+              {!dashboard.published && (
+                <Button
+                  size="sm"
+                  onClick={() => togglePublish(dashboard, true)}
+                >
+                  Publish
+                </Button>
               )}
             </>
           )}
-          <Spacer />
-          <Button type="button" onClick={() => updateDashboard(dashboard)}>
-            Save Dashboard
-          </Button>
-          <Button onClick={() => toggle()}>Toggle</Button>
+          <OUTree />
+          <PeriodPicker
+            selectedPeriods={store.periods}
+            onChange={onChangePeriods}
+          />
+          <AutoRefreshPicker />
         </Stack>
       )}
       <Stack
         h={`calc(100vh - ${dashboard.showTop ? 96 : 48}px)`}
-        w={`calc(100vw - ${store.showSider ? 128 : 0}px)`}
+        w="100vw"
         overflow="auto"
         bg="gray.50"
       >
@@ -162,7 +244,7 @@ const Dashboard = () => {
                     <MenuItem
                       onClick={() => {
                         setCurrentSection(section);
-                        navigate({ to: "/dashboards/section" });
+                        navigate({ to: `/dashboards/${dashboard.id}/section` });
                       }}
                     >
                       Edit
@@ -170,7 +252,7 @@ const Dashboard = () => {
                   </MenuList>
                 </Menu>
               </Stack>
-              <Stack flex={1} direction="row">
+              <Stack direction={section.direction} w="100%" h="100%">
                 {section.visualizations.map((visualization) => (
                   <Visualization
                     key={visualization.id}
@@ -182,8 +264,56 @@ const Dashboard = () => {
           ))}
         </ReactGridLayout>
       </Stack>
+
+      <Modal isOpen={isOpen} onClose={onClose} size="2xl">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Dashboard Options</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Stack spacing="20px">
+              <Stack>
+                <Text>Category</Text>
+                <Select<Option, false, GroupBase<Option>>
+                  options={categoryOptions}
+                  value={categoryOptions.find(
+                    (d: Option) => d.value === dashboard.category
+                  )}
+                  onChange={(e) => changeCategory(e?.value || "")}
+                />
+              </Stack>
+              <Stack>
+                <Text>Name</Text>
+                <Input
+                  value={dashboard.name}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    changeDashboardName(e.target.value)
+                  }
+                />
+              </Stack>
+              <Stack>
+                <Text>Description</Text>
+                <Textarea
+                  value={dashboard.description}
+                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                    changeDashboardDescription(e.target.value)
+                  }
+                />
+              </Stack>
+              {/* <Stack>
+                <Checkbox value={}>Default Dashboard</Checkbox>
+              </Stack> */}
+            </Stack>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="red" mr={3} onClick={onClose}>
+              Close
+            </Button>
+            <Button onClick={() => updateDashboard(dashboard)}>Save</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Stack>
-    // <NewVisualizationDialog isOpen={isOpen} onClose={onClose} />
   );
 };
 
