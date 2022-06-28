@@ -26,7 +26,7 @@ import {
   changeDenominatorDimension,
   changeDataSource,
   changeUseIndicators,
-  changeVisualizationQueries,
+  setVisualizationQueries,
   addVisualization2Section,
   changeDefaults,
   changeLayouts,
@@ -34,6 +34,19 @@ import {
   toggle,
   setShowSider,
   setDataSource,
+  setCategory,
+  setIndicator,
+  setCategories,
+  setDashboards,
+  changeVisualizationAttribute,
+  changeSectionAttribute,
+  changeVisualizationProperties,
+  setUserUnits,
+  setSelectedUnits,
+  setZoom,
+  setCurrentLevel,
+  setSublevels,
+  setSublevel,
 } from "./Events";
 import {
   ICategory,
@@ -56,8 +69,17 @@ export const createSection = (): ISection => {
     y: 0,
     w: 1,
     h: 1,
-    title: "test",
+    title: "Example section",
     visualizations: [],
+  };
+};
+
+export const createCategory = (): ICategory => {
+  const id = generateUid();
+  return {
+    id,
+    name: "",
+    description: "",
   };
 };
 
@@ -74,10 +96,35 @@ export const createDataSource = (): IDataSource => {
   };
 };
 
+export const createIndicator = (): IIndicator => {
+  return {
+    id: generateUid(),
+    numerator: {
+      id: generateUid(),
+      type: "ANALYTICS",
+      dataDimensions: {},
+    },
+    denominator: {
+      id: generateUid(),
+      type: "ANALYTICS",
+      dataDimensions: {},
+    },
+    name: "",
+    dataSource: "",
+    description: "",
+    factor: "1",
+    useInBuildIndicators: false,
+  };
+};
+
 export const $store = domain
   .createStore<IStore>({
     categories: [],
     dashboards: [],
+    selectedUnits: "",
+    userUnits: [],
+    currentLevel: 3,
+    zoom: 6.0,
     visualizations: [],
     settings: [],
     organisationUnits: [],
@@ -94,6 +141,27 @@ export const $store = domain
       totalOrganisationUnitGroups: 0,
     },
   })
+
+
+  .on(setUserUnits, (state, userUnits) => {
+    return { ...state, userUnits };
+  })
+  .on(setSelectedUnits, (state, selectedUnits) => {
+    return { ...state, selectedUnits };
+  })
+  .on(setCurrentLevel, (state, currentLevel) => {
+    return { ...state, currentLevel };
+  })
+  .on(setZoom, (state, zoom) => {
+    return { ...state, zoom };
+  })
+  .on(setSublevels, (state, sublevels) => { 
+    return { ...state, sublevels };
+  })
+  .on(setSublevel, (state, sublevel) => {
+    return { ...state, sublevel };
+  })
+  
   .on(
     loadDefaults,
     (state, { dashboards, categories, organisationUnits, dataSources }) => {
@@ -106,12 +174,12 @@ export const $store = domain
       };
     }
   )
-  .on(addCategory, (state, category) => {
-    return {
-      ...state,
-      categories: [...state.categories, category],
-    };
-  })
+  // .on(addCategory, (state, category) => {
+  //   return {
+  //     ...state,
+  //     categories: [...state.categories, category],
+  //   };
+  // })
   .on(setShowSider, (state, showSider) => {
     return { ...state, showSider };
   })
@@ -201,39 +269,13 @@ export const $store = domain
       paginations: { ...state.paginations, ...pagination },
     };
   });
-// .on(changeVisualizationQueries, (state, indicators) => {
-//   let visualization = state.visualization;
-//   if (visualization) {
-//     visualization = { ...visualization, indicators };
-//   }
-//   return {
-//     ...state,
-//     visualization,
-//   };
-// });
-
 export const $dataSource = domain
-  .createStore<IDataSource>({
-    id: generateUid(),
-    type: "DHIS2",
-    authentication: {
-      url: "",
-      username: "",
-      password: "",
-    },
-    isCurrentDHIS2: true,
-  })
+  .createStore<IDataSource>(createDataSource())
   .on(setDataSource, (_, dataSource) => dataSource);
 
-export const $category = domain.createStore<ICategory>({
-  id: generateUid(),
-  name: "",
-});
-
-export const $dataSources = domain
-  .createStore<IDataSource[]>([])
-  .on(setDataSources, (_, dataSources) => dataSources);
-export const $indicators = domain.createStore<IIndicator[]>([]);
+export const $category = domain
+  .createStore<ICategory>(createCategory())
+  .on(setCategory, (_, category) => category);
 
 export const $dashboard = domain
   .createStore<IDashboard>({
@@ -248,10 +290,19 @@ export const $dashboard = domain
     name: "New Dashboard",
   })
   .on(addSection, (state, section) => {
-    return {
-      ...state,
-      sections: [...state.sections, section],
-    };
+    const isNew = state.sections.find((s) => s.i === section.i);
+    let sections: ISection[] = state.sections;
+    if (isNew) {
+      sections = sections.map((s) => {
+        if (s.i === section.i) {
+          return section;
+        }
+        return s;
+      });
+    } else {
+      sections = [...sections, section];
+    }
+    return { ...state, sections };
   })
   .on(deleteSection, (state, section) => {
     const sections = state.sections.filter((s) => s.i !== section);
@@ -293,24 +344,7 @@ export const $dashboard = domain
   });
 
 export const $indicator = domain
-  .createStore<IIndicator>({
-    id: generateUid(),
-    numerator: {
-      id: generateUid(),
-      type: "ANALYTICS",
-      dataDimensions: {},
-    },
-    denominator: {
-      id: generateUid(),
-      type: "ANALYTICS",
-      dataDimensions: {},
-    },
-    name: "",
-    dataSource: "",
-    description: "",
-    factor: "1",
-    useInBuildIndicators: false,
-  })
+  .createStore<IIndicator>(createIndicator())
   .on(changeIndicatorAttribute, (state, { attribute, value }) => {
     return { ...state, [attribute]: value };
   })
@@ -455,18 +489,11 @@ export const $indicator = domain
   )
   .on(changeUseIndicators, (state, useInBuildIndicators) => {
     return { ...state, useInBuildIndicators };
-  });
+  })
+  .on(setIndicator, (_, indicator) => indicator);
 
 export const $section = domain
-  .createStore<ISection>({
-    title: "Section title",
-    visualizations: [],
-    i: generateUid(),
-    x: 0,
-    y: 0,
-    w: 1,
-    h: 1,
-  })
+  .createStore<ISection>(createSection())
   .on(setCurrentSection, (_, section) => section)
   .on(addVisualization2Section, (state) => {
     const visualization: IVisualization = {
@@ -474,12 +501,53 @@ export const $section = domain
       indicators: [],
       type: "",
       name: `Visualization ${state.visualizations.length + 1}`,
+      properties: {},
     };
     return {
       ...state,
       visualizations: [...state.visualizations, visualization],
     };
-  });
+  })
+  .on(
+    changeVisualizationAttribute,
+    (state, { attribute, value, visualization }) => {
+      const visualizations = state.visualizations.map((v: IVisualization) => {
+        if (v.id === visualization) {
+          return { ...v, [attribute]: value };
+        }
+        return v;
+      });
+      return { ...state, visualizations };
+    }
+  )
+  .on(changeSectionAttribute, (state, { attribute, value }) => {
+    return { ...state, [attribute]: value };
+  })
+  .on(
+    changeVisualizationProperties,
+    (state, { attribute, value, visualization }) => {
+      const visualizations = state.visualizations.map((v: IVisualization) => {
+        if (v.id === visualization) {
+          return { ...v, properties: { ...v.properties, [attribute]: value } };
+        }
+        return v;
+      });
+      return { ...state, visualizations };
+    }
+  );
+
+export const $dataSources = domain
+  .createStore<IDataSource[]>([])
+  .on(setDataSources, (_, dataSources) => dataSources);
+export const $indicators = domain
+  .createStore<IIndicator[]>([])
+  .on(setVisualizationQueries, (_, indicators) => indicators);
+export const $categories = domain
+  .createStore<ICategory[]>([])
+  .on(setCategories, (_, categories) => categories);
+export const $dashboards = domain
+  .createStore<IDashboard[]>([])
+  .on(setDashboards, (_, dashboards) => dashboards);
 
 export const $hasDHIS2 = combine(
   $indicator,
@@ -510,10 +578,10 @@ export const $dataSourceOptions = $dataSources.map((state) => {
     return current;
   });
 });
-forward({
-  from: addSection,
-  to: $section,
-});
+// forward({
+//   from: addSection,
+//   to: $section,
+// });
 
 // export const $layout = $store.map((state) => {
 //   const md = state.dashboard?.sections.map((s) => s.layout.md);

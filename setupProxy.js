@@ -17,7 +17,7 @@ const onProxyRes = (proxyRes) => {
 };
 // proxy middleware options
 const options = {
-  target: "https://hmis-repo.health.go.ug", // target host
+  target: "https://tbl-ecbss.health.go.ug", // target host
   onProxyReq,
   onProxyRes,
   changeOrigin: true, // needed for virtual hosted sites

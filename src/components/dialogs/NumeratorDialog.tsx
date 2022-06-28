@@ -72,27 +72,30 @@ const NumeratorDialog = () => {
                   }
                 />
               </Stack>
-              <Stack>
-                <Text>Type</Text>
-                <Select
-                  value={indicator.numerator.type}
-                  onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-                    changeNumeratorAttribute({
-                      attribute: "type",
-                      value: e.target.value,
-                    })
-                  }
-                >
-                  <option></option>
-                  <option value="SQL_VIEW">SQL Views</option>
-                  <option value="ANALYTICS">Analytics</option>
-                  <option value="OTHER">Others</option>
-                </Select>
-              </Stack>
+              {dataSourceType === "DHIS2" && (
+                <Stack>
+                  <Text>Type</Text>
+                  <Select
+                    value={indicator.numerator.type}
+                    onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                      changeNumeratorAttribute({
+                        attribute: "type",
+                        value: e.target.value,
+                      })
+                    }
+                  >
+                    <option></option>
+                    <option value="SQL_VIEW">SQL Views</option>
+                    <option value="ANALYTICS">Analytics</option>
+                  </Select>
+                </Stack>
+              )}
+
               {displayDataSourceType({
                 dataSourceType,
                 onChange: changeNumeratorDimension,
                 denNum: indicator.numerator,
+                changeQuery: changeNumeratorAttribute,
               })}
 
               {indicator.numerator.type === "SQL_VIEW" && (
@@ -188,9 +191,6 @@ const NumeratorDialog = () => {
           </ModalBody>
           <ModalFooter>
             <Stack direction="row">
-              {/* <Button onClick={onClose} colorScheme="red">
-                Close
-              </Button> */}
               <Button colorScheme="blue" onClick={onClose}>
                 Save Numerator
               </Button>

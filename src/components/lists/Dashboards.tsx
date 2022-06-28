@@ -11,16 +11,18 @@ import {
   Tr,
 } from "@chakra-ui/react";
 import { useNavigate } from "@tanstack/react-location";
-import { IDashboard } from "../interfaces";
-import { useNamespace } from "../Queries";
-import NewDashboardDialog from "./dialogs/NewDashboardDialog";
+import { useStore } from "effector-react";
+import { setCurrentDashboard } from "../../Events";
+import { IDashboard } from "../../interfaces";
+import { useDashboards } from "../../Queries";
+import { $dashboards } from "../../Store";
 
 const Dashboards = () => {
   const navigate = useNavigate();
-  const { isLoading, isSuccess, isError, data, error } =
-    useNamespace("i-dashboards");
+  const dashboards = useStore($dashboards);
+  const { isLoading, isSuccess, isError, error } = useDashboards();
   return (
-    <Stack flex={1} p="10px">
+    <Stack flex={1} p="20px">
       <Stack direction="row">
         <Spacer />{" "}
         <Button onClick={() => navigate({ to: "/dashboards/form" })}>
@@ -37,11 +39,14 @@ const Dashboards = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {data.map((dashboard: IDashboard) => (
+            {dashboards.map((dashboard: IDashboard) => (
               <Tr
                 key={dashboard.id}
                 cursor="pointer"
-                onClick={() => navigate({ to: `./${dashboard.id}` })}
+                onClick={() => {
+                  setCurrentDashboard(dashboard);
+                  navigate({ to: "/dashboards/form", search: { edit: true } });
+                }}
               >
                 <Td>{dashboard.id}</Td>
                 <Td>{dashboard.name}</Td>
@@ -50,6 +55,7 @@ const Dashboards = () => {
           </Tbody>
         </Table>
       )}
+      {isError && <pre>{JSON.stringify(error, null, 2)}</pre>}
     </Stack>
   );
 };
