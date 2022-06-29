@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
+import { Event } from "effector";
 import { Checkbox, Radio, RadioGroup, Stack } from "@chakra-ui/react";
 import { ChangeEvent } from "react";
 
@@ -8,6 +9,15 @@ type GlobalAndFilterProps = {
   setDimension: Dispatch<SetStateAction<"filter" | "dimension">>;
   setUseGlobal: Dispatch<SetStateAction<boolean>>;
   hasGlobalFilter?: boolean;
+  type: string;
+  onChange: Event<{
+    id: string;
+    what: string;
+    type: string;
+    remove?: boolean | undefined;
+    label?: string | undefined;
+  }>;
+  id: string;
 };
 
 const GlobalAndFilter = ({
@@ -15,6 +25,9 @@ const GlobalAndFilter = ({
   useGlobal,
   setDimension,
   setUseGlobal,
+  onChange,
+  type,
+  id,
   hasGlobalFilter = true,
 }: GlobalAndFilterProps) => {
   return (
@@ -30,9 +43,23 @@ const GlobalAndFilter = ({
       </RadioGroup>
       {hasGlobalFilter && (
         <Checkbox
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setUseGlobal(e.target.checked)
-          }
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            setUseGlobal(e.target.checked);
+            if (e.target.checked) {
+              onChange({
+                id,
+                type: dimension,
+                what: type,
+              });
+            } else {
+              onChange({
+                id,
+                type: dimension,
+                what: type,
+                remove: true,
+              });
+            }
+          }}
           checked={useGlobal}
         >
           Use Global Filter

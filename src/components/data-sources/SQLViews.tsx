@@ -1,67 +1,54 @@
-import { ChangeEvent } from "react";
-import {
-  Pagination,
-  PaginationContainer,
-  PaginationNext,
-  PaginationPage,
-  PaginationPageGroup,
-  PaginationPrevious,
-  PaginationSeparator,
-  usePagination,
-} from "@ajna/pagination";
-import {
-  Box,
-  CircularProgress,
-  Heading,
-  Select,
-  Stack,
-  Table,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tr,
-} from "@chakra-ui/react";
-import { useStore } from "effector-react";
-import { IndicatorProps } from "../../interfaces";
+import { Box, Progress, Stack, Text } from "@chakra-ui/react";
+import { GroupBase, Select } from "chakra-react-select";
+import { IndicatorProps, Option } from "../../interfaces";
 import { useSQLViews } from "../../Queries";
-import { $store } from "../../Store";
 
-const SQLViews = ({ denNum, onChange }: IndicatorProps) => {
-  const store = useStore($store);
+const SQLViews = ({ denNum, onChange, changeQuery }: IndicatorProps) => {
   const { isLoading, isSuccess, isError, error, data } = useSQLViews();
-
   return (
     <>
-      {isLoading && (
-        <CircularProgress isIndeterminate color="blue.700" thickness={3} />
-      )}
+      {isLoading && <Progress />}
       {isSuccess && (
         <Stack>
           <Text>SQL View</Text>
-          <Select
-            value={
-              data.find(
-                (d: any) =>
-                  Object.keys(denNum.dataDimensions).indexOf(d.id) !== -1
-              )?.id
-            }
-            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+          <Select<Option, false, GroupBase<Option>>
+            value={data
+              .map((d) => {
+                const o: Option = {
+                  label: d.name,
+                  value: d.id,
+                };
+                return o;
+              })
+              .find(
+                (pt) =>
+                  Object.keys(denNum?.dataDimensions || {}).indexOf(
+                    pt.value
+                  ) !== -1
+              )}
+            onChange={(e) => {
               onChange({
-                id: e.target.value,
+                id: e?.value || "",
                 type: "dimension",
                 what: "v",
-              })
-            }
-          >
-            <option></option>
-            {data.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name}
-              </option>
-            ))}
-          </Select>
+                replace: true,
+              });
+              if (changeQuery) {
+                changeQuery({
+                  attribute: "query",
+                  value: data.find((d: any) => d.id === e?.value)?.sqlQuery,
+                });
+              }
+            }}
+            options={data.map((d) => {
+              const o: Option = {
+                label: d.name,
+                value: d.id,
+              };
+              return o;
+            })}
+            isClearable
+          />
         </Stack>
       )}
       {isError && <Box>{error?.message}</Box>}

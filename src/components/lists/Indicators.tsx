@@ -1,29 +1,37 @@
 import {
-  Button, Spacer, Spinner,
+  Button,
+  Spacer,
+  Spinner,
   Stack,
   Table,
   Tbody,
   Td,
   Th,
   Thead,
-  Tr
+  Tr,
 } from "@chakra-ui/react";
 import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { setIndicator } from "../../Events";
+import { setIndicator, setVisualizationQueries } from "../../Events";
 import { IIndicator } from "../../interfaces";
 import { useVisualizationData } from "../../Queries";
-import { $indicators } from "../../Store";
+import { $indicators, createIndicator } from "../../Store";
 
 const Indicators = () => {
   const navigate = useNavigate();
   const indicators = useStore($indicators);
-  const { isLoading, isSuccess, isError, data, error } = useVisualizationData();
+  const { isLoading, isSuccess, isError, error } = useVisualizationData();
   return (
     <Stack flex={1} p="20px">
       <Stack direction="row">
-        <Spacer />{" "}
-        <Button onClick={() => navigate({ to: "/indicators/form" })}>
+        <Spacer />
+        <Button
+          onClick={() => {
+            const indicator = createIndicator();
+            setVisualizationQueries([...indicators, indicator]);
+            navigate({ to: `/indicators/${indicator.id}` });
+          }}
+        >
           Add Visualization Data
         </Button>
       </Stack>
@@ -47,7 +55,7 @@ const Indicators = () => {
                   onClick={() => {
                     setIndicator(indicator);
                     navigate({
-                      to: "/indicators/form",
+                      to: `/indicators/${indicator.id}`,
                       search: { edit: true },
                     });
                   }}

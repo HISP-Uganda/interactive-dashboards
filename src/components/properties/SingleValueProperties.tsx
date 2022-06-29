@@ -1,23 +1,13 @@
-import React from "react";
-import {
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-  Stack,
-} from "@chakra-ui/react";
+import { Stack } from "@chakra-ui/react";
 import { HexColorInput } from "react-colorful";
-import { useStore } from "effector-react";
-import { $store } from "../../Store";
-import { displayDataSourceType } from "../data-sources";
-import { IVisualization } from "../../interfaces";
 import { changeVisualizationProperties } from "../../Events";
+import { IVisualization } from "../../interfaces";
 
-type SingleProps = {
+const SingleValueProperties = ({
+  visualization,
+}: {
   visualization: IVisualization;
-};
-const SingleValueProperties = ({ visualization }: SingleProps) => {
+}) => {
   return (
     <Stack>
       <HexColorInput

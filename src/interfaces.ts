@@ -12,11 +12,11 @@ export interface Authentication {
   password: string;
   url: string;
 }
-export interface IExpression {
-  id: string;
-  key: string;
-  value: string;
-  isGlobal: boolean;
+export interface IExpressions {
+  [key: string]: {
+    value: any;
+    isGlobal?: boolean;
+  };
 }
 export interface IDataSource extends INamed {
   type: "DHIS2" | "ELASTICSEARCH" | "API";
@@ -34,21 +34,22 @@ export interface IDimension {
 }
 export interface IData extends INamed {
   query?: string;
-  expressions?: IExpression[];
+  expressions?: IExpressions;
   type: "SQL_VIEW" | "ANALYTICS" | "OTHER";
   dataDimensions: IDimension;
 }
 
 export interface IIndicator extends INamed {
-  numerator: IData;
-  denominator: IData;
+  numerator?: IData;
+  denominator?: IData;
   factor: string;
   dataSource?: string;
   useInBuildIndicators: boolean;
+  query?: string;
 }
 
 export interface IVisualization extends INamed {
-  indicators: string[];
+  indicator: string;
   type: string;
   refreshInterval?: number;
   properties: { [key: string]: any };
@@ -56,6 +57,7 @@ export interface IVisualization extends INamed {
 export interface ISection extends Layout {
   title: string;
   visualizations: IVisualization[];
+  direction: "row" | "column";
 }
 
 export interface IFilter {}
@@ -71,6 +73,7 @@ export interface IDashboard extends INamed {
   showSider: boolean;
   showTop: boolean;
   mode: "edit" | "view";
+  refreshInterval: string;
 }
 export interface Pagination {
   total: number;
@@ -87,37 +90,61 @@ export interface DataNode {
 export interface Option extends OptionBase {
   label: string;
   value: string;
+  id?: string;
 }
 
-export interface IStore {
-  userUnits: any[];
-  selectedUnits: string;
-  currentLevel: number;
-  zoom: number;
+export type Item = {
+  id: string;
+  name: string;
+};
 
-  categories: string[];
-  dashboards: string[];
-  dataSources: string[];
-  visualizations: string[];
-  settings: string[];
-  organisationUnits: DataNode[];
+export type PickerProps = {
+  selectedPeriods: Item[];
+  onChange: (periods: Item[]) => void;
+};
+export interface IStore {
   showSider: boolean;
+  organisations: React.Key[];
+  periods: Item[];
+  groups: string[];
+  levels: string[];
+  expandedKeys: React.Key[];
+  selectedCategory: string;
+  selectedDashboard: string;
+  isAdmin: boolean;
   hasDashboards: boolean;
-  hasDefaultDashboard: boolean;
-  paginations: { [key: string]: number };
 }
 
 export type IndicatorProps = {
-  denNum: IData;
+  denNum?: IData;
   onChange: Event<{
     id: string;
     what: string;
     type: string;
     remove?: boolean;
+    replace?: boolean;
     label?: string;
+  }>;
+  dataSourceType?: string;
+  changeQuery?: Event<{
+    attribute: "name" | "description" | "type" | "query";
+    value: any;
   }>;
 };
 
 export type FormGenerics = MakeGenerics<{
-  Search: { edit: boolean };
+  Search: {
+    edit: boolean;
+    category: string;
+    periods: string[];
+    levels: string;
+    groups: string[];
+    organisations: string[];
+  };
 }>;
+
+export type OUTreeProps = {
+  units: DataNode[];
+  levels: Option[];
+  groups: Option[];
+};

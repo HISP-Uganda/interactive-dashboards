@@ -9,12 +9,13 @@ import {
   Textarea,
   Spacer,
 } from "@chakra-ui/react";
+import { useEffect } from "react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "react-query";
 
 import { useStore } from "effector-react";
-import { addCategory, setCategory } from "../../Events";
+import { addCategory, setCategory, setShowSider } from "../../Events";
 import { FormGenerics, ICategory } from "../../interfaces";
 import { $category, createCategory } from "../../Store";
 import { useNavigate, useSearch } from "@tanstack/react-location";
@@ -53,6 +54,9 @@ const Category = () => {
     await add(values);
     navigate({ to: "/categories" });
   }
+  useEffect(() => {
+    setShowSider(true);
+  }, []);
   return (
     <Box flex={1} p="10px">
       <form onSubmit={handleSubmit(onSubmit)}>

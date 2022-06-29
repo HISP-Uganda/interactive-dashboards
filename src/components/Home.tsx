@@ -1,19 +1,33 @@
-import { Flex, Stack } from "@chakra-ui/react";
-import { useStore } from "effector-react";
+import { useEffect } from "react";
+import { Stack, Flex, Text } from "@chakra-ui/react";
 import { Navigate } from "@tanstack/react-location";
-import { $dashboard, $store } from "../Store";
+import { useStore } from "effector-react";
+import { setShowSider } from "../Events";
+import { $store } from "../Store";
 
 export default function Home() {
   const store = useStore($store);
-  const dashboard = useStore($dashboard);
+
+  useEffect(() => {
+    setShowSider(false);
+  }, []);
   return (
     <Stack>
-      {store.hasDashboards && store.hasDefaultDashboard ? (
-        <Navigate to={`/dashboards/${dashboard.id}`} />
+      {store.isAdmin ? (
+        <Navigate to="/data-sources" />
       ) : store.hasDashboards ? (
-        <Navigate to={`/dashboards`} />
+        <Navigate to={`/dashboards/${store.selectedDashboard}`} />
       ) : (
-        <Navigate to={`/data-sources`} />
+        <Flex
+          w="100vw"
+          alignItems="center"
+          justifyContent="center"
+          justifyItems="center"
+          alignContent="center"
+          h="calc(100vh - 48px)"
+        >
+          <Text fontSize="3vh">No dashboards have been created yet</Text>
+        </Flex>
       )}
     </Stack>
   );
