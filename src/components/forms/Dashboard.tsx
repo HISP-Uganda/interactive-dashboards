@@ -25,6 +25,7 @@ import { GroupBase, Select } from "chakra-react-select";
 
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
+import { DatePicker } from "antd";
 import { useStore } from "effector-react";
 import { useEffect } from "react";
 import { Layout, Layouts, Responsive, WidthProvider } from "react-grid-layout";
@@ -65,6 +66,9 @@ import DashboardFilter from "../filters/DashboardFilter";
 import OUTree from "../OUTreeSelect";
 import PeriodPicker from "../PeriodPicker";
 import Visualization from "../visualizations/Visualization";
+
+
+const { RangePicker } = DatePicker;
 const ReactGridLayout = WidthProvider(Responsive);
 const Dashboard = () => {
   const search = useSearch<FormGenerics>();
