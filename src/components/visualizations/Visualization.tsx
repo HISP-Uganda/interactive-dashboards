@@ -9,11 +9,18 @@ import {
   $indicators,
   $store,
 } from "../../Store";
+import AreaGraph from "./AreaGraph";
 import BarGraph from "./BarGraph";
+import BubbleMaps from "./BubbleMaps";
+import FunnelGraph from "./FunnelGraph";
+import GaugeGraph from "./GaugeGraph";
+import Histogram from "./Histogram";
 import LineGraph from "./LineGraph";
 import MapChart from "./MapChart";
 import PieChart from "./PieChart";
+import RadarGraph from "./RadarGraph";
 import SingleValue from "./SingleValue";
+import SunburstChart from "./SunburstChart";
 
 type VisualizationProps = {
   visualization: IVisualization;
@@ -38,6 +45,27 @@ const getVisualization = (visualization: IVisualization) => {
     ),
     line: (
       <LineGraph visualization={visualization} {...visualization.properties} />
+    ),
+    sunburst: (
+      <SunburstChart visualization={visualization} {...visualization.properties} />
+    ),
+    gauge: (
+      <GaugeGraph visualization={visualization} {...visualization.properties} />
+    ),
+    histogram: (
+      <Histogram visualization={visualization} {...visualization.properties} />
+    ),
+    area: (
+      <AreaGraph visualization={visualization} {...visualization.properties} />
+    ),
+    radar: (
+      <RadarGraph visualization={visualization} {...visualization.properties} />
+    ),
+    bubblemaps: (
+      <BubbleMaps visualization={visualization} {...visualization.properties} />
+    ),
+    funnelplot: (
+      <FunnelGraph visualization={visualization} {...visualization.properties} />
     ),
   };
   return allTypes[visualization.type];
