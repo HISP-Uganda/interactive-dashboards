@@ -1,10 +1,52 @@
-import React from 'react'
+import { useStore } from "effector-react";
+import Plot from "react-plotly.js";
+import { IVisualization } from "../../interfaces";
+import { $visualizationData, $visualizationMetadata } from "../../Store";
+import { processGraphs } from "../processors";
 
-const RadarGraph = () => {
+type RadarGraphProps = {
+    visualization: IVisualization;
+    category?: string;
+    series?: string;
+  };
+
+const RadarGraph = ({ visualization, category, series }: RadarGraphProps) => {
+    const visualizationData = useStore($visualizationData);
+  const metadata = useStore($visualizationMetadata);
+  const data = visualizationData[visualization.id]
+    ? visualizationData[visualization.id]
+    : [];
+
+    const datas:any = [
+        {
+        type: 'scatterpolar',
+        r: [39, 28, 8, 7, 28, 39],
+        theta: ['A','B','C', 'D', 'E', 'A'],
+        fill: 'toself',
+        name: 'Group A'
+        },
+        {
+        type: 'scatterpolar',
+        r: [1.5, 10, 39, 31, 15, 1.5],
+        theta: ['A','B','C', 'D', 'E', 'A'],
+        fill: 'toself',
+        name: 'Group B'
+        }
+      ]
+      
+      
     return (
-        <div>
-            
-        </div>
+        <Plot
+        data = {datas}
+        layout = {{
+            polar: {
+              radialaxis: {
+                visible: true,
+                range: [0, 50]
+              }
+            }
+          }}
+        />
     )
 }
 

@@ -47,6 +47,14 @@ const chartTypes: Option[] = [
   { value: "bar", label: "Bar" },
   { value: "pie", label: "Pie" },
   { value: "line", label: "Line" },
+  { value: "sunburst", label: "Sunburst" },
+  { value: "gauge", label: "Gauge" },
+  { value: "histogram", label: "Histogram" },
+  { value: "area", label: "Area Graph" },
+  { value: "radar", label: "Radar Graph" },
+  { value: "bubblemaps", label: "Bubbble Maps" },
+  { value: "funnelplot", label: "Funnel Graph" },
+  
 ];
 
 const VisualizationTypes = ({
@@ -160,6 +168,11 @@ const Section = () => {
             _hover={{ bg: "none" }}
             aria-label="Search database"
             icon={<MdKeyboardBackspace />}
+            onClick={()=> {
+              navigate({
+                to: `/dashboards/${dashboard.id}`,
+              });
+            }}
           />
           <Stack direction="row" spacing="2px" fontSize="16px">
             <Text>{dashboard.name}</Text>

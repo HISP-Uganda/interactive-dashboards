@@ -147,6 +147,13 @@ const Dashboard = () => {
           <Button size="sm" type="button" onClick={() => increment(-1)}>
             -
           </Button>
+          <Button size="sm" type="button" colorScheme="blue" 
+            onClick={()=>{
+              navigate({ to: "/dashboards" })
+            }}
+          >
+                Dashboard List
+          </Button>
           <Spacer />
           <Text>Filter</Text>
           {store.isAdmin && (
