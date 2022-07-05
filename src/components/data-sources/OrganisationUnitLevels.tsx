@@ -67,6 +67,7 @@ const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
   return (
     <Stack spacing="30px">
       <GlobalAndFilter
+        denNum={denNum}
         dimension={dimension}
         setDimension={setDimension}
         useGlobal={useGlobal}

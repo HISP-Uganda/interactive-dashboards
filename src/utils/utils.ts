@@ -240,132 +240,113 @@ export const bucketMetricAggregation = (data: { [key: string]: any }) => {
     }
 
     if (pe && pe.buckets) {
-      return pe.buckets.flatMap(
-        ({ key, pe, dx, ou, doc_count, total }: any) => {
-          if (total) {
-            return { ...obj, pe: key, value: total.value };
-          }
-
-          if (dx && dx.buckets) {
-            return dx.buckets.flatMap(
-              ({ key, pe, dx, ou, doc_count, total }: any) => {
-                if (total) {
-                  return { ...obj, dx: key, value: total.value };
-                }
-
-                return { ...obj, dx: key, value: doc_count };
-              }
-            );
-          }
-
-          if (ou && ou.buckets) {
-            return ou.buckets.flatMap(
-              ({ key, pe, dx, ou, doc_count, total }: any) => {
-                if (total) {
-                  return { ...obj, ou: key, value: total.value };
-                }
-
-                return { ...obj, ou: key, value: doc_count };
-              }
-            );
-          }
-          return { ...obj, pe: key, value: doc_count };
+      return pe.buckets.flatMap(({ key, dx, ou, doc_count, total }: any) => {
+        if (total) {
+          return { ...obj, pe: key, value: total.value };
         }
-      );
+
+        if (dx && dx.buckets) {
+          return dx.buckets.flatMap(({ key, doc_count, total }: any) => {
+            if (total) {
+              return { ...obj, dx: key, value: total.value };
+            }
+
+            return { ...obj, dx: key, value: doc_count };
+          });
+        }
+
+        if (ou && ou.buckets) {
+          return ou.buckets.flatMap(({ key, doc_count, total }: any) => {
+            if (total) {
+              return { ...obj, ou: key, value: total.value };
+            }
+
+            return { ...obj, ou: key, value: doc_count };
+          });
+        }
+        return { ...obj, pe: key, value: doc_count };
+      });
     }
 
     if (dx && dx.buckets) {
-      return dx.buckets.flatMap(
-        ({ key, pe, dx, ou, doc_count, total }: any) => {
-          if (total) {
-            return { ...obj, dx: key, value: total.value };
-          }
-
-          if (pe && pe.buckets) {
-            return pe.buckets.flatMap(
-              ({ key, pe, ou, doc_count, total }: any) => {
-                if (total) {
-                  return { ...obj, pe: key, value: total.value };
-                }
-
-                if (pe && pe.buckets) {
-                  return pe.buckets.flatMap(
-                    ({ key, pe, dx, ou, doc_count, total }: any) => {
-                      if (total) {
-                        return { ...obj, pe: key, value: total.value };
-                      }
-
-                      return { ...obj, pe: key, value: doc_count };
-                    }
-                  );
-                }
-
-                if (ou && ou.buckets) {
-                  return ou.buckets.flatMap(
-                    ({ key, pe, dx, ou, doc_count, total }: any) => {
-                      if (total) {
-                        return { ...obj, ou: key, value: total.value };
-                      }
-
-                      return { ...obj, ou: key, value: doc_count };
-                    }
-                  );
-                }
-
-                return { ...obj, pe: key, value: doc_count };
-              }
-            );
-          }
-
-          if (ou && ou.buckets) {
-            return ou.buckets.flatMap(
-              ({ key, pe, dx, ou, doc_count, total }: any) => {
-                if (total) {
-                  return { ...obj, ou: key, value: total.value };
-                }
-
-                if (pe && pe.buckets) {
-                  return pe.buckets.flatMap(
-                    ({ key, pe, dx, ou, doc_count, total }: any) => {
-                      if (total) {
-                        return { ...obj, pe: key, value: total.value };
-                      }
-
-                      return { ...obj, pe: key, value: doc_count };
-                    }
-                  );
-                }
-
-                if (dx && dx.buckets) {
-                  return dx.buckets.flatMap(
-                    ({ key, pe, dx, ou, doc_count, total }: any) => {
-                      if (total) {
-                        return { ...obj, dx: key, value: total.value };
-                      }
-
-                      return { ...obj, dx: key, value: doc_count };
-                    }
-                  );
-                }
-
-                if (ou && ou.buckets) {
-                  return ou.buckets.flatMap(
-                    ({ key, pe, dx, ou, doc_count, total }: any) => {
-                      if (total) {
-                        return { ...obj, ou: key, value: total.value };
-                      }
-
-                      return { ...obj, ou: key, value: doc_count };
-                    }
-                  );
-                }
-                return { ...obj, ou: key, value: doc_count };
-              }
-            );
-          }
-          return { ...obj, dx: key, value: doc_count };
+      return dx.buckets.flatMap(({ key, pe, ou, doc_count, total }: any) => {
+        if (total) {
+          return { ...obj, dx: key, value: total.value };
         }
-      );
+
+        if (pe && pe.buckets) {
+          return pe.buckets.flatMap(
+            ({ key, pe, ou, doc_count, total }: any) => {
+              if (total) {
+                return { ...obj, pe: key, value: total.value };
+              }
+
+              if (pe && pe.buckets) {
+                return pe.buckets.flatMap(({ key, doc_count, total }: any) => {
+                  if (total) {
+                    return { ...obj, pe: key, value: total.value };
+                  }
+                  return { ...obj, pe: key, value: doc_count };
+                });
+              }
+
+              if (ou && ou.buckets) {
+                return ou.buckets.flatMap(({ key, doc_count, total }: any) => {
+                  if (total) {
+                    return { ...obj, ou: key, value: total.value };
+                  }
+                  return { ...obj, ou: key, value: doc_count };
+                });
+              }
+              return { ...obj, pe: key, value: doc_count };
+            }
+          );
+        }
+
+        if (ou && ou.buckets) {
+          return ou.buckets.flatMap(
+            ({ key, pe, dx, ou, doc_count, total }: any) => {
+              if (total) {
+                return { ...obj, ou: key, value: total.value };
+              }
+
+              if (pe && pe.buckets) {
+                return pe.buckets.flatMap(
+                  ({ key, ou, doc_count, total }: any) => {
+                    if (total) {
+                      return { ...obj, pe: key, value: total.value };
+                    }
+
+                    return { ...obj, pe: key, value: doc_count };
+                  }
+                );
+              }
+
+              if (dx && dx.buckets) {
+                return dx.buckets.flatMap(({ key, doc_count, total }: any) => {
+                  if (total) {
+                    return { ...obj, dx: key, value: total.value };
+                  }
+
+                  return { ...obj, dx: key, value: doc_count };
+                });
+              }
+
+              if (ou && ou.buckets) {
+                return ou.buckets.flatMap(({ key, doc_count, total }: any) => {
+                  if (total) {
+                    return { ...obj, ou: key, value: total.value };
+                  }
+
+                  return { ...obj, ou: key, value: doc_count };
+                });
+              }
+              return { ...obj, ou: key, value: doc_count };
+            }
+          );
+        }
+        return { ...obj, dx: key, value: doc_count };
+      });
     }
 
     if (ou && ou.buckets) {
@@ -374,12 +355,10 @@ export const bucketMetricAggregation = (data: { [key: string]: any }) => {
           if (total) {
             return { ...obj, ou: key, value: total.value };
           }
-
           return { ...obj, ou: key, value: doc_count };
         }
       );
     }
-
     return { ...obj, value: doc_count };
   });
 };
@@ -413,3 +392,39 @@ export function traverse(node: any, query: { [key: string]: any }) {
   }
   return [{ value: 0 }];
 }
+
+export const updateValAtKey: any = (
+  obj: { [key: string]: any },
+  path: string[],
+  cb: any
+) => {
+  const checkValidPath: any = (obj: { [key: string]: any }, path: string[]) => {
+    if (path.length > 1) {
+      if (typeof obj[path[0]] !== "object") {
+        return false;
+      } else {
+        return checkValidPath(obj[path[0]], path.slice(1, path.length));
+      }
+    } else {
+      if (obj[path[0]]) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  };
+  if (checkValidPath(obj, path)) {
+    const key = path[0];
+    if (path.length > 1) {
+      return Object.assign({}, obj, {
+        [key]: updateValAtKey(
+          Object.assign({}, obj[key]),
+          path.slice(1, path.length),
+          cb
+        ),
+      });
+    } else {
+      return Object.assign({}, obj, { [key]: cb(obj[key]) });
+    }
+  }
+};

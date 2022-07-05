@@ -37,7 +37,6 @@ const Indicator = () => {
   const indicator = useStore($indicator);
   const hasDHIS2 = useStore($hasDHIS2);
   const dataSourceType = useStore($dataSourceType);
-
   const [loading, setLoading] = useState<boolean>(false);
   const engine = useDataEngine();
   const queryClient = useQueryClient();
@@ -65,6 +64,7 @@ const Indicator = () => {
 
   return (
     <Box flex={1} p="20px">
+      <pre>{JSON.stringify(indicator, null, 2)}</pre>
       <Stack spacing="20px">
         <Stack>
           <Text>Data Source</Text>
