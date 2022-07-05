@@ -21,6 +21,11 @@ import PieChart from "./PieChart";
 import RadarGraph from "./RadarGraph";
 import SingleValue from "./SingleValue";
 import SunburstChart from "./SunburstChart";
+import MultipleChartTypes from "./MultipleChartTypes";
+import TreeMaps from "./TreeMaps";
+import Tables from "./Tables";
+import BoxPlot from "./BoxPlot";
+import ScatterPlot from "./ScatterPlot";
 
 type VisualizationProps = {
   visualization: IVisualization;
@@ -66,6 +71,21 @@ const getVisualization = (visualization: IVisualization) => {
     ),
     funnelplot: (
       <FunnelGraph visualization={visualization} {...visualization.properties} />
+    ),
+    multiplecharts: (
+      <MultipleChartTypes visualization={visualization} {...visualization.properties} />
+    ),
+    treemaps: (
+      <TreeMaps visualization={visualization} {...visualization.properties} />
+    ),
+    tables: (
+      <Tables visualization={visualization} {...visualization.properties} />
+    ),
+    boxplot: (
+      <BoxPlot visualization={visualization} {...visualization.properties} />
+    ),
+    scatterplot: (
+      <ScatterPlot visualization={visualization} {...visualization.properties} />
     ),
   };
   return allTypes[visualization.type];
