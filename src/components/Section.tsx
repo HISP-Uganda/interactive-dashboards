@@ -54,6 +54,11 @@ const chartTypes: Option[] = [
   { value: "radar", label: "Radar Graph" },
   { value: "bubblemaps", label: "Bubbble Maps" },
   { value: "funnelplot", label: "Funnel Graph" },
+  { value: "multiplecharts", label: "Line and Graph" },
+  { value: "treemaps", label: "Tree Map" },
+  { value: "tables", label: "Table" },
+  { value: "boxplot", label: "Box Plot" },
+  { value: "scatterplot", label: "Scatter Plot" },
   
 ];
 

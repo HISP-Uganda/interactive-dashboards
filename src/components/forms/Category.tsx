@@ -15,7 +15,7 @@ import { useForm } from "react-hook-form";
 import { useQueryClient } from "react-query";
 
 import { useStore } from "effector-react";
-import { addCategory, setCategory, setShowSider } from "../../Events";
+import { setCategory, setShowSider } from "../../Events";
 import { FormGenerics, ICategory } from "../../interfaces";
 import { $category, createCategory } from "../../Store";
 import { useNavigate, useSearch } from "@tanstack/react-location";

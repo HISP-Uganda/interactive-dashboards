@@ -78,6 +78,30 @@ export const processPieChart = (
   return chartData;
 };
 
+export const processGaugeChart = (
+  data: any[],
+  labels?: string,
+  values?: string
+) => {
+  let chartData: any = [];
+  if (data && data.length > 0 && labels && values) {
+    const x = data.map((num: any) => num[labels]);
+    const y = data.map((num: any) => num[values]);
+    chartData = [
+      {
+        labels: x,
+        values: y,
+        type: "pie",
+        textinfo: "label+percent+name",
+        hoverinfo: "label+percent+name",
+        textposition: "inside",
+        // hole: 0.2,
+      },
+    ];
+  }
+  return chartData;
+};
+
 export const processDHIS2Indicator = () => {};
 
 export const processOneDimension = (
