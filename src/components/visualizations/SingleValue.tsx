@@ -36,7 +36,7 @@ const SingleValue = ({
           type: "indicator",
           mode: "number",
           number: {
-            valueformat,
+            // valueformat,
             prefix,
             suffix,
             font: {

@@ -799,7 +799,7 @@ const makeSQLViewsQueries = (
     .flatMap(([col, val]) => {
       if (val.isGlobal) {
         if (globalFilters[val.value]) {
-          return [`var=${col}:${globalFilters[val.value]}`];
+          return [`var=${col}:${globalFilters[val.value].join("-")}`];
         }
         return [];
       }

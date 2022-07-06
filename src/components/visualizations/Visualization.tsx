@@ -1,4 +1,4 @@
-import { Spinner } from "@chakra-ui/react";
+import { Spinner, Stack } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { IVisualization } from "../../interfaces";
 import { useVisualization } from "../../Queries";
@@ -7,7 +7,6 @@ import {
   $dataSources,
   $globalFilters,
   $indicators,
-  $store,
 } from "../../Store";
 import AreaGraph from "./AreaGraph";
 import BarGraph from "./BarGraph";

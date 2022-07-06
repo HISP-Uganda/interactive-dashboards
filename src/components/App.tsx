@@ -6,14 +6,14 @@ import {
   parseSearchWith,
   ReactLocation,
   Router,
-  stringifySearchWith
+  stringifySearchWith,
 } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import {
   CategoryForm,
   DashboardForm,
   DataSourceForm,
-  IndicatorForm
+  IndicatorForm,
 } from "../components/forms";
 import Denominator from "../components/forms/Denominator";
 import Numerator from "../components/forms/Numerator";
@@ -22,7 +22,7 @@ import {
   Categories,
   Dashboards,
   DataSources,
-  Indicators
+  Indicators,
 } from "../components/lists";
 import DashboardCategories from "../components/lists/DashboardCategories";
 import Section from "../components/Section";
@@ -30,7 +30,7 @@ import {
   setCategory,
   setCurrentDashboard,
   setDataSource,
-  setIndicator
+  setIndicator,
 } from "../Events";
 import { useInitials } from "../Queries";
 import {
@@ -42,7 +42,7 @@ import {
   createCategory,
   createDashboard,
   createDataSource,
-  createIndicator
+  createIndicator,
 } from "../Store";
 import { decodeFromBinary, encodeToBinary } from "../utils/utils";
 import Menus from "./Menus";
@@ -140,6 +140,7 @@ const App = () => {
                         const dashboard = dashboards.find(
                           (c) => c.id === dashboardId
                         );
+                        // console.log(dashboard, dashboards);
                         if (dashboard) {
                           setCurrentDashboard(dashboard);
                         } else {

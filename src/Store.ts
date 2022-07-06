@@ -225,7 +225,8 @@ export const $dashboard = domain
     } else {
       sections = [...sections, section];
     }
-    return { ...state, sections, layouts: {} };
+    const currentDashboard = { ...state, sections };
+    return currentDashboard;
   })
   .on(deleteSection, (state, section) => {
     const sections = state.sections.filter((s) => s.i !== section);
@@ -478,7 +479,10 @@ export const $indicator = domain
 
 export const $section = domain
   .createStore<ISection>(createSection())
-  .on(setCurrentSection, (_, section) => section)
+  .on(setCurrentSection, (_, section) => {
+    console.log(section);
+    return section;
+  })
   .on(addVisualization2Section, (state) => {
     const visualization: IVisualization = {
       id: generateUid(),
@@ -651,4 +655,4 @@ export const $globalFilters = $store.map((state) => {
   };
 });
 
-// $indicator.watch((i) => console.log(i));
+$section.watch((i) => console.log(i));
