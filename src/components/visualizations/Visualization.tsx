@@ -26,12 +26,28 @@ import TreeMaps from "./TreeMaps";
 import Tables from "./Tables";
 import BoxPlot from "./BoxPlot";
 import ScatterPlot from "./ScatterPlot";
+import { fromPairs } from "lodash";
 
 type VisualizationProps = {
   visualization: IVisualization;
 };
 
 const getVisualization = (visualization: IVisualization) => {
+  const dataProperties = fromPairs(
+    Object.entries(visualization.properties).filter(([key]) =>
+      key.startsWith("data")
+    )
+  );
+  const layoutProperties = fromPairs(
+    Object.entries(visualization.properties).filter(([key]) =>
+      key.startsWith("layout")
+    )
+  );
+  const otherProperties = fromPairs(
+    Object.entries(visualization.properties).filter(
+      ([key]) => !key.startsWith("layout") && !key.startsWith("data")
+    )
+  );
   const allTypes: any = {
     single: (
       <SingleValue
@@ -40,7 +56,12 @@ const getVisualization = (visualization: IVisualization) => {
       />
     ),
     bar: (
-      <BarGraph visualization={visualization} {...visualization.properties} />
+      <BarGraph
+        visualization={visualization}
+        {...otherProperties}
+        layoutProperties={layoutProperties}
+        dataProperties={dataProperties}
+      />
     ),
     pie: (
       <PieChart visualization={visualization} {...visualization.properties} />
@@ -52,7 +73,10 @@ const getVisualization = (visualization: IVisualization) => {
       <LineGraph visualization={visualization} {...visualization.properties} />
     ),
     sunburst: (
-      <SunburstChart visualization={visualization} {...visualization.properties} />
+      <SunburstChart
+        visualization={visualization}
+        {...visualization.properties}
+      />
     ),
     gauge: (
       <GaugeGraph visualization={visualization} {...visualization.properties} />
@@ -70,10 +94,16 @@ const getVisualization = (visualization: IVisualization) => {
       <BubbleMaps visualization={visualization} {...visualization.properties} />
     ),
     funnelplot: (
-      <FunnelGraph visualization={visualization} {...visualization.properties} />
+      <FunnelGraph
+        visualization={visualization}
+        {...visualization.properties}
+      />
     ),
     multiplecharts: (
-      <MultipleChartTypes visualization={visualization} {...visualization.properties} />
+      <MultipleChartTypes
+        visualization={visualization}
+        {...visualization.properties}
+      />
     ),
     treemaps: (
       <TreeMaps visualization={visualization} {...visualization.properties} />
@@ -85,7 +115,10 @@ const getVisualization = (visualization: IVisualization) => {
       <BoxPlot visualization={visualization} {...visualization.properties} />
     ),
     scatterplot: (
-      <ScatterPlot visualization={visualization} {...visualization.properties} />
+      <ScatterPlot
+        visualization={visualization}
+        {...visualization.properties}
+      />
     ),
   };
   return allTypes[visualization.type];

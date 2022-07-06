@@ -61,10 +61,21 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
       currentPage: 1,
     },
   });
+
+  const selectedIndicators = Object.entries(
+    denNum?.dataDimensions || {}
+  ).flatMap(([i, { what }]) => {
+    if (what === "i") {
+      return i;
+    }
+    return [];
+  });
+
   const { isLoading, isSuccess, isError, error, data } = useIndicators(
     currentPage,
     pageSize,
-    q
+    q,
+    selectedIndicators
   );
 
   const handlePageChange = (nextPage: number) => {
@@ -74,6 +85,7 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
   return (
     <Stack spacing="30px">
       <GlobalAndFilter
+        denNum={denNum}
         dimension={dimension}
         setDimension={setDimension}
         useGlobal={useGlobal}
@@ -139,7 +151,7 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
                         });
                       }
                     }}
-                    checked={!!denNum?.dataDimensions?.[record.id]}
+                    isChecked={!!denNum?.dataDimensions?.[record.id]}
                   />
                 </Td>
                 <Td>{record.id}</Td>

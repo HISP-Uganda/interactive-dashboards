@@ -2,6 +2,7 @@ import { useDataEngine } from "@dhis2/app-runtime";
 import type { DataNode } from "antd/lib/tree";
 import axios, { AxiosRequestConfig } from "axios";
 import { fromPairs, max, uniq } from "lodash";
+import { center } from "@turf/turf";
 import { useQuery } from "react-query";
 import {
   addPagination,
@@ -30,7 +31,7 @@ import {
   IVisualization,
   Option,
 } from "./interfaces";
-import { getNestedKeys, traverse } from "./utils/utils";
+import { getNestedKeys, globalIds, traverse } from "./utils/utils";
 
 export const api = axios.create({
   baseURL: "https://services.dhis2.hispuganda.org/",
@@ -486,14 +487,32 @@ export const useDataElements = (page: number, pageSize: number, q = "") => {
   );
 };
 
-export const useIndicators = (page: number, pageSize: number, q = "") => {
+export const useIndicators = (
+  page: number,
+  pageSize: number,
+  q = "",
+  selectedIndicators: string[] = []
+) => {
   const engine = useDataEngine();
 
   let params: { [key: string]: any } = {
     page,
     pageSize,
     fields: "id,name",
+    order: "name:ASC",
   };
+
+  let selectedIndicatorsQuery = {};
+
+  // if (selectedIndicators.length > 0) {
+  //   selectedIndicatorsQuery = {
+  //     ...selectedIndicatorsQuery,
+  //     selected: {
+  //       resource: "indicators.json",
+  //       params: { ...params, filter: `id:in:${selectedIndicators.join(",")}` },
+  //     },
+  //   };
+  // }
 
   if (q) {
     params = { ...params, filter: `identifiable:token:${q}` };
@@ -503,6 +522,7 @@ export const useIndicators = (page: number, pageSize: number, q = "") => {
       resource: "indicators.json",
       params,
     },
+    ...selectedIndicatorsQuery,
   };
   return useQuery<{ id: string; name: string }[], Error>(
     ["indicators", page, pageSize, q],
@@ -654,6 +674,57 @@ const findDimension = (dimension: IDimension, t: string, w: string) => {
     .join(";");
 };
 
+const findDimension2 = (
+  dimension: IDimension,
+  t: string,
+  w: string,
+  joiner: string
+) => {
+  return Object.entries(dimension)
+    .filter(([key, { what, type }]) => type === t && what === w)
+    .map(([key]) => `${joiner}key`)
+    .join(";");
+};
+
+export const findLevelsAndOus = (indicator: IIndicator | undefined) => {
+  if (indicator) {
+    const denDimensions = indicator.denominator?.dataDimensions || {};
+    const numDimensions = indicator.numerator?.dataDimensions || {};
+    const denExpressions = indicator.denominator?.expressions || {};
+    const numExpressions = indicator.numerator?.expressions || {};
+    const ous = uniq([
+      ...Object.entries(denDimensions)
+        .filter(([key, { what }]) => what === "ou")
+        .map(([key]) => key),
+      ...Object.entries(numDimensions)
+        .filter(([_, { what }]) => what === "ou")
+        .map(([key]) => key),
+      ...Object.entries(denExpressions)
+        .filter(([key]) => key === "ou")
+        .map(([key, value]) => value.value),
+      ...Object.entries(numExpressions)
+        .filter(([key]) => key === "ou")
+        .map(([key, value]) => value.value),
+    ]);
+    const levels = uniq([
+      ...Object.entries(denDimensions)
+        .filter(([key, { what }]) => what === "oul")
+        .map(([key]) => key),
+      ...Object.entries(numDimensions)
+        .filter(([_, { what }]) => what === "oul")
+        .map(([key]) => key),
+      ...Object.entries(denExpressions)
+        .filter(([key]) => key === "oul")
+        .map(([key, value]) => value.value),
+      ...Object.entries(numExpressions)
+        .filter(([key]) => key === "oul")
+        .map(([key, value]) => value.value),
+    ]);
+    return { levels, ous };
+  }
+  return { levels: [], ous: [] };
+};
+
 const joinItems = (items: string[][], joiner: "dimension" | "filter") => {
   return items
     .flatMap((item: string[]) => {
@@ -675,10 +746,35 @@ const makeDHIS2Query = (
   const iFilters = findDimension(data.dataDimensions, "filter", "i");
   const peDimensions = findDimension(data.dataDimensions, "dimension", "pe");
   const peFilters = findDimension(data.dataDimensions, "filter", "pe");
+  const ouLevelFilter = findDimension2(
+    data.dataDimensions,
+    "filter",
+    "oul",
+    "LEVEL"
+  );
+  const ouLevelDimension = findDimension2(
+    data.dataDimensions,
+    "dimension",
+    "oul",
+    "LEVEL"
+  );
+
+  console.log(ouLevelFilter, ouLevelDimension, "Finishing");
+  // const ouLevelFilters =
+  //   globalFilters[ouLevelFilter].join(";") || ouLevelFilter;
+  // const ouLevelDimensions =
+  //   globalFilters[ouLevelDimension].join(";") || ouLevelDimension;
+
+  const unitsFilter = globalFilters[ouFilters]?.join(";") || ouFilters;
+  const unitsDimension = globalFilters[ouDimensions]?.join(";") || ouDimensions;
+
+  const finalOuFilters = [unitsFilter].join(";");
+  const finalOuDimensions = [unitsDimension].join(";");
+
   return [
     joinItems(
       [
-        [globalFilters[ouFilters]?.join(";") || ouFilters, "ou"],
+        [finalOuFilters, "ou"],
         [globalFilters[iFilters]?.join(";") || iFilters, "dx"],
         [globalFilters[peFilters]?.join(";") || peFilters, "pe"],
       ],
@@ -686,7 +782,7 @@ const makeDHIS2Query = (
     ),
     joinItems(
       [
-        [globalFilters[ouDimensions]?.join(";") || ouDimensions, "ou"],
+        [finalOuDimensions, "ou"],
         [globalFilters[iDimensions]?.join(";") || iDimensions, "dx"],
         [globalFilters[peDimensions]?.join(";") || peDimensions, "pe"],
       ],
@@ -941,4 +1037,55 @@ export const useVisualization = (
     },
     { refetchInterval: currentInterval }
   );
+};
+
+export const useMaps = (levels: string[], parents: string[]) => {
+  const engine = useDataEngine();
+  const parent = parents
+    .map((p) => {
+      return `parent=${p}`;
+    })
+    .join("&");
+  const level = levels
+    .map((l) => {
+      return `level=${l}`;
+    })
+    .join("&");
+
+  let resource = `organisationUnits.geojson?${parent}`;
+  if (level) {
+    resource = `organisationUnits.geojson?${parent}&${level}`;
+  }
+  let query = {
+    geojson: {
+      resource,
+    },
+  };
+
+  const levelsQuery = levels.map((l) => [
+    `level${l}`,
+    {
+      resource: "organisationUnits.json",
+      params: {
+        level: l,
+        fields: "id,name",
+        paging: false,
+      },
+    },
+  ]);
+
+  query = { ...query, ...fromPairs(levelsQuery) };
+
+  return useQuery<any, Error>(["maps", ...levels, ...parents], async () => {
+    const { geojson, ...otherLevels }: any = await engine.query(query);
+    const mapCenter = center(geojson).geometry.coordinates;
+    const organisationUnits = Object.values(otherLevels).flatMap(
+      ({ organisationUnits }: any) => organisationUnits
+    );
+    return {
+      geojson,
+      mapCenter,
+      organisationUnits,
+    };
+  });
 };

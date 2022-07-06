@@ -4,3 +4,4 @@ declare module "@dhis2/d2-i18n";
 declare module "localbase";
 declare module "@dhis2/ui";
 declare module "jsoneditor-react";
+declare module "deep-update-object";

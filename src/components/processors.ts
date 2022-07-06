@@ -1,5 +1,6 @@
-import { uniq } from "lodash";
-
+import { set, uniq, update } from "lodash";
+import deepUpdateObject from "deep-update-object";
+import { updateValAtKey } from "../utils/utils";
 export const processSingleValue = (data: any[]): any => {
   if (data.length > 0) {
     const values = Object.values(data[0]);
@@ -15,38 +16,66 @@ export const processSingleValue = (data: any[]): any => {
 
 export const processGraphs = (
   data: any[],
-  type: string,
   category?: string,
   series?: string,
+  dataProperties = {},
   metadata?: any
 ) => {
   let chartData: any = [];
+  let availableProperties: { [key: string]: any } = {};
+  update(availableProperties, "data.orientation", () => "v");
+  Object.entries(dataProperties).forEach(([property, value]) => {
+    availableProperties = update(availableProperties, property, () => value);
+  });
+
   if (data && data.length > 0 && category) {
     const x = uniq(data.map((num: any) => num[category]));
     if (series) {
       const allSeries = uniq(data.map((num: any) => num[series]));
       chartData = allSeries.map((se: any) => {
         return {
-          x: x.map((c: any) => metadata?.[c]?.name || c),
-          y: x.map((c: any) => {
-            const r = data.find(
-              (num: any) => num[series] === se && num[category] === c
-            );
-            return r?.count || r?.value;
-          }),
+          x:
+            availableProperties?.data?.orientation === "v"
+              ? x.map((c: any) => metadata?.[c]?.name || c)
+              : x.map((c: any) => {
+                  const r = data.find(
+                    (num: any) => num[series] === se && num[category] === c
+                  );
+                  return r?.count || r?.value;
+                }),
+          y:
+            availableProperties?.data?.orientation === "v"
+              ? x.map((c: any) => {
+                  const r = data.find(
+                    (num: any) => num[series] === se && num[category] === c
+                  );
+                  return r?.count || r?.value;
+                })
+              : x.map((c: any) => metadata?.[c]?.name || c),
           name: metadata?.[se]?.name || se,
-          type,
+          type: "bar",
+          ...availableProperties.data,
         };
       });
     } else {
       chartData = [
         {
-          x: x.map((c: any) => metadata?.[c]?.name || c),
-          y: x.map((c: any) => {
-            const r = data.find((num: any) => num[category] === c);
-            return r?.count || r?.value;
-          }),
-          type,
+          x:
+            availableProperties?.data?.orientation === "v"
+              ? x.map((c: any) => metadata?.[c]?.name || c)
+              : x.map((c: any) => {
+                  const r = data.find((num: any) => num[category] === c);
+                  return r?.count || r?.value;
+                }),
+          y:
+            availableProperties?.data?.orientation === "v"
+              ? x.map((c: any) => {
+                  const r = data.find((num: any) => num[category] === c);
+                  return r?.count || r?.value;
+                })
+              : x.map((c: any) => metadata?.[c]?.name || c),
+          type: "bar",
+          ...availableProperties.data,
         },
       ];
     }

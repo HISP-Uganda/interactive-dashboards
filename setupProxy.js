@@ -1,7 +1,9 @@
 const express = require("express");
 var cors = require("cors");
 
-const { createProxyMiddleware } = require("http-proxy-middleware");
+const {
+  createProxyMiddleware
+} = require("http-proxy-middleware");
 
 let sessionCookie = "";
 const onProxyReq = (proxyReq) => {
@@ -17,6 +19,7 @@ const onProxyRes = (proxyRes) => {
 };
 // proxy middleware options
 const options = {
+  // target: "http://localhost:8080", // target host
   target: "https://hmis-repo.health.go.ug", // target host
   onProxyReq,
   onProxyRes,
@@ -29,6 +32,9 @@ const options = {
 const exampleProxy = createProxyMiddleware(options);
 
 const app = express();
-app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+app.use(cors({
+  credentials: true,
+  origin: "http://localhost:3000"
+}));
 app.use("/", exampleProxy);
 app.listen(3002);

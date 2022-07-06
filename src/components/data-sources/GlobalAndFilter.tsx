@@ -1,11 +1,13 @@
 import { Dispatch, SetStateAction } from "react";
 import { Event } from "effector";
-import { Checkbox, Radio, RadioGroup, Stack } from "@chakra-ui/react";
+import { Checkbox, Radio, RadioGroup, Stack, Text } from "@chakra-ui/react";
 import { ChangeEvent } from "react";
+import { IData } from "../../interfaces";
 
 type GlobalAndFilterProps = {
   dimension: string;
   useGlobal: boolean;
+  denNum: IData | undefined;
   setDimension: Dispatch<SetStateAction<"filter" | "dimension">>;
   setUseGlobal: Dispatch<SetStateAction<boolean>>;
   hasGlobalFilter?: boolean;
@@ -29,11 +31,27 @@ const GlobalAndFilter = ({
   type,
   id,
   hasGlobalFilter = true,
+  denNum,
 }: GlobalAndFilterProps) => {
+  console.log(type);
   return (
     <Stack spacing="20px">
       <RadioGroup
-        onChange={(type: "filter" | "dimension") => setDimension(type)}
+        onChange={(dimension: "filter" | "dimension") => {
+          setDimension(dimension);
+          console.log(dimension, type);
+          Object.entries(denNum?.dataDimensions || {})
+            .filter(([k, { what }]) => what === type)
+            .forEach(([key, dim]) => {
+              console.log(key, dim);
+              onChange({
+                id: key,
+                type: dimension,
+                what: type,
+                label: dim.label,
+              });
+            });
+        }}
         value={dimension}
       >
         <Stack direction="row">
@@ -45,6 +63,16 @@ const GlobalAndFilter = ({
         <Checkbox
           onChange={(e: ChangeEvent<HTMLInputElement>) => {
             setUseGlobal(e.target.checked);
+            Object.entries(denNum?.dataDimensions || {})
+              .filter(([k, { what }]) => what === type)
+              .forEach(([key]) => {
+                onChange({
+                  id: key,
+                  type: dimension,
+                  what: type,
+                  remove: true,
+                });
+              });
             if (e.target.checked) {
               onChange({
                 id,
@@ -60,7 +88,7 @@ const GlobalAndFilter = ({
               });
             }
           }}
-          checked={useGlobal}
+          isChecked={useGlobal}
         >
           Use Global Filter
         </Checkbox>
