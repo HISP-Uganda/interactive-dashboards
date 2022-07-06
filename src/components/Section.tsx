@@ -59,7 +59,6 @@ const chartTypes: Option[] = [
   { value: "tables", label: "Table" },
   { value: "boxplot", label: "Box Plot" },
   { value: "scatterplot", label: "Scatter Plot" },
-  
 ];
 
 const VisualizationTypes = ({
@@ -136,13 +135,23 @@ const Section = () => {
   const dashboard = useStore($dashboard);
   const dashboards = useStore($dashboards);
   const store = useStore($store);
-
   const onApply = () => {
     addSection(section);
     setDashboards(
       dashboards.map((dash) => {
         if (dash.id === dashboard.id) {
-          return { ...dash, sections: [...dash.sections, section] };
+          const isOld = dashboard.sections.find((s) => s.i === section.i);
+          let sections = dashboard.sections.map((s) => {
+            if (section.i === s.i) {
+              return section;
+            }
+            return s;
+          });
+          if (!isOld) {
+            console.log("Is it new");
+            sections = [...sections, section];
+          }
+          return { ...dashboard, sections };
         }
         return dash;
       })
@@ -173,7 +182,7 @@ const Section = () => {
             _hover={{ bg: "none" }}
             aria-label="Search database"
             icon={<MdKeyboardBackspace />}
-            onClick={()=> {
+            onClick={() => {
               navigate({
                 to: `/dashboards/${dashboard.id}`,
               });
@@ -181,6 +190,8 @@ const Section = () => {
           />
           <Stack direction="row" spacing="2px" fontSize="16px">
             <Text>{dashboard.name}</Text>
+            <Text>/</Text>
+            <Text>{section.i}</Text>
             <Text>/</Text>
             <Text>Edit Section</Text>
           </Stack>
@@ -193,11 +204,10 @@ const Section = () => {
           </Button>
         </Stack>
       </Stack>
-      <Stack></Stack>
       <Stack direction="row" spacing="20px">
-        <Stack w="75%">
+        <Stack w="75%" bg="yellow" h="100%">
           <Text textAlign="center">{section.title}</Text>
-          <Stack>
+          <Stack spacing="20px" direction={section.direction} bg="red.300">
             {section.visualizations.map((visualization: IVisualization) => (
               <Visualization
                 key={visualization.id}

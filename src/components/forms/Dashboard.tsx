@@ -67,7 +67,6 @@ import OUTree from "../OUTreeSelect";
 import PeriodPicker from "../PeriodPicker";
 import Visualization from "../visualizations/Visualization";
 
-
 const { RangePicker } = DatePicker;
 const ReactGridLayout = WidthProvider(Responsive);
 const Dashboard = () => {
@@ -93,7 +92,7 @@ const Dashboard = () => {
     await engine.mutate(mutation);
     onClose();
   };
-  
+
   const togglePublish = async (data: IDashboard, value: boolean) => {
     let mutation: any = {
       type: "update",
@@ -147,12 +146,15 @@ const Dashboard = () => {
           <Button size="sm" type="button" onClick={() => increment(-1)}>
             -
           </Button>
-          <Button size="sm" type="button" colorScheme="blue" 
-            onClick={()=>{
-              navigate({ to: "/dashboards" })
+          <Button
+            size="sm"
+            type="button"
+            colorScheme="blue"
+            onClick={() => {
+              navigate({ to: "/dashboards" });
             }}
           >
-                Dashboard List
+            Dashboard List
           </Button>
           <Spacer />
           <Text>Filter</Text>
@@ -250,6 +252,7 @@ const Dashboard = () => {
                     rightIcon={<ChevronDownIcon />}
                   >
                     {section.title}
+                    {section.i}
                   </MenuButton>
                   <MenuList>
                     <MenuItem
