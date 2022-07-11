@@ -451,7 +451,6 @@ export const useNamespaceKey2 = (namespace: string, key: string) => {
 };
 
 export const useDataElements = (page: number, pageSize: number, q = "") => {
-  console.log(q);
   const engine = useDataEngine();
   let params: { [key: string]: any } = {
     page,
@@ -760,39 +759,54 @@ const makeDHIS2Query = (
     "oug"
   );
 
-  const ouGroupFilters =
-    globalFilters[ouGroupFilter]
-      ?.map((v: string) => `OU_GROUP-${v}`)
-      .join(";") ||
-    ouGroupFilter
-      .split(";")
-      .map((v) => `OU_GROUP-${v}`)
-      .join(";");
+  let ouGroupFilters = "";
 
-  const ouGroupDimensions =
-    globalFilters[ouGroupDimension]
-      ?.map((v: string) => `OU_GROUP-${v}`)
-      .join(";") ||
-    ouGroupDimension
-      .split(";")
-      .map((v) => `OU_GROUP-${v}`)
-      .join(";");
+  if (ouGroupFilter) {
+    ouGroupFilters =
+      globalFilters[ouGroupFilter]
+        ?.map((v: string) => `OU_GROUP-${v}`)
+        .join(";") ||
+      ouGroupFilter
+        .split(";")
+        .map((v) => `OU_GROUP-${v}`)
+        .join(";");
+  }
 
-  const ouLevelFilters =
-    globalFilters[ouLevelFilter]?.map((v: string) => `LEVEL-${v}`).join(";") ||
-    ouLevelFilter
-      .split(";")
-      .map((v) => `LEVEL-${v}`)
-      .join(";");
+  let ouGroupDimensions = "";
+  if (ouGroupDimension) {
+    ouGroupDimensions =
+      globalFilters[ouGroupDimension]
+        ?.map((v: string) => `OU_GROUP-${v}`)
+        .join(";") ||
+      ouGroupDimension
+        .split(";")
+        .map((v) => `OU_GROUP-${v}`)
+        .join(";");
+  }
 
-  const ouLevelDimensions =
-    globalFilters[ouLevelDimension]
-      ?.map((v: string) => `LEVEL-${v}`)
-      .join(";") ||
-    ouLevelDimension
-      .split(";")
-      .map((v) => `LEVEL-${v}`)
-      .join(";");
+  let ouLevelFilters = "";
+  if (ouLevelFilter) {
+    ouLevelFilters =
+      globalFilters[ouLevelFilter]
+        ?.map((v: string) => `LEVEL-${v}`)
+        .join(";") ||
+      ouLevelFilter
+        .split(";")
+        .map((v) => `LEVEL-${v}`)
+        .join(";");
+  }
+  let ouLevelDimensions = "";
+
+  if (ouLevelDimension) {
+    ouLevelDimensions =
+      globalFilters[ouLevelDimension]
+        ?.map((v: string) => `LEVEL-${v}`)
+        .join(";") ||
+      ouLevelDimension
+        .split(";")
+        .map((v) => `LEVEL-${v}`)
+        .join(";");
+  }
 
   const unitsFilter = globalFilters[ouFilters]?.map.join(";") || ouFilters;
   const unitsDimension = globalFilters[ouDimensions]?.join(";") || ouDimensions;
@@ -806,7 +820,6 @@ const makeDHIS2Query = (
 
   let finalIFilters = globalFilters[iFilters]?.join(";") || iFilters;
   let finalIDimensions = globalFilters[iDimensions]?.join(";") || iDimensions;
-
   let finalPeFilters = globalFilters[peFilters]?.join(";") || peFilters;
   let finalPeDimensions =
     globalFilters[peDimensions]?.join(";") || peDimensions;
@@ -832,6 +845,12 @@ const makeDHIS2Query = (
     finalPeDimensions = finalPeFilters || finalPeDimensions;
     finalPeFilters = "";
   }
+
+  if (finalOuFilters && finalOuDimensions) {
+    finalOuDimensions = `${finalOuFilters};${finalOuDimensions}`;
+    finalOuFilters = "";
+  }
+
   const dd = [
     joinItems(
       [
@@ -850,7 +869,6 @@ const makeDHIS2Query = (
       "dimension"
     ),
   ].join("&");
-  console.log(dd);
   return dd;
 };
 
@@ -982,10 +1000,10 @@ export const useVisualization = (
   indicator?: IIndicator,
   dataSource?: IDataSource,
   refreshInterval?: string,
-  globalFilters?: { [key: string]: any }
+  globalFilters?: { [key: string]: any },
+  overrides: { [key: string]: any } = {}
 ) => {
   const engine = useDataEngine();
-  const overrides = visualization.overrides || {};
   let currentInterval: boolean | number = false;
   if (refreshInterval && refreshInterval !== "off") {
     currentInterval = Number(refreshInterval) * 1000;
@@ -1000,8 +1018,7 @@ export const useVisualization = (
     ],
     async () => {
       if (indicator && dataSource && dataSource.isCurrentDHIS2) {
-        const queries = generateDHIS2Query(indicator, globalFilters);
-        console.log(queries);
+        const queries = generateDHIS2Query(indicator, globalFilters, overrides);
         const data = await engine.query(queries);
         let processed: any[] = [];
         let metadata = {};

@@ -353,7 +353,9 @@ const Section = () => {
                     <VisualizationOverride visualization={visualization} />
                     <VisualizationTypes visualization={visualization} />
                     <VisualizationProperties visualization={visualization} />
-                    <pre>{JSON.stringify(visualization, null, 2)}</pre>
+                    <pre>
+                      {JSON.stringify(visualization.indicator, null, 2)}
+                    </pre>
                   </Stack>
                 </AccordionPanel>
               </AccordionItem>

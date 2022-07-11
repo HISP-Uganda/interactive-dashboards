@@ -139,7 +139,8 @@ const Visualization = ({ visualization }: VisualizationProps) => {
     indicator,
     dataSource,
     dashboard.refreshInterval,
-    globalFilters
+    globalFilters,
+    visualization.overrides
   );
 
   return (

@@ -19,11 +19,12 @@ export const processGraphs = (
   category?: string,
   series?: string,
   dataProperties = {},
-  metadata?: any
+  metadata?: any,
+  type: string = "bar"
 ) => {
   let chartData: any = [];
   let availableProperties: { [key: string]: any } = {};
-  update(availableProperties, "data.orientation", () => "v");
+  // update(availableProperties, "data.orientation", () => "v");
   Object.entries(dataProperties).forEach(([property, value]) => {
     availableProperties = update(availableProperties, property, () => value);
   });
@@ -53,7 +54,7 @@ export const processGraphs = (
                 })
               : x.map((c: any) => metadata?.[c]?.name || c),
           name: metadata?.[se]?.name || se,
-          type: "bar",
+          type,
           ...availableProperties.data,
         };
       });
@@ -74,7 +75,7 @@ export const processGraphs = (
                   return r?.count || r?.value;
                 })
               : x.map((c: any) => metadata?.[c]?.name || c),
-          type: "bar",
+          type,
           ...availableProperties.data,
         },
       ];

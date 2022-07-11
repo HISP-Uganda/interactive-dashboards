@@ -68,7 +68,6 @@ import OUTree from "../OUTreeSelect";
 import PeriodPicker from "../PeriodPicker";
 import Visualization from "../visualizations/Visualization";
 
-const { RangePicker } = DatePicker;
 const ReactGridLayout = WidthProvider(Responsive);
 const Dashboard = () => {
   const search = useSearch<FormGenerics>();
@@ -253,7 +252,7 @@ const Dashboard = () => {
                     rightIcon={<ChevronDownIcon />}
                   >
                     {section.title}
-                    {/* {section.i} */}
+                    {section.i}
                   </MenuButton>
                   <MenuList>
                     <MenuItem
