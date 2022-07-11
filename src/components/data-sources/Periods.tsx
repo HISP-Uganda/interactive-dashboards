@@ -7,13 +7,13 @@ import { globalIds } from "../../utils/utils";
 
 const Periods = ({ denNum, onChange }: IndicatorProps) => {
   const [dimension, setDimension] = useState<"filter" | "dimension">("filter");
-  const [useGlobal, setUseGlobal] = useState<boolean>(false);
 
   const selected = Object.entries(denNum?.dataDimensions || {})
     .filter(([k, { what }]) => what === "pe")
-    .map(([key, { label }]) => {
-      return { id: key, name: label };
+    .map(([key]) => {
+      return key;
     });
+    const [useGlobal, setUseGlobal] = useState<boolean>(selected.indexOf("m5D13FqKZwN") !== -1);
   return (
     <Stack spacing="20px">
       <GlobalAndFilter

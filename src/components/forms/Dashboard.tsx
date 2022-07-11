@@ -252,7 +252,7 @@ const Dashboard = () => {
                     rightIcon={<ChevronDownIcon />}
                   >
                     {section.title}
-                    {section.i}
+                    {/* {section.i} */}
                   </MenuButton>
                   <MenuList>
                     <MenuItem

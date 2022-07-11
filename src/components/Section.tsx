@@ -205,7 +205,7 @@ const Section = () => {
         </Stack>
       </Stack>
       <Stack direction="row" spacing="20px">
-        <Stack w="75%" bg="yellow" h="100%">
+        <Stack w="75%" h="100%">
           <Text textAlign="center">{section.title}</Text>
           <Stack spacing="20px" direction={section.direction} bg="red.300">
             {section.visualizations.map((visualization: IVisualization) => (
