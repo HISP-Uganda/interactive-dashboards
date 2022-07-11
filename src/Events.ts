@@ -80,6 +80,11 @@ export const changeIndicatorAttribute = domain.createEvent<{
   value: any;
 }>();
 
+export const changeVisualizationData = domain.createEvent<{
+  attribute: "name" | "description" | "factor" | "query";
+  value: any;
+}>();
+
 export const changeNumeratorAttribute = domain.createEvent<{
   attribute: "name" | "description" | "type" | "query";
   value: any;
