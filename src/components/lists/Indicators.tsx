@@ -1,5 +1,6 @@
 import {
   Button,
+  Input,
   Spacer,
   Spinner,
   Stack,
@@ -10,20 +11,33 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { setIndicator, setVisualizationQueries } from "../../Events";
+import { changeVisualizationData, setIndicator, setVisualizationQueries } from "../../Events";
 import { IIndicator } from "../../interfaces";
 import { useVisualizationData } from "../../Queries";
-import { $indicators, createIndicator } from "../../Store";
+import { $indicators, $indicator, createIndicator } from "../../Store";
 
 const Indicators = () => {
   const navigate = useNavigate();
+  const indicator = useStore($indicator);
   const indicators = useStore($indicators);
   const { isLoading, isSuccess, isError, error } = useVisualizationData();
   return (
     <Stack flex={1} p="20px">
       <Stack direction="row">
+      {/* <Input placeholder='Search Visualization Data' width='50%' /> */}
+      <Input
+            value={indicator.name}
+            placeholder='Search Visualization Data' width='50%'
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              changeVisualizationData({
+                attribute: "name",
+                value: e.target.value,
+              })
+            }
+          />
         <Spacer />
         <Button
           onClick={() => {
