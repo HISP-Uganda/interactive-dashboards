@@ -139,15 +139,16 @@ const Visualization = ({ visualization }: VisualizationProps) => {
     indicator,
     dataSource,
     dashboard.refreshInterval,
-    globalFilters
+    globalFilters,
+    visualization.overrides
   );
 
   return (
-    <>
+    <Stack w="100%" h="100%" alignItems="center" justifyContent="center">
       {isLoading && <Spinner />}
       {isSuccess && getVisualization(visualization)}
       {isError && <pre>{JSON.stringify(error)}</pre>}
-    </>
+    </Stack>
   );
 };
 

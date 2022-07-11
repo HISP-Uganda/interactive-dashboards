@@ -24,6 +24,7 @@ const MapChart = ({ visualization }: MapChartProps) => {
     ? visualizationData[visualization.id]
     : [];
 
+  console.log(data);
   const {
     isLoading,
     isError,
