@@ -1,0 +1,32 @@
+{
+  "organisationUnits": [
+    {
+      "lastUpdated": "2022-03-17T05:10:16.829",
+      "id": "cpmqGoCNkI1",
+      "href": "https://hfqap-dev.health.go.ug/api/organisationUnits/cpmqGoCNkI1",
+      "level": 5,
+      "created": "2022-03-17T05:10:16.550",
+      "name": "Reproductive Health Uganda HC II",
+      "shortName": "Reproductive Health Uganda HC II",
+      "leaf": true,
+      "displayFormName": "Reproductive Health Uganda HC II",
+      "favorite": false,
+      "dimensionItemType": "ORGANISATION_UNIT",
+      "displayName": "Reproductive Health Uganda HC II",
+      "displayShortName": "Reproductive Health Uganda HC II",
+      "externalAccess": false,
+      "openingDate": "1999-03-08T00:00:00.000",
+      "dimensionItem": "cpmqGoCNkI1",
+      "parent": { "id": "AABKGoyjpm2" },
+      "children": [],
+      "translations": [],
+      "userGroupAccesses": [],
+      "attributeValues": [],
+      "users": [],
+      "userAccesses": [],
+      "dataSets": [],
+      "legendSets": [],
+      "favorites": []
+    }
+  ]
+}

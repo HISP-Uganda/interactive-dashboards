@@ -26,6 +26,7 @@ import {
   addVisualization2Section,
   changeSectionAttribute,
   changeVisualizationAttribute,
+  changeVisualizationOverride,
   setDashboards,
   setShowSider,
 } from "../Events";
@@ -128,6 +129,75 @@ const VisualizationQuery = ({
   );
 };
 
+const VisualizationOverride = ({
+  visualization,
+}: {
+  visualization: IVisualization;
+}) => {
+  const indicators = useStore($indicators);
+  const indicator = indicators.find((i) => i.id === visualization.indicator);
+  return (
+    <>
+      {indicator && indicator.numerator?.type === "ANALYTICS" && (
+        <Stack>
+          <Text>Overrides</Text>
+          <Stack direction="row">
+            <Text>DX</Text>
+            <RadioGroup
+              onChange={(e: string) =>
+                changeVisualizationOverride({
+                  override: "dx",
+                  value: e,
+                  visualization: visualization.id,
+                })
+              }
+            >
+              <Stack direction="row">
+                <Radio value="dimension">Dimension</Radio>
+                <Radio value="filter">Filter</Radio>
+              </Stack>
+            </RadioGroup>
+          </Stack>
+          <Stack direction="row">
+            <Text>OU</Text>
+            <RadioGroup
+              onChange={(e: string) =>
+                changeVisualizationOverride({
+                  override: "ou",
+                  value: e,
+                  visualization: visualization.id,
+                })
+              }
+            >
+              <Stack direction="row">
+                <Radio value="dimension">Dimension</Radio>
+                <Radio value="filter">Filter</Radio>
+              </Stack>
+            </RadioGroup>
+          </Stack>
+          <Stack direction="row">
+            <Text>PE</Text>
+            <RadioGroup
+              onChange={(e: string) =>
+                changeVisualizationOverride({
+                  override: "pe",
+                  value: e,
+                  visualization: visualization.id,
+                })
+              }
+            >
+              <Stack direction="row">
+                <Radio value="dimension">Dimension</Radio>
+                <Radio value="filter">Filter</Radio>
+              </Stack>
+            </RadioGroup>
+          </Stack>
+        </Stack>
+      )}
+    </>
+  );
+};
+
 const Section = () => {
   const search = useSearch<FormGenerics>();
   const navigate = useNavigate();
@@ -148,7 +218,6 @@ const Section = () => {
             return s;
           });
           if (!isOld) {
-            console.log("Is it new");
             sections = [...sections, section];
           }
           return { ...dashboard, sections };
@@ -281,8 +350,10 @@ const Section = () => {
                       />
                     </Stack>
                     <VisualizationQuery visualization={visualization} />
+                    <VisualizationOverride visualization={visualization} />
                     <VisualizationTypes visualization={visualization} />
                     <VisualizationProperties visualization={visualization} />
+                    <pre>{JSON.stringify(visualization, null, 2)}</pre>
                   </Stack>
                 </AccordionPanel>
               </AccordionItem>

@@ -1,0 +1,59 @@
+<Stack w="100%" h="100%">
+      <Stack h="30px">
+        <Textfit>
+          <Text textAlign="center">{visualization.name} </Text>
+        </Textfit>
+      </Stack>
+      <Stack
+        h="100%"
+        w="100%"
+        bg="yellow"
+        alignItems="center"
+        justifyItems="center"
+        justifyContent="center"
+        alignContent="center"
+        ref={ref}
+      >
+        <svg
+          height={height}
+          width={width}
+          x="0px"
+          y="0px"
+          xmlns="<http://www.w3.org/2000/svg>"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="8"
+            strokeWidth="4"
+            stroke="tomato"
+            fill="none"
+          />
+        </svg>
+
+        {/* <Plot
+          data={[
+            {
+              type: "indicator",
+              mode: "number",
+              number: {
+                // valueformat,
+                prefix,
+                suffix,
+                font: {
+                  size: valueSize,
+                  color: valueColor,
+                },
+              },
+              value: ,
+            },
+          ]}
+          layout={{
+            margin: { t: 0, r: 0, l: 0, b: 0, pad: 0 },
+            autosize: true,
+          }}
+          style={{ width: "100%", height: "100%" }}
+          config={{ displayModeBar: false, responsive: true }}
+        /> */}
+      </Stack>
+    </Stack>
