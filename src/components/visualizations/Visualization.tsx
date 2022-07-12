@@ -120,7 +120,6 @@ const getVisualization = (visualization: IVisualization) => {
       />
     ),
   };
-  console.log(allTypes[visualization.type]);
   return allTypes[visualization.type];
 };
 
@@ -147,7 +146,7 @@ const Visualization = ({ visualization }: VisualizationProps) => {
     <Stack w="100%" h="100%" alignItems="center" justifyContent="center">
       {isLoading && <Spinner />}
       {isSuccess && getVisualization(visualization)}
-      {isError && <pre>{JSON.stringify(error)}</pre>}
+      {isError && <pre>{error.message}</pre>}
     </Stack>
   );
 };
