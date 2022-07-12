@@ -1,3 +1,4 @@
+import { Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { update } from "lodash";
 import React from "react";
@@ -26,64 +27,69 @@ const LineGraph = ({
   const data = visualizationData[visualization.id]
     ? visualizationData[visualization.id]
     : [];
-
   let availableProperties: { [key: string]: any } = {
-    ["layout.legend.y"]: -0.1,
-    ["layout.legend.x"]: 0.5,
-    ["layout.legend.orientation"]: "h",
-    ["layout.yaxis.automargin"]: true,
-    ["layout.colorway"]: [
-      "#1f77b4",
-      "#ff7f0e",
-      "#2ca02c",
-      "#d62728",
-      "#9467bd",
-      "#8c564b",
-      "#e377c2",
-      "#7f7f7f",
-      "#bcbd22",
-    ],
+    layout: {
+      legend: { x: 0.5, y: -0.3, orientation: "h" },
+      yaxis: { automargin: true },
+      colorway: [
+        "#1f77b4",
+        "#ff7f0e",
+        "#2ca02c",
+        "#d62728",
+        "#9467bd",
+        "#8c564b",
+        "#e377c2",
+        "#7f7f7f",
+        "#bcbd22",
+      ],
+    },
   };
+
   Object.entries(layoutProperties || {}).forEach(([property, value]) => {
     update(availableProperties, property, () => value);
   });
   return (
-    <Plot
-      data={processGraphs(
-        data,
-        category,
-        series,
-        dataProperties,
-        metadata[visualization.id],
-        "line"
-      )}
-      layout={{
-        margin: {
-          pad: 5,
-          r: 5,
-          t: 0,
-          l: 30,
-          b: 20,
-        },
-        autosize: true,
-        showlegend: true,
-        xaxis: {
-          automargin: true,
-        },
-        legend: {
-          orientation: "h",
-          traceorder: "normal",
-          yanchor: "top",
-          y: -0.1,
-          xanchor: "left",
-          x: 0.5,
-          font: {},
-        },
-        ...availableProperties.layout,
-      }}
-      style={{ width: "100%", height: "100%" }}
-      config={{ displayModeBar: false, responsive: true }}
-    />
+    <Stack w="100%" h="100%">
+      <Text textAlign="center">{visualization.name}</Text>
+      <Stack h="100%" w="100%" flex={1}>
+        <Plot
+          data={processGraphs(
+            data,
+            category,
+            series,
+            dataProperties,
+            metadata[visualization.id],
+            "line"
+          )}
+          layout={{
+            margin: {
+              pad: 0,
+              r: 0,
+              t: 0,
+              l: 30,
+              b: 0,
+            },
+            autosize: true,
+            showlegend: true,
+            xaxis: {
+              automargin: true,
+            },
+            legend: {
+              orientation: "h",
+              traceorder: "normal",
+              yanchor: "top",
+              y: -0.1,
+              xanchor: "left",
+              x: 0.5,
+              font: {},
+            },
+            ...availableProperties.layout,
+          }}
+          style={{ width: "100%", height: "100%" }}
+          config={{ displayModeBar: false, responsive: true }}
+        />
+      </Stack>
+    </Stack>
   );
 };
 

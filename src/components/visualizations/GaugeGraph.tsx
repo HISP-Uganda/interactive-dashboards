@@ -8,6 +8,8 @@ type GaugeGraphProps = {
   visualization: IVisualization;
   category?: string;
   series?: string;
+  layoutProperties?: { [key: string]: any };
+  dataProperties?: { [key: string]: any };
 };
 
 const GaugeGraph = ({ visualization, category, series }: GaugeGraphProps) => {
@@ -19,12 +21,12 @@ const GaugeGraph = ({ visualization, category, series }: GaugeGraphProps) => {
 
   const datas: any = [
     {
-		domain: { x: [0, 1], y: [0, 1] },
-		value: 350,
-		title: { text: "Speed" },
-		type: "indicator",
-		mode: "gauge+number"
-	}
+      domain: { x: [0, 1], y: [0, 1] },
+      value: 350,
+      title: { text: "Speed" },
+      type: "indicator",
+      mode: "gauge+number",
+    },
   ];
   return (
     <Plot

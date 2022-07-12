@@ -8,6 +8,8 @@ type TreeMapsProps = {
   visualization: IVisualization;
   category?: string;
   series?: string;
+  layoutProperties?: { [key: string]: any };
+  dataProperties?: { [key: string]: any };
 };
 
 const TreeMaps = ({ visualization, category, series }: TreeMapsProps) => {
@@ -41,7 +43,7 @@ const TreeMaps = ({ visualization, category, series }: TreeMapsProps) => {
       layout={{
         margin: { l: 0, r: 0, b: 0, t: 0 },
         width: 600,
-        height:300,
+        height: 300,
       }}
       style={{ width: "100%", height: "100%" }}
       config={{ displayModeBar: false, responsive: true }}

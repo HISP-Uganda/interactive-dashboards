@@ -51,7 +51,9 @@ const getVisualization = (visualization: IVisualization) => {
     single: (
       <SingleValue
         visualization={visualization}
-        {...visualization.properties}
+        {...otherProperties}
+        layoutProperties={layoutProperties}
+        dataProperties={dataProperties}
       />
     ),
     bar: (
@@ -63,60 +65,123 @@ const getVisualization = (visualization: IVisualization) => {
       />
     ),
     pie: (
-      <PieChart visualization={visualization} {...visualization.properties} />
+      <PieChart
+        visualization={visualization}
+        {...otherProperties}
+        layoutProperties={layoutProperties}
+        dataProperties={dataProperties}
+      />
     ),
     map: (
-      <MapChart visualization={visualization} {...visualization.properties} />
+      <MapChart
+        visualization={visualization}
+        {...otherProperties}
+        layoutProperties={layoutProperties}
+        dataProperties={dataProperties}
+      />
     ),
     line: (
-      <LineGraph visualization={visualization} {...visualization.properties} />
+      <LineGraph
+        visualization={visualization}
+        {...otherProperties}
+        layoutProperties={layoutProperties}
+        dataProperties={dataProperties}
+      />
     ),
     sunburst: (
       <SunburstChart
         visualization={visualization}
-        {...visualization.properties}
+        {...otherProperties}
+        layoutProperties={layoutProperties}
+        dataProperties={dataProperties}
       />
     ),
     gauge: (
-      <GaugeGraph visualization={visualization} {...visualization.properties} />
+      <GaugeGraph
+        visualization={visualization}
+        {...otherProperties}
+        layoutProperties={layoutProperties}
+        dataProperties={dataProperties}
+      />
     ),
     histogram: (
-      <Histogram visualization={visualization} {...visualization.properties} />
+      <Histogram
+        visualization={visualization}
+        {...otherProperties}
+        layoutProperties={layoutProperties}
+        dataProperties={dataProperties}
+      />
     ),
     area: (
-      <AreaGraph visualization={visualization} {...visualization.properties} />
+      <AreaGraph
+        visualization={visualization}
+        {...otherProperties}
+        layoutProperties={layoutProperties}
+        dataProperties={dataProperties}
+      />
     ),
     radar: (
-      <RadarGraph visualization={visualization} {...visualization.properties} />
+      <RadarGraph
+        visualization={visualization}
+        {...otherProperties}
+        layoutProperties={layoutProperties}
+        dataProperties={dataProperties}
+      />
     ),
     bubblemaps: (
-      <BubbleMaps visualization={visualization} {...visualization.properties} />
+      <BubbleMaps
+        visualization={visualization}
+        {...otherProperties}
+        layoutProperties={layoutProperties}
+        dataProperties={dataProperties}
+      />
     ),
     funnelplot: (
       <FunnelGraph
         visualization={visualization}
-        {...visualization.properties}
+        {...otherProperties}
+        layoutProperties={layoutProperties}
+        dataProperties={dataProperties}
       />
     ),
     multiplecharts: (
       <MultipleChartTypes
         visualization={visualization}
-        {...visualization.properties}
+        {...otherProperties}
+        layoutProperties={layoutProperties}
+        dataProperties={dataProperties}
       />
     ),
     treemaps: (
-      <TreeMaps visualization={visualization} {...visualization.properties} />
+      <TreeMaps
+        visualization={visualization}
+        {...otherProperties}
+        layoutProperties={layoutProperties}
+        dataProperties={dataProperties}
+      />
     ),
     tables: (
-      <Tables visualization={visualization} {...visualization.properties} />
+      <Tables
+        visualization={visualization}
+        {...otherProperties}
+        layoutProperties={layoutProperties}
+        dataProperties={dataProperties}
+      />
     ),
     boxplot: (
-      <BoxPlot visualization={visualization} {...visualization.properties} />
+      <BoxPlot
+        visualization={visualization}
+        {...otherProperties}
+        layoutProperties={layoutProperties}
+        dataProperties={dataProperties}
+      />
     ),
     scatterplot: (
       <ScatterPlot
         visualization={visualization}
-        {...visualization.properties}
+        {...otherProperties}
+        layoutProperties={layoutProperties}
+        dataProperties={dataProperties}
       />
     ),
   };

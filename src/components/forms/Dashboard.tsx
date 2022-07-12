@@ -257,7 +257,10 @@ const Dashboard = () => {
                     <MenuItem
                       onClick={() => {
                         setCurrentSection(section);
-                        navigate({ to: `/dashboards/${dashboard.id}/section` });
+                        navigate({
+                          to: `/dashboards/${dashboard.id}/section`,
+                          search,
+                        });
                       }}
                     >
                       Edit
