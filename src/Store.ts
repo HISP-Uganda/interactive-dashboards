@@ -50,6 +50,8 @@ import {
   changeDashboardId,
   changeAdministration,
   changeHasDashboards,
+  addOverride,
+  changeVisualizationOverride,
 } from "./Events";
 import {
   ICategory,
@@ -480,7 +482,6 @@ export const $indicator = domain
 export const $section = domain
   .createStore<ISection>(createSection())
   .on(setCurrentSection, (_, section) => {
-    console.log(section);
     return section;
   })
   .on(addVisualization2Section, (state) => {
@@ -490,6 +491,7 @@ export const $section = domain
       type: "",
       name: `Visualization ${state.visualizations.length + 1}`,
       properties: {},
+      overrides: {},
     };
     return {
       ...state,
@@ -511,6 +513,23 @@ export const $section = domain
   .on(changeSectionAttribute, (state, { attribute, value }) => {
     return { ...state, [attribute]: value };
   })
+  .on(
+    changeVisualizationOverride,
+    (state, { visualization, override, value }) => {
+      const visualizations: IVisualization[] = state.visualizations.map(
+        (v: IVisualization) => {
+          if (v.id === visualization) {
+            return {
+              ...v,
+              overrides: { ...v.overrides, [override]: value },
+            };
+          }
+          return v;
+        }
+      );
+      return { ...state, visualizations };
+    }
+  )
   .on(
     changeVisualizationProperties,
     (state, { attribute, value, visualization }) => {
@@ -655,4 +674,4 @@ export const $globalFilters = $store.map((state) => {
   };
 });
 
-$section.watch((i) => console.log(i));
+// $section.watch((i) => console.log(i));

@@ -451,7 +451,6 @@ export const useNamespaceKey2 = (namespace: string, key: string) => {
 };
 
 export const useDataElements = (page: number, pageSize: number, q = "") => {
-  console.log(q);
   const engine = useDataEngine();
   let params: { [key: string]: any } = {
     page,
@@ -682,7 +681,7 @@ const findDimension2 = (
 ) => {
   return Object.entries(dimension)
     .filter(([key, { what, type }]) => type === t && what === w)
-    .map(([key]) => `${joiner}key`)
+    .map(([key]) => `${joiner}${key}`)
     .join(";");
 };
 
@@ -738,7 +737,8 @@ const joinItems = (items: string[][], joiner: "dimension" | "filter") => {
 
 const makeDHIS2Query = (
   data: IData,
-  globalFilters: { [key: string]: any } = {}
+  globalFilters: { [key: string]: any } = {},
+  overrides: { [key: string]: any } = {}
 ) => {
   const ouDimensions = findDimension(data.dataDimensions, "dimension", "ou");
   const ouFilters = findDimension(data.dataDimensions, "filter", "ou");
@@ -746,49 +746,130 @@ const makeDHIS2Query = (
   const iFilters = findDimension(data.dataDimensions, "filter", "i");
   const peDimensions = findDimension(data.dataDimensions, "dimension", "pe");
   const peFilters = findDimension(data.dataDimensions, "filter", "pe");
-  const ouLevelFilter = findDimension2(
-    data.dataDimensions,
-    "filter",
-    "oul",
-    "LEVEL"
-  );
-  const ouLevelDimension = findDimension2(
+  const ouLevelFilter = findDimension(data.dataDimensions, "filter", "oul");
+  const ouLevelDimension = findDimension(
     data.dataDimensions,
     "dimension",
-    "oul",
-    "LEVEL"
+    "oul"
+  );
+  const ouGroupFilter = findDimension(data.dataDimensions, "filter", "oug");
+  const ouGroupDimension = findDimension(
+    data.dataDimensions,
+    "dimension",
+    "oug"
   );
 
-  console.log(ouLevelFilter, ouLevelDimension, "Finishing");
-  // const ouLevelFilters =
-  //   globalFilters[ouLevelFilter].join(";") || ouLevelFilter;
-  // const ouLevelDimensions =
-  //   globalFilters[ouLevelDimension].join(";") || ouLevelDimension;
+  let ouGroupFilters = "";
 
-  const unitsFilter = globalFilters[ouFilters]?.join(";") || ouFilters;
+  if (ouGroupFilter) {
+    ouGroupFilters =
+      globalFilters[ouGroupFilter]
+        ?.map((v: string) => `OU_GROUP-${v}`)
+        .join(";") ||
+      ouGroupFilter
+        .split(";")
+        .map((v) => `OU_GROUP-${v}`)
+        .join(";");
+  }
+
+  let ouGroupDimensions = "";
+  if (ouGroupDimension) {
+    ouGroupDimensions =
+      globalFilters[ouGroupDimension]
+        ?.map((v: string) => `OU_GROUP-${v}`)
+        .join(";") ||
+      ouGroupDimension
+        .split(";")
+        .map((v) => `OU_GROUP-${v}`)
+        .join(";");
+  }
+
+  let ouLevelFilters = "";
+  if (ouLevelFilter) {
+    ouLevelFilters =
+      globalFilters[ouLevelFilter]
+        ?.map((v: string) => `LEVEL-${v}`)
+        .join(";") ||
+      ouLevelFilter
+        .split(";")
+        .map((v) => `LEVEL-${v}`)
+        .join(";");
+  }
+  let ouLevelDimensions = "";
+
+  if (ouLevelDimension) {
+    ouLevelDimensions =
+      globalFilters[ouLevelDimension]
+        ?.map((v: string) => `LEVEL-${v}`)
+        .join(";") ||
+      ouLevelDimension
+        .split(";")
+        .map((v) => `LEVEL-${v}`)
+        .join(";");
+  }
+
+  const unitsFilter = globalFilters[ouFilters]?.map.join(";") || ouFilters;
   const unitsDimension = globalFilters[ouDimensions]?.join(";") || ouDimensions;
 
-  const finalOuFilters = [unitsFilter].join(";");
-  const finalOuDimensions = [unitsDimension].join(";");
+  let finalOuFilters = [unitsFilter, ouLevelFilters, ouGroupFilters]
+    .filter((v: string) => !!v)
+    .join(";");
+  let finalOuDimensions = [unitsDimension, ouLevelDimensions, ouGroupDimensions]
+    .filter((v: string) => !!v)
+    .join(";");
 
-  return [
+  let finalIFilters = globalFilters[iFilters]?.join(";") || iFilters;
+  let finalIDimensions = globalFilters[iDimensions]?.join(";") || iDimensions;
+  let finalPeFilters = globalFilters[peFilters]?.join(";") || peFilters;
+  let finalPeDimensions =
+    globalFilters[peDimensions]?.join(";") || peDimensions;
+
+  if (overrides.ou && overrides.ou === "filters") {
+    finalOuFilters = finalOuFilters || finalOuDimensions;
+    finalOuDimensions = "";
+  } else if (overrides.ou && overrides.ou === "dimension") {
+    finalOuDimensions = finalOuFilters || finalOuDimensions;
+    finalOuFilters = "";
+  }
+  if (overrides.dx && overrides.dx === "filters") {
+    finalIFilters = finalIFilters || finalIDimensions;
+    finalIDimensions = "";
+  } else if (overrides.dx && overrides.dx === "dimension") {
+    finalIDimensions = finalIFilters || finalIDimensions;
+    finalIFilters = "";
+  }
+  if (overrides.pe && overrides.pe === "filters") {
+    finalPeFilters = finalPeFilters || finalPeDimensions;
+    finalPeDimensions = "";
+  } else if (overrides.pe && overrides.pe === "dimension") {
+    finalPeDimensions = finalPeFilters || finalPeDimensions;
+    finalPeFilters = "";
+  }
+
+  if (finalOuFilters && finalOuDimensions) {
+    finalOuDimensions = `${finalOuFilters};${finalOuDimensions}`;
+    finalOuFilters = "";
+  }
+
+  const dd = [
     joinItems(
       [
         [finalOuFilters, "ou"],
-        [globalFilters[iFilters]?.join(";") || iFilters, "dx"],
-        [globalFilters[peFilters]?.join(";") || peFilters, "pe"],
+        [finalIFilters, "dx"],
+        [finalPeFilters, "pe"],
       ],
       "filter"
     ),
     joinItems(
       [
         [finalOuDimensions, "ou"],
-        [globalFilters[iDimensions]?.join(";") || iDimensions, "dx"],
-        [globalFilters[peDimensions]?.join(";") || peDimensions, "pe"],
+        [finalIDimensions, "dx"],
+        [finalPeDimensions, "pe"],
       ],
       "dimension"
     ),
   ].join("&");
+  return dd;
 };
 
 const makeSQLViewsQueries = (
@@ -810,14 +891,19 @@ const makeSQLViewsQueries = (
 
 const generateDHIS2Query = (
   indicator: IIndicator,
-  globalFilters: { [key: string]: any } = {}
+  globalFilters: { [key: string]: any } = {},
+  overrides: { [key: string]: string } = {}
 ) => {
   let queries = {};
   if (
     indicator.numerator?.type === "ANALYTICS" &&
     Object.keys(indicator.numerator.dataDimensions).length > 0
   ) {
-    const params = makeDHIS2Query(indicator.numerator, globalFilters);
+    const params = makeDHIS2Query(
+      indicator.numerator,
+      globalFilters,
+      overrides
+    );
     if (params) {
       queries = {
         numerator: {
@@ -914,7 +1000,8 @@ export const useVisualization = (
   indicator?: IIndicator,
   dataSource?: IDataSource,
   refreshInterval?: string,
-  globalFilters?: { [key: string]: any }
+  globalFilters?: { [key: string]: any },
+  overrides: { [key: string]: any } = {}
 ) => {
   const engine = useDataEngine();
   let currentInterval: boolean | number = false;
@@ -923,10 +1010,15 @@ export const useVisualization = (
   }
   const otherKeys = generateKeys(indicator, globalFilters);
   return useQuery<any, Error>(
-    ["visualizations", indicator?.id, ...otherKeys],
+    [
+      "visualizations",
+      indicator?.id,
+      ...otherKeys,
+      ...Object.values(overrides),
+    ],
     async () => {
       if (indicator && dataSource && dataSource.isCurrentDHIS2) {
-        const queries = generateDHIS2Query(indicator, globalFilters);
+        const queries = generateDHIS2Query(indicator, globalFilters, overrides);
         const data = await engine.query(queries);
         let processed: any[] = [];
         let metadata = {};

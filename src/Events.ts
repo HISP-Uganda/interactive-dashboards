@@ -132,9 +132,20 @@ export const changeVisualizationAttribute = domain.createEvent<{
   visualization: string;
 }>();
 
+export const changeVisualizationOverride = domain.createEvent<{
+  override: string;
+  value: string;
+  visualization: string;
+}>();
+
 export const changeSectionAttribute = domain.createEvent<{
   attribute: string;
   value?: any;
+}>();
+
+export const addOverride = domain.createEvent<{
+  attribute: "ou" | "dx" | "pe";
+  value: string;
 }>();
 
 export const changeVisualizationProperties = domain.createEvent<{

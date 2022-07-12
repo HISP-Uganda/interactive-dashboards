@@ -36,19 +36,12 @@ const SingleValue = ({
           type: "indicator",
           mode: "number",
           number: {
-            // valueformat,
+            valueformat: "",
             prefix,
             suffix,
             font: {
               size: valueSize,
               color: valueColor,
-            },
-          },
-          title: {
-            text: String(visualization.name).toUpperCase(),
-            font: {
-              size: titleSize,
-              color: titleColor,
             },
           },
           value: processSingleValue(data),

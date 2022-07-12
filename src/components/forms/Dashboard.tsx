@@ -21,6 +21,7 @@ import {
   Textarea,
   Checkbox,
 } from "@chakra-ui/react";
+import { Textfit } from "react-textfit";
 import { GroupBase, Select } from "chakra-react-select";
 
 import { useDataEngine } from "@dhis2/app-runtime";
@@ -67,7 +68,6 @@ import OUTree from "../OUTreeSelect";
 import PeriodPicker from "../PeriodPicker";
 import Visualization from "../visualizations/Visualization";
 
-const { RangePicker } = DatePicker;
 const ReactGridLayout = WidthProvider(Responsive);
 const Dashboard = () => {
   const search = useSearch<FormGenerics>();
@@ -265,8 +265,18 @@ const Dashboard = () => {
                     </MenuItem>
                   </MenuList>
                 </Menu>
+                {/* <Textfit mode="single">Fat headline!</Textfit> */}
               </Stack>
-              <Stack direction={section.direction} w="100%" h="100%">
+              <Stack
+                direction={section.direction}
+                w="100%"
+                h="100%"
+                justifyContent="space-between"
+                // justifyItems="center"
+                // alignContent="center"
+                // alignSelf="center"
+                // alignItems="center"
+              >
                 {section.visualizations.map((visualization) => (
                   <Visualization
                     key={visualization.id}

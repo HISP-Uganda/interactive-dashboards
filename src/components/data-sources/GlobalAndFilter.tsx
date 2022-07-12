@@ -33,7 +33,6 @@ const GlobalAndFilter = ({
   hasGlobalFilter = true,
   denNum,
 }: GlobalAndFilterProps) => {
-  console.log(type);
   return (
     <Stack spacing="20px">
       <RadioGroup
@@ -43,7 +42,6 @@ const GlobalAndFilter = ({
           Object.entries(denNum?.dataDimensions || {})
             .filter(([k, { what }]) => what === type)
             .forEach(([key, dim]) => {
-              console.log(key, dim);
               onChange({
                 id: key,
                 type: dimension,
