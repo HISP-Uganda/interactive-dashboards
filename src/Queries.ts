@@ -51,12 +51,13 @@ export const queryDataSource = async (
           params: parameters,
         },
       };
-      try {
-        const { results }: any = await engine.query(query);
-        return results;
-      } catch (error) {
-        return {};
-      }
+      // try {
+      const { results }: any = await engine.query(query);
+      return results;
+      // } catch (error) {
+      //   console.log(error);
+      //   return {};
+      // }
     }
   }
 
@@ -807,9 +808,14 @@ const makeDHIS2Query = (
         .map((v) => `LEVEL-${v}`)
         .join(";");
   }
+  console.log("Death1111");
+  console.log(globalFilters[ouFilters].join(","));
+  console.log(ouFilters);
+  const unitsFilter = globalFilters[ouFilters].map.join(";") || ouFilters;
+  console.log("Death666666");
 
-  const unitsFilter = globalFilters[ouFilters]?.map.join(";") || ouFilters;
-  const unitsDimension = globalFilters[ouDimensions]?.join(";") || ouDimensions;
+  const unitsDimension = globalFilters[ouDimensions].join(";") || ouDimensions;
+  console.log("Death77777");
 
   let finalOuFilters = [unitsFilter, ouLevelFilters, ouGroupFilters]
     .filter((v: string) => !!v)
@@ -817,28 +823,30 @@ const makeDHIS2Query = (
   let finalOuDimensions = [unitsDimension, ouLevelDimensions, ouGroupDimensions]
     .filter((v: string) => !!v)
     .join(";");
+  console.log("Death88888");
 
-  let finalIFilters = globalFilters[iFilters]?.join(";") || iFilters;
-  let finalIDimensions = globalFilters[iDimensions]?.join(";") || iDimensions;
-  let finalPeFilters = globalFilters[peFilters]?.join(";") || peFilters;
-  let finalPeDimensions =
-    globalFilters[peDimensions]?.join(";") || peDimensions;
+  let finalIFilters = globalFilters[iFilters].join(";") || iFilters;
+  let finalIDimensions = globalFilters[iDimensions].join(";") || iDimensions;
+  let finalPeFilters = globalFilters[peFilters].join(";") || peFilters;
+  let finalPeDimensions = globalFilters[peDimensions].join(";") || peDimensions;
 
-  if (overrides.ou && overrides.ou === "filters") {
+  if (overrides.ou && overrides.ou === "filter") {
     finalOuFilters = finalOuFilters || finalOuDimensions;
     finalOuDimensions = "";
   } else if (overrides.ou && overrides.ou === "dimension") {
     finalOuDimensions = finalOuFilters || finalOuDimensions;
     finalOuFilters = "";
   }
-  if (overrides.dx && overrides.dx === "filters") {
+  if (overrides.dx && overrides.dx === "filter") {
     finalIFilters = finalIFilters || finalIDimensions;
     finalIDimensions = "";
   } else if (overrides.dx && overrides.dx === "dimension") {
     finalIDimensions = finalIFilters || finalIDimensions;
     finalIFilters = "";
   }
-  if (overrides.pe && overrides.pe === "filters") {
+  console.log("Death33333");
+
+  if (overrides.pe && overrides.pe === "filter") {
     finalPeFilters = finalPeFilters || finalPeDimensions;
     finalPeDimensions = "";
   } else if (overrides.pe && overrides.pe === "dimension") {
@@ -850,6 +858,7 @@ const makeDHIS2Query = (
     finalOuDimensions = `${finalOuFilters};${finalOuDimensions}`;
     finalOuFilters = "";
   }
+  console.log("Death334323222");
 
   const dd = [
     joinItems(
@@ -869,6 +878,7 @@ const makeDHIS2Query = (
       "dimension"
     ),
   ].join("&");
+
   return dd;
 };
 
@@ -964,6 +974,7 @@ const generateDHIS2Query = (
       },
     };
   }
+  console.log(queries);
   return queries;
 };
 
@@ -1000,8 +1011,7 @@ export const useVisualization = (
   indicator?: IIndicator,
   dataSource?: IDataSource,
   refreshInterval?: string,
-  globalFilters?: { [key: string]: any },
-  overrides: { [key: string]: any } = {}
+  globalFilters?: { [key: string]: any }
 ) => {
   const engine = useDataEngine();
   let currentInterval: boolean | number = false;
@@ -1009,6 +1019,7 @@ export const useVisualization = (
     currentInterval = Number(refreshInterval) * 1000;
   }
   const otherKeys = generateKeys(indicator, globalFilters);
+  const overrides = visualization.overrides;
   return useQuery<any, Error>(
     [
       "visualizations",
@@ -1017,12 +1028,12 @@ export const useVisualization = (
       ...Object.values(overrides),
     ],
     async () => {
+      console.log(indicator, dataSource);
       if (indicator && dataSource && dataSource.isCurrentDHIS2) {
         const queries = generateDHIS2Query(indicator, globalFilters, overrides);
         const data = await engine.query(queries);
         let processed: any[] = [];
         let metadata = {};
-
         if (data.numerator && data.denominator) {
           const numerator: any = data.numerator;
           const denominator: any = data.denominator;

@@ -22,9 +22,10 @@ export const processGraphs = (
   metadata?: any,
   type: string = "bar"
 ) => {
+  console.log(data);
   let chartData: any = [];
   let availableProperties: { [key: string]: any } = {};
-  // update(availableProperties, "data.orientation", () => "v");
+  update(availableProperties, "data.orientation", () => "v");
   Object.entries(dataProperties).forEach(([property, value]) => {
     availableProperties = update(availableProperties, property, () => value);
   });

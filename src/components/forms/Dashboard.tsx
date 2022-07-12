@@ -244,7 +244,7 @@ const Dashboard = () => {
                 justifyItems="center"
                 textAlign="center"
               >
-                {/* <Menu>
+                <Menu>
                   <MenuButton
                     _hover={{ bg: "none" }}
                     bg="none"
@@ -252,7 +252,6 @@ const Dashboard = () => {
                     rightIcon={<ChevronDownIcon />}
                   >
                     {section.title}
-                    {section.i}
                   </MenuButton>
                   <MenuList>
                     <MenuItem
@@ -264,8 +263,7 @@ const Dashboard = () => {
                       Edit
                     </MenuItem>
                   </MenuList>
-                </Menu> */}
-                <Textfit mode="single">Fat headline!</Textfit>
+                </Menu>
               </Stack>
               <Stack
                 direction={section.direction}
