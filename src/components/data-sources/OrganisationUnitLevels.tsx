@@ -34,9 +34,15 @@ const INNER_LIMIT = 4;
 
 const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
   const [dimension, setDimension] = useState<"filter" | "dimension">("filter");
+  const selected = Object.entries(denNum?.dataDimensions || {})
+    .filter(([k, { what }]) => what === "oul")
+    .map(([key]) => {
+      return key;
+    });
+    const [useGlobal, setUseGlobal] = useState<boolean>(selected.indexOf("GQhi6pRnTKF") !== -1);
   const [q, setQ] = useState<string>("");
-  const [useGlobal, setUseGlobal] = useState<boolean>(false);
   const paginations = useStore($paginations);
+
 
   const {
     pages,
@@ -63,6 +69,8 @@ const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
   const handlePageChange = (nextPage: number) => {
     setCurrentPage(nextPage);
   };
+
+
 
   return (
     <Stack spacing="30px">
