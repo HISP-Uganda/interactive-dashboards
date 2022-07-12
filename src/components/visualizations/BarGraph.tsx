@@ -29,33 +29,29 @@ const BarGraph = ({
     : [];
 
   let availableProperties: { [key: string]: any } = {
-    ["layout.legend.y"]: -0.2,
-    ["layout.legend.x"]: 0.5,
-    ["layout.legend.orientation"]: "h",
-    ["layout.yaxis.automargin"]: true,
-    ["layout.colorway"]: [
-      "#1f77b4",
-      "#ff7f0e",
-      "#2ca02c",
-      "#d62728",
-      "#9467bd",
-      "#8c564b",
-      "#e377c2",
-      "#7f7f7f",
-      "#bcbd22",
-    ],
+    layout: {
+      legend: { x: 0.5, y: -0.1, orientation: "h" },
+      yaxis: { automargin: true },
+      colorway: [
+        "#1f77b4",
+        "#ff7f0e",
+        "#2ca02c",
+        "#d62728",
+        "#9467bd",
+        "#8c564b",
+        "#e377c2",
+        "#7f7f7f",
+        "#bcbd22",
+      ],
+    },
   };
   Object.entries(layoutProperties || {}).forEach(([property, value]) => {
     update(availableProperties, property, () => value);
   });
   return (
     <Stack w="100%" spacing="30px" h="100%">
-      <Textfit>
-        <Text h="30px" textAlign="center">
-          {visualization.name}
-        </Text>
-      </Textfit>
-      <Stack h="100%" w="100%">
+      <Text textAlign="center">{visualization.name}</Text>
+      <Stack h="100%" w="100%" flex={1}>
         <Plot
           data={processGraphs(
             data,

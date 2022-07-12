@@ -252,7 +252,6 @@ const Dashboard = () => {
                     rightIcon={<ChevronDownIcon />}
                   >
                     {section.title}
-                    {/* {section.i} */}
                   </MenuButton>
                   <MenuList>
                     <MenuItem
@@ -265,7 +264,6 @@ const Dashboard = () => {
                     </MenuItem>
                   </MenuList>
                 </Menu>
-                {/* <Textfit mode="single">Fat headline!</Textfit> */}
               </Stack>
               <Stack
                 direction={section.direction}
