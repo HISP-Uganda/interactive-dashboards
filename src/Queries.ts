@@ -808,14 +808,15 @@ const makeDHIS2Query = (
         .map((v) => `LEVEL-${v}`)
         .join(";");
   }
-  console.log("Death1111");
-  console.log(globalFilters[ouFilters].join(","));
-  console.log(ouFilters);
-  const unitsFilter = globalFilters[ouFilters].map.join(";") || ouFilters;
-  console.log("Death666666");
+  const unitsFilter =
+    globalFilters[ouFilters] && globalFilters[ouFilters].length > 0
+      ? globalFilters[ouFilters].join(";")
+      : ouFilters;
 
-  const unitsDimension = globalFilters[ouDimensions].join(";") || ouDimensions;
-  console.log("Death77777");
+  const unitsDimension =
+    globalFilters[ouDimensions] && globalFilters[ouDimensions].length > 0
+      ? globalFilters[ouDimensions].join(";")
+      : ouDimensions;
 
   let finalOuFilters = [unitsFilter, ouLevelFilters, ouGroupFilters]
     .filter((v: string) => !!v)
@@ -823,13 +824,23 @@ const makeDHIS2Query = (
   let finalOuDimensions = [unitsDimension, ouLevelDimensions, ouGroupDimensions]
     .filter((v: string) => !!v)
     .join(";");
-  console.log("Death88888");
 
-  let finalIFilters = globalFilters[iFilters].join(";") || iFilters;
-  let finalIDimensions = globalFilters[iDimensions].join(";") || iDimensions;
-  let finalPeFilters = globalFilters[peFilters].join(";") || peFilters;
-  let finalPeDimensions = globalFilters[peDimensions].join(";") || peDimensions;
-
+  let finalIFilters =
+    globalFilters[iFilters] && globalFilters[iFilters].length > 0
+      ? globalFilters[iFilters].join(";")
+      : iFilters;
+  let finalIDimensions =
+    globalFilters[iDimensions] && globalFilters[iDimensions].length > 0
+      ? globalFilters[iDimensions].join(";")
+      : iDimensions;
+  let finalPeFilters =
+    globalFilters[peFilters] && globalFilters[peFilters].length > 0
+      ? globalFilters[peFilters].join(";")
+      : peFilters;
+  let finalPeDimensions =
+    globalFilters[peDimensions] && globalFilters[peDimensions].length > 0
+      ? globalFilters[peDimensions].join(";")
+      : peDimensions;
   if (overrides.ou && overrides.ou === "filter") {
     finalOuFilters = finalOuFilters || finalOuDimensions;
     finalOuDimensions = "";
@@ -844,7 +855,6 @@ const makeDHIS2Query = (
     finalIDimensions = finalIFilters || finalIDimensions;
     finalIFilters = "";
   }
-  console.log("Death33333");
 
   if (overrides.pe && overrides.pe === "filter") {
     finalPeFilters = finalPeFilters || finalPeDimensions;
@@ -858,7 +868,6 @@ const makeDHIS2Query = (
     finalOuDimensions = `${finalOuFilters};${finalOuDimensions}`;
     finalOuFilters = "";
   }
-  console.log("Death334323222");
 
   const dd = [
     joinItems(
