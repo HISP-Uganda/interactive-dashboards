@@ -8,6 +8,8 @@ type BoxplotProps = {
   visualization: IVisualization;
   category?: string;
   series?: string;
+  layoutProperties?: { [key: string]: any };
+  dataProperties?: { [key: string]: any };
 };
 
 const BoxPlot = ({ visualization, category, series }: BoxplotProps) => {

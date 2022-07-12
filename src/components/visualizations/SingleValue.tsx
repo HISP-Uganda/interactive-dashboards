@@ -7,24 +7,14 @@ import { processSingleValue } from "../processors";
 
 type SingleValueProps = {
   visualization: IVisualization;
-  valueformat?: string;
-  prefix?: string;
-  suffix?: string;
-  valueSize?: number | undefined;
-  titleSize?: number | undefined;
-  valueColor?: string;
-  titleColor?: string;
+  layoutProperties?: { [key: string]: any };
+  dataProperties?: { [key: string]: any };
 };
 
 const SingleValue = ({
   visualization,
-  valueformat,
-  prefix,
-  suffix,
-  valueSize,
-  titleSize,
-  valueColor,
-  titleColor,
+  dataProperties,
+  layoutProperties,
 }: SingleValueProps) => {
   const visualizationData = useStore($visualizationData);
   const data = visualizationData[visualization.id]
@@ -39,15 +29,7 @@ const SingleValue = ({
             {
               type: "indicator",
               mode: "number",
-              number: {
-                valueformat: "",
-                prefix,
-                suffix,
-                font: {
-                  size: valueSize,
-                  color: valueColor,
-                },
-              },
+              number: {},
               value: processSingleValue(data),
             },
           ]}

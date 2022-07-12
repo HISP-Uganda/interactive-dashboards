@@ -8,6 +8,8 @@ type MultipleChartTypesProps = {
   visualization: IVisualization;
   category?: string;
   series?: string;
+  layoutProperties?: { [key: string]: any };
+  dataProperties?: { [key: string]: any };
 };
 
 const MultipleChartTypes = ({
@@ -21,20 +23,20 @@ const MultipleChartTypes = ({
     ? visualizationData[visualization.id]
     : [];
 
-    const trace1 = {
-        x: [0, 1, 2, 3, 4, 5],
-        y: [1.5, 1, 1.3, 0.7, 0.8, 0.9],
-        type: 'scatter'
-      };
-      
-      const trace2 = {
-        x: [0, 1, 2, 3, 4, 5],
-        y: [1, 0.5, 0.7, -1.2, 0.3, 0.4],
-        type: 'bar'
-      };
-      
-      const datas:any = [trace1, trace2];
-      
+  const trace1 = {
+    x: [0, 1, 2, 3, 4, 5],
+    y: [1.5, 1, 1.3, 0.7, 0.8, 0.9],
+    type: "scatter",
+  };
+
+  const trace2 = {
+    x: [0, 1, 2, 3, 4, 5],
+    y: [1, 0.5, 0.7, -1.2, 0.3, 0.4],
+    type: "bar",
+  };
+
+  const datas: any = [trace1, trace2];
+
   return (
     // <Plot
     //   data={datas}

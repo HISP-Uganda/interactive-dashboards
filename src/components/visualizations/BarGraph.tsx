@@ -30,7 +30,7 @@ const BarGraph = ({
 
   let availableProperties: { [key: string]: any } = {
     layout: {
-      legend: { x: 0.5, y: -0.1, orientation: "h" },
+      legend: { x: 0.5, y: -0.3, orientation: "h" },
       yaxis: { automargin: true },
       colorway: [
         "#1f77b4",
@@ -49,7 +49,7 @@ const BarGraph = ({
     update(availableProperties, property, () => value);
   });
   return (
-    <Stack w="100%" spacing="30px" h="100%">
+    <Stack w="100%" h="100%">
       <Text textAlign="center">{visualization.name}</Text>
       <Stack h="100%" w="100%" flex={1}>
         <Plot

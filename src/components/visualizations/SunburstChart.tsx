@@ -8,6 +8,8 @@ type SunBurstProps = {
   visualization: IVisualization;
   category?: string;
   series?: string;
+  layoutProperties?: { [key: string]: any };
+  dataProperties?: { [key: string]: any };
 };
 
 const SunburstChart = ({ visualization, category, series }: SunBurstProps) => {

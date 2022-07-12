@@ -8,6 +8,8 @@ type FunnelGraphProps = {
   visualization: IVisualization;
   category?: string;
   series?: string;
+  layoutProperties?: { [key: string]: any };
+  dataProperties?: { [key: string]: any };
 };
 
 const FunnelGraph = ({ visualization, category, series }: FunnelGraphProps) => {

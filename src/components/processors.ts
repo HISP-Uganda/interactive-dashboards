@@ -1,6 +1,4 @@
-import { set, uniq, update } from "lodash";
-import deepUpdateObject from "deep-update-object";
-import { updateValAtKey } from "../utils/utils";
+import { uniq, update } from "lodash";
 export const processSingleValue = (data: any[]): any => {
   if (data.length > 0) {
     const values = Object.values(data[0]);
@@ -22,7 +20,6 @@ export const processGraphs = (
   metadata?: any,
   type: string = "bar"
 ) => {
-  console.log(data);
   let chartData: any = [];
   let availableProperties: { [key: string]: any } = {};
   update(availableProperties, "data.orientation", () => "v");
@@ -88,11 +85,15 @@ export const processGraphs = (
 export const processPieChart = (
   data: any[],
   labels?: string,
-  values?: string
+  values?: string,
+  metadata?: any
 ) => {
   let chartData: any = [];
   if (data && data.length > 0 && labels && values) {
-    const x = data.map((num: any) => num[labels]);
+    const x = data.map((num: any) => {
+      const label = num[labels];
+      return metadata?.[num[labels]]?.name || num[labels];
+    });
     const y = data.map((num: any) => num[values]);
     chartData = [
       {
@@ -102,7 +103,7 @@ export const processPieChart = (
         textinfo: "label+percent+name",
         hoverinfo: "label+percent+name",
         textposition: "inside",
-        // hole: 0.2,
+        hole: 0.5,
       },
     ];
   }

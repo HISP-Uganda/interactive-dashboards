@@ -8,6 +8,8 @@ type HistogramProps = {
   visualization: IVisualization;
   category?: string;
   series?: string;
+  layoutProperties?: { [key: string]: any };
+  dataProperties?: { [key: string]: any };
 };
 
 const Histogram = ({ visualization, category, series }: HistogramProps) => {

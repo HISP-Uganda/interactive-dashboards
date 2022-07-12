@@ -4,31 +4,29 @@ import { IVisualization } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { processGraphs } from "../processors";
 import {
-    Table,
-    Thead,
-    Tbody,
-    Tfoot,
-    Tr,
-    Th,
-    Td,
-    TableCaption,
-    TableContainer,
-  } from '@chakra-ui/react'
+  Table,
+  Thead,
+  Tbody,
+  Tfoot,
+  Tr,
+  Th,
+  Td,
+  TableCaption,
+  TableContainer,
+} from "@chakra-ui/react";
 
 type TableProps = {
   visualization: IVisualization;
   category?: string;
   series?: string;
+  layoutProperties?: { [key: string]: any };
+  dataProperties?: { [key: string]: any };
 };
 
-const Tables = ({
-    visualization,
-    category,
-    series,
-  }: TableProps) => {
-    return (
-      <TableContainer>
-      <Table variant='striped' colorScheme='teal'>
+const Tables = ({ visualization, category, series }: TableProps) => {
+  return (
+    <TableContainer>
+      <Table variant="striped" colorScheme="teal">
         <TableCaption>Imperial to metric conversion factors</TableCaption>
         <Thead>
           <Tr>
@@ -63,7 +61,7 @@ const Tables = ({
         </Tfoot>
       </Table>
     </TableContainer>
-    )
-}
+  );
+};
 
-export default Tables
+export default Tables;

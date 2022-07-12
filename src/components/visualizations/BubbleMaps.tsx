@@ -8,6 +8,8 @@ type BubbleMapsProps = {
   visualization: IVisualization;
   category?: string;
   series?: string;
+  layoutProperties?: { [key: string]: any };
+  dataProperties?: { [key: string]: any };
 };
 
 const BubbleMaps = ({ visualization, category, series }: BubbleMapsProps) => {
@@ -16,9 +18,7 @@ const BubbleMaps = ({ visualization, category, series }: BubbleMapsProps) => {
   const data = visualizationData[visualization.id]
     ? visualizationData[visualization.id]
     : [];
-  return (
-    <></>
-  );
+  return <></>;
 };
 
 export default BubbleMaps;
