@@ -227,15 +227,7 @@ const Section = () => {
     );
     navigate({
       to: `/dashboards/${dashboard.id}`,
-      search: {
-        ...search,
-        category: dashboard.category,
-        periods: store.periods.map((i) => i.id),
-        organisations: store.organisations,
-        groups: store.groups,
-        levels: store.levels,
-        edit: true,
-      },
+      search,
     });
   };
 
@@ -353,9 +345,6 @@ const Section = () => {
                     <VisualizationOverride visualization={visualization} />
                     <VisualizationTypes visualization={visualization} />
                     <VisualizationProperties visualization={visualization} />
-                    <pre>
-                      {JSON.stringify(visualization.indicator, null, 2)}
-                    </pre>
                   </Stack>
                 </AccordionPanel>
               </AccordionItem>

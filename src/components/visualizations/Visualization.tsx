@@ -120,6 +120,7 @@ const getVisualization = (visualization: IVisualization) => {
       />
     ),
   };
+  console.log(allTypes[visualization.type]);
   return allTypes[visualization.type];
 };
 
@@ -139,8 +140,7 @@ const Visualization = ({ visualization }: VisualizationProps) => {
     indicator,
     dataSource,
     dashboard.refreshInterval,
-    globalFilters,
-    visualization.overrides
+    globalFilters
   );
 
   return (
