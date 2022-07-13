@@ -34,7 +34,6 @@ const SingleValue = ({
             },
           ]}
           layout={{
-            title: visualization.name,
             margin: { t: 0, r: 0, l: 0, b: 0, pad: 0 },
             autosize: true,
           }}

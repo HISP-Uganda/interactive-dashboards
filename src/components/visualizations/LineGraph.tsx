@@ -66,7 +66,7 @@ const LineGraph = ({
               pad: 0,
               r: 0,
               t: 0,
-              l: 30,
+              l: 60,
               b: 0,
             },
             autosize: true,

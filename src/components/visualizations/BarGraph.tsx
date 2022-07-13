@@ -31,7 +31,7 @@ const BarGraph = ({
   let availableProperties: { [key: string]: any } = {
     layout: {
       legend: { x: 0.5, y: -0.3, orientation: "h" },
-      yaxis: { automargin: true },
+      yaxis: { automargin: true},
       colorway: [
         "#1f77b4",
         "#ff7f0e",
@@ -63,9 +63,9 @@ const BarGraph = ({
           layout={{
             margin: {
               // pad: 5,
-              r: 0,
+              r: 10,
               t: 0,
-              l: 50,
+              l: 70,
               b: 0,
             },
             autosize: true,
