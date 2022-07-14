@@ -167,8 +167,6 @@ export const processTwoDimensions = (
   const searchNumerator = data.find(
     (d) => Object.keys(d).findIndex((s) => s === "numerator") !== -1
   );
-
-  // const i = indicators.find((s) => s.denominator?.dataDimensions);
   let value;
   const searchDenominator = data.find(
     (d) => Object.keys(d).findIndex((s) => s === "denominator") !== -1

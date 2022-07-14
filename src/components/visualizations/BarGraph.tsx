@@ -1,8 +1,7 @@
-import { useStore } from "effector-react";
-import Plot from "react-plotly.js";
-import { Textfit } from "react-textfit";
 import { Stack, Text } from "@chakra-ui/react";
+import { useStore } from "effector-react";
 import { update } from "lodash";
+import Plot from "react-plotly.js";
 import { IVisualization } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { processGraphs } from "../processors";
@@ -31,7 +30,7 @@ const BarGraph = ({
   let availableProperties: { [key: string]: any } = {
     layout: {
       legend: { x: 0.5, y: -0.3, orientation: "h" },
-      yaxis: { automargin: true},
+      yaxis: { automargin: true },
       colorway: [
         "#1f77b4",
         "#ff7f0e",

@@ -51,13 +51,13 @@ export const queryDataSource = async (
           params: parameters,
         },
       };
-      // try {
-      const { results }: any = await engine.query(query);
-      return results;
-      // } catch (error) {
-      //   console.log(error);
-      //   return {};
-      // }
+      try {
+        const { results }: any = await engine.query(query);
+        return results;
+      } catch (error) {
+        console.log(error);
+        return {};
+      }
     }
   }
 
@@ -983,7 +983,6 @@ const generateDHIS2Query = (
       },
     };
   }
-  console.log(queries);
   return queries;
 };
 
@@ -1037,7 +1036,6 @@ export const useVisualization = (
       ...Object.values(overrides),
     ],
     async () => {
-      console.log(indicator, dataSource);
       if (indicator && dataSource && dataSource.isCurrentDHIS2) {
         const queries = generateDHIS2Query(indicator, globalFilters, overrides);
         const data = await engine.query(queries);

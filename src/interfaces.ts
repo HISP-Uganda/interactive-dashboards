@@ -52,7 +52,7 @@ export interface IVisualization extends INamed {
   indicator: string;
   type: string;
   refreshInterval?: number;
-  overrides: {};
+  overrides: { [key: string]: any };
   properties: { [key: string]: any };
 }
 export interface ISection extends Layout {

@@ -21,9 +21,9 @@ const VisualizationProperties = ({ visualization }: VizProps) => {
     if (visualizationType) {
       return allTypes[visualizationType] || null;
     }
-    return <></>;
+    return null;
   };
-  return <>{displayProperties(visualization.type)}</>;
+  return displayProperties(visualization.type);
 };
 
 export default VisualizationProperties;
