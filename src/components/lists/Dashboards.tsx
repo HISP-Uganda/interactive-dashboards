@@ -22,7 +22,6 @@ import {
 } from "../../Events";
 import { IDashboard } from "../../interfaces";
 import { $dashboards, $store, createDashboard } from "../../Store";
-import { generateUid } from "../../utils/uid";
 
 const Dashboards = () => {
   const navigate = useNavigate();

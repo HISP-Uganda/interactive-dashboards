@@ -25,16 +25,6 @@ const VisualizationQuerySelector = ({
       {isSuccess && (
         <Select<Option, true, GroupBase<Option>>
           isMulti
-          value={
-            data.flatMap((d: IIndicator) => {
-              if (value?.indicators.find((i) => i === d.id)) {
-                return {
-                  value: d.id,
-                  label: d.name,
-                };
-              }
-            }) as any[]
-          }
           onChange={(e) =>
             changeDataSources(
               data.filter(

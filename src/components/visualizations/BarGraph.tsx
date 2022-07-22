@@ -1,8 +1,7 @@
-import { useStore } from "effector-react";
-import Plot from "react-plotly.js";
-import { Textfit } from "react-textfit";
 import { Stack, Text } from "@chakra-ui/react";
+import { useStore } from "effector-react";
 import { update } from "lodash";
+import Plot from "react-plotly.js";
 import { IVisualization } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { processGraphs } from "../processors";
@@ -31,7 +30,7 @@ const BarGraph = ({
   let availableProperties: { [key: string]: any } = {
     layout: {
       legend: { x: 0.5, y: -0.3, orientation: "h" },
-      yaxis: { automargin: true},
+      yaxis: { automargin: true },
       colorway: [
         "#1f77b4",
         "#ff7f0e",
@@ -62,7 +61,7 @@ const BarGraph = ({
           )}
           layout={{
             margin: {
-              // pad: 5,
+              pad: 5,
               r: 10,
               t: 0,
               l: 70,
@@ -72,11 +71,30 @@ const BarGraph = ({
             showlegend: true,
             xaxis: {
               automargin: true,
+              showgrid: false,
             },
             ...availableProperties.layout,
           }}
           style={{ width: "100%", height: "100%" }}
-          config={{ displayModeBar: false, responsive: true }}
+          config={{
+            displayModeBar: true,
+            responsive: true,
+            toImageButtonOptions: {
+              format: "svg",
+              scale: 1,
+            },
+            modeBarButtonsToRemove: [
+              "pan2d",
+              "lasso2d",
+              "zoom2d",
+              "select2d",
+              "autoScale2d",
+              "zoomIn2d",
+              "zoomOut2d",
+              "resetScale2d",
+            ],
+            displaylogo: false,
+          }}
         />
       </Stack>
     </Stack>

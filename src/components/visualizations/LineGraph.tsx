@@ -63,8 +63,8 @@ const LineGraph = ({
           )}
           layout={{
             margin: {
-              pad: 0,
-              r: 0,
+              pad: 5,
+              r: 10,
               t: 0,
               l: 60,
               b: 0,
@@ -73,6 +73,7 @@ const LineGraph = ({
             showlegend: true,
             xaxis: {
               automargin: true,
+              showgrid: false,
             },
             legend: {
               orientation: "h",
@@ -86,7 +87,29 @@ const LineGraph = ({
             ...availableProperties.layout,
           }}
           style={{ width: "100%", height: "100%" }}
-          config={{ displayModeBar: false, responsive: true }}
+          config={{
+            displayModeBar: true,
+            responsive: true,
+            toImageButtonOptions: {
+              format: "svg",
+              scale: 1,
+            },
+            modeBarButtonsToRemove: [
+              "pan2d",
+              "lasso2d",
+              "zoom2d",
+              "select2d",
+              "autoScale2d",
+              "zoomIn2d",
+              "zoomOut2d",
+              "resetScale2d",
+              "resetGeo",
+              "zoomInGeo",
+              "zoomOutGeo",
+              "zoom3d",
+            ],
+            displaylogo: false,
+          }}
         />
       </Stack>
     </Stack>

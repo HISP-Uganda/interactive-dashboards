@@ -144,6 +144,7 @@ const VisualizationOverride = ({
           <Stack direction="row">
             <Text>DX</Text>
             <RadioGroup
+              value={visualization.overrides["dx"]}
               onChange={(e: string) =>
                 changeVisualizationOverride({
                   override: "dx",
@@ -161,6 +162,7 @@ const VisualizationOverride = ({
           <Stack direction="row">
             <Text>OU</Text>
             <RadioGroup
+              value={visualization.overrides["ou"]}
               onChange={(e: string) =>
                 changeVisualizationOverride({
                   override: "ou",
@@ -176,8 +178,45 @@ const VisualizationOverride = ({
             </RadioGroup>
           </Stack>
           <Stack direction="row">
+            <Text>OU Level</Text>
+            <RadioGroup
+              value={visualization.overrides["oul"]}
+              onChange={(e: string) =>
+                changeVisualizationOverride({
+                  override: "oul",
+                  value: e,
+                  visualization: visualization.id,
+                })
+              }
+            >
+              <Stack direction="row">
+                <Radio value="dimension">Dimension</Radio>
+                <Radio value="filter">Filter</Radio>
+              </Stack>
+            </RadioGroup>
+          </Stack>
+          <Stack direction="row">
+            <Text>OU Group</Text>
+            <RadioGroup
+              value={visualization.overrides["oug"]}
+              onChange={(e: string) =>
+                changeVisualizationOverride({
+                  override: "oug",
+                  value: e,
+                  visualization: visualization.id,
+                })
+              }
+            >
+              <Stack direction="row">
+                <Radio value="dimension">Dimension</Radio>
+                <Radio value="filter">Filter</Radio>
+              </Stack>
+            </RadioGroup>
+          </Stack>
+          <Stack direction="row">
             <Text>PE</Text>
             <RadioGroup
+              value={visualization.overrides["pe"]}
               onChange={(e: string) =>
                 changeVisualizationOverride({
                   override: "pe",
@@ -204,7 +243,6 @@ const Section = () => {
   const section = useStore($section);
   const dashboard = useStore($dashboard);
   const dashboards = useStore($dashboards);
-  const store = useStore($store);
   const onApply = () => {
     addSection(section);
     setDashboards(
@@ -258,8 +296,17 @@ const Section = () => {
           </Stack>
         </Stack>
         <Spacer />
+        <Button
+          size="sm"
+          onClick={() => {
+            navigate({
+              to: `/dashboards/${dashboard.id}`,
+            });
+          }}
+        >
+          Discard
+        </Button>
         <Stack direction="row" alignItems="center" justifyItems="center">
-          <Button size="sm">Discard</Button>
           <Button size="sm" onClick={() => onApply()}>
             Apply
           </Button>
@@ -268,7 +315,7 @@ const Section = () => {
       <Stack direction="row" spacing="20px">
         <Stack w="75%" h="100%">
           <Text textAlign="center">{section.title}</Text>
-          <Stack spacing="20px" direction={section.direction} bg="red.300">
+          <Stack spacing="20px" direction={section.direction}>
             {section.visualizations.map((visualization: IVisualization) => (
               <Visualization
                 key={visualization.id}

@@ -52,7 +52,7 @@ export interface IVisualization extends INamed {
   indicator: string;
   type: string;
   refreshInterval?: number;
-  overrides: {};
+  overrides: { [key: string]: any };
   properties: { [key: string]: any };
 }
 export interface ISection extends Layout {
@@ -135,10 +135,10 @@ export type IndicatorProps = {
 
 export type FormGenerics = MakeGenerics<{
   Search: {
-    edit: boolean;
+    edit?: boolean;
     category: string;
     periods: string[];
-    levels: string;
+    levels: string[];
     groups: string[];
     organisations: string[];
   };

@@ -4,8 +4,6 @@ import React from "react";
 import useOnClickOutside from "use-onclickoutside";
 import { Item, PickerProps } from "../interfaces";
 
-
-
 const PeriodPicker = ({ selectedPeriods, onChange }: PickerProps) => {
   const { isOpen, onToggle, onClose } = useDisclosure();
   const ref = React.useRef(null);

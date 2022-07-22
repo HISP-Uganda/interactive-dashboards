@@ -1,20 +1,15 @@
-import { Box, Input, Radio, RadioGroup, Stack, Text } from "@chakra-ui/react";
+import { Input, Radio, RadioGroup, Stack, Text } from "@chakra-ui/react";
 
-import {
-  chakraComponents,
-  GroupBase,
-  OptionProps,
-  Select,
-} from "chakra-react-select";
+import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { isArray } from "lodash";
 import { ChangeEvent } from "react";
 import { changeVisualizationProperties } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData } from "../../Store";
-import { createOptions } from "./AvialableOptions";
-import { colors } from "../../utils/utils";
 import { customComponents } from "../../utils/components";
+import { colors } from "../../utils/utils";
+import { createOptions } from "./AvialableOptions";
 
 const barModes = createOptions(["stack", "group", "overlay", "relative"]);
 

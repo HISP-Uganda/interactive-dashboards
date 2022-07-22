@@ -20,10 +20,11 @@ import {
   useDisclosure,
   Textarea,
   Checkbox,
+  IconButton,
 } from "@chakra-ui/react";
 import { Textfit } from "react-textfit";
 import { GroupBase, Select } from "chakra-react-select";
-
+import { useState } from "react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { DatePicker } from "antd";
@@ -64,7 +65,7 @@ import {
 } from "../../Store";
 import AutoRefreshPicker from "../AutoRefreshPicker";
 import DashboardFilter from "../filters/DashboardFilter";
-import OUTree from "../OUTreeSelect";
+import OUTreeSelect from "../OUTreeSelect";
 import PeriodPicker from "../PeriodPicker";
 import Visualization from "../visualizations/Visualization";
 
@@ -72,6 +73,8 @@ const ReactGridLayout = WidthProvider(Responsive);
 const Dashboard = () => {
   const search = useSearch<FormGenerics>();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isFull, onOpen: onFull, onClose: onUnFull } = useDisclosure();
+  const [section, setSection] = useState<ISection | undefined>();
   const navigate = useNavigate();
   const engine = useDataEngine();
   const dashboards = useStore($dashboards);
@@ -117,6 +120,11 @@ const Dashboard = () => {
   const onChangePeriods = (periods: Item[]) => {
     changePeriods(periods);
   };
+
+  const displayFull = (section: string) => {
+    setSection(dashboard.sections.find((sec) => sec.i === section));
+    onFull();
+  };
   useEffect(() => {
     setShowSider(false);
     // changeSelectedDashboard(dashboard.id);
@@ -146,16 +154,18 @@ const Dashboard = () => {
           <Button size="sm" type="button" onClick={() => increment(-1)}>
             -
           </Button>
-          <Button
-            size="sm"
-            type="button"
-            colorScheme="blue"
-            onClick={() => {
-              navigate({ to: "/dashboards" });
-            }}
-          >
-            Dashboard List
-          </Button>
+          {store.isAdmin && (
+            <Button
+              size="sm"
+              type="button"
+              colorScheme="blue"
+              onClick={() => {
+                navigate({ to: "/dashboards" });
+              }}
+            >
+              Dashboard List
+            </Button>
+          )}
           <Spacer />
           <Text>Filter</Text>
           {store.isAdmin && (
@@ -194,12 +204,12 @@ const Dashboard = () => {
               )}
             </>
           )}
-          <OUTree />
+          <OUTreeSelect />
           <PeriodPicker
             selectedPeriods={store.periods}
             onChange={onChangePeriods}
           />
-          <AutoRefreshPicker />
+          {store.isAdmin && <AutoRefreshPicker />}
         </Stack>
       )}
       <Stack
@@ -219,7 +229,9 @@ const Dashboard = () => {
           preventCollision={false}
           containerPadding={[5, 5]}
           rowHeight={dashboard.itemHeight}
-          isResizable={dashboard.mode === "edit"}
+          isResizable={store.isAdmin}
+          isDraggable={store.isAdmin}
+          isDroppable={store.isAdmin}
         >
           {dashboard?.sections.map((section: ISection) => (
             <Stack
@@ -243,27 +255,41 @@ const Dashboard = () => {
                 justifyContent="center"
                 justifyItems="center"
                 textAlign="center"
+                _focus={{ boxShadow: "none !important" }}
               >
-                <Menu>
+                <Text fontSize="18px">{section.title}</Text>
+                <Spacer />
+                <Menu placement="left">
                   <MenuButton
                     _hover={{ bg: "none" }}
+                    _expanded={{ bg: "none" }}
+                    _focus={{ boxShadow: "none" }}
                     bg="none"
-                    as={Button}
-                    rightIcon={<ChevronDownIcon />}
-                  >
-                    {section.title}
-                  </MenuButton>
-                  <MenuList>
+                    as={IconButton}
+                    icon={<ChevronDownIcon />}
+                  />
+                  <MenuList zIndex={10000} p={0} m={0}>
+                    {store.isAdmin && (
+                      <MenuItem
+                        maxH="32px"
+                        fontSize="18px"
+                        onClick={() => {
+                          setCurrentSection(section);
+                          navigate({
+                            to: `/dashboards/${dashboard.id}/section`,
+                            search,
+                          });
+                        }}
+                      >
+                        Edit
+                      </MenuItem>
+                    )}
                     <MenuItem
-                      onClick={() => {
-                        setCurrentSection(section);
-                        navigate({
-                          to: `/dashboards/${dashboard.id}/section`,
-                          search,
-                        });
-                      }}
+                      maxH="32px"
+                      fontSize="18px"
+                      onClick={() => displayFull(section.i)}
                     >
-                      Edit
+                      Expand
                     </MenuItem>
                   </MenuList>
                 </Menu>
@@ -336,6 +362,22 @@ const Dashboard = () => {
             </Button>
             <Button onClick={() => updateDashboard(dashboard)}>Save</Button>
           </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal isOpen={isFull} onClose={onUnFull} size="full">
+        <ModalOverlay />
+        <ModalContent h="100vh" display="flex" flexDirection="column" w="100vw">
+          <ModalBody>
+            <Stack h="100%" w="100%" direction={section?.direction}>
+              {section?.visualizations.map((visualization) => (
+                <Visualization
+                  key={visualization.id}
+                  visualization={visualization}
+                />
+              ))}
+            </Stack>
+          </ModalBody>
         </ModalContent>
       </Modal>
     </Stack>

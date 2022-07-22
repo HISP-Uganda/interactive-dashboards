@@ -51,13 +51,13 @@ export const queryDataSource = async (
           params: parameters,
         },
       };
-      // try {
-      const { results }: any = await engine.query(query);
-      return results;
-      // } catch (error) {
-      //   console.log(error);
-      //   return {};
-      // }
+      try {
+        const { results }: any = await engine.query(query);
+        return results;
+      } catch (error) {
+        console.log(error);
+        return {};
+      }
     }
   }
 
@@ -208,10 +208,10 @@ export const useInitials = () => {
       const facilities: React.Key[] = organisationUnits.map(
         (unit: any) => unit.id
       );
-      const level = max(organisationUnits.map((unit: any) => unit.level));
+      // const level = max(organisationUnits.map((unit: any) => unit.level));
 
       onChangeOrganisations({
-        levels: [String(level)],
+        levels: ["3"],
         organisations: facilities,
         groups: [],
         expandedKeys: [],
@@ -383,11 +383,10 @@ export const useVisualizationData = () => {
           },
         ])
       );
-      const allData = await engine.query(query);
-      const visualizationQueries = Object.values(allData).map((x) => {
-        let value = x as unknown as IIndicator;
-        return value;
-      });
+      const allData: { [key: string]: any } = await engine.query(query);
+
+      console.log(allData);
+      const visualizationQueries = Object.values(allData);
       setVisualizationQueries(visualizationQueries);
       return true;
     } catch (error) {
@@ -983,7 +982,6 @@ const generateDHIS2Query = (
       },
     };
   }
-  console.log(queries);
   return queries;
 };
 
@@ -1028,7 +1026,7 @@ export const useVisualization = (
     currentInterval = Number(refreshInterval) * 1000;
   }
   const otherKeys = generateKeys(indicator, globalFilters);
-  const overrides = visualization.overrides;
+  const overrides = visualization.overrides || {};
   return useQuery<any, Error>(
     [
       "visualizations",
@@ -1037,7 +1035,6 @@ export const useVisualization = (
       ...Object.values(overrides),
     ],
     async () => {
-      console.log(indicator, dataSource);
       if (indicator && dataSource && dataSource.isCurrentDHIS2) {
         const queries = generateDHIS2Query(indicator, globalFilters, overrides);
         const data = await engine.query(queries);
