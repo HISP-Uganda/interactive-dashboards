@@ -61,7 +61,7 @@ const BarGraph = ({
           )}
           layout={{
             margin: {
-              // pad: 5,
+              pad: 5,
               r: 10,
               t: 0,
               l: 70,
@@ -71,11 +71,30 @@ const BarGraph = ({
             showlegend: true,
             xaxis: {
               automargin: true,
+              showgrid: false,
             },
             ...availableProperties.layout,
           }}
           style={{ width: "100%", height: "100%" }}
-          config={{ displayModeBar: false, responsive: true }}
+          config={{
+            displayModeBar: true,
+            responsive: true,
+            toImageButtonOptions: {
+              format: "svg",
+              scale: 1,
+            },
+            modeBarButtonsToRemove: [
+              "pan2d",
+              "lasso2d",
+              "zoom2d",
+              "select2d",
+              "autoScale2d",
+              "zoomIn2d",
+              "zoomOut2d",
+              "resetScale2d",
+            ],
+            displaylogo: false,
+          }}
         />
       </Stack>
     </Stack>

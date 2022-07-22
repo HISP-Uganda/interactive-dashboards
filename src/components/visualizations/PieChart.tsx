@@ -44,7 +44,31 @@ const PieChart = ({ visualization, labels, values }: PieChartProps) => {
             showlegend: false,
           }}
           style={{ width: "100%", height: "100%" }}
-          config={{ displayModeBar: false, responsive: true }}
+          config={{
+            displayModeBar: true,
+            responsive: true,
+            toImageButtonOptions: {
+              format: "svg",
+              scale: 1,
+            },
+            modeBarButtonsToRemove: [
+              "pan2d",
+              "lasso2d",
+              "zoom2d",
+              "select2d",
+              "autoScale2d",
+              "zoomIn2d",
+              "zoomOut2d",
+              "resetScale2d",
+              "resetViews",
+              "zoomInGeo",
+              "zoomOut2d",
+              "pan3d",
+              "resetCameraDefault3d",
+              "resetGeo",
+            ],
+            displaylogo: false,
+          }}
         />
       </Stack>
     </Stack>

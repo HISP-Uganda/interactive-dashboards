@@ -33,17 +33,17 @@ type VisualizationProps = {
 
 const getVisualization = (visualization: IVisualization) => {
   const dataProperties = fromPairs(
-    Object.entries(visualization.properties).filter(([key]) =>
+    Object.entries(visualization.properties || {}).filter(([key]) =>
       key.startsWith("data")
     )
   );
   const layoutProperties = fromPairs(
-    Object.entries(visualization.properties).filter(([key]) =>
+    Object.entries(visualization.properties || {}).filter(([key]) =>
       key.startsWith("layout")
     )
   );
   const otherProperties = fromPairs(
-    Object.entries(visualization.properties).filter(
+    Object.entries(visualization.properties || {}).filter(
       ([key]) => !key.startsWith("layout") && !key.startsWith("data")
     )
   );

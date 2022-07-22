@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Key } from "react";
 import { Stack, Flex, Text } from "@chakra-ui/react";
 import { Navigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
@@ -16,7 +17,16 @@ export default function Home() {
       {store.isAdmin ? (
         <Navigate to="/data-sources" />
       ) : store.hasDashboards ? (
-        <Navigate to={`/dashboards/${store.selectedDashboard}`} />
+        <Navigate
+          to={`/dashboards/${store.selectedDashboard}`}
+          search={{
+            category: store.selectedCategory,
+            periods: store.periods.map((i) => i.id),
+            organisations: store.organisations.map((k: Key) => String(k)),
+            groups: store.groups,
+            levels: store.levels,
+          }}
+        />
       ) : (
         <Flex
           w="100vw"

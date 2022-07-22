@@ -1,9 +1,10 @@
+import { Key } from "react";
 import { Box, Stack } from "@chakra-ui/react";
 import { useNavigate } from "@tanstack/react-location";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { changeSelectedCategory, changeSelectedDashboard } from "../../Events";
-import { Option } from "../../interfaces";
+import { FormGenerics, Option } from "../../interfaces";
 import {
   $categoryOptions,
   $store,
@@ -33,6 +34,22 @@ const DashboardFilter = () => {
               );
               if (allCategoryDashboards.length > 0) {
                 changeSelectedDashboard(allCategoryDashboards[0].id);
+
+                let search: any = {
+                  category: e.value,
+                  periods: store.periods.map((i) => i.id),
+                  organisations: store.organisations.map((k: Key) => String(k)),
+                  groups: store.groups,
+                  levels: store.levels,
+                };
+
+                if (store.isAdmin) {
+                  search = { ...search, edit: true };
+                }
+                navigate({
+                  to: `/dashboards/${allCategoryDashboards[0].id}`,
+                  search,
+                });
               }
             }
           }}
@@ -48,16 +65,21 @@ const DashboardFilter = () => {
           onChange={(e) => {
             if (e && e.value) {
               changeSelectedDashboard(e.value);
+
+              let search: any = {
+                category: store.selectedCategory,
+                periods: store.periods.map((i) => i.id),
+                organisations: store.organisations.map((k: Key) => String(k)),
+                groups: store.groups,
+                levels: store.levels,
+              };
+
+              if (store.isAdmin) {
+                search = { ...search, edit: true };
+              }
               navigate({
                 to: `/dashboards/${e.value}`,
-                search: {
-                  edit: true,
-                  category: store.selectedCategory,
-                  periods: store.periods.map((i) => i.id),
-                  organisations: store.organisations,
-                  groups: store.groups,
-                  levels: store.levels,
-                },
+                search,
               });
             }
           }}

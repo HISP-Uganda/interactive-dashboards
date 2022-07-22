@@ -13,15 +13,67 @@ import {
   Thead,
   Tr,
   useDisclosure,
+  Radio,
+  RadioGroup,
 } from "@chakra-ui/react";
+import { GroupBase, Select } from "chakra-react-select";
 import { ChangeEvent, useRef, useState } from "react";
 import { SwatchesPicker } from "react-color";
 import useOnClickOutside from "use-onclickoutside";
 import { changeVisualizationProperties } from "../../Events";
-import { IVisualization } from "../../interfaces";
+import { IVisualization, Option } from "../../interfaces";
 import { generateUid } from "../../utils/uid";
 
 type Threshold = { id: string; min: string; max: string; color: string };
+
+const numberFormats: Option[] = [
+  {
+    label: "Zero decimals Short form",
+    value: ".0s",
+  },
+  {
+    label: "1 decimal Short form",
+    value: ".1s",
+  },
+  {
+    label: "2 decimal Short form",
+    value: ".2s",
+  },
+  {
+    label: "any decimal Short form",
+    value: "~s",
+  },
+  {
+    label: "Zero decimals full number",
+    value: ".0f",
+  },
+  {
+    label: "1 Decimal full number",
+    value: ".1f",
+  },
+  {
+    label: "2 Decimal full number",
+    value: ".2f",
+  },
+];
+const progressAlignments: Option[] = [
+  {
+    label: "Column",
+    value: "column",
+  },
+  {
+    label: "Column Reverse",
+    value: "column-reverse",
+  },
+  {
+    label: "Row",
+    value: "row",
+  },
+  {
+    label: "Row Reverse",
+    value: "row-reverse",
+  },
+];
 
 const SingleValueProperties = ({
   visualization,
@@ -81,6 +133,43 @@ const SingleValueProperties = ({
 
   return (
     <Stack>
+      <Text>Prefix</Text>
+      <Input
+        value={visualization.properties["data.prefix"] || ""}
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          changeVisualizationProperties({
+            visualization: visualization.id,
+            attribute: "data.prefix",
+            value: e.target.value,
+          })
+        }
+      />
+      <Text>Suffix</Text>
+      <Input
+        value={visualization.properties["data.suffix"] || ""}
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          changeVisualizationProperties({
+            visualization: visualization.id,
+            attribute: "data.suffix",
+            value: e.target.value,
+          })
+        }
+      />
+      <Text>Number format</Text>
+      <Select<Option, false, GroupBase<Option>>
+        value={numberFormats.find(
+          (pt) => pt.value === visualization.properties["data.valueformat"]
+        )}
+        onChange={(e) =>
+          changeVisualizationProperties({
+            visualization: visualization.id,
+            attribute: "data.valueformat",
+            value: e?.value,
+          })
+        }
+        options={numberFormats}
+        isClearable
+      />
       <Stack direction="row" alignItems="center">
         <Text>Threshold</Text>
         <Spacer />
@@ -154,6 +243,50 @@ const SingleValueProperties = ({
           </Tbody>
         </Table>
       </TableContainer>
+
+      <Text>Target</Text>
+      <Input
+        value={visualization.properties["data.target"] || ""}
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          changeVisualizationProperties({
+            visualization: visualization.id,
+            attribute: "data.target",
+            value: e.target.value,
+          })
+        }
+      />
+      <Text>Target Graph</Text>
+      <RadioGroup
+        onChange={(e: string) =>
+          changeVisualizationProperties({
+            visualization: visualization.id,
+            attribute: "data.targetgraph",
+            value: e,
+          })
+        }
+        value={visualization.properties["data.targetgraph"]}
+      >
+        <Stack direction="row">
+          <Radio value="progress">Progress</Radio>
+          <Radio value="circular">Circular Progress</Radio>
+        </Stack>
+      </RadioGroup>
+
+      <Text>Target Direction</Text>
+      <Select<Option, false, GroupBase<Option>>
+        value={progressAlignments.find(
+          (pt) => pt.value === visualization.properties["data.direction"]
+        )}
+        onChange={(e) =>
+          changeVisualizationProperties({
+            visualization: visualization.id,
+            attribute: "data.direction",
+            value: e?.value,
+          })
+        }
+        options={progressAlignments}
+        isClearable
+      />
     </Stack>
   );
 };

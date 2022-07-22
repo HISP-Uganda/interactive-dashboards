@@ -135,10 +135,10 @@ export type IndicatorProps = {
 
 export type FormGenerics = MakeGenerics<{
   Search: {
-    edit: boolean;
+    edit?: boolean;
     category: string;
     periods: string[];
-    levels: string;
+    levels: string[];
     groups: string[];
     organisations: string[];
   };

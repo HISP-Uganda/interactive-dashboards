@@ -157,7 +157,7 @@ export const $paginations = domain
 export const $store = domain
   .createStore<IStore>({
     showSider: true,
-    periods: [{ id: "LAST_3_MONTHS", name: "Last 3 months" }],
+    periods: [{ id: "LAST_12_MONTHS", name: "Last 12 months" }],
     organisations: [],
     levels: [],
     groups: [],
@@ -623,7 +623,7 @@ export const $indicatorDataSourceTypes = combine(
   $indicators,
   $dataSources,
   (indicators, dataSources) => {
-    const allIndicators = indicators.map((indicator) => {
+    const allIndicators: string[][] = indicators.map((indicator) => {
       const dataSource = dataSources.find(
         (ds) => ds.id === indicator.dataSource
       );
@@ -674,4 +674,4 @@ export const $globalFilters = $store.map((state) => {
   };
 });
 
-// $section.watch((i) => console.log(i));
+$store.watch((i) => console.log(i.levels));
