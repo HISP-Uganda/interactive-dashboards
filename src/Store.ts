@@ -323,38 +323,6 @@ export const $indicator = domain
       }
     }
   )
-  // .on(addNumeratorExpression, (state, expression) => {
-  //   if (state.numerator) {
-  //     let expressions: IExpression[] = [];
-
-  //     if (state.numerator.expressions) {
-  //       expressions = state.numerator.expressions;
-  //     }
-  //     return {
-  //       ...state,
-  //       numerator: {
-  //         ...state.numerator,
-  //         expressions: [...expressions, expression],
-  //       },
-  //     };
-  //   }
-  // })
-  // .on(addDenominatorExpression, (state, expression) => {
-  //   if (state.denominator) {
-  //     let expressions: IExpression[] = [];
-
-  //     if (state.denominator.expressions) {
-  //       expressions = state.denominator.expressions;
-  //     }
-  //     return {
-  //       ...state,
-  //       denominator: {
-  //         ...state.denominator,
-  //         expressions: [...expressions, expression],
-  //       },
-  //     };
-  //   }
-  // })
   .on(changeDenominatorAttribute, (state, { attribute, value }) => {
     if (state.denominator) {
       return {

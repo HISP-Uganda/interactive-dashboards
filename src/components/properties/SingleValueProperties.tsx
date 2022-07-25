@@ -45,15 +45,15 @@ const numberFormats: Option[] = [
   },
   {
     label: "Zero decimals full number",
-    value: ".0f",
+    value: ",.0f",
   },
   {
     label: "1 Decimal full number",
-    value: ".1f",
+    value: ",.1f",
   },
   {
     label: "2 Decimal full number",
-    value: ".2f",
+    value: ",.2f",
   },
 ];
 const progressAlignments: Option[] = [
@@ -82,7 +82,7 @@ const SingleValueProperties = ({
 }) => {
   const [id, setId] = useState<string>("");
   const [thresholds, setThresholds] = useState<Threshold[]>(
-    visualization.properties["data.thresholds"] || []
+    visualization.properties?.["data.thresholds"] || []
   );
   const { isOpen, onClose, onOpen } = useDisclosure();
   const ref = useRef(null);
@@ -103,7 +103,7 @@ const SingleValueProperties = ({
   };
 
   const removeThreshold = (id: string) => {
-    const filtered = thresholds.filter((threshold) => threshold.id === id);
+    const filtered = thresholds.filter((threshold) => threshold.id !== id);
     changeVisualizationProperties({
       visualization: visualization.id,
       attribute: "data.thresholds",
@@ -135,7 +135,7 @@ const SingleValueProperties = ({
     <Stack>
       <Text>Prefix</Text>
       <Input
-        value={visualization.properties["data.prefix"] || ""}
+        value={visualization.properties?.["data.prefix"] || ""}
         onChange={(e: ChangeEvent<HTMLInputElement>) =>
           changeVisualizationProperties({
             visualization: visualization.id,
@@ -146,7 +146,7 @@ const SingleValueProperties = ({
       />
       <Text>Suffix</Text>
       <Input
-        value={visualization.properties["data.suffix"] || ""}
+        value={visualization.properties?.["data.suffix"] || ""}
         onChange={(e: ChangeEvent<HTMLInputElement>) =>
           changeVisualizationProperties({
             visualization: visualization.id,
@@ -158,7 +158,7 @@ const SingleValueProperties = ({
       <Text>Number format</Text>
       <Select<Option, false, GroupBase<Option>>
         value={numberFormats.find(
-          (pt) => pt.value === visualization.properties["data.valueformat"]
+          (pt) => pt.value === visualization.properties?.["data.valueformat"]
         )}
         onChange={(e) =>
           changeVisualizationProperties({
@@ -223,7 +223,6 @@ const SingleValueProperties = ({
                       key={hold.id}
                       color={hold.color}
                       onChangeComplete={(color) => {
-                        console.log(color);
                         changeThreshold(hold.id, "color", color.hex);
                         onClose();
                       }}
@@ -246,7 +245,7 @@ const SingleValueProperties = ({
 
       <Text>Target</Text>
       <Input
-        value={visualization.properties["data.target"] || ""}
+        value={visualization.properties?.["data.target"] || ""}
         onChange={(e: ChangeEvent<HTMLInputElement>) =>
           changeVisualizationProperties({
             visualization: visualization.id,
@@ -264,7 +263,7 @@ const SingleValueProperties = ({
             value: e,
           })
         }
-        value={visualization.properties["data.targetgraph"]}
+        value={visualization.properties?.["data.targetgraph"]}
       >
         <Stack direction="row">
           <Radio value="progress">Progress</Radio>
@@ -275,7 +274,7 @@ const SingleValueProperties = ({
       <Text>Target Direction</Text>
       <Select<Option, false, GroupBase<Option>>
         value={progressAlignments.find(
-          (pt) => pt.value === visualization.properties["data.direction"]
+          (pt) => pt.value === visualization.properties?.["data.direction"]
         )}
         onChange={(e) =>
           changeVisualizationProperties({

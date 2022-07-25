@@ -200,7 +200,9 @@ const App = () => {
                 <Menus />
               </Stack>
             )}
-            <Outlet />
+            <Stack flex={1}>
+              <Outlet />
+            </Stack>
           </Stack>
         </Router>
       )}

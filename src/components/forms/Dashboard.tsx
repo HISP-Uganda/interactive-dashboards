@@ -1,7 +1,7 @@
-import { ChangeEvent } from "react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import {
   Button,
+  IconButton,
   Input,
   Menu,
   MenuButton,
@@ -17,19 +17,14 @@ import {
   Spacer,
   Stack,
   Text,
-  useDisclosure,
   Textarea,
-  Checkbox,
-  IconButton,
+  useDisclosure,
 } from "@chakra-ui/react";
-import { Textfit } from "react-textfit";
-import { GroupBase, Select } from "chakra-react-select";
-import { useState } from "react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
-import { DatePicker } from "antd";
+import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { useEffect } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { Layout, Layouts, Responsive, WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
@@ -39,14 +34,11 @@ import {
   changeDashboardName,
   changeLayouts,
   changePeriods,
-  changeSelectedCategory,
-  changeSelectedDashboard,
   increment,
   setCurrentDashboard,
   setCurrentSection,
   setDashboards,
   setShowSider,
-  toggleDashboard,
 } from "../../Events";
 import {
   FormGenerics,
@@ -56,7 +48,6 @@ import {
   Option,
 } from "../../interfaces";
 import {
-  $categories,
   $categoryOptions,
   $dashboard,
   $dashboards,
@@ -268,7 +259,7 @@ const Dashboard = () => {
                     as={IconButton}
                     icon={<ChevronDownIcon />}
                   />
-                  <MenuList zIndex={10000} p={0} m={0}>
+                  <MenuList>
                     {store.isAdmin && (
                       <MenuItem
                         maxH="32px"
