@@ -192,7 +192,6 @@ export const nest: any = (items: any[], id = null, link = "parent") =>
 
 const iterate = (obj: { [key: string]: any }) => {
   Object.keys(obj).forEach((key) => {
-    console.log(`key: ${key}, value: ${obj[key]}`);
     if (typeof obj[key] === "object") {
       iterate(obj[key]);
     }
@@ -504,4 +503,34 @@ export const colors: Option[] = [
     value:
       "#006466,#065a60,#0b525b,#144552,#1b3a4b,#212f45,#272640,#312244,#3e1f47,#4d194d",
   },
+];
+
+export const exclusions: any[] = [
+  "lasso2d",
+  "select2d",
+  "sendDataToCloud",
+  "zoom2d",
+  "pan2d",
+  "zoomIn2d",
+  "zoomOut2d",
+  "autoScale2d",
+  "resetScale2d",
+  "hoverClosestCartesian",
+  "hoverCompareCartesian",
+  "zoom3d",
+  "pan3d",
+  "orbitRotation",
+  "tableRotation",
+  "resetCameraDefault3d",
+  "resetCameraLastSave3d",
+  "hoverClosest3d",
+  "zoomInGeo",
+  "zoomOutGeo",
+  "resetGeo",
+  "hoverClosestGeo",
+  "hoverClosestGl2d",
+  "hoverClosestPie",
+  "toggleHover",
+  "resetViews",
+  "toggleSpikelines",
 ];

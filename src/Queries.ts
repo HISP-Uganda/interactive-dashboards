@@ -385,7 +385,6 @@ export const useVisualizationData = () => {
       );
       const allData: { [key: string]: any } = await engine.query(query);
 
-      console.log(allData);
       const visualizationQueries = Object.values(allData);
       setVisualizationQueries(visualizationQueries);
       return true;

@@ -1,14 +1,14 @@
 import { useStore } from "effector-react";
-import { useState, useEffect } from "react";
-import Plot from "react-plotly.js";
+import { useEffect, useState } from "react";
+
 import {
-  Stack,
-  Text,
-  Icon,
+  Box,
   CircularProgress,
   CircularProgressLabel,
-  Progress,
+  Stack,
+  Text,
 } from "@chakra-ui/react";
+import Plot from "react-plotly.js";
 import { IVisualization } from "../../interfaces";
 import { $visualizationData } from "../../Store";
 import { processSingleValue } from "../processors";
@@ -17,6 +17,33 @@ type SingleValueProps = {
   visualization: IVisualization;
   layoutProperties?: { [key: string]: any };
   dataProperties?: { [key: string]: any };
+};
+
+const ProgressBar = ({ bg, completed }: { bg: string; completed: number }) => {
+  return (
+    <Box
+      height="20px"
+      width="100%"
+      backgroundColor="#e0e0de"
+      borderRadius="50px"
+      margin="50px"
+    >
+      <Box
+        height="100%"
+        width={`${completed}%`}
+        bg={bg}
+        borderRadius="inherit"
+        textAlign="right"
+      >
+        <Box
+          as="span"
+          padding="5px"
+          color="white"
+          fontWeight="bold"
+        >{`${completed.toFixed(1)}%`}</Box>
+      </Box>
+    </Box>
+  );
 };
 
 const SingleValue = ({
@@ -49,7 +76,9 @@ const SingleValue = ({
   const target = dataProperties?.["data.target"];
   const targetGraph = dataProperties?.["data.targetgraph"];
   const direction = dataProperties?.["data.direction"] || "column-reverse";
-
+  const titleFontSize = dataProperties?.["data.title.fontsize"] || "1.5vh";
+  const titleCase = dataProperties?.["data.title.case"] || "uppercase";
+  const titleColor = dataProperties?.["data.title.color"] || "black";
   useEffect(() => {
     if (colorSearch) {
       setColor(colorSearch.color);
@@ -69,7 +98,15 @@ const SingleValue = ({
       justifyContent="center"
       justifyItems="center"
     >
-      {visualization.name && <Text>{visualization.name}</Text>}
+      {visualization.name && (
+        <Text
+          fontSize={titleFontSize}
+          textTransform={titleCase}
+          color={titleColor}
+        >
+          {visualization.name}
+        </Text>
+      )}
       <Stack
         w="100%"
         h="100%"
@@ -86,9 +123,9 @@ const SingleValue = ({
             </CircularProgressLabel>
           </CircularProgress>
         ) : targetGraph === "progress" && target ? (
-          <Progress
-            value={(processSingleValue(data) * 100) / Number(target)}
-            color="yellow.100"
+          <ProgressBar
+            completed={(processSingleValue(data) * 100) / Number(target)}
+            bg="green"
           />
         ) : null}
         <Stack w="100%" h="100%" flex={1}>

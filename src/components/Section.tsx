@@ -1,11 +1,4 @@
-import { useEffect } from "react";
 import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
-  Box,
   Button,
   IconButton,
   Input,
@@ -19,26 +12,23 @@ import {
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select, SingleValue } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { MdKeyboardBackspace } from "react-icons/md";
+import { ChevronDownIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import {
   addSection,
   addVisualization2Section,
   changeSectionAttribute,
   changeVisualizationAttribute,
   changeVisualizationOverride,
+  changeVisualizationProperties,
   setDashboards,
   setShowSider,
 } from "../Events";
 import { FormGenerics, IVisualization, Option } from "../interfaces";
 import { useVisualizationData } from "../Queries";
-import {
-  $dashboard,
-  $dashboards,
-  $indicators,
-  $section,
-  $store,
-} from "../Store";
+import { $dashboard, $dashboards, $indicators, $section } from "../Store";
+import ColorPalette from "./ColorPalette";
 import Visualization from "./visualizations/Visualization";
 import VisualizationProperties from "./visualizations/VisualizationProperties";
 
@@ -60,6 +50,53 @@ const chartTypes: Option[] = [
   { value: "tables", label: "Table" },
   { value: "boxplot", label: "Box Plot" },
   { value: "scatterplot", label: "Scatter Plot" },
+];
+
+const fontSizes: Option[] = [
+  {
+    label: "0.5vh",
+    value: "0.5vh",
+  },
+  {
+    label: "1vh",
+    value: "1vh",
+  },
+  {
+    label: "1.5vh",
+    value: "1.5vh",
+  },
+  {
+    label: "2vh",
+    value: "2vh",
+  },
+  {
+    label: "2.5vh",
+    value: "2.5vh",
+  },
+  {
+    label: "3vh",
+    value: "3vh",
+  },
+  {
+    label: "3.5vh",
+    value: "3.5vh",
+  },
+  {
+    label: "4vh",
+    value: "4vh",
+  },
+  {
+    label: "4.5vh",
+    value: "4.5vh",
+  },
+  {
+    label: "5vh",
+    value: "5vh",
+  },
+  {
+    label: "5.5vh",
+    value: "5.5vh",
+  },
 ];
 
 const VisualizationTypes = ({
@@ -243,6 +280,7 @@ const Section = () => {
   const section = useStore($section);
   const dashboard = useStore($dashboard);
   const dashboards = useStore($dashboards);
+  const [active, setActive] = useState<string>("title");
   const onApply = () => {
     addSection(section);
     setDashboards(
@@ -272,9 +310,17 @@ const Section = () => {
   useEffect(() => {
     setShowSider(false);
   }, []);
+
+  const toggle = (id: string) => {
+    if (active === id) {
+      setActive("");
+    } else {
+      setActive(id);
+    }
+  };
   return (
-    <Stack flex={1} p="20px">
-      <Stack direction="row">
+    <Stack p="5px">
+      <Stack direction="row" h="48px">
         <Stack direction="row" alignItems="center" justifyItems="center">
           <IconButton
             bg="none"
@@ -306,14 +352,12 @@ const Section = () => {
         >
           Discard
         </Button>
-        <Stack direction="row" alignItems="center" justifyItems="center">
-          <Button size="sm" onClick={() => onApply()}>
-            Apply
-          </Button>
-        </Stack>
+        <Button size="sm" onClick={() => onApply()}>
+          Apply
+        </Button>
       </Stack>
-      <Stack direction="row" spacing="20px">
-        <Stack w="75%" h="100%">
+      <Stack direction="row" spacing="20px" flex={1}>
+        <Stack w="75%">
           <Text textAlign="center">{section.title}</Text>
           <Stack spacing="20px" direction={section.direction}>
             {section.visualizations.map((visualization: IVisualization) => (
@@ -324,17 +368,26 @@ const Section = () => {
             ))}
           </Stack>
         </Stack>
-        <Stack w="25%">
-          <Accordion>
-            <AccordionItem>
-              <AccordionButton>
-                <Box flex="1" textAlign="left">
-                  Section options
-                </Box>
-                <AccordionIcon />
-              </AccordionButton>
-              <AccordionPanel pb={4}>
-                <Stack>
+        <Stack w="25%" spacing="20px">
+          <Stack h="calc(100vh - 200px)" overflow="auto">
+            <Stack spacing="20px">
+              <Stack
+                direction="row"
+                onClick={() => toggle("title")}
+                cursor="pointer"
+                fontSize="xl"
+              >
+                <Text>Section options</Text>
+                <Spacer />
+                {active === "title" ? (
+                  <ChevronDownIcon />
+                ) : (
+                  <ChevronRightIcon />
+                )}
+              </Stack>
+
+              {active === "title" && (
+                <Stack pl="10px" spacing="20px">
                   <Text>Title</Text>
                   <Input
                     value={section.title}
@@ -345,8 +398,6 @@ const Section = () => {
                       })
                     }
                   />
-                </Stack>
-                <Stack>
                   <Text>Arrangement</Text>
                   <RadioGroup
                     onChange={(e: string) =>
@@ -363,19 +414,27 @@ const Section = () => {
                     </Stack>
                   </RadioGroup>
                 </Stack>
-              </AccordionPanel>
-            </AccordionItem>
-            {section.visualizations.map((visualization: IVisualization) => (
-              <AccordionItem key={visualization.id}>
-                <AccordionButton>
-                  <Box flex="1" textAlign="left">
-                    {visualization.name}
-                  </Box>
-                  <AccordionIcon />
-                </AccordionButton>
-                <AccordionPanel pb={4}>
-                  <Stack spacing="20px">
-                    <Stack>
+              )}
+            </Stack>
+            <Stack>
+              {section.visualizations.map((visualization: IVisualization) => (
+                <Stack key={visualization.id}>
+                  <Stack
+                    direction="row"
+                    onClick={() => toggle(visualization.id)}
+                    cursor="pointer"
+                    fontSize="xl"
+                  >
+                    <Text>{visualization.name}</Text>
+                    <Spacer />
+                    {active === visualization.id ? (
+                      <ChevronDownIcon />
+                    ) : (
+                      <ChevronRightIcon />
+                    )}
+                  </Stack>
+                  {active === visualization.id && (
+                    <Stack pl="10px" spacing="20px">
                       <Text>Title</Text>
                       <Input
                         value={visualization.name}
@@ -387,17 +446,46 @@ const Section = () => {
                           })
                         }
                       />
+                      <Text>Title font size</Text>
+                      <Select<Option, false, GroupBase<Option>>
+                        value={fontSizes.find(
+                          (pt) =>
+                            pt.value ===
+                            visualization.properties?.["data.title.fontsize"]
+                        )}
+                        onChange={(e) =>
+                          changeVisualizationProperties({
+                            visualization: visualization.id,
+                            attribute: "data.title.fontsize",
+                            value: e?.value,
+                          })
+                        }
+                        options={fontSizes}
+                        isClearable
+                      />
+                      <Text>Title font color</Text>
+                      <ColorPalette
+                        visualization={visualization}
+                        attribute="data.title.color"
+                      />
+                      <VisualizationQuery visualization={visualization} />
+                      <VisualizationOverride visualization={visualization} />
+                      <VisualizationTypes visualization={visualization} />
+                      <VisualizationProperties visualization={visualization} />
                     </Stack>
-                    <VisualizationQuery visualization={visualization} />
-                    <VisualizationOverride visualization={visualization} />
-                    <VisualizationTypes visualization={visualization} />
-                    <VisualizationProperties visualization={visualization} />
-                  </Stack>
-                </AccordionPanel>
-              </AccordionItem>
-            ))}
-          </Accordion>
-          <Button onClick={() => addVisualization2Section()}>
+                  )}
+                </Stack>
+              ))}
+            </Stack>
+          </Stack>
+          <Button
+            onClick={() => {
+              addVisualization2Section();
+              setActive(
+                section.visualizations[section.visualizations.length - 1]?.id
+              );
+            }}
+          >
             Add Visualization
           </Button>
         </Stack>

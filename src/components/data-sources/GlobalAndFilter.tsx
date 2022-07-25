@@ -38,7 +38,6 @@ const GlobalAndFilter = ({
       <RadioGroup
         onChange={(dimension: "filter" | "dimension") => {
           setDimension(dimension);
-          console.log(dimension, type);
           Object.entries(denNum?.dataDimensions || {})
             .filter(([k, { what }]) => what === type)
             .forEach(([key, dim]) => {

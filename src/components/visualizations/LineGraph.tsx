@@ -5,6 +5,7 @@ import React from "react";
 import Plot from "react-plotly.js";
 import { IVisualization } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
+import { exclusions } from "../../utils/utils";
 import { processGraphs } from "../processors";
 
 type LineGraphProps = {
@@ -48,9 +49,21 @@ const LineGraph = ({
   Object.entries(layoutProperties || {}).forEach(([property, value]) => {
     update(availableProperties, property, () => value);
   });
+  const titleFontSize = dataProperties?.["data.title.fontsize"] || "1.5vh";
+  const titleCase = dataProperties?.["data.title.case"] || "uppercase";
+  const titleColor = dataProperties?.["data.title.color"] || "black";
   return (
     <Stack w="100%" h="100%">
-      <Text textAlign="center">{visualization.name}</Text>
+      {visualization.name && (
+        <Text
+          textAlign="center"
+          fontSize={titleFontSize}
+          textTransform={titleCase}
+          color={titleColor}
+        >
+          {visualization.name}
+        </Text>
+      )}
       <Stack h="100%" w="100%" flex={1}>
         <Plot
           data={processGraphs(
@@ -94,20 +107,7 @@ const LineGraph = ({
               format: "svg",
               scale: 1,
             },
-            modeBarButtonsToRemove: [
-              "pan2d",
-              "lasso2d",
-              "zoom2d",
-              "select2d",
-              "autoScale2d",
-              "zoomIn2d",
-              "zoomOut2d",
-              "resetScale2d",
-              "resetGeo",
-              "zoomInGeo",
-              "zoomOutGeo",
-              "zoom3d",
-            ],
+            modeBarButtonsToRemove: exclusions,
             displaylogo: false,
           }}
         />
