@@ -2,6 +2,11 @@ import { MakeGenerics } from "@tanstack/react-location";
 import { OptionBase } from "chakra-react-select";
 import { Event } from "effector";
 import { Layout, Layouts } from "react-grid-layout";
+
+export interface DataValueAttribute {
+  attribute: "name" | "description" | "type" | "query" | "accessor";
+  value: any;
+}
 export interface INamed {
   id: string;
   name?: string;
@@ -36,6 +41,7 @@ export interface IData extends INamed {
   query?: string;
   expressions?: IExpressions;
   type: "SQL_VIEW" | "ANALYTICS" | "OTHER";
+  accessor?: string;
   dataDimensions: IDimension;
 }
 
@@ -127,10 +133,7 @@ export type IndicatorProps = {
     label?: string;
   }>;
   dataSourceType?: string;
-  changeQuery?: Event<{
-    attribute: "name" | "description" | "type" | "query";
-    value: any;
-  }>;
+  changeQuery?: Event<DataValueAttribute>;
 };
 
 export type FormGenerics = MakeGenerics<{

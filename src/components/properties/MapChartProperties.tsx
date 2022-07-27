@@ -1,6 +1,11 @@
+import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
 import {
   IconButton,
-  Input,
+  NumberDecrementStepper,
+  NumberIncrementStepper,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
   Spacer,
   Stack,
   Table,
@@ -12,25 +17,15 @@ import {
   Thead,
   Tr,
   useDisclosure,
-  Radio,
-  RadioGroup,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
 } from "@chakra-ui/react";
-import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
-import { ChangeEvent, useRef, useState } from "react";
-import { SwatchesPicker } from "react-color";
 import { GroupBase, Select } from "chakra-react-select";
-import { useStore } from "effector-react";
+import { fromPairs, orderBy } from "lodash";
+import { useRef, useState } from "react";
+import { SwatchesPicker } from "react-color";
 import useOnClickOutside from "use-onclickoutside";
 import { changeVisualizationProperties } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
-import { $visualizationData } from "../../Store";
 import { generateUid } from "../../utils/uid";
-import { fromPairs } from "lodash";
 import { createOptions } from "./AvialableOptions";
 
 type Threshold = { [key: string]: [number, string] };
@@ -52,7 +47,12 @@ const MapChartProperties = ({
 }) => {
   const [id, setId] = useState<string>("");
   const [thresholds, setThresholds] = useState<Threshold>(
-    visualization.properties?.["data.mapKeys"] || {}
+    fromPairs(
+      orderBy(
+        Object.entries(visualization.properties?.["data.mapKeys"] || {}),
+        ([key, val]) => val[0]
+      )
+    )
   );
   const { isOpen, onClose, onOpen } = useDisclosure();
   const ref = useRef(null);

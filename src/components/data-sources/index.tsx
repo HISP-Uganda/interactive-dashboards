@@ -1,14 +1,11 @@
 import { ChangeEvent } from "react";
-import { Stack, Textarea, Text } from "@chakra-ui/react";
+import { Stack, Textarea, Text, Input } from "@chakra-ui/react";
 import { Event } from "effector";
-import { IndicatorProps } from "../../interfaces";
+import { DataValueAttribute, IndicatorProps } from "../../interfaces";
 import DHIS2 from "./DHIS2";
 interface DHIS2Props extends IndicatorProps {
   dataSourceType?: string;
-  changeQuery?: Event<{
-    attribute: "name" | "description" | "type" | "query";
-    value: any;
-  }>;
+  changeQuery?: Event<DataValueAttribute>;
 }
 export const displayDataSourceType = ({
   denNum,
@@ -29,6 +26,19 @@ export const displayDataSourceType = ({
           onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
             changeQuery
               ? changeQuery({ attribute: "query", value: e.target.value })
+              : null
+          }
+        />
+      </Stack>
+    ),
+    API: (
+      <Stack>
+        <Text>Accessor</Text>
+        <Input
+          value={denNum?.accessor || ""}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            changeQuery
+              ? changeQuery({ attribute: "accessor", value: e.target.value })
               : null
           }
         />
