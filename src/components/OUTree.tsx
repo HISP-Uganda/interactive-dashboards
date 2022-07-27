@@ -135,9 +135,7 @@ const OUTree = ({
 
   return (
     <Stack w="500px" bg="white" p="30px" spacing="10px">
-      <Stack
-        direction="row"
-      >
+      <Stack direction="row">
         <Checkbox>User OrgUnit</Checkbox>
       </Stack>
       <Box border="1px solid gray" h="300px" overflow="auto">
@@ -164,7 +162,7 @@ const OUTree = ({
             isMulti
             options={levels}
             value={levels.filter(
-              (d: Option) => availableLevels.indexOf(d.value) !== -1
+              (d: Option) => availableLevels.indexOf(String(d.value)) !== -1
             )}
             onChange={(e) => setAvailableLevels(e.map((ex) => ex.value))}
           />

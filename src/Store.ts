@@ -52,6 +52,7 @@ import {
   changeHasDashboards,
   addOverride,
   changeVisualizationOverride,
+  changeVisualizationType,
 } from "./Events";
 import {
   ICategory,
@@ -282,6 +283,18 @@ export const $dashboard = domain
   })
   .on(changeDashboardId, (state, id) => {
     return { ...state, id };
+  })
+  .on(changeVisualizationType, (state, { section, visualization }) => {
+    const sections = state.sections.map((s) => {
+      if (s.i === section.i) {
+        const visualizations = section.visualizations.map((viz) => {
+          return { ...viz, type: visualization };
+        });
+        return { ...section, visualizations };
+      }
+      return s;
+    });
+    return { ...state, sections };
   });
 
 export const $indicator = domain
@@ -641,5 +654,3 @@ export const $globalFilters = $store.map((state) => {
     mclvD0Z9mfT: state.organisations,
   };
 });
-
-$store.watch((i) => console.log(i.levels));

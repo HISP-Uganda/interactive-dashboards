@@ -7,10 +7,11 @@ import {
   CircularProgressLabel,
   Stack,
   Text,
+  SimpleGrid,
 } from "@chakra-ui/react";
 import Plot from "react-plotly.js";
 import { IVisualization } from "../../interfaces";
-import { $visualizationData } from "../../Store";
+import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { processSingleValue } from "../processors";
 
 type SingleValueProps = {
@@ -52,6 +53,7 @@ const SingleValue = ({
   layoutProperties,
 }: SingleValueProps) => {
   const visualizationData = useStore($visualizationData);
+  const metadata = useStore($visualizationMetadata);
   const [color, setColor] = useState<string>("");
   const data = visualizationData[visualization.id]
     ? visualizationData[visualization.id]
@@ -98,62 +100,75 @@ const SingleValue = ({
       justifyContent="center"
       justifyItems="center"
     >
-      {visualization.name && (
-        <Text
-          fontSize={titleFontSize}
-          textTransform={titleCase}
-          color={titleColor}
-        >
-          {visualization.name}
-        </Text>
-      )}
-      <Stack
+      <SimpleGrid
+        minChildWidth="100px"
         w="100%"
         h="100%"
         flex={1}
-        direction={direction}
-        alignItems="center"
+        spacing="10px"
       >
-        {targetGraph === "circular" && target ? (
-          <CircularProgress
-            value={(processSingleValue(data) * 100) / Number(target)}
+        {processSingleValue(data, metadata[visualization.id]).map((d, x) => (
+          <Stack
+            w="100%"
+            h="100%"
+            flex={1}
+            alignItems="center"
+            alignContent="center"
+            justifyContent="center"
+            justifyItems="center"
           >
-            <CircularProgressLabel>
-              {((processSingleValue(data) * 100) / Number(target)).toFixed(0)}%
-            </CircularProgressLabel>
-          </CircularProgress>
-        ) : targetGraph === "progress" && target ? (
-          <ProgressBar
-            completed={(processSingleValue(data) * 100) / Number(target)}
-            bg="green"
-          />
-        ) : null}
-        <Stack w="100%" h="100%" flex={1}>
-          <Plot
-            data={[
-              {
-                type: "indicator",
-                mode: "number",
-                number: {
-                  font: {
-                    color,
-                  },
-                  prefix,
-                  suffix,
-                  valueformat,
-                },
-                value: processSingleValue(data),
-              },
-            ]}
-            layout={{
-              margin: { t: 0, r: 0, l: 0, b: 0, pad: 0 },
-              autosize: true,
-            }}
-            style={{ width: "100%", height: "100%" }}
-            config={{ displayModeBar: false, responsive: true }}
-          />
-        </Stack>
-      </Stack>
+            {(visualization.name || d.title) && (
+              <Text
+                fontSize={titleFontSize}
+                textTransform={titleCase}
+                color={titleColor}
+              >
+                {visualization.name || d.title}
+              </Text>
+            )}
+            <Stack w="100%" h="100%" direction={direction}>
+              {targetGraph === "circular" && target ? (
+                <CircularProgress value={(d.value * 100) / Number(target)}>
+                  <CircularProgressLabel>
+                    {((d.value * 100) / Number(target)).toFixed(0)}%
+                  </CircularProgressLabel>
+                </CircularProgress>
+              ) : targetGraph === "progress" && target ? (
+                <ProgressBar
+                  completed={(d.value * 100) / Number(target)}
+                  bg="green"
+                />
+              ) : null}
+              <Stack flex={1} w="100%" h="100%">
+                <Plot
+                  key={x}
+                  data={[
+                    {
+                      type: "indicator",
+                      mode: "number",
+                      number: {
+                        font: {
+                          color,
+                        },
+                        prefix,
+                        suffix,
+                        valueformat,
+                      },
+                      value: d.value,
+                    },
+                  ]}
+                  layout={{
+                    margin: { t: 0, r: 0, l: 0, b: 0, pad: 0 },
+                    autosize: true,
+                  }}
+                  style={{ width: "100%", height: "100%" }}
+                  config={{ displayModeBar: false, responsive: true }}
+                />
+              </Stack>
+            </Stack>
+          </Stack>
+        ))}
+      </SimpleGrid>
     </Stack>
   );
 };

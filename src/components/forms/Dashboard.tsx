@@ -34,6 +34,7 @@ import {
   changeDashboardName,
   changeLayouts,
   changePeriods,
+  changeVisualizationType,
   increment,
   setCurrentDashboard,
   setCurrentSection,
@@ -118,15 +119,7 @@ const Dashboard = () => {
   };
   useEffect(() => {
     setShowSider(false);
-    // changeSelectedDashboard(dashboard.id);
-    // changeSelectedCategory(dashboard.category || "");
   }, []);
-  // useEffect(() => {
-  //   const search = dashboards.find((d) => d.id === store.selectedDashboard);
-  //   if (search) {
-  //     setCurrentDashboard(search);
-  //   }
-  // }, [store.selectedDashboard]);
   return (
     <Stack spacing="0">
       {dashboard.showTop && (
@@ -281,6 +274,55 @@ const Dashboard = () => {
                       onClick={() => displayFull(section.i)}
                     >
                       Expand
+                    </MenuItem>
+
+                    <MenuItem
+                      maxH="32px"
+                      fontSize="18px"
+                      onClick={() =>
+                        changeVisualizationType({
+                          section,
+                          visualization: "line",
+                        })
+                      }
+                    >
+                      View as Line
+                    </MenuItem>
+                    <MenuItem
+                      maxH="32px"
+                      fontSize="18px"
+                      onClick={() =>
+                        changeVisualizationType({
+                          section,
+                          visualization: "bar",
+                        })
+                      }
+                    >
+                      View as Column
+                    </MenuItem>
+                    <MenuItem
+                      maxH="32px"
+                      fontSize="18px"
+                      onClick={() =>
+                        changeVisualizationType({
+                          section,
+                          visualization: "map",
+                        })
+                      }
+                    >
+                      View as Map
+                    </MenuItem>
+                    <MenuItem
+                      maxH="32px"
+                      fontSize="18px"
+                      onClick={() =>
+                        changeVisualizationType({
+                          section,
+                          visualization: "single",
+                        })
+                      }
+                    >
+                      View as Single Value
                     </MenuItem>
                   </MenuList>
                 </Menu>

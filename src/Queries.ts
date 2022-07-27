@@ -1,8 +1,8 @@
 import { useDataEngine } from "@dhis2/app-runtime";
+import { center } from "@turf/turf";
 import type { DataNode } from "antd/lib/tree";
 import axios, { AxiosRequestConfig } from "axios";
-import { fromPairs, max, uniq } from "lodash";
-import { center } from "@turf/turf";
+import { fromPairs, uniq } from "lodash";
 import { useQuery } from "react-query";
 import {
   addPagination,
@@ -31,7 +31,7 @@ import {
   IVisualization,
   Option,
 } from "./interfaces";
-import { getNestedKeys, globalIds, traverse } from "./utils/utils";
+import { traverse } from "./utils/utils";
 
 export const api = axios.create({
   baseURL: "https://services.dhis2.hispuganda.org/",
@@ -203,13 +203,10 @@ export const useInitials = () => {
         me: { organisationUnits, authorities },
       }: any = await engine.query(ouQuery);
       const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
-
       changeAdministration(isAdmin);
       const facilities: React.Key[] = organisationUnits.map(
         (unit: any) => unit.id
       );
-      // const level = max(organisationUnits.map((unit: any) => unit.level));
-
       onChangeOrganisations({
         levels: ["3"],
         organisations: facilities,
@@ -1138,6 +1135,21 @@ export const useVisualization = (
           updateVisualizationData({
             visualizationId: visualization.id,
             data: traverse(data, queryString),
+          });
+        }
+      } else if (dataSource?.type === "API") {
+        const { data } = await axios.get(dataSource.authentication.url);
+
+        if (
+          indicator?.numerator?.accessor &&
+          indicator?.denominator?.accessor
+        ) {
+          const numerator = data[indicator?.numerator?.accessor];
+          const denominator = data[indicator?.denominator?.accessor];
+        } else if (indicator?.numerator?.accessor) {
+          updateVisualizationData({
+            visualizationId: visualization.id,
+            data: data[indicator?.numerator?.accessor],
           });
         }
       }

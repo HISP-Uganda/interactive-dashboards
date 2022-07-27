@@ -1,0 +1,886 @@
+{
+  "2015": [
+    {
+      "district": "ABIM",
+      "male": 55200,
+      "female": 58200,
+      "total": 113400
+    },
+    {
+      "district": "ADJUMANI",
+      "male": 108800,
+      "female": 117700,
+      "total": 226500
+    },
+    {
+      "district": "AGAGO",
+      "male": 112000,
+      "female": 118800,
+      "total": 230800
+    },
+    {
+      "district": "Alebtong",
+      "male": 113500,
+      "female": 118900,
+      "total": 232400
+    },
+    {
+      "district": "Amolatar",
+      "male": 74600,
+      "female": 75500,
+      "total": 150100
+    },
+    {
+      "district": "Amudat",
+      "male": 56000,
+      "female": 53400,
+      "total": 109400
+    },
+    {
+      "district": "Amuru",
+      "male": 93200,
+      "female": 97300,
+      "total": 190500
+    },
+    {
+      "district": "Apac",
+      "male": 94000,
+      "female": 96500,
+      "total": 190500
+    },
+    {
+      "district": "Kwania",
+      "male": 91800,
+      "female": 95700,
+      "total": 187500
+    },
+    {
+      "district": "Dokolo",
+      "male": 91600,
+      "female": 95600,
+      "total": 187200
+    },
+    {
+      "district": "GuluCity",
+      "male": 87900,
+      "female": 92400,
+      "total": 180300
+    },
+    {
+      "district": "Gulu",
+      "male": 49900,
+      "female": 51800,
+      "total": 101700
+    },
+    {
+      "district": "Omoro",
+      "male": 81200,
+      "female": 84100,
+      "total": 165300
+    },
+    {
+      "district": "Kitgum",
+      "male": 100600,
+      "female": 106000,
+      "total": 206600
+    },
+    {
+      "district": "Koboko",
+      "male": 105600,
+      "female": 107400,
+      "total": 213000
+    },
+    {
+      "district": "Kole",
+      "male": 120200,
+      "female": 124900,
+      "total": 245100
+    },
+    {
+      "district": "Kotido",
+      "male": 87900,
+      "female": 96400,
+      "total": 184300
+    },
+    {
+      "district": "Lamwo",
+      "male": 65600,
+      "female": 70000,
+      "total": 135600
+    },
+    {
+      "district": "LiraCity",
+      "male": 101200,
+      "female": 110900,
+      "total": 212100
+    },
+    {
+      "district": "Lira",
+      "male": 99800,
+      "female": 105100,
+      "total": 204900
+    },
+    {
+      "district": "Maracha",
+      "male": 89300,
+      "female": 99600,
+      "total": 188900
+    },
+    {
+      "district": "Moroto",
+      "male": 50700,
+      "female": 54700,
+      "total": 105400
+    },
+    {
+      "district": "Nakapiripirit",
+      "male": 44100,
+      "female": 47300,
+      "total": 91400
+    },
+    {
+      "district": "Nabilatuk",
+      "male": 33400,
+      "female": 37700,
+      "total": 71100
+    },
+    {
+      "district": "Napak",
+      "male": 66400,
+      "female": 77900,
+      "total": 144300
+    },
+    {
+      "district": "Nebbi",
+      "male": 117600,
+      "female": 126700,
+      "total": 244300
+    },
+    {
+      "district": "Pakwach",
+      "male": 78900,
+      "female": 84000,
+      "total": 162900
+    },
+    {
+      "district": "Nwoya",
+      "male": 71600,
+      "female": 73100,
+      "total": 144700
+    },
+    {
+      "district": "Otuke",
+      "male": 53000,
+      "female": 54900,
+      "total": 107900
+    },
+    {
+      "district": "Oyam",
+      "male": 191700,
+      "female": 200900,
+      "total": 392600
+    },
+    {
+      "district": "Pader",
+      "male": 87800,
+      "female": 92600,
+      "total": 180400
+    },
+    {
+      "district": "Yumbe",
+      "male": 240400,
+      "female": 266200,
+      "total": 506600
+    },
+    {
+      "district": "Zombo",
+      "male": 118700,
+      "female": 126900,
+      "total": 245600
+    },
+    {
+      "district": "Moyo",
+      "male": 48200,
+      "female": 49500,
+      "total": 97700
+    },
+    {
+      "district": "Obongi",
+      "male": 22100,
+      "female": 21700,
+      "total": 43800
+    },
+    {
+      "district": "AruaCity",
+      "male": 149700,
+      "female": 166300,
+      "total": 316000
+    },
+    {
+      "district": "Arua",
+      "male": 65500,
+      "female": 70900,
+      "total": 136400
+    },
+    {
+      "district": "Terego",
+      "male": 98300,
+      "female": 105300,
+      "total": 203600
+    },
+    {
+      "district": "MADIOKOLLO",
+      "male": 69900,
+      "female": 73300,
+      "total": 143200
+    },
+    {
+      "district": "Kaabong",
+      "male": 51500,
+      "female": 59300,
+      "total": 110800
+    },
+    {
+      "district": "Karenga",
+      "male": 29400,
+      "female": 31000,
+      "total": 60400
+    },
+    {
+      "district": "Amuria",
+      "male": 92200,
+      "female": 96400,
+      "total": 188600
+    },
+    {
+      "district": "Kapelebyong",
+      "male": 44200,
+      "female": 45400,
+      "total": 89600
+    },
+    {
+      "district": "Budaka",
+      "male": 103600,
+      "female": 109800,
+      "total": 213400
+    },
+    {
+      "district": "Bududa",
+      "male": 109800,
+      "female": 108000,
+      "total": 217800
+    },
+    {
+      "district": "Bugiri",
+      "male": 192200,
+      "female": 203000,
+      "total": 395200
+    },
+    {
+      "district": "Bukedea",
+      "male": 102300,
+      "female": 108300,
+      "total": 210600
+    },
+    {
+      "district": "Bukwo",
+      "male": 47000,
+      "female": 46000,
+      "total": 93000
+    },
+    {
+      "district": "Bulambuli",
+      "male": 89600,
+      "female": 91800,
+      "total": 181400
+    },
+    {
+      "district": "Busia",
+      "male": 160500,
+      "female": 170900,
+      "total": 331400
+    },
+    {
+      "district": "Butaleja",
+      "male": 123200,
+      "female": 128100,
+      "total": 251300
+    },
+    {
+      "district": "Buyende",
+      "male": 164500,
+      "female": 170000,
+      "total": 334500
+    },
+    {
+      "district": "Iganga",
+      "male": 166600,
+      "female": 180800,
+      "total": 347400
+    },
+    {
+      "district": "Bugweri",
+      "male": 80500,
+      "female": 87800,
+      "total": 168300
+    },
+    {
+      "district": "JinjaCity",
+      "male": 121600,
+      "female": 128400,
+      "total": 250000
+    },
+    {
+      "district": "Jinja",
+      "male": 111500,
+      "female": 115300,
+      "total": 226800
+    },
+    {
+      "district": "Kaliro",
+      "male": 119400,
+      "female": 123500,
+      "total": 242900
+    },
+    {
+      "district": "Katakwi",
+      "male": 83700,
+      "female": 86200,
+      "total": 169900
+    },
+    {
+      "district": "Kibuku",
+      "male": 100600,
+      "female": 107600,
+      "total": 208200
+    },
+    {
+      "district": "Kween",
+      "male": 48600,
+      "female": 47100,
+      "total": 95700
+    },
+    {
+      "district": "Luuka",
+      "male": 115500,
+      "female": 126300,
+      "total": 241800
+    },
+    {
+      "district": "Manafwa",
+      "male": 76400,
+      "female": 79800,
+      "total": 156200
+    },
+    {
+      "district": "Namisindwa",
+      "male": 100800,
+      "female": 103500,
+      "total": 204300
+    },
+    {
+      "district": "Mayuge",
+      "male": 235200,
+      "female": 249700,
+      "total": 484900
+    },
+    {
+      "district": "MbaleCity",
+      "male": 129500,
+      "female": 143900,
+      "total": 273400
+    },
+    {
+      "district": "Mbale",
+      "male": 109700,
+      "female": 118300,
+      "total": 228000
+    },
+    {
+      "district": "Namayingo",
+      "male": 107900,
+      "female": 110300,
+      "total": 218200
+    },
+    {
+      "district": "Namutumba",
+      "male": 127500,
+      "female": 131900,
+      "total": 259400
+    },
+    {
+      "district": "Ngora",
+      "male": 70000,
+      "female": 75000,
+      "total": 145000
+    },
+    {
+      "district": "Serere",
+      "male": 144200,
+      "female": 150900,
+      "total": 295100
+    },
+    {
+      "district": "Sironko",
+      "male": 123100,
+      "female": 123400,
+      "total": 246500
+    },
+    {
+      "district": "SorotiCity",
+      "male": 28400,
+      "female": 30400,
+      "total": 58800
+    },
+    {
+      "district": "Soroti",
+      "male": 120900,
+      "female": 125600,
+      "total": 246500
+    },
+    {
+      "district": "Tororo",
+      "male": 256100,
+      "female": 271300,
+      "total": 527400
+    },
+    {
+      "district": "Pallisa",
+      "male": 138900,
+      "female": 146000,
+      "total": 284900
+    },
+    {
+      "district": "Butebo",
+      "male": 54900,
+      "female": 58100,
+      "total": 113000
+    },
+    {
+      "district": "Kapchorwa",
+      "male": 52900,
+      "female": 54700,
+      "total": 107600
+    },
+    {
+      "district": "Kumi",
+      "male": 119500,
+      "female": 125500,
+      "total": 245000
+    },
+    {
+      "district": "Kamuli",
+      "male": 241400,
+      "female": 254200,
+      "total": 495600
+    },
+    {
+      "district": "Kalaki",
+      "male": 56100,
+      "female": 57400,
+      "total": 113500
+    },
+    {
+      "district": "Kaberamaido",
+      "male": 53700,
+      "female": 55000,
+      "total": 108700
+    },
+    {
+      "district": "Buhweju",
+      "male": 60600,
+      "female": 63100,
+      "total": 123700
+    },
+    {
+      "district": "Buliisa",
+      "male": 60300,
+      "female": 57300,
+      "total": 117600
+    },
+    {
+      "district": "Bundibugyo",
+      "male": 111100,
+      "female": 118300,
+      "total": 229400
+    },
+    {
+      "district": "Bushenyi",
+      "male": 115200,
+      "female": 120900,
+      "total": 236100
+    },
+    {
+      "district": "HoimaCity",
+      "male": 49000,
+      "female": 53900,
+      "total": 102900
+    },
+    {
+      "district": "Hoima",
+      "male": 107100,
+      "female": 104300,
+      "total": 211400
+    },
+    {
+      "district": "Kikuube",
+      "male": 142300,
+      "female": 136400,
+      "total": 278700
+    },
+    {
+      "district": "Ibanda",
+      "male": 123300,
+      "female": 129900,
+      "total": 253200
+    },
+    {
+      "district": "Isingiro",
+      "male": 242700,
+      "female": 257600,
+      "total": 500300
+    },
+    {
+      "district": "Kabale",
+      "male": 111300,
+      "female": 121500,
+      "total": 232800
+    },
+    {
+      "district": "FortPortalCity",
+      "male": 51400,
+      "female": 52400,
+      "total": 103800
+    },
+    {
+      "district": "Kabarole",
+      "male": 100800,
+      "female": 99400,
+      "total": 200200
+    },
+    {
+      "district": "Kanungu",
+      "male": 122800,
+      "female": 132600,
+      "total": 255400
+    },
+    {
+      "district": "Kasese",
+      "male": 345000,
+      "female": 362600,
+      "total": 707600
+    },
+    {
+      "district": "Kibaale",
+      "male": 74500,
+      "female": 73400,
+      "total": 147900
+    },
+    {
+      "district": "Kiryandongo",
+      "male": 136100,
+      "female": 136100,
+      "total": 272200
+    },
+    {
+      "district": "Kisoro",
+      "male": 128100,
+      "female": 157900,
+      "total": 286000
+    },
+    {
+      "district": "Kyegegwa",
+      "male": 150100,
+      "female": 150000,
+      "total": 300100
+    },
+    {
+      "district": "Kyenjojo",
+      "male": 217500,
+      "female": 217700,
+      "total": 435200
+    },
+    {
+      "district": "Masindi",
+      "male": 151600,
+      "female": 145900,
+      "total": 297500
+    },
+    {
+      "district": "Mitooma",
+      "male": 87300,
+      "female": 97500,
+      "total": 184800
+    },
+    {
+      "district": "Ntoroko",
+      "male": 34700,
+      "female": 33400,
+      "total": 68100
+    },
+    {
+      "district": "Ntungamo",
+      "male": 236400,
+      "female": 254800,
+      "total": 491200
+    },
+    {
+      "district": "Rubirizi",
+      "male": 62700,
+      "female": 68300,
+      "total": 131000
+    },
+    {
+      "district": "Rukungiri",
+      "male": 151400,
+      "female": 165700,
+      "total": 317100
+    },
+    {
+      "district": "Sheema",
+      "male": 100100,
+      "female": 108900,
+      "total": 209000
+    },
+    {
+      "district": "Rubanda",
+      "male": 92900,
+      "female": 105400,
+      "total": 198300
+    },
+    {
+      "district": "Kakumiro",
+      "male": 157800,
+      "female": 155900,
+      "total": 313700
+    },
+    {
+      "district": "Kagadi",
+      "male": 176900,
+      "female": 184200,
+      "total": 361100
+    },
+    {
+      "district": "Rukiga",
+      "male": 48500,
+      "female": 52700,
+      "total": 101200
+    },
+    {
+      "district": "Bunyangabu",
+      "male": 85800,
+      "female": 87700,
+      "total": 173500
+    },
+    {
+      "district": "MbararaCity",
+      "male": 97300,
+      "female": 101400,
+      "total": 198700
+    },
+    {
+      "district": "Mbarara",
+      "male": 73400,
+      "female": 78600,
+      "total": 152000
+    },
+    {
+      "district": "Rwampara",
+      "male": 63500,
+      "female": 66500,
+      "total": 130000
+    },
+    {
+      "district": "Kiruhura",
+      "male": 80500,
+      "female": 74800,
+      "total": 155300
+    },
+    {
+      "district": "Kazo",
+      "male": 90800,
+      "female": 91500,
+      "total": 182300
+    },
+    {
+      "district": "Kamwenge",
+      "male": 136900,
+      "female": 142000,
+      "total": 278900
+    },
+    {
+      "district": "Kitagwenda",
+      "male": 72200,
+      "female": 75800,
+      "total": 148000
+    },
+    {
+      "district": "Bukomansimbi",
+      "male": 75600,
+      "female": 76400,
+      "total": 152000
+    },
+    {
+      "district": "Butambala",
+      "male": 50600,
+      "female": 51100,
+      "total": 101700
+    },
+    {
+      "district": "Buvuma",
+      "male": 50800,
+      "female": 43700,
+      "total": 94500
+    },
+    {
+      "district": "Gomba",
+      "male": 83300,
+      "female": 78400,
+      "total": 161700
+    },
+    {
+      "district": "Kalangala",
+      "male": 32200,
+      "female": 23700,
+      "total": 55900
+    },
+    {
+      "district": "Kalungu",
+      "male": 86100,
+      "female": 89600,
+      "total": 175700
+    },
+    {
+      "district": "Kayunga",
+      "male": 183600,
+      "female": 189600,
+      "total": 373200
+    },
+    {
+      "district": "Kiboga",
+      "male": 77500,
+      "female": 73700,
+      "total": 151200
+    },
+    {
+      "district": "Kyankwanzi",
+      "male": 116200,
+      "female": 107000,
+      "total": 223200
+    },
+    {
+      "district": "Luwero",
+      "male": 231500,
+      "female": 234000,
+      "total": 465500
+    },
+    {
+      "district": "Lwengo",
+      "male": 134600,
+      "female": 142300,
+      "total": 276900
+    },
+    {
+      "district": "Lyantonde",
+      "male": 47900,
+      "female": 48000,
+      "total": 95900
+    },
+    {
+      "district": "MasakaCity",
+      "male": 97200,
+      "female": 105200,
+      "total": 202400
+    },
+    {
+      "district": "Masaka",
+      "male": 55400,
+      "female": 53000,
+      "total": 108400
+    },
+    {
+      "district": "Mpigi",
+      "male": 127900,
+      "female": 127300,
+      "total": 255200
+    },
+    {
+      "district": "Mukono",
+      "male": 296200,
+      "female": 314000,
+      "total": 610200
+    },
+    {
+      "district": "Nakaseke",
+      "male": 107900,
+      "female": 94300,
+      "total": 202200
+    },
+    {
+      "district": "Nakasongola",
+      "male": 95800,
+      "female": 90300,
+      "total": 186100
+    },
+    {
+      "district": "Rakai",
+      "male": 138900,
+      "female": 143100,
+      "total": 282000
+    },
+    {
+      "district": "Kyotera",
+      "male": 119900,
+      "female": 122400,
+      "total": 242300
+    },
+    {
+      "district": "Ssembabule",
+      "male": 129100,
+      "female": 129100,
+      "total": 258200
+    },
+    {
+      "district": "KampalaCityAuthority",
+      "male": 723700,
+      "female": 805700,
+      "total": 1529400
+    },
+    {
+      "district": "Mubende",
+      "male": 216800,
+      "female": 213400,
+      "total": 430200
+    },
+    {
+      "district": "Kassanda",
+      "male": 142100,
+      "female": 134700,
+      "total": 276800
+    },
+    {
+      "district": "Wakiso",
+      "male": 1001400,
+      "female": 1106100,
+      "total": 2107500
+    },
+    {
+      "district": "Mityana",
+      "male": 168200,
+      "female": 165100,
+      "total": 333300
+    },
+    {
+      "district": "Buikwe",
+      "male": 210700,
+      "female": 218600,
+      "total": 429300
+    },
+    {
+      "district": "all",
+      "male": 17344000,
+      "female": 18158100,
+      "total": 35502100
+    }
+  ]
+}

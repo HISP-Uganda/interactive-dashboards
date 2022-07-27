@@ -5,6 +5,7 @@ import { Layout, Layouts } from "react-grid-layout";
 import { domain } from "./Domain";
 import {
   DataNode,
+  DataValueAttribute,
   ICategory,
   IDashboard,
   IDataSource,
@@ -85,14 +86,10 @@ export const changeVisualizationData = domain.createEvent<{
   value: any;
 }>();
 
-export const changeNumeratorAttribute = domain.createEvent<{
-  attribute: "name" | "description" | "type" | "query";
-  value: any;
-}>();
-export const changeDenominatorAttribute = domain.createEvent<{
-  attribute: "name" | "description" | "type" | "query";
-  value: any;
-}>();
+export const changeNumeratorAttribute =
+  domain.createEvent<DataValueAttribute>();
+export const changeDenominatorAttribute =
+  domain.createEvent<DataValueAttribute>();
 
 export const changeNumeratorDimension = domain.createEvent<{
   id: string;
@@ -169,6 +166,10 @@ export const setExpandedKeys = domain.createEvent<React.Key[]>();
 export const changeOrganisations = domain.createEvent<string>();
 export const setRefreshInterval = domain.createEvent<string>();
 export const changeHasDashboards = domain.createEvent<boolean>();
+export const changeVisualizationType = domain.createEvent<{
+  visualization: string;
+  section: ISection;
+}>();
 
 export const changePeriods = domain.createEvent<Item[]>();
 

@@ -64,7 +64,6 @@ const Indicator = () => {
 
   return (
     <Box flex={1} p="20px">
-      <pre>{JSON.stringify(indicator, null, 2)}</pre>
       <Stack spacing="20px">
         <Stack>
           <Text>Data Source</Text>

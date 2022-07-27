@@ -1,15 +1,11 @@
 import { uniq, update } from "lodash";
-export const processSingleValue = (data: any[]): any => {
-  if (data.length > 0) {
-    const values = Object.values(data[0]);
-    if (data.length === 1 && Object.keys(data[0]).length === 1) {
-      return values[0];
-    }
-    if (data.length === 1 && Object.keys(data[0]).length > 1) {
-      return values[values.length - 1];
-    }
-  }
-  return "";
+export const processSingleValue = (data: any[], metadata?: any) => {
+  return data.map((r: any) => {
+    return {
+      value: r?.count || r?.value || r?.total,
+      title: metadata?.[r.dx || r.ou || r.pe]?.name || r.dx || r.ou || r.pe,
+    };
+  });
 };
 
 export const processGraphs = (
@@ -40,7 +36,7 @@ export const processGraphs = (
                   const r = data.find(
                     (num: any) => num[series] === se && num[category] === c
                   );
-                  return r?.count || r?.value;
+                  return r?.count || r?.value || r?.total;
                 }),
           y:
             availableProperties?.data?.orientation === "v"
@@ -48,7 +44,7 @@ export const processGraphs = (
                   const r = data.find(
                     (num: any) => num[series] === se && num[category] === c
                   );
-                  return r?.count || r?.value;
+                  return r?.count || r?.value || r?.total;
                 })
               : x.map((c: any) => metadata?.[c]?.name || c),
           name: metadata?.[se]?.name || se,
@@ -64,13 +60,13 @@ export const processGraphs = (
               ? x.map((c: any) => metadata?.[c]?.name || c)
               : x.map((c: any) => {
                   const r = data.find((num: any) => num[category] === c);
-                  return r?.count || r?.value;
+                  return r?.count || r?.value || r?.total;
                 }),
           y:
             availableProperties?.data?.orientation === "v"
               ? x.map((c: any) => {
                   const r = data.find((num: any) => num[category] === c);
-                  return r?.count || r?.value;
+                  return r?.count || r?.value || r?.total;
                 })
               : x.map((c: any) => metadata?.[c]?.name || c),
           type,
