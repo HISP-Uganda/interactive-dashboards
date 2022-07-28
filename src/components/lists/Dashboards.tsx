@@ -1,5 +1,7 @@
+import { AddIcon } from "@chakra-ui/icons";
 import {
   Button,
+  Divider,
   Spacer,
   Stack,
   Table,
@@ -53,10 +55,13 @@ const Dashboards = () => {
               },
             });
           }}
+          colorScheme="blue"
         >
+           <AddIcon mr="2"/>
           Add Dashboard
         </Button>
       </Stack>
+      <Divider borderColor="blue.500" />
       <Table variant="simple">
         <Thead>
           <Tr>

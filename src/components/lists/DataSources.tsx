@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { AddIcon } from "@chakra-ui/icons";
 import {
   Spinner,
   Stack,
@@ -10,6 +11,7 @@ import {
   Tr,
   Button,
   Spacer,
+  Divider,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { useNavigate } from "@tanstack/react-location";
@@ -27,14 +29,17 @@ const DataSources = () => {
   }, []);
   return (
     <Stack flex={1} p="20px">
-      <Stack direction="row">
+      <Stack direction="row" border="1">
         <Spacer />
         <Button
+          colorScheme="blue"
           onClick={() => navigate({ to: `/data-sources/${generateUid()}` })}
         >
+          <AddIcon mr="2"/>
           Add Data Source
         </Button>
       </Stack>
+      <Divider borderColor="blue.500" />
       {isLoading && <Spinner />}
       {isSuccess && (
         <Table variant="simple">

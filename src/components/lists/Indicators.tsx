@@ -1,5 +1,6 @@
 import {
   Button,
+  Divider,
   Input,
   Spacer,
   Spinner,
@@ -18,6 +19,7 @@ import { changeVisualizationData, setIndicator, setVisualizationQueries } from "
 import { IIndicator } from "../../interfaces";
 import { useVisualizationData } from "../../Queries";
 import { $indicators, $indicator, createIndicator } from "../../Store";
+import { AddIcon } from "@chakra-ui/icons";
 
 const Indicators = () => {
   const navigate = useNavigate();
@@ -45,7 +47,9 @@ const Indicators = () => {
             setVisualizationQueries([...indicators, indicator]);
             navigate({ to: `/indicators/${indicator.id}` });
           }}
+          colorScheme="blue"
         >
+          <AddIcon mr="2"/>
           Add Visualization Data
         </Button>
       </Stack>
