@@ -1,4 +1,6 @@
-import { ChevronDownIcon } from "@chakra-ui/icons";
+import { ChevronDownIcon, EditIcon, ExternalLinkIcon, HamburgerIcon } from "@chakra-ui/icons";
+import { AiOutlineBarChart, AiOutlineLineChart, AiOutlineNumber } from "react-icons/ai";
+import {FaGlobeAfrica} from "react-icons/fa"
 import {
   Button,
   IconButton,
@@ -250,7 +252,7 @@ const Dashboard = () => {
                     _focus={{ boxShadow: "none" }}
                     bg="none"
                     as={IconButton}
-                    icon={<ChevronDownIcon />}
+                    icon={<HamburgerIcon />}
                   />
                   <MenuList>
                     {store.isAdmin && (
@@ -264,6 +266,7 @@ const Dashboard = () => {
                             search,
                           });
                         }}
+                        icon={<EditIcon />} 
                       >
                         Edit
                       </MenuItem>
@@ -272,6 +275,7 @@ const Dashboard = () => {
                       maxH="32px"
                       fontSize="18px"
                       onClick={() => displayFull(section.i)}
+                      icon={<ExternalLinkIcon />}
                     >
                       Expand
                     </MenuItem>
@@ -285,6 +289,7 @@ const Dashboard = () => {
                           visualization: "line",
                         })
                       }
+                      icon={<AiOutlineLineChart />}
                     >
                       View as Line
                     </MenuItem>
@@ -297,6 +302,7 @@ const Dashboard = () => {
                           visualization: "bar",
                         })
                       }
+                      icon={<AiOutlineBarChart />}
                     >
                       View as Column
                     </MenuItem>
@@ -309,6 +315,7 @@ const Dashboard = () => {
                           visualization: "map",
                         })
                       }
+                      icon={<FaGlobeAfrica />}
                     >
                       View as Map
                     </MenuItem>
@@ -321,6 +328,7 @@ const Dashboard = () => {
                           visualization: "single",
                         })
                       }
+                      icon={<AiOutlineNumber />}
                     >
                       View as Single Value
                     </MenuItem>
