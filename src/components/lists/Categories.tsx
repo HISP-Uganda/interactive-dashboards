@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import {
   Button,
+  Divider,
   Spacer,
   Spinner,
   Stack,
@@ -18,6 +19,7 @@ import { ICategory } from "../../interfaces";
 import { useCategories } from "../../Queries";
 import { $categories } from "../../Store";
 import { generateUid } from "../../utils/uid";
+import { AddIcon } from "@chakra-ui/icons";
 
 const Categories = () => {
   const navigate = useNavigate();
@@ -31,11 +33,14 @@ const Categories = () => {
       <Stack direction="row">
         <Spacer />
         <Button
+        colorScheme="blue"
           onClick={() => navigate({ to: `/categories/${generateUid()}` })}
         >
+          <AddIcon mr="2"/>
           Add Category
         </Button>
       </Stack>
+      <Divider borderColor="blue.500" />
       {isLoading && <Spinner />}
       {isSuccess && (
         <Table variant="simple">

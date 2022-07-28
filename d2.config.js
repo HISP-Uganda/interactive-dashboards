@@ -1,6 +1,6 @@
 const config = {
   type: "app",
-
+  title:"Visualization Studio",
   entryPoints: {
     app: "./src/AppWrapper.js",
   },
