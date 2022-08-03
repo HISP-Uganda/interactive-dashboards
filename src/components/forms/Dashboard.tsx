@@ -132,14 +132,15 @@ const Dashboard = () => {
           h="48px"
           p="5px"
         >
-          <DashboardFilter />
-
+          <Text fontSize='lg' fontWeight="bold" color='blue.600'>Resize Dashboard</Text>
           <Button size="sm" type="button" onClick={() => increment(1)}>
             +
           </Button>
           <Button size="sm" type="button" onClick={() => increment(-1)}>
             -
           </Button>
+
+          <DashboardFilter />
           {store.isAdmin && (
             <Button
               size="sm"
@@ -149,11 +150,11 @@ const Dashboard = () => {
                 navigate({ to: "/dashboards" });
               }}
             >
-              Dashboard List
+              Manage Dashboards
             </Button>
           )}
           <Spacer />
-          <Text>Filter</Text>
+          <Text fontSize='lg' fontWeight="bold" color='blue.600'>Filter</Text>
           {store.isAdmin && (
             <>
               <Button
