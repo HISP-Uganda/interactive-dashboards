@@ -104,7 +104,7 @@ const MapChart = ({
                     lon: metadata.mapCenter[0],
                     lat: metadata.mapCenter[1],
                   },
-                  zoom: 6.5,
+                  zoom: 5.8,
                 },
                 autosize: true,
                 margin: {

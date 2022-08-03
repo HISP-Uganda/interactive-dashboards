@@ -7,7 +7,6 @@ import {
   CircularProgressLabel,
   Stack,
   Text,
-  SimpleGrid,
 } from "@chakra-ui/react";
 import Plot from "react-plotly.js";
 import { IVisualization } from "../../interfaces";
@@ -27,7 +26,6 @@ const ProgressBar = ({ bg, completed }: { bg: string; completed: number }) => {
       width="100%"
       backgroundColor="#e0e0de"
       borderRadius="50px"
-      margin="50px"
     >
       <Box
         height="100%"
@@ -100,75 +98,62 @@ const SingleValue = ({
       justifyContent="center"
       justifyItems="center"
     >
-      <SimpleGrid
-        minChildWidth="100px"
+      {visualization.name && (
+        <Text
+          fontSize={titleFontSize}
+          textTransform={titleCase}
+          color={titleColor}
+        >
+          {visualization.name}
+        </Text>
+      )}
+      <Stack
         w="100%"
         h="100%"
         flex={1}
-        spacing="10px"
+        direction={direction}
+        alignItems="center"
       >
-        {processSingleValue(data, metadata[visualization.id]).map((d, x) => (
-          <Stack
-            w="100%"
-            h="100%"
-            flex={1}
-            alignItems="center"
-            alignContent="center"
-            justifyContent="center"
-            justifyItems="center"
+        {targetGraph === "circular" && target ? (
+          <CircularProgress
+            value={(processSingleValue(data) * 100) / Number(target)}
           >
-            {(visualization.name || d.title) && (
-              <Text
-                fontSize={titleFontSize}
-                textTransform={titleCase}
-                color={titleColor}
-              >
-                {visualization.name || d.title}
-              </Text>
-            )}
-            <Stack w="100%" h="100%" direction={direction}>
-              {targetGraph === "circular" && target ? (
-                <CircularProgress value={(d.value * 100) / Number(target)}>
-                  <CircularProgressLabel>
-                    {((d.value * 100) / Number(target)).toFixed(0)}%
-                  </CircularProgressLabel>
-                </CircularProgress>
-              ) : targetGraph === "progress" && target ? (
-                <ProgressBar
-                  completed={(d.value * 100) / Number(target)}
-                  bg="green"
-                />
-              ) : null}
-              <Stack flex={1} w="100%" h="100%">
-                <Plot
-                  key={x}
-                  data={[
-                    {
-                      type: "indicator",
-                      mode: "number",
-                      number: {
-                        font: {
-                          color,
-                        },
-                        prefix,
-                        suffix,
-                        valueformat,
-                      },
-                      value: d.value,
-                    },
-                  ]}
-                  layout={{
-                    margin: { t: 0, r: 0, l: 0, b: 0, pad: 0 },
-                    autosize: true,
-                  }}
-                  style={{ width: "100%", height: "100%" }}
-                  config={{ displayModeBar: false, responsive: true }}
-                />
-              </Stack>
-            </Stack>
-          </Stack>
-        ))}
-      </SimpleGrid>
+            <CircularProgressLabel>
+              {((processSingleValue(data) * 100) / Number(target)).toFixed(0)}%
+            </CircularProgressLabel>
+          </CircularProgress>
+        ) : targetGraph === "progress" && target ? (
+          <ProgressBar
+            completed={(processSingleValue(data) * 100) / Number(target)}
+            bg="green"
+          />
+        ) : null}
+        <Stack w="100%" h="100%">
+          <Plot
+            data={[
+              {
+                type: "indicator",
+                mode: "number",
+                number: {
+                  font: {
+                    color,
+                  },
+                  prefix,
+                  suffix,
+                  valueformat,
+                },
+                value: processSingleValue(data),
+              },
+            ]}
+            layout={{
+              margin: { t: 0, r: 0, l: 0, b: 0, pad: 0 },
+              autosize: true,
+            }}
+            style={{ width: "100%", height: "100%" }}
+            config={{ displayModeBar: false, responsive: true }}
+          />
+        </Stack>
+      </Stack>
     </Stack>
   );
 };

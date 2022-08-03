@@ -1,14 +1,25 @@
-import { Input, Radio, RadioGroup, Stack, Text } from "@chakra-ui/react";
+import {
+  Input,
+  Radio,
+  RadioGroup,
+  Stack,
+  Text,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+} from "@chakra-ui/react";
 
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { isArray } from "lodash";
+import { isArray, uniq } from "lodash";
 import { ChangeEvent } from "react";
 import { changeVisualizationProperties } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
-import { $visualizationData } from "../../Store";
+import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { customComponents } from "../../utils/components";
-import { colors } from "../../utils/utils";
+import { chartTypes, colors } from "../../utils/utils";
 import { createOptions } from "./AvialableOptions";
 
 const barModes = createOptions(["stack", "group", "overlay", "relative"]);
@@ -19,6 +30,7 @@ const BarGraphProperties = ({
   visualization: IVisualization;
 }) => {
   const visualizationData = useStore($visualizationData);
+  const metadata = useStore($visualizationMetadata)[visualization.id];
   const columns = visualizationData[visualization.id]
     ? Object.keys(visualizationData[visualization.id][0]).map<Option>((o) => {
         return { value: o, label: o };
@@ -172,6 +184,49 @@ const BarGraphProperties = ({
           }
         />
       </Stack>
+
+      {visualization.properties["series"] && (
+        <Tabs>
+          <TabList>
+            {uniq(
+              visualizationData[visualization.id].map(
+                (x: any) => x[visualization.properties["series"]]
+              )
+            ).map((x) => (
+              <Tab key={x}>{metadata?.[x]?.name}</Tab>
+            ))}
+          </TabList>
+
+          <TabPanels>
+            {uniq(
+              visualizationData[visualization.id].map(
+                (x: any) => x[visualization.properties["series"]]
+              )
+            ).map((x) => (
+              <TabPanel key={x}>
+                <Stack>
+                  <Text>Chart Type</Text>
+                  <Select<Option, false, GroupBase<Option>>
+                    value={chartTypes.find(
+                      (pt) => visualization.properties[`data.${x}`] === pt.value
+                    )}
+                    onChange={(e) => {
+                      const val = e?.value || "";
+                      changeVisualizationProperties({
+                        visualization: visualization.id,
+                        attribute: `data.${x}`,
+                        value: val,
+                      });
+                    }}
+                    options={chartTypes}
+                    isClearable
+                  />
+                </Stack>
+              </TabPanel>
+            ))}
+          </TabPanels>
+        </Tabs>
+      )}
     </Stack>
   );
 };
