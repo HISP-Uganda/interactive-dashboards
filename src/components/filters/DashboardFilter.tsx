@@ -1,5 +1,5 @@
 import { Key } from "react";
-import { Box, Stack } from "@chakra-ui/react";
+import { Box, Stack, Text } from "@chakra-ui/react";
 import { useNavigate } from "@tanstack/react-location";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
@@ -20,8 +20,10 @@ const DashboardFilter = () => {
   const navigate = useNavigate();
   return (
     <Stack spacing="10px" direction="row" fontSize="16px" alignItems="center">
+      <Text fontSize='lg' fontWeight="bold" color='blue.600'>Thematic Area</Text>
       <Box width="300px">
         <Select<Option, false, GroupBase<Option>>
+          placeholder="Select Thematic Area"
           size="sm"
           value={categoryOptions.filter(
             (d: Option) => d.value === store.selectedCategory
@@ -56,6 +58,7 @@ const DashboardFilter = () => {
           options={categoryOptions}
         />
       </Box>
+      <Text fontSize='lg' fontWeight="bold" color='blue.600'>Dashboards</Text>
       <Box width="300px">
         <Select<Option, false, GroupBase<Option>>
           size="sm"
