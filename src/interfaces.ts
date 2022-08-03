@@ -65,6 +65,7 @@ export interface ISection extends Layout {
   title: string;
   visualizations: IVisualization[];
   direction: "row" | "column";
+  display: string;
 }
 
 export interface IFilter {}

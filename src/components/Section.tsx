@@ -8,7 +8,9 @@ import {
   Spinner,
   Stack,
   Text,
+  Switch,
 } from "@chakra-ui/react";
+import Marquee from "react-fast-marquee";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select, SingleValue } from "chakra-react-select";
 import { useStore } from "effector-react";
@@ -32,6 +34,7 @@ import ColorPalette from "./ColorPalette";
 import Visualization from "./visualizations/Visualization";
 import VisualizationProperties from "./visualizations/VisualizationProperties";
 import { chartTypes } from "../utils/utils";
+import Carousel from "./visualizations/Carousel";
 
 const fontSizes: Option[] = [
   {
@@ -339,15 +342,28 @@ const Section = () => {
       </Stack>
       <Stack direction="row" spacing="20px" flex={1}>
         <Stack w="75%">
-          <Text textAlign="center">{section.title}</Text>
-          <Stack spacing="20px" direction={section.direction}>
-            {section.visualizations.map((visualization: IVisualization) => (
-              <Visualization
-                key={visualization.id}
-                visualization={visualization}
-              />
-            ))}
-          </Stack>
+          {section.title && <Text textAlign="center">{section.title}</Text>}
+          {section.display === "carousel" ? (
+            <Carousel {...section} />
+          ) : section.display === "marquee" ? (
+            <Marquee>
+              {section.visualizations.map((visualization) => (
+                <Visualization
+                  key={visualization.id}
+                  visualization={visualization}
+                />
+              ))}
+            </Marquee>
+          ) : (
+            <Stack direction={section.direction} flex={1}>
+              {section.visualizations.map((visualization) => (
+                <Visualization
+                  key={visualization.id}
+                  visualization={visualization}
+                />
+              ))}
+            </Stack>
+          )}
         </Stack>
         <Stack w="25%" spacing="20px">
           <Stack h="calc(100vh - 200px)" overflow="auto">
@@ -392,6 +408,23 @@ const Section = () => {
                     <Stack direction="row">
                       <Radio value="row">Horizontal</Radio>
                       <Radio value="column">Vertical</Radio>
+                    </Stack>
+                  </RadioGroup>
+
+                  <Text>Display Style</Text>
+                  <RadioGroup
+                    value={section.display}
+                    onChange={(e: string) =>
+                      changeSectionAttribute({
+                        attribute: "display",
+                        value: e,
+                      })
+                    }
+                  >
+                    <Stack direction="row">
+                      <Radio value="normal">Normal</Radio>
+                      <Radio value="carousel">Carousel</Radio>
+                      <Radio value="marquee">Marquee</Radio>
                     </Stack>
                   </RadioGroup>
                 </Stack>
