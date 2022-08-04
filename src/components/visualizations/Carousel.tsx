@@ -14,7 +14,7 @@ const Carousel = (section: ISection) => {
   };
   useInterval(increment, 1000 * 10);
   return (
-    <Stack onClick={() => setPause(!pause)}>
+    <Stack onClick={() => setPause(!pause)} w="100%" h="100%" flex={1}>
       <Visualization
         key={section.visualizations[index].id}
         visualization={section.visualizations[index]}

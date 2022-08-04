@@ -7,8 +7,8 @@ import {
   CircularProgressLabel,
   Stack,
   Text,
+  Tooltip,
 } from "@chakra-ui/react";
-import Plot from "react-plotly.js";
 import { IVisualization } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { processSingleValue } from "../processors";
@@ -24,12 +24,13 @@ const ProgressBar = ({ bg, completed }: { bg: string; completed: number }) => {
     <Box
       height="20px"
       width="100%"
+      minWidth="200px"
       backgroundColor="#e0e0de"
       borderRadius="50px"
     >
       <Box
         height="100%"
-        width={`${completed}%`}
+        width={`${completed > 100 ? "100" : completed}%`}
         bg={bg}
         borderRadius="inherit"
         textAlign="right"
@@ -76,9 +77,10 @@ const SingleValue = ({
   const target = dataProperties?.["data.target"];
   const targetGraph = dataProperties?.["data.targetgraph"];
   const direction = dataProperties?.["data.direction"] || "column-reverse";
-  const titleFontSize = dataProperties?.["data.title.fontsize"] || "1.5vh";
+  const titleFontSize = dataProperties?.["data.title.fontsize"] || "1.7vh";
   const titleCase = dataProperties?.["data.title.case"] || "uppercase";
   const titleColor = dataProperties?.["data.title.color"] || "black";
+  const alignment = dataProperties?.["data.alignment"] || "column";
   useEffect(() => {
     if (colorSearch) {
       setColor(colorSearch.color);
@@ -91,11 +93,18 @@ const SingleValue = ({
 
   return (
     <Stack
-      w="100%"
       alignItems="center"
       alignContent="center"
       justifyContent="center"
       justifyItems="center"
+      direction={alignment}
+      textAlign="center"
+      // flex={1}
+      // w="100%"
+      // h="100%"
+      spacing={
+        alignment === "row" || alignment === "row-reverse" ? "10px" : "5px"
+      }
     >
       {visualization.name && (
         // <Text
@@ -105,16 +114,35 @@ const SingleValue = ({
         // >
         //   {visualization.name}
         // </Text>
-        <Text
-          textTransform="uppercase"
-          fontWeight="medium"
-          fontSize="2.0vh"
-          isTruncated
-        >
-          {visualization.name}
-        </Text>
+        <Tooltip label={visualization.name} hasArrow placement="top">
+          <Text
+            textTransform="uppercase"
+            fontWeight="medium"
+            fontSize={titleFontSize}
+            color={titleColor}
+            whiteSpace={
+              alignment === "row" || alignment === "row-reverse"
+                ? "nowrap"
+                : "normal"
+            }
+            noOfLines={
+              alignment === "row" || alignment === "row-reverse" ? undefined : 1
+            }
+          >
+            {visualization.name}
+          </Text>
+        </Tooltip>
       )}
-      <Stack w="100%" direction={direction} alignItems="center">
+      <Stack
+        w="100%"
+        direction={direction}
+        alignItems="center"
+        alignContent="center"
+        justifyContent="center"
+        justifyItems="center"
+        flex={1}
+        h="100%"
+      >
         {targetGraph === "circular" && target ? (
           <CircularProgress
             value={(processSingleValue(data) * 100) / Number(target)}

@@ -67,7 +67,7 @@ const App = () => {
   const indicators = useStore($indicators);
   const categories = useStore($categories);
   return (
-    <Stack>
+    <>
       {isLoading && (
         <Flex
           w="100%"
@@ -208,7 +208,7 @@ const App = () => {
       )}
 
       {isError && <Box>{error?.message}</Box>}
-    </Stack>
+    </>
   );
 };
 

@@ -133,6 +133,21 @@ const SingleValueProperties = ({
 
   return (
     <Stack>
+      <Text>Label Alignment</Text>
+      <Select<Option, false, GroupBase<Option>>
+        value={progressAlignments.find(
+          (pt) => pt.value === visualization.properties?.["data.alignment"]
+        )}
+        onChange={(e) =>
+          changeVisualizationProperties({
+            visualization: visualization.id,
+            attribute: "data.alignment",
+            value: e?.value,
+          })
+        }
+        options={progressAlignments}
+        isClearable
+      />
       <Text>Prefix</Text>
       <Input
         value={visualization.properties?.["data.prefix"] || ""}

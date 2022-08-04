@@ -11,6 +11,7 @@ import {
 } from "react-icons/ai";
 import { FaGlobeAfrica } from "react-icons/fa";
 import {
+  Box,
   Button,
   IconButton,
   Input,
@@ -135,7 +136,7 @@ const Dashboard = () => {
     setShowSider(false);
   }, []);
   return (
-    <Stack spacing="0">
+    <Stack spacing="0" bg="gray.300">
       {dashboard.showTop && (
         <Stack
           direction="row"
@@ -144,9 +145,7 @@ const Dashboard = () => {
           h="48px"
           p="5px"
         >
-          <Text fontSize="lg" fontWeight="bold" color="blue.600">
-            Resize Dashboard
-          </Text>
+          <Text fontSize="lg">Resize Dashboard</Text>
           <Button size="sm" type="button" onClick={() => increment(1)}>
             +
           </Button>
@@ -168,9 +167,7 @@ const Dashboard = () => {
             </Button>
           )}
           <Spacer />
-          <Text fontSize="lg" fontWeight="bold" color="blue.600">
-            Filter
-          </Text>
+          <Text fontSize="lg">Filter</Text>
           {store.isAdmin && (
             <>
               <Button
@@ -219,7 +216,6 @@ const Dashboard = () => {
         h={`calc(100vh - ${dashboard.showTop ? 96 : 48}px)`}
         w="100vw"
         overflow="auto"
-        bg="gray.50"
       >
         <ReactGridLayout
           margin={[5, 5]}
@@ -260,9 +256,19 @@ const Dashboard = () => {
                 textAlign="center"
                 _focus={{ boxShadow: "none !important" }}
               >
-                <Text fontSize="18px">{section.title}</Text>
+                <Text
+                  pl="25px"
+                  h="20px"
+                  textTransform="uppercase"
+                  fontWeight="bold"
+                  fontSize="0.8vw"
+                  color="gray.500"
+                  noOfLines={1}
+                >
+                  {section.title}
+                </Text>
                 <Spacer />
-                <Menu placement="left">
+                <Menu placement="left-start">
                   <MenuButton
                     _hover={{ bg: "none" }}
                     _expanded={{ bg: "none" }}
@@ -355,16 +361,35 @@ const Dashboard = () => {
               {section.display === "carousel" ? (
                 <Carousel {...section} />
               ) : section.display === "marquee" ? (
-                <Marquee>
+                <Marquee
+                  style={{ padding: 0, margin: 0, height: "100px" }}
+                  gradient={false}
+                  speed={40}
+                >
                   {section.visualizations.map((visualization) => (
-                    <Visualization
-                      key={visualization.id}
-                      visualization={visualization}
-                    />
+                    <Stack direction="row" key={visualization.id}>
+                      <Visualization
+                        key={visualization.id}
+                        visualization={visualization}
+                      />
+                      <Box w="70px">&nbsp;</Box>
+                    </Stack>
                   ))}
                 </Marquee>
               ) : (
-                <Stack direction={section.direction} flex={1}>
+                <Stack
+                  direction={section.direction}
+                  spacing="40px"
+                  // alignItems="center"
+                  // alignContent="center"
+                  // justifyContent="center"
+                  // justifyItems="center"
+                  // overflow="auto"
+                  alignItems="space-between"
+                  alignContent="space-between"
+                  w="100%"
+                  h="100%"
+                >
                   {section.visualizations.map((visualization) => (
                     <Visualization
                       key={visualization.id}
