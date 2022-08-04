@@ -1139,17 +1139,28 @@ export const useVisualization = (
         }
       } else if (dataSource?.type === "API") {
         const { data } = await axios.get(dataSource.authentication.url);
+        console.log(indicator?.numerator, indicator?.denominator);
+        let numerator: any = undefined;
+        let denominator: any = undefined;
 
-        if (
-          indicator?.numerator?.accessor &&
-          indicator?.denominator?.accessor
-        ) {
-          const numerator = data[indicator?.numerator?.accessor];
-          const denominator = data[indicator?.denominator?.accessor];
-        } else if (indicator?.numerator?.accessor) {
+        if (indicator?.numerator?.accessor) {
+          numerator = data[indicator?.numerator?.accessor];
+        } else if (indicator?.numerator?.name) {
+          numerator = data;
+        }
+
+        if (indicator?.denominator?.accessor) {
+          denominator = data[indicator?.denominator?.accessor];
+        } else if (indicator?.denominator?.name) {
+          denominator = data;
+        }
+
+        if (numerator && denominator) {
+          console.log("Are we here some how");
+        } else if (numerator) {
           updateVisualizationData({
             visualizationId: visualization.id,
-            data: data[indicator?.numerator?.accessor],
+            data: numerator,
           });
         }
       }

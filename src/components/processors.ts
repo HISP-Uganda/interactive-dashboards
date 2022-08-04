@@ -1,5 +1,6 @@
 import { uniq, update } from "lodash";
 export const processSingleValue = (data: any[]): any => {
+  console.log(data);
   if (data.length > 0) {
     const values = Object.values(data[0]);
     if (data.length === 1 && Object.keys(data[0]).length === 1) {
@@ -9,7 +10,7 @@ export const processSingleValue = (data: any[]): any => {
       return values[values.length - 1];
     }
   }
-  return "";
+  return "-";
 };
 
 export const processGraphs = (
@@ -31,7 +32,6 @@ export const processGraphs = (
     if (series) {
       const allSeries = uniq(data.map((num: any) => num[series]));
       chartData = allSeries.map((se: any) => {
-        console.log(se, availableProperties[se], availableProperties);
         return {
           x:
             availableProperties?.data?.orientation === "v"
@@ -54,6 +54,11 @@ export const processGraphs = (
           name: metadata?.[se]?.name || se,
           type: availableProperties?.data?.[se] || type,
           ...availableProperties.data,
+          textposition: "auto",
+          texttemplate:
+            availableProperties?.data?.orientation === "v"
+              ? "%{y:.2s}"
+              : "%{x:.2s}",
         };
       });
     } else {
@@ -75,6 +80,11 @@ export const processGraphs = (
               : x.map((c: any) => metadata?.[c]?.name || c),
           type,
           ...availableProperties.data,
+          textposition: "auto",
+          texttemplate:
+            availableProperties?.data?.orientation === "v"
+              ? "%{y:.2s}"
+              : "%{x:.2s}",
         },
       ];
     }

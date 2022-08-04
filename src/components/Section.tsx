@@ -1,3 +1,4 @@
+import { ChevronDownIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import {
   Button,
   IconButton,
@@ -8,15 +9,13 @@ import {
   Spinner,
   Stack,
   Text,
-  Switch,
 } from "@chakra-ui/react";
-import Marquee from "react-fast-marquee";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select, SingleValue } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { ChangeEvent, useEffect, useState } from "react";
+import Marquee from "react-fast-marquee";
 import { MdKeyboardBackspace } from "react-icons/md";
-import { ChevronDownIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import {
   addSection,
   addVisualization2Section,
@@ -30,11 +29,11 @@ import {
 import { FormGenerics, IVisualization, Option } from "../interfaces";
 import { useVisualizationData } from "../Queries";
 import { $dashboard, $dashboards, $indicators, $section } from "../Store";
+import { chartTypes } from "../utils/utils";
 import ColorPalette from "./ColorPalette";
+import Carousel from "./visualizations/Carousel";
 import Visualization from "./visualizations/Visualization";
 import VisualizationProperties from "./visualizations/VisualizationProperties";
-import { chartTypes } from "../utils/utils";
-import Carousel from "./visualizations/Carousel";
 
 const fontSizes: Option[] = [
   {
@@ -42,40 +41,40 @@ const fontSizes: Option[] = [
     value: "0.5vh",
   },
   {
-    label: "1vh",
-    value: "1vh",
+    label: "1.0vh",
+    value: "1.0vh",
   },
   {
     label: "1.5vh",
     value: "1.5vh",
   },
   {
-    label: "2vh",
-    value: "2vh",
+    label: "2.0vh",
+    value: "2.0vh",
   },
   {
     label: "2.5vh",
     value: "2.5vh",
   },
   {
-    label: "3vh",
-    value: "3vh",
+    label: "3.0vh",
+    value: "3.0vh",
   },
   {
     label: "3.5vh",
     value: "3.5vh",
   },
   {
-    label: "4vh",
-    value: "4vh",
+    label: "4.0vh",
+    value: "4.0vh",
   },
   {
     label: "4.5vh",
     value: "4.5vh",
   },
   {
-    label: "5vh",
-    value: "5vh",
+    label: "5.0vh",
+    value: "5.0vh",
   },
   {
     label: "5.5vh",
@@ -355,7 +354,7 @@ const Section = () => {
               ))}
             </Marquee>
           ) : (
-            <Stack direction={section.direction} flex={1}>
+            <Stack direction={section.direction}>
               {section.visualizations.map((visualization) => (
                 <Visualization
                   key={visualization.id}
@@ -430,67 +429,65 @@ const Section = () => {
                 </Stack>
               )}
             </Stack>
-            <Stack>
-              {section.visualizations.map((visualization: IVisualization) => (
-                <Stack key={visualization.id}>
-                  <Stack
-                    direction="row"
-                    onClick={() => toggle(visualization.id)}
-                    cursor="pointer"
-                    fontSize="xl"
-                  >
-                    <Text>{visualization.name}</Text>
-                    <Spacer />
-                    {active === visualization.id ? (
-                      <ChevronDownIcon />
-                    ) : (
-                      <ChevronRightIcon />
-                    )}
-                  </Stack>
-                  {active === visualization.id && (
-                    <Stack pl="10px" spacing="20px">
-                      <Text>Title</Text>
-                      <Input
-                        value={visualization.name}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                          changeVisualizationAttribute({
-                            attribute: "name",
-                            value: e.target.value,
-                            visualization: visualization.id,
-                          })
-                        }
-                      />
-                      <Text>Title font size</Text>
-                      <Select<Option, false, GroupBase<Option>>
-                        value={fontSizes.find(
-                          (pt) =>
-                            pt.value ===
-                            visualization.properties?.["data.title.fontsize"]
-                        )}
-                        onChange={(e) =>
-                          changeVisualizationProperties({
-                            visualization: visualization.id,
-                            attribute: "data.title.fontsize",
-                            value: e?.value,
-                          })
-                        }
-                        options={fontSizes}
-                        isClearable
-                      />
-                      <Text>Title font color</Text>
-                      <ColorPalette
-                        visualization={visualization}
-                        attribute="data.title.color"
-                      />
-                      <VisualizationQuery visualization={visualization} />
-                      <VisualizationOverride visualization={visualization} />
-                      <VisualizationTypes visualization={visualization} />
-                      <VisualizationProperties visualization={visualization} />
-                    </Stack>
+            {section.visualizations.map((visualization: IVisualization) => (
+              <Stack key={visualization.id}>
+                <Stack
+                  direction="row"
+                  onClick={() => toggle(visualization.id)}
+                  cursor="pointer"
+                  fontSize="xl"
+                >
+                  <Text>{visualization.name}</Text>
+                  <Spacer />
+                  {active === visualization.id ? (
+                    <ChevronDownIcon />
+                  ) : (
+                    <ChevronRightIcon />
                   )}
                 </Stack>
-              ))}
-            </Stack>
+                {active === visualization.id && (
+                  <Stack pl="10px" spacing="20px">
+                    <Text>Title</Text>
+                    <Input
+                      value={visualization.name}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        changeVisualizationAttribute({
+                          attribute: "name",
+                          value: e.target.value,
+                          visualization: visualization.id,
+                        })
+                      }
+                    />
+                    <Text>Title font size</Text>
+                    <Select<Option, false, GroupBase<Option>>
+                      value={fontSizes.find(
+                        (pt) =>
+                          pt.value ===
+                          visualization.properties?.["data.title.fontsize"]
+                      )}
+                      onChange={(e) =>
+                        changeVisualizationProperties({
+                          visualization: visualization.id,
+                          attribute: "data.title.fontsize",
+                          value: e?.value,
+                        })
+                      }
+                      options={fontSizes}
+                      isClearable
+                    />
+                    <Text>Title font color</Text>
+                    <ColorPalette
+                      visualization={visualization}
+                      attribute="data.title.color"
+                    />
+                    <VisualizationQuery visualization={visualization} />
+                    <VisualizationOverride visualization={visualization} />
+                    <VisualizationTypes visualization={visualization} />
+                    <VisualizationProperties visualization={visualization} />
+                  </Stack>
+                )}
+              </Stack>
+            ))}
           </Stack>
           <Button
             onClick={() => {

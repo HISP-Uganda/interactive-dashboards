@@ -33,7 +33,17 @@ const MapChart = ({
   const titleFontSize = dataProperties?.["data.title.fontsize"] || "1.5vh";
   const titleCase = dataProperties?.["data.title.case"] || "uppercase";
   const titleColor = dataProperties?.["data.title.color"] || "black";
-  const colorscale = Object.values(dataProperties?.["data.mapKeys"] || {});
+  console.log(dataProperties?.["data.mapKeys"]);
+  const colorscale = Object.values(
+    dataProperties?.["data.mapKeys"] || {
+      "1": [0, "white"],
+      "2": [0.2, "lightyellow"],
+      "3": [0.4, "orange"],
+      "4": [0.6, "lime"],
+      "5": [0.8, "lightgreen"],
+      "6": [1.0, "green"],
+    }
+  );
   const store = useStore($store);
   const data = visualizationData[visualization.id]
     ? visualizationData[visualization.id]
