@@ -1,11 +1,15 @@
 import { uniq, update } from "lodash";
-export const processSingleValue = (data: any[], metadata?: any) => {
-  return data.map((r: any) => {
-    return {
-      value: r?.count || r?.value || r?.total,
-      title: metadata?.[r.dx || r.ou || r.pe]?.name || r.dx || r.ou || r.pe,
-    };
-  });
+export const processSingleValue = (data: any[]): any => {
+  if (data.length > 0) {
+    const values = Object.values(data[0]);
+    if (data.length === 1 && Object.keys(data[0]).length === 1) {
+      return values[0];
+    }
+    if (data.length === 1 && Object.keys(data[0]).length > 1) {
+      return values[values.length - 1];
+    }
+  }
+  return "";
 };
 
 export const processGraphs = (
@@ -22,12 +26,12 @@ export const processGraphs = (
   Object.entries(dataProperties).forEach(([property, value]) => {
     availableProperties = update(availableProperties, property, () => value);
   });
-
   if (data && data.length > 0 && category) {
     const x = uniq(data.map((num: any) => num[category]));
     if (series) {
       const allSeries = uniq(data.map((num: any) => num[series]));
       chartData = allSeries.map((se: any) => {
+        console.log(se, availableProperties[se], availableProperties);
         return {
           x:
             availableProperties?.data?.orientation === "v"
@@ -48,7 +52,7 @@ export const processGraphs = (
                 })
               : x.map((c: any) => metadata?.[c]?.name || c),
           name: metadata?.[se]?.name || se,
-          type,
+          type: availableProperties?.data?.[se] || type,
           ...availableProperties.data,
         };
       });

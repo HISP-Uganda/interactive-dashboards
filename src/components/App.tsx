@@ -47,12 +47,12 @@ import {
 import { decodeFromBinary, encodeToBinary } from "../utils/utils";
 import Menus from "./Menus";
 
-type LocationGenerics = MakeGenerics<{
-  LoaderData: {};
-}>;
-
 const history = createHashHistory();
-const location = new ReactLocation<LocationGenerics>({
+const location = new ReactLocation<
+  MakeGenerics<{
+    LoaderData: {};
+  }>
+>({
   history,
   parseSearch: parseSearchWith((value) => JSON.parse(decodeFromBinary(value))),
   stringifySearch: stringifySearchWith((value) =>
@@ -207,7 +207,7 @@ const App = () => {
         </Router>
       )}
 
-      {isError && <Box>{error.message}</Box>}
+      {isError && <Box>{error?.message}</Box>}
     </Stack>
   );
 };

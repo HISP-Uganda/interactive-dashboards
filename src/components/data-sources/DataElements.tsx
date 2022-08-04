@@ -117,7 +117,7 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
             </Tr>
           </Thead>
           <Tbody py={10}>
-            {data.map((record: any) => (
+            {data?.map((record: any) => (
               <Tr key={record.id}>
                 <Td>
                   <Checkbox

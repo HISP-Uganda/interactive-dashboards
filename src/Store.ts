@@ -77,6 +77,7 @@ export const createSection = (id = generateUid()): ISection => {
     title: "Example section",
     visualizations: [],
     direction: "row",
+    display: "normal",
   };
 };
 

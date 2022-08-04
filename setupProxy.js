@@ -1,5 +1,5 @@
 const express = require("express");
-var cors = require("cors");
+let cors = require("cors");
 
 const { createProxyMiddleware } = require("http-proxy-middleware");
 

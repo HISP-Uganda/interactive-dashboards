@@ -1,6 +1,15 @@
-import { ChevronDownIcon, EditIcon, ExternalLinkIcon, HamburgerIcon } from "@chakra-ui/icons";
-import { AiOutlineBarChart, AiOutlineLineChart, AiOutlineNumber } from "react-icons/ai";
-import {FaGlobeAfrica} from "react-icons/fa"
+import {
+  ChevronDownIcon,
+  EditIcon,
+  ExternalLinkIcon,
+  HamburgerIcon,
+} from "@chakra-ui/icons";
+import {
+  AiOutlineBarChart,
+  AiOutlineLineChart,
+  AiOutlineNumber,
+} from "react-icons/ai";
+import { FaGlobeAfrica } from "react-icons/fa";
 import {
   Button,
   IconButton,
@@ -22,6 +31,8 @@ import {
   Textarea,
   useDisclosure,
 } from "@chakra-ui/react";
+import Marquee from "react-fast-marquee";
+
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select } from "chakra-react-select";
@@ -62,6 +73,7 @@ import DashboardFilter from "../filters/DashboardFilter";
 import OUTreeSelect from "../OUTreeSelect";
 import PeriodPicker from "../PeriodPicker";
 import Visualization from "../visualizations/Visualization";
+import Carousel from "../visualizations/Carousel";
 
 const ReactGridLayout = WidthProvider(Responsive);
 const Dashboard = () => {
@@ -132,7 +144,9 @@ const Dashboard = () => {
           h="48px"
           p="5px"
         >
-          <Text fontSize='lg' fontWeight="bold" color='blue.600'>Resize Dashboard</Text>
+          <Text fontSize="lg" fontWeight="bold" color="blue.600">
+            Resize Dashboard
+          </Text>
           <Button size="sm" type="button" onClick={() => increment(1)}>
             +
           </Button>
@@ -154,7 +168,9 @@ const Dashboard = () => {
             </Button>
           )}
           <Spacer />
-          <Text fontSize='lg' fontWeight="bold" color='blue.600'>Filter</Text>
+          <Text fontSize="lg" fontWeight="bold" color="blue.600">
+            Filter
+          </Text>
           {store.isAdmin && (
             <>
               <Button
@@ -267,7 +283,7 @@ const Dashboard = () => {
                             search,
                           });
                         }}
-                        icon={<EditIcon />} 
+                        icon={<EditIcon />}
                       >
                         Edit
                       </MenuItem>
@@ -336,23 +352,27 @@ const Dashboard = () => {
                   </MenuList>
                 </Menu>
               </Stack>
-              <Stack
-                direction={section.direction}
-                w="100%"
-                h="100%"
-                justifyContent="space-between"
-                // justifyItems="center"
-                // alignContent="center"
-                // alignSelf="center"
-                // alignItems="center"
-              >
-                {section.visualizations.map((visualization) => (
-                  <Visualization
-                    key={visualization.id}
-                    visualization={visualization}
-                  />
-                ))}
-              </Stack>
+              {section.display === "carousel" ? (
+                <Carousel {...section} />
+              ) : section.display === "marquee" ? (
+                <Marquee>
+                  {section.visualizations.map((visualization) => (
+                    <Visualization
+                      key={visualization.id}
+                      visualization={visualization}
+                    />
+                  ))}
+                </Marquee>
+              ) : (
+                <Stack direction={section.direction} flex={1}>
+                  {section.visualizations.map((visualization) => (
+                    <Visualization
+                      key={visualization.id}
+                      visualization={visualization}
+                    />
+                  ))}
+                </Stack>
+              )}
             </Stack>
           ))}
         </ReactGridLayout>

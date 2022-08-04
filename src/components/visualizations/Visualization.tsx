@@ -26,6 +26,7 @@ import Tables from "./Tables";
 import BoxPlot from "./BoxPlot";
 import ScatterPlot from "./ScatterPlot";
 import { fromPairs } from "lodash";
+import Marquee from "./Marquee";
 
 type VisualizationProps = {
   visualization: IVisualization;
@@ -178,6 +179,14 @@ const getVisualization = (visualization: IVisualization) => {
     ),
     scatterplot: (
       <ScatterPlot
+        visualization={visualization}
+        {...otherProperties}
+        layoutProperties={layoutProperties}
+        dataProperties={dataProperties}
+      />
+    ),
+    marquee: (
+      <Marquee
         visualization={visualization}
         {...otherProperties}
         layoutProperties={layoutProperties}
