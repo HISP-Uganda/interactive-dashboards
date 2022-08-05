@@ -29,11 +29,11 @@ const MapChart = ({
   const ouIsGlobal = ous.findIndex((l) => l === "mclvD0Z9mfT");
 
   const style = layoutProperties?.["layout.mapbox.style"] || "open-street-map";
+  const zoom = layoutProperties?.["layout.zoom"] || 5.3;
 
   const titleFontSize = dataProperties?.["data.title.fontsize"] || "1.5vh";
   const titleCase = dataProperties?.["data.title.case"] || "uppercase";
   const titleColor = dataProperties?.["data.title.color"] || "black";
-  console.log(dataProperties?.["data.mapKeys"]);
   const colorscale = Object.values(
     dataProperties?.["data.mapKeys"] || {
       "1": [0, "white"],
@@ -114,7 +114,7 @@ const MapChart = ({
                     lon: metadata.mapCenter[0],
                     lat: metadata.mapCenter[1],
                   },
-                  zoom: 5.8,
+                  zoom,
                 },
                 autosize: true,
                 margin: {

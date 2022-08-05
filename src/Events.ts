@@ -165,6 +165,7 @@ export const setOrganisations = domain.createEvent<React.Key[]>();
 export const setExpandedKeys = domain.createEvent<React.Key[]>();
 export const changeOrganisations = domain.createEvent<string>();
 export const setRefreshInterval = domain.createEvent<string>();
+export const setDefaultDashboard = domain.createEvent<string>();
 export const changeHasDashboards = domain.createEvent<boolean>();
 export const changeVisualizationType = domain.createEvent<{
   visualization: string;

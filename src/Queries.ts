@@ -16,6 +16,7 @@ import {
   setCurrentDashboard,
   setDashboards,
   setDataSources,
+  setDefaultDashboard,
   setVisualizationQueries,
   updateVisualizationData,
   updateVisualizationMetadata,
@@ -257,7 +258,10 @@ export const useInitials = () => {
           );
           if (dashboard !== null) {
             setCurrentDashboard(dashboard);
+            changeSelectedDashboard(dashboard.id);
+            changeSelectedCategory(dashboard.category);
             changeDefaults();
+            setDefaultDashboard(defaults.default);
           }
         }
       }
@@ -1139,7 +1143,6 @@ export const useVisualization = (
         }
       } else if (dataSource?.type === "API") {
         const { data } = await axios.get(dataSource.authentication.url);
-        console.log(indicator?.numerator, indicator?.denominator);
         let numerator: any = undefined;
         let denominator: any = undefined;
 

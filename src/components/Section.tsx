@@ -313,6 +313,7 @@ const Section = () => {
             onClick={() => {
               navigate({
                 to: `/dashboards/${dashboard.id}`,
+                search,
               });
             }}
           />
@@ -330,6 +331,7 @@ const Section = () => {
           onClick={() => {
             navigate({
               to: `/dashboards/${dashboard.id}`,
+              search,
             });
           }}
         >

@@ -1,6 +1,5 @@
 import { uniq, update } from "lodash";
 export const processSingleValue = (data: any[]): any => {
-  console.log(data);
   if (data.length > 0) {
     const values = Object.values(data[0]);
     if (data.length === 1 && Object.keys(data[0]).length === 1) {

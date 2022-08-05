@@ -13,7 +13,9 @@ const Periods = ({ denNum, onChange }: IndicatorProps) => {
     .map(([key]) => {
       return key;
     });
-    const [useGlobal, setUseGlobal] = useState<boolean>(selected.indexOf("m5D13FqKZwN") !== -1);
+  const [useGlobal, setUseGlobal] = useState<boolean>(
+    selected.indexOf("m5D13FqKZwN") !== -1
+  );
   return (
     <Stack spacing="20px">
       <GlobalAndFilter
@@ -30,7 +32,6 @@ const Periods = ({ denNum, onChange }: IndicatorProps) => {
         <PeriodDimension
           onSelect={({ items }: any) => {
             items.forEach(({ id, name, ...others }: any) => {
-              console.log({ id, name, ...others });
               onChange({
                 id,
                 type: dimension,
