@@ -53,6 +53,7 @@ import {
   addOverride,
   changeVisualizationOverride,
   changeVisualizationType,
+  setDefaultDashboard,
 } from "./Events";
 import {
   ICategory,
@@ -168,6 +169,7 @@ export const $store = domain
     selectedDashboard: "",
     isAdmin: false,
     hasDashboards: false,
+    defaultDashboard: "",
   })
   .on(setOrganisations, (state, organisations) => {
     return { ...state, organisations };
@@ -198,6 +200,9 @@ export const $store = domain
   })
   .on(changeHasDashboards, (state, hasDashboards) => {
     return { ...state, hasDashboards };
+  })
+  .on(setDefaultDashboard, (state, defaultDashboard) => {
+    return { ...state, defaultDashboard };
   });
 
 export const $dataSource = domain

@@ -4,6 +4,7 @@ import {
   ExternalLinkIcon,
   HamburgerIcon,
 } from "@chakra-ui/icons";
+import { MouseEvent } from "react";
 import {
   AiOutlineBarChart,
   AiOutlineLineChart,
@@ -31,6 +32,7 @@ import {
   Text,
   Textarea,
   useDisclosure,
+  Checkbox,
 } from "@chakra-ui/react";
 import Marquee from "react-fast-marquee";
 
@@ -53,6 +55,7 @@ import {
   setCurrentDashboard,
   setCurrentSection,
   setDashboards,
+  setDefaultDashboard,
   setShowSider,
 } from "../../Events";
 import {
@@ -99,7 +102,13 @@ const Dashboard = () => {
         id: data.id,
       };
     }
-    await engine.mutate(mutation);
+    const mutation2: any = {
+      type: "update",
+      resource: `dataStore/i-dashboard-settings`,
+      data: { default: store.defaultDashboard },
+      id: "settings",
+    };
+    await Promise.all([engine.mutate(mutation), engine.mutate(mutation2)]);
     onClose();
   };
 
@@ -231,6 +240,7 @@ const Dashboard = () => {
           isResizable={store.isAdmin}
           isDraggable={store.isAdmin}
           isDroppable={store.isAdmin}
+          cols={{ md: 24, lg: 24, xl: 24, sm: 6 }}
         >
           {dashboard?.sections.map((section: ISection) => (
             <Stack
@@ -244,138 +254,159 @@ const Dashboard = () => {
               spacing="2px"
               bg="white"
             >
-              <Stack
-                direction="row"
-                bg="gray.200"
-                h="30px"
-                fontSize="24px"
-                alignContent="center"
-                alignItems="center"
-                justifyContent="center"
-                justifyItems="center"
-                textAlign="center"
-                _focus={{ boxShadow: "none !important" }}
-              >
-                <Text
-                  pl="25px"
-                  h="20px"
-                  textTransform="uppercase"
-                  fontWeight="bold"
-                  fontSize="0.8vw"
-                  color="gray.500"
-                  noOfLines={1}
+              {section.title && (
+                <Stack
+                  direction="row"
+                  bg="gray.200"
+                  h="30px"
+                  fontSize="24px"
+                  alignContent="center"
+                  alignItems="center"
+                  justifyContent="center"
+                  justifyItems="center"
+                  textAlign="center"
+                  _focus={{ boxShadow: "none !important" }}
                 >
-                  {section.title}
-                </Text>
-                <Spacer />
-                <Menu placement="left-start">
-                  <MenuButton
-                    _hover={{ bg: "none" }}
-                    _expanded={{ bg: "none" }}
-                    _focus={{ boxShadow: "none" }}
-                    bg="none"
-                    as={IconButton}
-                    icon={<HamburgerIcon />}
-                  />
-                  <MenuList>
-                    {store.isAdmin && (
+                  <Text
+                    pl="25px"
+                    h="20px"
+                    textTransform="uppercase"
+                    fontWeight="bold"
+                    fontSize="0.8vw"
+                    color="gray.500"
+                    noOfLines={1}
+                  >
+                    {section.title}
+                  </Text>
+                  <Spacer />
+                  <Menu placement="left-start">
+                    <MenuButton
+                      _hover={{ bg: "none" }}
+                      _expanded={{ bg: "none" }}
+                      _focus={{ boxShadow: "none" }}
+                      bg="none"
+                      as={IconButton}
+                      icon={<HamburgerIcon />}
+                    />
+                    <MenuList>
+                      {store.isAdmin && (
+                        <MenuItem
+                          maxH="32px"
+                          fontSize="18px"
+                          onClick={() => {
+                            setCurrentSection(section);
+                            navigate({
+                              to: `/dashboards/${dashboard.id}/section`,
+                              search,
+                            });
+                          }}
+                          icon={<EditIcon />}
+                        >
+                          Edit
+                        </MenuItem>
+                      )}
                       <MenuItem
                         maxH="32px"
                         fontSize="18px"
-                        onClick={() => {
-                          setCurrentSection(section);
-                          navigate({
-                            to: `/dashboards/${dashboard.id}/section`,
-                            search,
-                          });
-                        }}
-                        icon={<EditIcon />}
+                        onClick={() => displayFull(section.i)}
+                        icon={<ExternalLinkIcon />}
                       >
-                        Edit
+                        Expand
                       </MenuItem>
-                    )}
-                    <MenuItem
-                      maxH="32px"
-                      fontSize="18px"
-                      onClick={() => displayFull(section.i)}
-                      icon={<ExternalLinkIcon />}
-                    >
-                      Expand
-                    </MenuItem>
 
-                    <MenuItem
-                      maxH="32px"
-                      fontSize="18px"
-                      onClick={() =>
-                        changeVisualizationType({
-                          section,
-                          visualization: "line",
-                        })
-                      }
-                      icon={<AiOutlineLineChart />}
-                    >
-                      View as Line
-                    </MenuItem>
-                    <MenuItem
-                      maxH="32px"
-                      fontSize="18px"
-                      onClick={() =>
-                        changeVisualizationType({
-                          section,
-                          visualization: "bar",
-                        })
-                      }
-                      icon={<AiOutlineBarChart />}
-                    >
-                      View as Column
-                    </MenuItem>
-                    <MenuItem
-                      maxH="32px"
-                      fontSize="18px"
-                      onClick={() =>
-                        changeVisualizationType({
-                          section,
-                          visualization: "map",
-                        })
-                      }
-                      icon={<FaGlobeAfrica />}
-                    >
-                      View as Map
-                    </MenuItem>
-                    <MenuItem
-                      maxH="32px"
-                      fontSize="18px"
-                      onClick={() =>
-                        changeVisualizationType({
-                          section,
-                          visualization: "single",
-                        })
-                      }
-                      icon={<AiOutlineNumber />}
-                    >
-                      View as Single Value
-                    </MenuItem>
-                  </MenuList>
-                </Menu>
-              </Stack>
+                      <MenuItem
+                        maxH="32px"
+                        fontSize="18px"
+                        onClick={() =>
+                          changeVisualizationType({
+                            section,
+                            visualization: "line",
+                          })
+                        }
+                        icon={<AiOutlineLineChart />}
+                      >
+                        View as Line
+                      </MenuItem>
+                      <MenuItem
+                        maxH="32px"
+                        fontSize="18px"
+                        onClick={() =>
+                          changeVisualizationType({
+                            section,
+                            visualization: "bar",
+                          })
+                        }
+                        icon={<AiOutlineBarChart />}
+                      >
+                        View as Column
+                      </MenuItem>
+                      <MenuItem
+                        maxH="32px"
+                        fontSize="18px"
+                        onClick={() =>
+                          changeVisualizationType({
+                            section,
+                            visualization: "map",
+                          })
+                        }
+                        icon={<FaGlobeAfrica />}
+                      >
+                        View as Map
+                      </MenuItem>
+                      <MenuItem
+                        maxH="32px"
+                        fontSize="18px"
+                        onClick={() =>
+                          changeVisualizationType({
+                            section,
+                            visualization: "single",
+                          })
+                        }
+                        icon={<AiOutlineNumber />}
+                      >
+                        View as Single Value
+                      </MenuItem>
+                    </MenuList>
+                  </Menu>
+                </Stack>
+              )}
+
               {section.display === "carousel" ? (
                 <Carousel {...section} />
               ) : section.display === "marquee" ? (
-                <Marquee
-                  style={{ padding: 0, margin: 0, height: "100px" }}
-                  gradient={false}
-                  speed={40}
+                <Stack
+                  alignContent="center"
+                  alignItems="center"
+                  justifyContent="center"
+                  justifyItems="center"
+                  w="100%"
+                  h="100%"
+                  onClick={(e: MouseEvent<HTMLElement>) => {
+                    if (e.detail === 2 && store.isAdmin) {
+                      setCurrentSection(section);
+                      navigate({
+                        to: `/dashboards/${dashboard.id}/section`,
+                        search,
+                      });
+                    }
+                  }}
                 >
-                  {section.visualizations.map((visualization) => (
-                    <Stack direction="row" key={visualization.id}>
-                      <Visualization
-                        key={visualization.id}
-                        visualization={visualization}
-                      />
-                      <Box w="70px">&nbsp;</Box>
-                    </Stack>
-                  ))}
-                </Marquee>
+                  <Marquee
+                    style={{ padding: 0, margin: 0 }}
+                    gradient={false}
+                    speed={40}
+                  >
+                    {section.visualizations.map((visualization) => (
+                      <Stack direction="row" key={visualization.id}>
+                        <Visualization
+                          key={visualization.id}
+                          visualization={visualization}
+                        />
+                        <Box w="70px">&nbsp;</Box>
+                      </Stack>
+                    ))}
+                  </Marquee>
+                </Stack>
               ) : (
                 <Stack
                   direction={section.direction}
@@ -438,9 +469,16 @@ const Dashboard = () => {
                   }
                 />
               </Stack>
-              {/* <Stack>
-                <Checkbox value={}>Default Dashboard</Checkbox>
-              </Stack> */}
+              <Stack>
+                <Checkbox
+                  isChecked={store.defaultDashboard === dashboard.id}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setDefaultDashboard(e.target.checked ? dashboard.id : "")
+                  }
+                >
+                  Default Dashboard
+                </Checkbox>
+              </Stack>
             </Stack>
           </ModalBody>
           <ModalFooter>
