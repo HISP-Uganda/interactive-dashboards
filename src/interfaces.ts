@@ -122,6 +122,8 @@ export interface IStore {
   isAdmin: boolean;
   hasDashboards: boolean;
   defaultDashboard: string;
+  currentPage: string;
+  logo: string;
 }
 
 export type IndicatorProps = {

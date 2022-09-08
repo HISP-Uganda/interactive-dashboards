@@ -180,3 +180,5 @@ export const onChangeOrganisations = domain.createEvent<{
   groups: string[];
   expandedKeys: React.Key[];
 }>();
+
+export const setCurrentPage = domain.createEvent<string>();

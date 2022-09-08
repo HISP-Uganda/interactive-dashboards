@@ -1,4 +1,5 @@
-import { Box, Flex, Spinner, Stack, Text } from "@chakra-ui/react";
+import { ChangeEvent } from "react";
+import { Box, Flex, Spinner, Stack, Text, Image } from "@chakra-ui/react";
 import {
   createHashHistory,
   MakeGenerics,
@@ -68,6 +69,23 @@ const App = () => {
   const dataSources = useStore($dataSources);
   const indicators = useStore($indicators);
   const categories = useStore($categories);
+
+  const changeHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    let fileReader,
+      isCancel = false;
+    if (file) {
+      fileReader = new FileReader();
+      fileReader.onload = (f: any) => {
+        const { result } = f.target;
+        if (result && !isCancel) {
+          console.log(result);
+        }
+      };
+      fileReader.readAsDataURL(file);
+    }
+  };
   return (
     <>
       {isLoading && (
@@ -217,29 +235,40 @@ const App = () => {
             },
           ]}
         >
-          <Stack
-            h="calc(100vh - 48px)"
-            direction="row"
-            spacing="0"
-            bg="gray.300"
-          >
-            {store.isAdmin ? (
-              store.currentPage === "dashboards" ? (
-                <Stack w="200px" alignItems="center" alignContent="center">
+          <Stack>
+            <Stack direction="row">
+              {/* <input
+                type="file"
+                id="image"
+                accept=".png, .jpg, .jpeg"
+                onChange={changeHandler}
+              /> */}
+
+              <Image src={store.logo} alt="Dan Abramov" boxSize="100px" />
+            </Stack>
+            <Stack direction="row" spacing="0" flex={1}>
+              {store.isAdmin && store.currentPage === "dashboards" ? (
+                <Stack>
                   <DashboardMenu />
                 </Stack>
-              ) : store.currentPage === "sections" ? null : (
-                <Stack w="128px" alignItems="center" alignContent="center">
+              ) : store.isAdmin && store.currentPage === "sections" ? null : (
+                <Stack
+                  w="128px"
+                  alignItems="center"
+                  alignContent="center"
+                  bg="gray.100"
+                >
                   <Menus />
                 </Stack>
-              )
-            ) : (
-              <Stack w="200px" alignItems="center" alignContent="center">
-                <DashboardMenu />
+              )}
+              {!store.isAdmin && (
+                <Stack>
+                  <DashboardMenu />
+                </Stack>
+              )}
+              <Stack flex={1}>
+                <Outlet />
               </Stack>
-            )}
-            <Stack flex={1}>
-              <Outlet />
             </Stack>
           </Stack>
         </Router>
