@@ -20,7 +20,7 @@ const DashboardFilter = () => {
   const navigate = useNavigate();
   return (
     <Stack spacing="10px" direction="row" fontSize="16px" alignItems="center">
-      <Text fontSize="lg">Thematic Area</Text>
+      {/* <Text fontSize="lg">Thematic Area</Text>
       <Box width="250px" bg="white">
         <Select<Option, false, GroupBase<Option>>
           placeholder="Select Thematic Area"
@@ -57,8 +57,8 @@ const DashboardFilter = () => {
           }}
           options={categoryOptions}
         />
-      </Box>
-      <Text fontSize="lg">Dashboards</Text>
+      </Box> */}
+      {/* <Text fontSize="lg">Dashboards</Text>
       <Box width="250px" bg="white">
         <Select<Option, false, GroupBase<Option>>
           size="sm"
@@ -88,7 +88,7 @@ const DashboardFilter = () => {
           }}
           options={categoryDashboards}
         />
-      </Box>
+      </Box> */}
     </Stack>
   );
 };

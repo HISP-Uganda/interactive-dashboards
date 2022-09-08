@@ -11,13 +11,18 @@ import {
   Stack,
   Icon,
   Text,
+  Image,
 } from "@chakra-ui/react";
 import { useNavigate } from "@tanstack/react-location";
+import { useStore } from "effector-react";
+import { $store } from "../Store";
 
 const Menus = () => {
   const navigate = useNavigate();
+  const store = useStore($store);
   return (
     <Stack spacing="30px" pt="5">
+      <Image src={store.logo} alt="Dan Abramov" boxSize="100px" />
       <Stack
         alignItems="center"
         alignContent="center"

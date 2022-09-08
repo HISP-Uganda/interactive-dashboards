@@ -34,7 +34,7 @@ const Dashboards = () => {
   }, []);
 
   return (
-    <Stack flex={1} p="20px">
+    <Stack p="20px" bg="white" flex={1}>
       <Stack direction="row">
         <Spacer />
         <Button
@@ -57,7 +57,7 @@ const Dashboards = () => {
           }}
           colorScheme="blue"
         >
-           <AddIcon mr="2"/>
+          <AddIcon mr="2" />
           Add Dashboard
         </Button>
       </Stack>

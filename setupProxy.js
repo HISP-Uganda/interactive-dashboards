@@ -18,7 +18,7 @@ const onProxyRes = (proxyRes) => {
 // proxy middleware options
 const options = {
   // target: "http://localhost:8080", // target host
-  target: "https://hmis-repo.health.go.ug", // target host
+  target: "https://hmis-repo.health.go.ug/repo", // target host
   onProxyReq,
   onProxyRes,
   changeOrigin: true, // needed for virtual hosted sites

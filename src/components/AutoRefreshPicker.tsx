@@ -29,7 +29,7 @@ const AutoRefreshPicker = () => {
       justifyContent="center"
     >
       <Icon as={BiRefresh} w={6} h={6} />
-      <Box w="110px" bg="white">
+      <Box w="110px">
         <Select<Option, false, GroupBase<Option>>
           size="sm"
           placeholder="Refresh"

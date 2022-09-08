@@ -1,9 +1,4 @@
-import {
-  ChevronDownIcon,
-  EditIcon,
-  ExternalLinkIcon,
-  HamburgerIcon,
-} from "@chakra-ui/icons";
+import { EditIcon, ExternalLinkIcon, HamburgerIcon } from "@chakra-ui/icons";
 import { MouseEvent } from "react";
 import {
   AiOutlineBarChart,
@@ -53,6 +48,7 @@ import {
   changeVisualizationType,
   increment,
   setCurrentDashboard,
+  setCurrentPage,
   setCurrentSection,
   setDashboards,
   setDefaultDashboard,
@@ -145,7 +141,7 @@ const Dashboard = () => {
     setShowSider(false);
   }, []);
   return (
-    <Stack spacing="0" bg="gray.300">
+    <Stack spacing="0">
       {dashboard.showTop && (
         <Stack
           direction="row"
@@ -154,7 +150,6 @@ const Dashboard = () => {
           h="48px"
           p="5px"
         >
-          <Text fontSize="lg">Resize Dashboard</Text>
           <Button size="sm" type="button" onClick={() => increment(1)}>
             +
           </Button>
@@ -162,7 +157,7 @@ const Dashboard = () => {
             -
           </Button>
 
-          <DashboardFilter />
+          {/* <DashboardFilter /> */}
           {store.isAdmin && (
             <Button
               size="sm"
@@ -170,6 +165,7 @@ const Dashboard = () => {
               colorScheme="blue"
               onClick={() => {
                 navigate({ to: "/dashboards" });
+                setCurrentPage("");
               }}
             >
               Manage Dashboards
@@ -223,7 +219,6 @@ const Dashboard = () => {
       )}
       <Stack
         h={`calc(100vh - ${dashboard.showTop ? 96 : 48}px)`}
-        w="100vw"
         overflow="auto"
       >
         <ReactGridLayout
