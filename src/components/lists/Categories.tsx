@@ -29,14 +29,14 @@ const Categories = () => {
     setShowSider(true);
   }, []);
   return (
-    <Stack flex={1} p="20px">
+    <Stack flex={1} p="20px" bg="white">
       <Stack direction="row">
         <Spacer />
         <Button
-        colorScheme="blue"
+          colorScheme="blue"
           onClick={() => navigate({ to: `/categories/${generateUid()}` })}
         >
-          <AddIcon mr="2"/>
+          <AddIcon mr="2" />
           Add Category
         </Button>
       </Stack>
