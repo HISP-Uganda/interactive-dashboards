@@ -97,7 +97,7 @@ const DataSource = () => {
             </FormErrorMessage>
           </FormControl>
           {type === "DHIS2" && (
-            <FormControl isInvalid={!!errors.name} isRequired={true}>
+            <FormControl isInvalid={!!errors.name} isRequired={false}>
               <Checkbox {...register("isCurrentDHIS2")} colorScheme="green">
                 Is Current DHIS2
               </Checkbox>

@@ -7,6 +7,7 @@ import Visualization from "./Visualization";
 const Carousel = (section: ISection) => {
   const [index, setIndex] = useState<number>(0);
   const [pause, setPause] = useState<boolean>(false);
+  section
   const increment = () => {
     if (!pause) {
       setIndex((s: number) => (s + 1) % section.visualizations.length);
@@ -18,6 +19,7 @@ const Carousel = (section: ISection) => {
       <Visualization
         key={section.visualizations[index].id}
         visualization={section.visualizations[index]}
+        section={section}
       />
     </Stack>
   );

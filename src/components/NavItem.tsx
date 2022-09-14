@@ -51,11 +51,11 @@ const NavItem = ({ option: { label, value } }: NavItemProps) => {
         }
       }}
     >
-      <Text fontSize="md" fontWeight="bold" textTransform="uppercase">
+      <Text fontSize="md" fontWeight="bold" textTransform="uppercase" color="gray.600">
         {label}
       </Text>
       {active === value && (
-        <Stack pl="20px" w="100%">
+        <Stack pl="20px" w="100%" color="blue.700" fontWeight="bold" fontSize="sm" spacing="10px">
           {categoryDashboards.map((d) => (
             <Text
               bg={dashboard.id === d.id ? "blue.50" : ""}

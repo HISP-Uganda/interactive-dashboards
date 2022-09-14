@@ -7,11 +7,13 @@ import {
   StackProps,
   useColorModeValue,
   Text,
+  Button,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { IconType } from "react-icons";
 import moh from "../images/moh.json";
 import who from "../images/who.json";
+import hisp from "../images/hisp.json";
 import { $categoryOptions, $store } from "../Store";
 import Menus from "./Menus";
 import NavItem from "./NavItem";
@@ -34,9 +36,9 @@ const SidebarContent = ({ ...rest }: SidebarProps) => {
         <Image src={moh} alt="Dan Abramov" boxSize="100px" />
       </Flex>
       <Divider />
-      <Text fontSize="xl" fontWeight="bold" textTransform="uppercase">
+      <Button fontSize="xl" fontWeight="bold" textTransform="uppercase" color="blue.600">
         Thematic Areas
-      </Text>
+      </Button>
       <Divider />
 
       {store.isAdmin ? (
@@ -54,8 +56,10 @@ const SidebarContent = ({ ...rest }: SidebarProps) => {
       )}
       <Spacer />
       <Divider />
-      <Flex alignItems="center" justifyContent="center">
+      <Flex alignItems="center" justifyContent="center" >
         <Image src={who} alt="WHO" boxSize="78px" p={0} m={0} />
+        <Spacer />
+        <Image src={hisp} alt="HISP" boxSize="78px" p={0} m={0} />
       </Flex>
     </Stack>
   );
