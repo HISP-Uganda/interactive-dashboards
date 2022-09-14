@@ -149,9 +149,8 @@ const Dashboard = () => {
                 navigate({ to: "/dashboards" });
                 setCurrentPage("");
               }}
-              variant="link"
             >
-              Dashboards
+             Manage Dashboards
             </Button>
           )}
           <Spacer />
