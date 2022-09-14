@@ -15,7 +15,11 @@ import {
 import { ChangeEvent, useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { changeVisualizationData, setIndicator, setVisualizationQueries } from "../../Events";
+import {
+  changeVisualizationData,
+  setIndicator,
+  setVisualizationQueries,
+} from "../../Events";
 import { IIndicator } from "../../interfaces";
 import { useVisualizationData } from "../../Queries";
 import { $indicators, $indicator, createIndicator } from "../../Store";
@@ -27,19 +31,20 @@ const Indicators = () => {
   const indicators = useStore($indicators);
   const { isLoading, isSuccess, isError, error } = useVisualizationData();
   return (
-    <Stack flex={1} p="20px">
+    <Stack flex={1} p="20px" bg="white">
       <Stack direction="row">
-      {/* <Input placeholder='Search Visualization Data' width='50%' /> */}
-      <Input
-            value={indicator.name}
-            placeholder='Search Visualization Data' width='50%'
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              changeVisualizationData({
-                attribute: "name",
-                value: e.target.value,
-              })
-            }
-          />
+        {/* <Input placeholder='Search Visualization Data' width='50%' /> */}
+        <Input
+          value={indicator.name}
+          placeholder="Search Visualization Data"
+          width="50%"
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            changeVisualizationData({
+              attribute: "name",
+              value: e.target.value,
+            })
+          }
+        />
         <Spacer />
         <Button
           onClick={() => {
@@ -49,7 +54,7 @@ const Indicators = () => {
           }}
           colorScheme="blue"
         >
-          <AddIcon mr="2"/>
+          <AddIcon mr="2" />
           Add Visualization Data
         </Button>
       </Stack>

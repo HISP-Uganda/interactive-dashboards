@@ -240,7 +240,7 @@ const App = () => {
             <GridItem>
               <SidebarContent />
             </GridItem>
-            <GridItem>
+            <GridItem overflow="auto">
               <Outlet />
             </GridItem>
           </Grid>

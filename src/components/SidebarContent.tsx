@@ -12,12 +12,14 @@ import { useStore } from "effector-react";
 import { IconType } from "react-icons";
 import moh from "../images/moh.json";
 import who from "../images/who.json";
-import { $categoryOptions } from "../Store";
+import { $categoryOptions, $store } from "../Store";
+import Menus from "./Menus";
 import NavItem from "./NavItem";
 interface SidebarProps extends StackProps {}
 
 const SidebarContent = ({ ...rest }: SidebarProps) => {
   const categoryOptions = useStore($categoryOptions);
+  const store = useStore($store);
   return (
     <Stack
       bg={useColorModeValue("white", "gray.900")}
@@ -36,9 +38,20 @@ const SidebarContent = ({ ...rest }: SidebarProps) => {
         Thematic Areas
       </Text>
       <Divider />
-      {categoryOptions.map((link) => (
-        <NavItem key={link.value} option={link} />
-      ))}
+
+      {store.isAdmin ? (
+        store.currentPage === "dashboards" ? (
+          categoryOptions.map((link) => (
+            <NavItem key={link.value} option={link} />
+          ))
+        ) : store.currentPage === "sections" ? null : (
+          <Menus />
+        )
+      ) : (
+        categoryOptions.map((link) => (
+          <NavItem key={link.value} option={link} />
+        ))
+      )}
       <Spacer />
       <Divider />
       <Flex alignItems="center" justifyContent="center">

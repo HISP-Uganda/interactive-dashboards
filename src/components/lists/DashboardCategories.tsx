@@ -37,7 +37,7 @@ const DashboardCategories = () => {
   const categories = useStore($categories);
   const { isLoading, isSuccess, isError, error } = useCategories();
   return (
-    <Stack flex={1} p="20px">
+    <Stack flex={1} p="20px" bg="white">
       <Stack direction="row">
         <Spacer />
         <Button onClick={() => navigate({ to: "/categories/form" })}>
