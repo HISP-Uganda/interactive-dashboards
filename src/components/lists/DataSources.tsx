@@ -28,14 +28,14 @@ const DataSources = () => {
     setShowSider(true);
   }, []);
   return (
-    <Stack flex={1} p="20px">
+    <Stack flex={1} p="20px" bg="white">
       <Stack direction="row" border="1">
         <Spacer />
         <Button
           colorScheme="blue"
           onClick={() => navigate({ to: `/data-sources/${generateUid()}` })}
         >
-          <AddIcon mr="2"/>
+          <AddIcon mr="2" />
           Add Data Source
         </Button>
       </Stack>

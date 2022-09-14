@@ -107,13 +107,6 @@ const SingleValue = ({
       }
     >
       {visualization.name && (
-        // <Text
-        //   fontSize={titleFontSize}
-        //   textTransform={titleCase}
-        //   color={titleColor}
-        // >
-        //   {visualization.name}
-        // </Text>
         <Tooltip label={visualization.name} hasArrow placement="top">
           <Text
             textTransform="uppercase"

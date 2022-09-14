@@ -1,11 +1,13 @@
 import { Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { update } from "lodash";
+import { useElementSize } from "usehooks-ts";
 import Plot from "react-plotly.js";
-import { IVisualization } from "../../interfaces";
+import { ISection, IVisualization } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { exclusions } from "../../utils/utils";
 import { processGraphs } from "../processors";
+import VisualizationTitle from "./VisualizationTitle";
 
 type BarGraphProps = {
   visualization: IVisualization;
@@ -13,6 +15,7 @@ type BarGraphProps = {
   dataProperties?: { [key: string]: any };
   category?: string;
   series?: string;
+  section: ISection;
 };
 
 const BarGraph = ({
@@ -21,9 +24,12 @@ const BarGraph = ({
   series,
   layoutProperties,
   dataProperties,
+  section,
 }: BarGraphProps) => {
   const visualizationData = useStore($visualizationData);
   const metadata = useStore($visualizationMetadata);
+  const [squareRef, { width, height }] = useElementSize();
+
   const data = visualizationData[visualization.id]
     ? visualizationData[visualization.id]
     : [];
@@ -53,18 +59,18 @@ const BarGraph = ({
   const titleCase = dataProperties?.["data.title.case"] || "uppercase";
   const titleColor = dataProperties?.["data.title.color"] || "black";
   return (
-    <Stack w="100%" h="100%">
+    <Stack ref={squareRef} h="100%" spacing={0}>
       {visualization.name && (
-        <Text
-          textAlign="center"
-          fontSize={titleFontSize}
-          textTransform={titleCase}
-          color={titleColor}
-        >
-          {visualization.name}
-        </Text>
+        <VisualizationTitle
+          visualization={visualization}
+          titleFontSize={titleFontSize}
+          titleCase={titleCase}
+          titleColor={titleColor}
+          section={section}
+        />
       )}
-      <Stack h="100%" w="100%" flex={1}>
+
+      <Stack flex={1}>
         <Plot
           data={processGraphs(
             data,
@@ -78,7 +84,7 @@ const BarGraph = ({
               pad: 5,
               r: 10,
               t: 0,
-              l: 70,
+              l: 50,
               b: 0,
             },
             autosize: true,

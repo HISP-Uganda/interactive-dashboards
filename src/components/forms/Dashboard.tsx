@@ -1,20 +1,9 @@
-import { EditIcon, ExternalLinkIcon, HamburgerIcon } from "@chakra-ui/icons";
-import { MouseEvent } from "react";
 import {
-  AiOutlineBarChart,
-  AiOutlineLineChart,
-  AiOutlineNumber,
-} from "react-icons/ai";
-import { FaGlobeAfrica } from "react-icons/fa";
-import {
-  Box,
   Button,
-  IconButton,
+  Checkbox,
+  Grid,
+  GridItem,
   Input,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -26,33 +15,29 @@ import {
   Stack,
   Text,
   Textarea,
+  useBreakpointValue,
   useDisclosure,
-  Checkbox,
 } from "@chakra-ui/react";
-import Marquee from "react-fast-marquee";
+import { MouseEvent } from "react";
 
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { ChangeEvent, useEffect, useState } from "react";
-import { Layout, Layouts, Responsive, WidthProvider } from "react-grid-layout";
+import { ChangeEvent, useState } from "react";
+import { Responsive, WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import {
   changeCategory,
   changeDashboardDescription,
   changeDashboardName,
-  changeLayouts,
   changePeriods,
-  changeVisualizationType,
-  increment,
   setCurrentDashboard,
   setCurrentPage,
   setCurrentSection,
   setDashboards,
   setDefaultDashboard,
-  setShowSider,
 } from "../../Events";
 import {
   FormGenerics,
@@ -69,11 +54,9 @@ import {
   createSection,
 } from "../../Store";
 import AutoRefreshPicker from "../AutoRefreshPicker";
-import DashboardFilter from "../filters/DashboardFilter";
 import OUTreeSelect from "../OUTreeSelect";
 import PeriodPicker from "../PeriodPicker";
 import Visualization from "../visualizations/Visualization";
-import Carousel from "../visualizations/Carousel";
 
 const ReactGridLayout = WidthProvider(Responsive);
 const Dashboard = () => {
@@ -134,30 +117,29 @@ const Dashboard = () => {
   };
 
   const displayFull = (section: string) => {
-    setSection(dashboard.sections.find((sec) => sec.i === section));
+    setSection(dashboard.sections.find((sec) => sec.id === section));
     onFull();
   };
-  useEffect(() => {
-    setShowSider(false);
-  }, []);
+
+  const templateColumns = useBreakpointValue({
+    base: "100%",
+    md: `repeat(${dashboard.columns}, 1fr)`,
+  });
+  const templateRows = useBreakpointValue({
+    base: "100%",
+    md: `repeat(${dashboard.rows}, 1fr)`,
+  });
   return (
-    <Stack spacing="0">
-      {dashboard.showTop && (
+    <Grid templateRows="50px 1fr" gap={1}>
+      <GridItem>
         <Stack
           direction="row"
           alignContent="center"
           alignItems="center"
-          h="48px"
-          p="5px"
+          justifyContent="center"
+          justifyItems="center"
+          h="50px"
         >
-          <Button size="sm" type="button" onClick={() => increment(1)}>
-            +
-          </Button>
-          <Button size="sm" type="button" onClick={() => increment(-1)}>
-            -
-          </Button>
-
-          {/* <DashboardFilter /> */}
           {store.isAdmin && (
             <Button
               size="sm"
@@ -167,8 +149,9 @@ const Dashboard = () => {
                 navigate({ to: "/dashboards" });
                 setCurrentPage("");
               }}
+              variant="link"
             >
-              Manage Dashboards
+              Dashboards
             </Button>
           )}
           <Spacer />
@@ -216,219 +199,43 @@ const Dashboard = () => {
           />
           {store.isAdmin && <AutoRefreshPicker />}
         </Stack>
-      )}
-      <Stack
-        h={`calc(100vh - ${dashboard.showTop ? 96 : 48}px)`}
-        overflow="auto"
-      >
-        <ReactGridLayout
-          margin={[5, 5]}
-          layouts={dashboard.layouts}
-          verticalCompact={true}
-          onLayoutChange={(currentLayout: Layout[], allLayouts: Layouts) =>
-            changeLayouts({ currentLayout, allLayouts })
-          }
-          autoSize={true}
-          preventCollision={false}
-          containerPadding={[5, 5]}
-          rowHeight={dashboard.itemHeight}
-          isResizable={store.isAdmin}
-          isDraggable={store.isAdmin}
-          isDroppable={store.isAdmin}
-          cols={{ md: 24, lg: 24, xl: 24, sm: 6 }}
+      </GridItem>
+      <GridItem>
+        <Grid
+          maxH="calc(100vh - 48px - 50px - 14px)"
+          minH="calc(100vh - 48px - 50px - 14px)"
+          h="calc(100vh - 48px - 50px - 14px)"
+          templateColumns={templateColumns}
+          templateRows={templateRows}
+          gap={1}
         >
           {dashboard?.sections.map((section: ISection) => (
-            <Stack
-              onClick={() => {
-                if (dashboard.mode === "edit") {
+            <GridItem
+              bg="white"
+              key={section.id}
+              colSpan={section.colSpan}
+              rowSpan={section.rowSpan}
+              onClick={(e: MouseEvent<HTMLElement>) => {
+                if (e.detail === 2 && store.isAdmin) {
                   setCurrentSection(section);
+                  navigate({
+                    to: `/dashboards/${dashboard.id}/section`,
+                    search,
+                  });
                 }
               }}
-              key={section.i}
-              data-grid={section}
-              spacing="2px"
-              bg="white"
             >
-              {section.title && (
-                <Stack
-                  direction="row"
-                  bg="gray.200"
-                  h="30px"
-                  fontSize="24px"
-                  alignContent="center"
-                  alignItems="center"
-                  justifyContent="center"
-                  justifyItems="center"
-                  textAlign="center"
-                  _focus={{ boxShadow: "none !important" }}
-                >
-                  <Text
-                    pl="25px"
-                    h="20px"
-                    textTransform="uppercase"
-                    fontWeight="bold"
-                    fontSize="0.8vw"
-                    color="gray.500"
-                    noOfLines={1}
-                  >
-                    {section.title}
-                  </Text>
-                  <Spacer />
-                  <Menu placement="left-start">
-                    <MenuButton
-                      _hover={{ bg: "none" }}
-                      _expanded={{ bg: "none" }}
-                      _focus={{ boxShadow: "none" }}
-                      bg="none"
-                      as={IconButton}
-                      icon={<HamburgerIcon />}
-                    />
-                    <MenuList>
-                      {store.isAdmin && (
-                        <MenuItem
-                          maxH="32px"
-                          fontSize="18px"
-                          onClick={() => {
-                            setCurrentSection(section);
-                            navigate({
-                              to: `/dashboards/${dashboard.id}/section`,
-                              search,
-                            });
-                          }}
-                          icon={<EditIcon />}
-                        >
-                          Edit
-                        </MenuItem>
-                      )}
-                      <MenuItem
-                        maxH="32px"
-                        fontSize="18px"
-                        onClick={() => displayFull(section.i)}
-                        icon={<ExternalLinkIcon />}
-                      >
-                        Expand
-                      </MenuItem>
-
-                      <MenuItem
-                        maxH="32px"
-                        fontSize="18px"
-                        onClick={() =>
-                          changeVisualizationType({
-                            section,
-                            visualization: "line",
-                          })
-                        }
-                        icon={<AiOutlineLineChart />}
-                      >
-                        View as Line
-                      </MenuItem>
-                      <MenuItem
-                        maxH="32px"
-                        fontSize="18px"
-                        onClick={() =>
-                          changeVisualizationType({
-                            section,
-                            visualization: "bar",
-                          })
-                        }
-                        icon={<AiOutlineBarChart />}
-                      >
-                        View as Column
-                      </MenuItem>
-                      <MenuItem
-                        maxH="32px"
-                        fontSize="18px"
-                        onClick={() =>
-                          changeVisualizationType({
-                            section,
-                            visualization: "map",
-                          })
-                        }
-                        icon={<FaGlobeAfrica />}
-                      >
-                        View as Map
-                      </MenuItem>
-                      <MenuItem
-                        maxH="32px"
-                        fontSize="18px"
-                        onClick={() =>
-                          changeVisualizationType({
-                            section,
-                            visualization: "single",
-                          })
-                        }
-                        icon={<AiOutlineNumber />}
-                      >
-                        View as Single Value
-                      </MenuItem>
-                    </MenuList>
-                  </Menu>
-                </Stack>
-              )}
-
-              {section.display === "carousel" ? (
-                <Carousel {...section} />
-              ) : section.display === "marquee" ? (
-                <Stack
-                  alignContent="center"
-                  alignItems="center"
-                  justifyContent="center"
-                  justifyItems="center"
-                  w="100%"
-                  h="100%"
-                  onClick={(e: MouseEvent<HTMLElement>) => {
-                    if (e.detail === 2 && store.isAdmin) {
-                      setCurrentSection(section);
-                      navigate({
-                        to: `/dashboards/${dashboard.id}/section`,
-                        search,
-                      });
-                    }
-                  }}
-                >
-                  <Marquee
-                    style={{ padding: 0, margin: 0 }}
-                    gradient={false}
-                    speed={40}
-                  >
-                    {section.visualizations.map((visualization) => (
-                      <Stack direction="row" key={visualization.id}>
-                        <Visualization
-                          key={visualization.id}
-                          visualization={visualization}
-                        />
-                        <Box w="70px">&nbsp;</Box>
-                      </Stack>
-                    ))}
-                  </Marquee>
-                </Stack>
-              ) : (
-                <Stack
-                  direction={section.direction}
-                  spacing="40px"
-                  // alignItems="center"
-                  // alignContent="center"
-                  // justifyContent="center"
-                  // justifyItems="center"
-                  // overflow="auto"
-                  alignItems="space-between"
-                  alignContent="space-between"
-                  w="100%"
-                  h="100%"
-                >
-                  {section.visualizations.map((visualization) => (
-                    <Visualization
-                      key={visualization.id}
-                      visualization={visualization}
-                    />
-                  ))}
-                </Stack>
-              )}
-            </Stack>
+              {section.visualizations.map((visualization) => (
+                <Visualization
+                  section={section}
+                  key={visualization.id}
+                  visualization={visualization}
+                />
+              ))}
+            </GridItem>
           ))}
-        </ReactGridLayout>
-      </Stack>
-
+        </Grid>
+      </GridItem>
       <Modal isOpen={isOpen} onClose={onClose} size="2xl">
         <ModalOverlay />
         <ModalContent>
@@ -484,23 +291,7 @@ const Dashboard = () => {
           </ModalFooter>
         </ModalContent>
       </Modal>
-
-      <Modal isOpen={isFull} onClose={onUnFull} size="full">
-        <ModalOverlay />
-        <ModalContent h="100vh" display="flex" flexDirection="column" w="100vw">
-          <ModalBody>
-            <Stack h="100%" w="100%" direction={section?.direction}>
-              {section?.visualizations.map((visualization) => (
-                <Visualization
-                  key={visualization.id}
-                  visualization={visualization}
-                />
-              ))}
-            </Stack>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-    </Stack>
+    </Grid>
   );
 };
 

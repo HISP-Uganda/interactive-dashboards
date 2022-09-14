@@ -61,11 +61,14 @@ export interface IVisualization extends INamed {
   overrides: { [key: string]: any };
   properties: { [key: string]: any };
 }
-export interface ISection extends Layout {
+export interface ISection {
+  id: string;
   title: string;
   visualizations: IVisualization[];
   direction: "row" | "column";
   display: string;
+  colSpan: number;
+  rowSpan: number;
 }
 
 export interface IFilter {}
@@ -76,12 +79,12 @@ export interface IDashboard extends INamed {
   sections: ISection[];
   published: boolean;
   isDefault?: boolean;
-  layouts: Layouts;
-  itemHeight: number;
   showSider: boolean;
   showTop: boolean;
   mode: "edit" | "view";
   refreshInterval: string;
+  rows: number;
+  columns: number;
 }
 export interface Pagination {
   total: number;

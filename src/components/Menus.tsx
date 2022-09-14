@@ -16,17 +16,17 @@ import {
 import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { $store } from "../Store";
+import moh from "../images/moh.json";
 
 const Menus = () => {
   const navigate = useNavigate();
-  const store = useStore($store);
   return (
-    <Stack spacing="30px" pt="5">
-      <Image src={store.logo} alt="Dan Abramov" boxSize="100px" />
+    <Stack p="10px" spacing="25px" mt="10px">
       <Stack
         alignItems="center"
         alignContent="center"
         cursor="pointer"
+        direction="row"
         onClick={() => navigate({ to: "/data-sources" })}
       >
         <Icon as={MdInput} w={8} h={8} color="blue.600" />
@@ -35,6 +35,7 @@ const Menus = () => {
       <Stack
         alignItems="center"
         alignContent="center"
+        direction="row"
         cursor="pointer"
         onClick={() => navigate({ to: "/categories" })}
       >
@@ -44,6 +45,7 @@ const Menus = () => {
       <Stack
         alignItems="center"
         alignContent="center"
+        direction="row"
         cursor="pointer"
         onClick={() => navigate({ to: "/indicators" })}
       >
@@ -53,6 +55,7 @@ const Menus = () => {
       <Stack
         alignItems="center"
         alignContent="center"
+        direction="row"
         cursor="pointer"
         onClick={() => navigate({ to: "/dashboards" })}
       >

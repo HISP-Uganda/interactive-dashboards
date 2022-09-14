@@ -1,4 +1,14 @@
-import { Box, Flex, Spinner, Stack, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  Grid,
+  GridItem,
+  Spinner,
+  Stack,
+  Text,
+  Image,
+  Divider,
+} from "@chakra-ui/react";
 import {
   createHashHistory,
   MakeGenerics,
@@ -48,6 +58,9 @@ import {
 import { decodeFromBinary, encodeToBinary } from "../utils/utils";
 import DashboardMenu from "./DashboardMenus";
 import Menus from "./Menus";
+import moh from "../images/moh.json";
+import who from "../images/who.json";
+import SidebarContent from "./SidebarContent";
 
 const history = createHashHistory();
 const location = new ReactLocation<
@@ -156,7 +169,6 @@ const App = () => {
                         const dashboard = dashboards.find(
                           (c) => c.id === dashboardId
                         );
-                        // console.log(dashboard, dashboards);
                         if (dashboard) {
                           setCurrentDashboard(dashboard);
                         } else {
@@ -217,31 +229,21 @@ const App = () => {
             },
           ]}
         >
-          <Stack
-            h="calc(100vh - 48px)"
-            direction="row"
-            spacing="0"
+          <Grid
             bg="gray.300"
+            templateColumns="250px 1fr"
+            gap={1}
+            h="calc(100vh - 48px)"
+            w="100vw"
+            p="5px"
           >
-            {store.isAdmin ? (
-              store.currentPage === "dashboards" ? (
-                <Stack w="200px" alignItems="center" alignContent="center">
-                  <DashboardMenu />
-                </Stack>
-              ) : store.currentPage === "sections" ? null : (
-                <Stack w="128px" alignItems="center" alignContent="center">
-                  <Menus />
-                </Stack>
-              )
-            ) : (
-              <Stack w="200px" alignItems="center" alignContent="center">
-                <DashboardMenu />
-              </Stack>
-            )}
-            <Stack flex={1}>
+            <GridItem>
+              <SidebarContent />
+            </GridItem>
+            <GridItem>
               <Outlet />
-            </Stack>
-          </Stack>
+            </GridItem>
+          </Grid>
         </Router>
       )}
 

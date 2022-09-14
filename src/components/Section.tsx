@@ -9,6 +9,11 @@ import {
   Spinner,
   Stack,
   Text,
+  NumberDecrementStepper,
+  NumberIncrementStepper,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
 } from "@chakra-ui/react";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select, SingleValue } from "chakra-react-select";
@@ -269,9 +274,9 @@ const Section = () => {
     setDashboards(
       dashboards.map((dash) => {
         if (dash.id === dashboard.id) {
-          const isOld = dashboard.sections.find((s) => s.i === section.i);
+          const isOld = dashboard.sections.find((s) => s.id === section.id);
           let sections = dashboard.sections.map((s) => {
-            if (section.i === s.i) {
+            if (section.id === s.id) {
               return section;
             }
             return s;
@@ -320,7 +325,7 @@ const Section = () => {
           <Stack direction="row" spacing="2px" fontSize="16px">
             <Text>{dashboard.name}</Text>
             <Text>/</Text>
-            <Text>{section.i}</Text>
+            <Text>{section.id}</Text>
             <Text>/</Text>
             <Text>Edit Section</Text>
           </Stack>
@@ -350,6 +355,7 @@ const Section = () => {
             <Marquee>
               {section.visualizations.map((visualization) => (
                 <Visualization
+                  section={section}
                   key={visualization.id}
                   visualization={visualization}
                 />
@@ -359,6 +365,7 @@ const Section = () => {
             <Stack direction={section.direction}>
               {section.visualizations.map((visualization) => (
                 <Visualization
+                  section={section}
                   key={visualization.id}
                   visualization={visualization}
                 />
@@ -396,6 +403,44 @@ const Section = () => {
                       })
                     }
                   />
+
+                  <Text>Row Span</Text>
+                  <NumberInput
+                    value={section.rowSpan}
+                    max={12}
+                    min={1}
+                    onChange={(value1: string, value2: number) =>
+                      changeSectionAttribute({
+                        attribute: "rowSpan",
+                        value: value2,
+                      })
+                    }
+                  >
+                    <NumberInputField />
+                    <NumberInputStepper>
+                      <NumberIncrementStepper />
+                      <NumberDecrementStepper />
+                    </NumberInputStepper>
+                  </NumberInput>
+
+                  <Text>Column Span</Text>
+                  <NumberInput
+                    value={section.colSpan}
+                    max={24}
+                    min={1}
+                    onChange={(value1: string, value2: number) =>
+                      changeSectionAttribute({
+                        attribute: "colSpan",
+                        value: value2,
+                      })
+                    }
+                  >
+                    <NumberInputField />
+                    <NumberInputStepper>
+                      <NumberIncrementStepper />
+                      <NumberDecrementStepper />
+                    </NumberInputStepper>
+                  </NumberInput>
                   <Text>Arrangement</Text>
                   <RadioGroup
                     onChange={(e: string) =>
