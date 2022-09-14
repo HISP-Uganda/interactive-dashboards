@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Checkbox,
   Grid,
@@ -57,6 +58,8 @@ import AutoRefreshPicker from "../AutoRefreshPicker";
 import OUTreeSelect from "../OUTreeSelect";
 import PeriodPicker from "../PeriodPicker";
 import Visualization from "../visualizations/Visualization";
+import Carousel from "../visualizations/Carousel";
+import Marquee from "react-fast-marquee";
 
 const ReactGridLayout = WidthProvider(Responsive);
 const Dashboard = () => {
@@ -150,7 +153,7 @@ const Dashboard = () => {
                 setCurrentPage("");
               }}
             >
-             Manage Dashboards
+              Manage Dashboards
             </Button>
           )}
           <Spacer />
@@ -224,13 +227,68 @@ const Dashboard = () => {
                 }
               }}
             >
-              {section.visualizations.map((visualization) => (
+              {section.display === "carousel" ? (
+                <Carousel {...section} />
+              ) : section.display === "marquee" ? (
+                <Stack
+                  alignContent="center"
+                  alignItems="center"
+                  justifyContent="center"
+                  justifyItems="center"
+                  w="100%"
+                  h="100%"
+                  onClick={(e: MouseEvent<HTMLElement>) => {
+                    if (e.detail === 2 && store.isAdmin) {
+                      setCurrentSection(section);
+                      navigate({
+                        to: `/dashboards/${dashboard.id}/section`,
+                        search,
+                      });
+                    }
+                  }}
+                >
+                  <Marquee
+                    style={{ padding: 0, margin: 0 }}
+                    gradient={false}
+                    speed={40}
+                  >
+                    {section.visualizations.map((visualization) => (
+                      <Stack direction="row" key={visualization.id}>
+                        <Visualization
+                          section={section}
+                          key={visualization.id}
+                          visualization={visualization}
+                        />
+                        <Box w="70px">&nbsp;</Box>
+                      </Stack>
+                    ))}
+                  </Marquee>
+                </Stack>
+              ) : (
+                <Stack
+                  direction={section.direction}
+                  spacing="40px"
+                  alignItems="space-between"
+                  alignContent="space-between"
+                  w="100%"
+                  h="100%"
+                >
+                  {section.visualizations.map((visualization) => (
+                    <Visualization
+                      key={visualization.id}
+                      visualization={visualization}
+                      section={section}
+                    />
+                  ))}
+                </Stack>
+              )}
+              {/* {section.visualizations.map((visualization) => (
                 <Visualization
                   section={section}
                   key={visualization.id}
                   visualization={visualization}
                 />
-              ))}
+              ))} */}
             </GridItem>
           ))}
         </Grid>
