@@ -71,11 +71,9 @@ import { getRelativePeriods, relativePeriodTypes } from "./utils/utils";
 
 export const createSection = (id = generateUid()): ISection => {
   return {
-    i: id,
-    x: 0,
-    y: 0,
-    w: 1,
-    h: 1,
+    id,
+    rowSpan: 1,
+    colSpan: 1,
     title: "Example section",
     visualizations: [],
     direction: "row",
@@ -131,8 +129,8 @@ export const createDashboard = (id = generateUid()): IDashboard => {
     id,
     sections: [],
     published: false,
-    layouts: {},
-    itemHeight: 100,
+    rows: 12,
+    columns: 24,
     showSider: true,
     category: "uDWxMNyXZeo",
     showTop: true,
@@ -228,11 +226,11 @@ export const $category = domain
 export const $dashboard = domain
   .createStore<IDashboard>(createDashboard())
   .on(addSection, (state, section) => {
-    const isNew = state.sections.find((s) => s.i === section.i);
+    const isNew = state.sections.find((s) => s.id === section.id);
     let sections: ISection[] = state.sections;
     if (isNew) {
       sections = sections.map((s) => {
-        if (s.i === section.i) {
+        if (s.id === section.id) {
           return section;
         }
         return s;
@@ -244,7 +242,7 @@ export const $dashboard = domain
     return currentDashboard;
   })
   .on(deleteSection, (state, section) => {
-    const sections = state.sections.filter((s) => s.i !== section);
+    const sections = state.sections.filter((s) => s.id !== section);
     return {
       ...state,
       sections,
@@ -255,16 +253,13 @@ export const $dashboard = domain
   })
   .on(changeLayouts, (state, { currentLayout, allLayouts }) => {
     const sections = state.sections.map((s) => {
-      const l = currentLayout.find((ll) => ll.i === s.i);
+      const l = currentLayout.find((ll) => ll.i === s.id);
       if (l) {
         s = { ...s, ...l };
       }
       return s;
     });
     return { ...state, sections, layouts: allLayouts };
-  })
-  .on(increment, (state, value) => {
-    return { ...state, itemHeight: state.itemHeight + value };
   })
   .on(changeDefaults, (state) => {
     return { ...state, hasDashboards: true, hasDefaultDashboard: true };
@@ -298,7 +293,7 @@ export const $dashboard = domain
   })
   .on(changeVisualizationType, (state, { section, visualization }) => {
     const sections = state.sections.map((s) => {
-      if (s.i === section.i) {
+      if (s.id === section.id) {
         const visualizations = section.visualizations.map((viz) => {
           return { ...viz, type: visualization };
         });

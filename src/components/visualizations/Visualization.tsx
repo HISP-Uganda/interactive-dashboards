@@ -1,6 +1,6 @@
 import { Spinner, Stack } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { IVisualization } from "../../interfaces";
+import { ISection, IVisualization } from "../../interfaces";
 import { useVisualization } from "../../Queries";
 import {
   $dashboard,
@@ -30,9 +30,10 @@ import Marquee from "./Marquee";
 
 type VisualizationProps = {
   visualization: IVisualization;
+  section: ISection;
 };
 
-const getVisualization = (visualization: IVisualization) => {
+const getVisualization = (visualization: IVisualization, section: ISection) => {
   const dataProperties = fromPairs(
     Object.entries(visualization.properties || {}).filter(([key]) =>
       key.startsWith("data")
@@ -59,6 +60,7 @@ const getVisualization = (visualization: IVisualization) => {
     ),
     bar: (
       <BarGraph
+        section={section}
         visualization={visualization}
         {...otherProperties}
         layoutProperties={layoutProperties}
@@ -197,7 +199,7 @@ const getVisualization = (visualization: IVisualization) => {
   return allTypes[visualization.type];
 };
 
-const Visualization = ({ visualization }: VisualizationProps) => {
+const Visualization = ({ visualization, section }: VisualizationProps) => {
   const indicators = useStore($indicators);
   const globalFilters = useStore($globalFilters);
   const dataSources = useStore($dataSources);
@@ -217,11 +219,11 @@ const Visualization = ({ visualization }: VisualizationProps) => {
   );
 
   return (
-    <Stack w="100%" h="100%" alignItems="center" justifyContent="center">
+    <>
       {isLoading && <Spinner />}
-      {isSuccess && getVisualization(visualization)}
+      {isSuccess && getVisualization(visualization, section)}
       {isError && <pre>{error.message}</pre>}
-    </Stack>
+    </>
   );
 };
 
