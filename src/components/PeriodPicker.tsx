@@ -13,7 +13,7 @@ const PeriodPicker = ({ selectedPeriods, onChange }: PickerProps) => {
     React.useState<Item[]>(selectedPeriods);
   return (
     <Stack position="relative">
-      <Button size="sm" onClick={onToggle}>
+      <Button size="md" onClick={onToggle} colorScheme="blue">
         Select Period
       </Button>
       {isOpen && (

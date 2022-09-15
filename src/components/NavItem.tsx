@@ -1,7 +1,7 @@
 import { groupBy } from "lodash";
 import { useState } from "react";
 
-import { Stack, Text } from "@chakra-ui/react";
+import { Box, Stack, Text } from "@chakra-ui/react";
 import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { $dashboard, $dashboards, $store } from "../Store";
@@ -33,7 +33,7 @@ const NavItem = ({ option: { label, value } }: NavItemProps) => {
   return (
     <Stack
       cursor="pointer"
-      key={value}
+    key={value}
       onClick={() => {
         toggle(value);
 
@@ -51,14 +51,16 @@ const NavItem = ({ option: { label, value } }: NavItemProps) => {
         }
       }}
     >
-      <Text fontSize="md" fontWeight="bold" textTransform="uppercase" color="gray.600">
+      <Text fontSize="2xl" fontWeight="bold" textTransform="uppercase" color="gray.600">
         {label}
       </Text>
       {active === value && (
-        <Stack pl="20px" w="100%" color="blue.700" fontWeight="bold" fontSize="sm" spacing="10px">
+        <Stack pl="20px" w="100%" color="blue.700" fontWeight="bold" fontSize="2xl"  spacing="10px">
           {categoryDashboards.map((d) => (
-            <Text
+            <Box
               bg={dashboard.id === d.id ? "blue.50" : ""}
+              color={dashboard.id === d.id ? "red.700" : ""}
+              border={dashboard.id === d.id ? "2px" : ""}
               onClick={(e) => {
                 e.stopPropagation();
                 navigate({
@@ -74,7 +76,7 @@ const NavItem = ({ option: { label, value } }: NavItemProps) => {
               }}
             >
               {d.name}
-            </Text>
+            </Box>
           ))}
         </Stack>
       )}

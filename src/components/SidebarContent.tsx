@@ -26,6 +26,7 @@ const SidebarContent = ({ ...rest }: SidebarProps) => {
     <Stack
       bg={useColorModeValue("white", "gray.900")}
       w={{ base: "full", md: "250px" }}
+      backgroundColor="gray.300"
       pos="fixed"
       h="calc(100vh - 58px)"
       {...rest}

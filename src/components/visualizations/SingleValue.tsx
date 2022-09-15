@@ -118,9 +118,9 @@ const SingleValue = ({
                 ? "nowrap"
                 : "normal"
             }
-            noOfLines={
-              alignment === "row" || alignment === "row-reverse" ? undefined : 1
-            }
+            // noOfLines={
+            //   alignment === "row" || alignment === "row-reverse" ? undefined : 1
+            // }
           >
             {visualization.name}
           </Text>
@@ -150,7 +150,7 @@ const SingleValue = ({
             bg="green"
           />
         ) : null}
-        <Text fontSize={"2.5vh"} color={color} fontWeight="bold">
+        <Text fontSize={"3.3vh"} color={color} fontWeight="bold">
           {prefix}
           {processSingleValue(data)}
           {suffix}
