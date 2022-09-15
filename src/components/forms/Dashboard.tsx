@@ -157,7 +157,7 @@ const Dashboard = () => {
             </Button>
           )}
           <Spacer />
-          <Text fontSize="lg">Filter</Text>
+          <Text fontSize="xl" fontWeight="bold">Filters</Text>
           {store.isAdmin && (
             <>
               <Button

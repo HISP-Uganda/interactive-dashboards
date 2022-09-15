@@ -27,7 +27,7 @@ const DashboardMenu = () => {
   return (
     // <SidebarContent />
     <Stack flex={1}>
-      <Stack spacing="10px" h="100%" p="10px">
+      <Stack spacing="10px" h="100%" p="10px" >
         <Text fontSize="xl" fontWeight="bold" textTransform="uppercase" color="red.500">
           Thematic Areas
         </Text>
@@ -55,7 +55,7 @@ const DashboardMenu = () => {
                 }
               }}
             >
-              <Text fontSize="md" color="red.900" fontWeight="bold">
+              <Text fontSize="lg" color="red.900" fontWeight="bold">
                 {label}
               </Text>
               {active === value && (

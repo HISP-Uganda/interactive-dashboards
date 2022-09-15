@@ -32,7 +32,7 @@ const OUTreeSelect = () => {
       {isLoading && <Spinner />}
       {isSuccess && (
         <Stack position="relative">
-          <Button size="sm" onClick={onToggle}>
+          <Button size="md" onClick={onToggle} colorScheme="blue">
             Select OrgUnit
           </Button>
           {isOpen && (
