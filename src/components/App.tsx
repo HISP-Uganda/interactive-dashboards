@@ -8,6 +8,7 @@ import {
   Text,
   Image,
   Divider,
+  Spacer,
 } from "@chakra-ui/react";
 import {
   createHashHistory,
@@ -56,11 +57,14 @@ import {
   createIndicator,
 } from "../Store";
 import { decodeFromBinary, encodeToBinary } from "../utils/utils";
-import DashboardMenu from "./DashboardMenus";
+import DashboardMenu from "./DashboardMenu";
 import Menus from "./Menus";
 import moh from "../images/moh.json";
 import who from "../images/who.json";
+import hisp from "../images/hisp.json";
 import SidebarContent from "./SidebarContent";
+import HAndWAware from "./HAndWAware";
+import SectionMenu from "./SectionMenu";
 
 const history = createHashHistory();
 const location = new ReactLocation<
@@ -81,6 +85,14 @@ const App = () => {
   const dataSources = useStore($dataSources);
   const indicators = useStore($indicators);
   const categories = useStore($categories);
+
+  const topMenuOptions: { [key: string]: any } = {
+    dashboards: <DashboardMenu />,
+    sections: <SectionMenu />,
+  };
+
+  const rowSpans2 = [1, 10, 1];
+  const rowSpans = [1, 11];
   return (
     <>
       {isLoading && (
@@ -231,17 +243,78 @@ const App = () => {
         >
           <Grid
             bg="gray.300"
+            // templateRows="100px 1fr"
             templateColumns="250px 1fr"
             gap={1}
             h="calc(100vh - 48px)"
-            w="100vw"
+            // w="100vw"
             p="5px"
           >
-            <GridItem>
-              <SidebarContent />
+            <GridItem h="100%">
+              <Grid templateRows="repeat(12, 1fr)" gap={1} h="100%">
+                <GridItem rowSpan={rowSpans2[0]} h="100%">
+                  <HAndWAware src={moh} />
+                </GridItem>
+                <GridItem rowSpan={rowSpans2[1]}>
+                  <SidebarContent />
+                </GridItem>
+                <GridItem rowSpan={rowSpans2[2]} h="100%">
+                  {/* <HAndWAware src={hisp} /> */}
+                  <Stack
+                    alignItems="center"
+                    justifyItems="center"
+                    justifyContent="center"
+                    alignContent="center"
+                    h="100%"
+                  >
+                    <Image
+                      src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/logo.png"
+                      alt="Ministry of Health"
+                      w="100%"
+                      maxWidth="110px"
+                      h="auto"
+                    />
+                  </Stack>
+                </GridItem>
+              </Grid>
             </GridItem>
-            <GridItem overflow="auto">
-              <Outlet />
+            <GridItem h="100%">
+              <Grid templateRows="repeat(12, 1fr)" gap={1} h="100%">
+                <GridItem h="100%" rowSpan={rowSpans[0]}>
+                  <Grid templateColumns="1fr 250px" h="100%" gap={1}>
+                    <GridItem h="100%">
+                      <Stack
+                        h="100%"
+                        justifyContent="center"
+                        alignContent="center"
+                      >
+                        {topMenuOptions[store.currentPage]}
+                      </Stack>
+                    </GridItem>
+                    <GridItem>
+                      {/* <HAndWAware src={who} /> */}
+                      <Stack
+                        alignItems="center"
+                        justifyItems="center"
+                        justifyContent="center"
+                        alignContent="center"
+                        h="100%"
+                      >
+                        <Image
+                          src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/h-logo-blue.svg"
+                          alt="Ministry of Health"
+                          w="100%"
+                          maxWidth="160px"
+                          h="auto"
+                        />
+                      </Stack>
+                    </GridItem>
+                  </Grid>
+                </GridItem>
+                <GridItem rowSpan={rowSpans[1]} h="100%">
+                  <Outlet />
+                </GridItem>
+              </Grid>
             </GridItem>
           </Grid>
         </Router>

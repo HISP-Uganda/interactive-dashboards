@@ -78,6 +78,7 @@ export const createSection = (id = generateUid()): ISection => {
     visualizations: [],
     direction: "row",
     display: "normal",
+    justifyContent: "space-around",
   };
 };
 

@@ -19,6 +19,12 @@ type SingleValueProps = {
   dataProperties?: { [key: string]: any };
 };
 
+const numberFormatter = Intl.NumberFormat("en-US", {
+  style: "decimal",
+  // notation: "compact",
+  maximumFractionDigits: 0,
+});
+
 const ProgressBar = ({ bg, completed }: { bg: string; completed: number }) => {
   return (
     <Box
@@ -152,7 +158,7 @@ const SingleValue = ({
         ) : null}
         <Text fontSize={"3.3vh"} color={color} fontWeight="bold">
           {prefix}
-          {processSingleValue(data)}
+          {numberFormatter.format(processSingleValue(data))}
           {suffix}
         </Text>
       </Stack>
