@@ -1,34 +1,30 @@
 import { ChevronDownIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import {
   Button,
-  IconButton,
   Input,
+  NumberDecrementStepper,
+  NumberIncrementStepper,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
   Radio,
   RadioGroup,
   Spacer,
   Spinner,
   Stack,
   Text,
-  NumberDecrementStepper,
-  NumberIncrementStepper,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
 } from "@chakra-ui/react";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select, SingleValue } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { ChangeEvent, useEffect, useState } from "react";
 import Marquee from "react-fast-marquee";
-import { MdKeyboardBackspace } from "react-icons/md";
 import {
-  addSection,
   addVisualization2Section,
   changeSectionAttribute,
   changeVisualizationAttribute,
   changeVisualizationOverride,
   changeVisualizationProperties,
-  setDashboards,
   setShowSider,
 } from "../Events";
 import { FormGenerics, IVisualization, Option } from "../interfaces";
@@ -85,6 +81,19 @@ const fontSizes: Option[] = [
     label: "5.5vh",
     value: "5.5vh",
   },
+];
+
+const alignmentOptions: Option[] = [
+  { label: "flex-start", value: "flex-start" },
+  { label: "flex-end", value: "flex-end" },
+  { label: "center", value: "center" },
+  { label: "space-between", value: "space-between" },
+  { label: "space-around", value: "space-around" },
+  { label: "space-evenly", value: "space-evenly" },
+  { label: "stretch", value: "stretch" },
+  { label: "start", value: "start" },
+  { label: "end", value: "end" },
+  { label: "baseline", value: "baseline" },
 ];
 
 const VisualizationTypes = ({
@@ -263,37 +272,8 @@ const VisualizationOverride = ({
 };
 
 const Section = () => {
-  const search = useSearch<FormGenerics>();
-  const navigate = useNavigate();
   const section = useStore($section);
-  const dashboard = useStore($dashboard);
-  const dashboards = useStore($dashboards);
   const [active, setActive] = useState<string>("title");
-  const onApply = () => {
-    addSection(section);
-    setDashboards(
-      dashboards.map((dash) => {
-        if (dash.id === dashboard.id) {
-          const isOld = dashboard.sections.find((s) => s.id === section.id);
-          let sections = dashboard.sections.map((s) => {
-            if (section.id === s.id) {
-              return section;
-            }
-            return s;
-          });
-          if (!isOld) {
-            sections = [...sections, section];
-          }
-          return { ...dashboard, sections };
-        }
-        return dash;
-      })
-    );
-    navigate({
-      to: `/dashboards/${dashboard.id}`,
-      search,
-    });
-  };
 
   useEffect(() => {
     setShowSider(false);
@@ -308,44 +288,6 @@ const Section = () => {
   };
   return (
     <Stack p="5px">
-      <Stack direction="row" h="48px">
-        <Stack direction="row" alignItems="center" justifyItems="center">
-          <IconButton
-            bg="none"
-            _hover={{ bg: "none" }}
-            aria-label="Search database"
-            icon={<MdKeyboardBackspace />}
-            onClick={() => {
-              navigate({
-                to: `/dashboards/${dashboard.id}`,
-                search,
-              });
-            }}
-          />
-          <Stack direction="row" spacing="2px" fontSize="16px">
-            <Text>{dashboard.name}</Text>
-            <Text>/</Text>
-            <Text>{section.id}</Text>
-            <Text>/</Text>
-            <Text>Edit Section</Text>
-          </Stack>
-        </Stack>
-        <Spacer />
-        <Button
-          size="sm"
-          onClick={() => {
-            navigate({
-              to: `/dashboards/${dashboard.id}`,
-              search,
-            });
-          }}
-        >
-          Discard
-        </Button>
-        <Button size="sm" onClick={() => onApply()}>
-          Apply
-        </Button>
-      </Stack>
       <Stack direction="row" spacing="20px" flex={1}>
         <Stack w="75%">
           {section.title && <Text textAlign="center">{section.title}</Text>}
@@ -457,6 +399,20 @@ const Section = () => {
                     </Stack>
                   </RadioGroup>
 
+                  <Text>Content Alignment</Text>
+                  <Select<Option, false, GroupBase<Option>>
+                    value={alignmentOptions.find(
+                      (d: Option) => d.value === section.justifyContent
+                    )}
+                    onChange={(e) =>
+                      changeSectionAttribute({
+                        attribute: "justifyContent",
+                        value: e?.value,
+                      })
+                    }
+                    options={alignmentOptions}
+                    isClearable
+                  />
                   <Text>Display Style</Text>
                   <RadioGroup
                     value={section.display}

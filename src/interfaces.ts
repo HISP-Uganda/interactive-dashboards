@@ -66,6 +66,17 @@ export interface ISection {
   title: string;
   visualizations: IVisualization[];
   direction: "row" | "column";
+  justifyContent:
+    | "flex-start"
+    | "flex-end"
+    | "center"
+    | "space-between"
+    | "space-around"
+    | "space-evenly"
+    | "stretch"
+    | "start"
+    | "end"
+    | "baseline";
   display: string;
   colSpan: number;
   rowSpan: number;
