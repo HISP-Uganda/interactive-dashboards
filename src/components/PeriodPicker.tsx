@@ -17,7 +17,7 @@ const PeriodPicker = ({ selectedPeriods, onChange }: PickerProps) => {
         Select Period
       </Button>
       {isOpen && (
-        <Box bottom={0} top={7} zIndex={1000} position="absolute" right={-35}>
+        <Box h="510px" bottom={0} top={10} zIndex={1000} position="absolute" right={-1} bg="white">
           <PeriodDimension
             onSelect={({
               items,

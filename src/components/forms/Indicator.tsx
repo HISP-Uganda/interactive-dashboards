@@ -63,7 +63,7 @@ const Indicator = () => {
   };
 
   return (
-    <Box flex={1} p="20px">
+    <Box flex={1} p="20px" bg="white">
       <Stack spacing="20px">
         <Stack>
           <Text>Data Source</Text>

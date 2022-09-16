@@ -4,9 +4,10 @@ import { useState } from "react";
 import { Box, Stack, Text } from "@chakra-ui/react";
 import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { $dashboard, $dashboards, $store } from "../Store";
+import { $category, $dashboard, $dashboards, $store } from "../Store";
 
 import { Option } from "../interfaces";
+import { changeSelectedCategory } from "../Events";
 
 interface NavItemProps {
   // icon: IconType;
@@ -17,7 +18,8 @@ const NavItem = ({ option: { label, value } }: NavItemProps) => {
   const store = useStore($store);
   const dashboards = groupBy(useStore($dashboards), "category");
   const dashboard = useStore($dashboard);
-  const [active, setActive] = useState<string>("title");
+  const [active, setActive] = useState<string>(store.selectedCategory);
+  const category = useStore($category);
   const toggle = (id: string) => {
     if (active === id) {
       setActive("");
@@ -32,10 +34,12 @@ const NavItem = ({ option: { label, value } }: NavItemProps) => {
   const categoryDashboards = getDashboards(value);
   return (
     <Stack
+      color={store.selectedCategory === value ? "blue.600" : "none"}
       cursor="pointer"
-    key={value}
+      key={value}
       onClick={() => {
         toggle(value);
+        changeSelectedCategory(value)
 
         if (categoryDashboards.length > 0) {
           navigate({
@@ -51,15 +55,31 @@ const NavItem = ({ option: { label, value } }: NavItemProps) => {
         }
       }}
     >
-      <Text fontSize="2xl" fontWeight="bold" textTransform="uppercase" color="gray.600">
+      <Text
+        fontSize="xl"
+        fontWeight="bold"
+        textTransform="uppercase"
+      >
         {label}
       </Text>
       {active === value && (
-        <Stack pl="20px" w="100%" color="blue.700" fontWeight="bold" fontSize="2xl"  spacing="10px">
+        <Stack
+          pl="20px"
+          w="100%"
+          color="blue.700"
+          fontWeight="bold"
+          fontSize="xl"
+          spacing="10px"
+        >
           {categoryDashboards.map((d) => (
             <Box
+              maxW="sm"
+              borderWidth="1px"
+              borderRadius="lg"
+              overflow="hidden"
+              p="5px"
               bg={dashboard.id === d.id ? "blue.50" : ""}
-              color={dashboard.id === d.id ? "red.700" : ""}
+              color={dashboard.id === d.id ? "blue.600" : ""}
               border={dashboard.id === d.id ? "2px" : ""}
               onClick={(e) => {
                 e.stopPropagation();

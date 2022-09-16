@@ -253,7 +253,19 @@ const App = () => {
             <GridItem h="100%">
               <Grid templateRows="repeat(12, 1fr)" gap={1} h="100%">
                 <GridItem rowSpan={rowSpans2[0]} h="100%">
-                  <HAndWAware src={moh} />
+                <Stack
+                    alignItems="center"
+                    justifyItems="center"
+                    justifyContent="center"
+                    alignContent="center"
+                    h="100%"
+                  >
+                  <Image
+                    src={moh}
+                    alt="Ministry of Health"
+                    maxWidth="80px"
+                    h="auto"
+                  /></Stack>
                 </GridItem>
                 <GridItem rowSpan={rowSpans2[1]}>
                   <SidebarContent />

@@ -31,7 +31,7 @@ const Indicators = () => {
   const indicators = useStore($indicators);
   const { isLoading, isSuccess, isError, error } = useVisualizationData();
   return (
-    <Stack flex={1} p="20px" bg="white">
+    <Stack p="20px" bg="white">
       <Stack direction="row">
         {/* <Input placeholder='Search Visualization Data' width='50%' /> */}
         <Input
@@ -60,7 +60,12 @@ const Indicators = () => {
       </Stack>
       {isLoading && <Spinner />}
       {isSuccess && (
-        <Stack direction="row" spacing="10px">
+        <Stack
+          direction="row"
+          overflow="auto"
+          h="calc(100vh - 300px)"
+          spacing="10px"
+        >
           <Table variant="simple">
             <Thead>
               <Tr>

@@ -4,6 +4,7 @@ import {
   GridItem,
   Stack,
   useBreakpointValue,
+  Text,
 } from "@chakra-ui/react";
 import { MouseEvent } from "react";
 
@@ -15,6 +16,7 @@ import { FormGenerics, ISection } from "../../interfaces";
 import { $dashboard, $store } from "../../Store";
 import Carousel from "../visualizations/Carousel";
 import Visualization from "../visualizations/Visualization";
+import VisualizationTitle from "../visualizations/VisualizationTitle";
 
 const Dashboard = () => {
   const search = useSearch<FormGenerics>();
@@ -92,33 +94,26 @@ const Dashboard = () => {
               </Marquee>
             </Stack>
           ) : (
-            <Stack
-              direction={section.direction}
-              spacing="40px"
-              // alignItems="space-between"
-              // alignContent="space-between"
-              // justifyItems="space-between"
-              justifyContent={section.justifyContent || "space-around"}
-              w="100%"
-              h="100%"
-            >
-              {section.justifyContent}
-              {section.visualizations.map((visualization) => (
-                <Visualization
-                  key={visualization.id}
-                  visualization={visualization}
-                  section={section}
-                />
-              ))}
+            <Stack h="100%">
+              {section.title && (
+                <VisualizationTitle section={section} fontSize={"18px"} textTransform={"uppercase"} color={"gray.500"} title={section.title} fontWeight="bold"/>
+              )}
+              <Stack
+                justifyContent={section.justifyContent || "space-around"}
+                direction={section.direction}
+                flex={1}
+                p="5px"
+              >
+                {section.visualizations.map((visualization) => (
+                  <Visualization
+                    key={visualization.id}
+                    visualization={visualization}
+                    section={section}
+                  />
+                ))}
+              </Stack>
             </Stack>
           )}
-          {/* {section.visualizations.map((visualization) => (
-                <Visualization
-                  section={section}
-                  key={visualization.id}
-                  visualization={visualization}
-                />
-              ))} */}
         </GridItem>
       ))}
     </Grid>

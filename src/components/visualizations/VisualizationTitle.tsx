@@ -1,24 +1,19 @@
 import React, { useState } from "react";
-import { Stack, Text } from "@chakra-ui/react";
+import { Stack, StackProps, Text } from "@chakra-ui/react";
 import { IDashboard, IVisualization, ISection } from "../../interfaces";
 import VisualizationMenu from "./VisualizationMenu";
 import { useStore } from "effector-react";
 import { $dashboard } from "../../Store";
 
-type VisualizationTitleProps = {
-  titleFontSize: string;
-  titleCase: "lowercase" | "uppercase" | "capitalize";
-  titleColor: string;
-  visualization: IVisualization;
+interface VisualizationTitleProps extends StackProps {
+  title: string;
   section: ISection;
 };
 
 const VisualizationTitle = ({
-  titleFontSize,
-  titleCase,
-  titleColor,
-  visualization,
+  title,
   section,
+  ...rest
 }: VisualizationTitleProps) => {
   const [showMenu, setShowMenu] = useState<boolean>(false);
   return (
@@ -33,16 +28,14 @@ const VisualizationTitle = ({
       onMouseEnter={() => setShowMenu(true)}
       onMouseLeave={() => setShowMenu(false)}
       bg="gray.200"
+      {...rest}
     >
       <Text
         textAlign="center"
         noOfLines={1}
-        fontSize={titleFontSize}
-        textTransform={titleCase}
-        color={titleColor}
         flex={1}
       >
-        {visualization.name}
+        {title}
       </Text>
       {showMenu && <VisualizationMenu section={section} />}
     </Stack>
