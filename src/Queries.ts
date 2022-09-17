@@ -251,7 +251,6 @@ export const useInitials = () => {
           engine,
           "i-dashboard-settings/settings"
         );
-        console.log(defaults);
         if (defaults !== null) {
           const dashboard: any = await loadSingleResource(
             engine,

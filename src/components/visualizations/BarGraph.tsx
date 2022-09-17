@@ -62,10 +62,7 @@ const BarGraph = ({
     <Stack ref={squareRef} h="100%" spacing={0}>
       {visualization.name && (
         <VisualizationTitle
-          visualization={visualization}
-          titleFontSize={titleFontSize}
-          titleCase={titleCase}
-          titleColor={titleColor}
+          title={visualization.name}
           section={section}
         />
       )}

@@ -29,7 +29,7 @@ const Categories = () => {
     setShowSider(true);
   }, []);
   return (
-    <Stack flex={1} p="20px" bg="white">
+    <Stack flex={1} p="20px" bg="white" overflow="auto" h="calc(100vh - 300px)">
       <Stack direction="row">
         <Spacer />
         <Button

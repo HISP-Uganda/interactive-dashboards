@@ -58,7 +58,7 @@ const Category = () => {
     setShowSider(true);
   }, []);
   return (
-    <Box flex={1} p="10px">
+    <Box flex={1} p="10px" bg="white">
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing="20px">
           <FormControl isInvalid={!!errors.id}>
