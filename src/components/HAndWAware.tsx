@@ -1,12 +1,14 @@
-import { Box, Flex, Image, Text } from "@chakra-ui/react";
+import { Box, Flex, Image, Text, StackProps, Stack } from "@chakra-ui/react";
 import React from "react";
 import { useElementSize } from "usehooks-ts";
 
-const HAndWAware = ({ src }: { src: string }) => {
+interface HAndWAwareProps extends StackProps {}
+
+const HAndWAware = ({ children, ...rest }: HAndWAwareProps) => {
   const [squareRef, { width, height }] = useElementSize();
 
   return (
-    <Flex
+    <Stack
       ref={squareRef}
       h="100%"
       align="center"
@@ -16,8 +18,8 @@ const HAndWAware = ({ src }: { src: string }) => {
       justifyContent="center"
       alignContent="center"
     >
-      <Image src={src} boxSize={height} />
-    </Flex>
+      <Stack w={`${width}px`}>{children}</Stack>
+    </Stack>
   );
 };
 

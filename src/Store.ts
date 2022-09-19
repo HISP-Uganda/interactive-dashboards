@@ -79,6 +79,7 @@ export const createSection = (id = generateUid()): ISection => {
     direction: "row",
     display: "normal",
     justifyContent: "space-around",
+    carouselOver: "items",
   };
 };
 
@@ -481,6 +482,7 @@ export const $section = domain
       name: `Visualization ${state.visualizations.length + 1}`,
       properties: {},
       overrides: {},
+      group: "",
     };
     return {
       ...state,

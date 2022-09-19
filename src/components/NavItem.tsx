@@ -39,7 +39,7 @@ const NavItem = ({ option: { label, value } }: NavItemProps) => {
       key={value}
       onClick={() => {
         toggle(value);
-        changeSelectedCategory(value)
+        changeSelectedCategory(value);
 
         if (categoryDashboards.length > 0) {
           navigate({
@@ -55,11 +55,7 @@ const NavItem = ({ option: { label, value } }: NavItemProps) => {
         }
       }}
     >
-      <Text
-        fontSize="xl"
-        fontWeight="bold"
-        textTransform="uppercase"
-      >
+      <Text fontSize="xl" fontWeight="bold" textTransform="uppercase">
         {label}
       </Text>
       {active === value && (
@@ -77,6 +73,7 @@ const NavItem = ({ option: { label, value } }: NavItemProps) => {
               borderWidth="1px"
               borderRadius="lg"
               overflow="hidden"
+              key={d.id}
               p="5px"
               bg={dashboard.id === d.id ? "blue.50" : ""}
               color={dashboard.id === d.id ? "blue.600" : ""}

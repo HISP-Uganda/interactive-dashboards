@@ -30,6 +30,8 @@
     "@dhis2/ui": "^8.2.5",
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
+    "@fontsource/open-sans": "^4.5.11",
+    "@fontsource/raleway": "^4.5.10",
     "@tanstack/react-location": "^3.7.4",
     "@turf/turf": "^6.5.0",
     "@types/react-textfit": "^1.1.0",

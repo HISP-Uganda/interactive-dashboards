@@ -1,20 +1,17 @@
-import { Stack, Text } from "@chakra-ui/react";
+import { Stack } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { update } from "lodash";
-import React from "react";
 import Plot from "react-plotly.js";
-import { IVisualization } from "../../interfaces";
+import { ChartProps } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { exclusions } from "../../utils/utils";
 import { processGraphs } from "../processors";
+import VisualizationTitle from "./VisualizationTitle";
 
-type LineGraphProps = {
-  visualization: IVisualization;
+interface LineGraphProps extends ChartProps {
   category?: string;
   series?: string;
-  layoutProperties?: { [key: string]: any };
-  dataProperties?: { [key: string]: any };
-};
+}
 
 const LineGraph = ({
   visualization,
@@ -22,6 +19,7 @@ const LineGraph = ({
   series,
   layoutProperties,
   dataProperties,
+  section,
 }: LineGraphProps) => {
   const visualizationData = useStore($visualizationData);
   const metadata = useStore($visualizationMetadata);
@@ -53,16 +51,16 @@ const LineGraph = ({
   const titleCase = dataProperties?.["data.title.case"] || "uppercase";
   const titleColor = dataProperties?.["data.title.color"] || "black";
   return (
-    <Stack w="100%" h="100%">
+    <Stack w="100%" h="100%" spacing={0}>
       {visualization.name && (
-        <Text
-          textAlign="center"
+        <VisualizationTitle
+          section={section}
           fontSize={titleFontSize}
           textTransform={titleCase}
           color={titleColor}
-        >
-          {visualization.name}
-        </Text>
+          title={visualization.name}
+          fontWeight="bold"
+        />
       )}
       <Stack h="100%" w="100%" flex={1}>
         <Plot
