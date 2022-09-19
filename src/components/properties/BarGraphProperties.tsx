@@ -19,8 +19,7 @@ import { changeVisualizationProperties } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { customComponents } from "../../utils/components";
-import { chartTypes, colors } from "../../utils/utils";
-import { createOptions } from "./AvialableOptions";
+import { chartTypes, colors, createOptions } from "../../utils/utils";
 
 const barModes = createOptions(["stack", "group", "overlay", "relative"]);
 

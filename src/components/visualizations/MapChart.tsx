@@ -1,24 +1,19 @@
 import { Spinner, Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { max } from "lodash";
+import { max, orderBy, sortBy } from "lodash";
 import Plot from "react-plotly.js";
-import { IVisualization } from "../../interfaces";
+import { ChartProps, IVisualization } from "../../interfaces";
 import { findLevelsAndOus, useMaps } from "../../Queries";
 import { $indicators, $store, $visualizationData } from "../../Store";
-import { exclusions } from "../../utils/utils";
-import { createOptions } from "../properties/AvialableOptions";
-
-type MapChartProps = {
-  visualization: IVisualization;
-  layoutProperties?: { [key: string]: any };
-  dataProperties?: { [key: string]: any };
-};
+import { exclusions, createOptions } from "../../utils/utils";
+import VisualizationTitle from "./VisualizationTitle";
 
 const MapChart = ({
   visualization,
   dataProperties,
   layoutProperties,
-}: MapChartProps) => {
+  section,
+}: ChartProps) => {
   const visualizationData = useStore($visualizationData);
   const indicators = useStore($indicators);
 
@@ -34,15 +29,19 @@ const MapChart = ({
   const titleFontSize = dataProperties?.["data.title.fontsize"] || "1.5vh";
   const titleCase = dataProperties?.["data.title.case"] || "uppercase";
   const titleColor = dataProperties?.["data.title.color"] || "black";
-  const colorscale = Object.values(
-    dataProperties?.["data.mapKeys"] || {
-      "1": [0, "white"],
-      "2": [0.2, "lightyellow"],
-      "3": [0.4, "orange"],
-      "4": [0.6, "lime"],
-      "5": [0.8, "lightgreen"],
-      "6": [1.0, "green"],
-    }
+  const colorscale = orderBy(
+    Object.values(
+      dataProperties?.["data.mapKeys"] || {
+        "1": [0, "white"],
+        "2": [0.2, "lightyellow"],
+        "3": [0.4, "orange"],
+        "4": [0.6, "lime"],
+        "5": [0.8, "lightgreen"],
+        "6": [1.0, "green"],
+      }
+    ),
+    (v: [number, string]) => v[0],
+    ["asc"]
   );
   const store = useStore($store);
   const data = visualizationData[visualization.id]
@@ -63,16 +62,16 @@ const MapChart = ({
     <>
       {isLoading && <Spinner />}
       {isSuccess && (
-        <Stack w="100%" h="100%">
+        <Stack w="100%" h="100%" spacing={0}>
           {visualization.name && (
-            <Text
-              textAlign="center"
+            <VisualizationTitle
+              section={section}
               fontSize={titleFontSize}
               textTransform={titleCase}
               color={titleColor}
-            >
-              {visualization.name}
-            </Text>
+              title={visualization.name}
+              fontWeight="bold"
+            />
           )}
           <Stack h="100%" w="100%" flex={1}>
             <Plot

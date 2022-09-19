@@ -26,7 +26,7 @@ import useOnClickOutside from "use-onclickoutside";
 import { changeVisualizationProperties } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { generateUid } from "../../utils/uid";
-import { createOptions } from "./AvialableOptions";
+import { createOptions } from "../../utils/utils";
 
 type Threshold = { [key: string]: [number, string] };
 

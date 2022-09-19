@@ -7,7 +7,6 @@ import {
   CircularProgressLabel,
   Stack,
   Text,
-  Tooltip,
 } from "@chakra-ui/react";
 import { IVisualization } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
@@ -18,12 +17,6 @@ type SingleValueProps = {
   layoutProperties?: { [key: string]: any };
   dataProperties?: { [key: string]: any };
 };
-
-const numberFormatter = Intl.NumberFormat("en-US", {
-  style: "decimal",
-  // notation: "compact",
-  maximumFractionDigits: 0,
-});
 
 const ProgressBar = ({ bg, completed }: { bg: string; completed: number }) => {
   return (
@@ -63,12 +56,13 @@ const SingleValue = ({
   const data = visualizationData[visualization.id]
     ? visualizationData[visualization.id]
     : [];
+
   const value = processSingleValue(data);
 
   const colorSearch = dataProperties?.["data.thresholds"]?.find(
     ({ max, min }: any) => {
       if (max && min) {
-        return Number(value) >= Number(min) && Number(value) <= Number(max);
+        return Number(value) >= Number(min) && Number(value) < Number(max);
       } else if (min) {
         return Number(value) >= Number(min);
       } else if (max) {
@@ -79,14 +73,25 @@ const SingleValue = ({
 
   const prefix = dataProperties?.["data.prefix"];
   const suffix = dataProperties?.["data.suffix"];
-  const valueformat = dataProperties?.["data.valueformat"];
   const target = dataProperties?.["data.target"];
   const targetGraph = dataProperties?.["data.targetgraph"];
   const direction = dataProperties?.["data.direction"] || "column-reverse";
-  const titleFontSize = dataProperties?.["data.title.fontsize"] || "1.7vh";
+  const titleFontSize = dataProperties?.["data.title.fontSize"] || "2.0";
+  const titleFontWeight = dataProperties?.["data.title.fontWeight"] || 300;
   const titleCase = dataProperties?.["data.title.case"] || "uppercase";
   const titleColor = dataProperties?.["data.title.color"] || "black";
+  const fontWeight = dataProperties?.["data.format.fontWeight"] || 400;
+  const fontSize = dataProperties?.["data.format.fontSize"] || 2;
+  const spacing = dataProperties?.["data.format.spacing"] || 10;
+
   const alignment = dataProperties?.["data.alignment"] || "column";
+  const format = {
+    style: dataProperties?.["data.format.style"] || "decimal",
+    notation: dataProperties?.["data.format.notation"] || "standard",
+    maximumFractionDigits:
+      dataProperties?.["data.format.maximumFractionDigits"] || 0,
+  };
+
   useEffect(() => {
     if (colorSearch) {
       setColor(colorSearch.color);
@@ -97,68 +102,47 @@ const SingleValue = ({
     }
   }, [dataProperties]);
 
+  const numberFormatter = Intl.NumberFormat("en-US", format);
+
   return (
     <Stack
       alignItems="center"
-      alignContent="center"
-      justifyContent="center"
       justifyItems="center"
       direction={alignment}
       textAlign="center"
-      // flex={1}
-      // w="100%"
-      // h="100%"
-      spacing={
-        alignment === "row" || alignment === "row-reverse" ? "10px" : "5px"
-      }
+      spacing={`${spacing}px`}
     >
       {visualization.name && (
-        <Tooltip label={visualization.name} hasArrow placement="top">
-          <Text
-            textTransform="uppercase"
-            fontWeight="medium"
-            fontSize={titleFontSize}
-            color={titleColor}
-            whiteSpace={
-              alignment === "row" || alignment === "row-reverse"
-                ? "nowrap"
-                : "normal"
-            }
-            // noOfLines={
-            //   alignment === "row" || alignment === "row-reverse" ? undefined : 1
-            // }
-          >
-            {visualization.name}
-          </Text>
-        </Tooltip>
+        <Text
+          textTransform={titleCase}
+          fontWeight={titleFontWeight}
+          fontSize={`${titleFontSize}vh`}
+          color={titleColor}
+          whiteSpace="normal"
+        >
+          {visualization.name}
+        </Text>
       )}
       <Stack
-        w="100%"
         direction={direction}
         alignItems="center"
         alignContent="center"
         justifyContent="center"
         justifyItems="center"
-        flex={1}
-        h="100%"
+        spacing={`${spacing}px`}
       >
         {targetGraph === "circular" && target ? (
-          <CircularProgress
-            value={(processSingleValue(data) * 100) / Number(target)}
-          >
+          <CircularProgress value={(value * 100) / Number(target)}>
             <CircularProgressLabel>
-              {((processSingleValue(data) * 100) / Number(target)).toFixed(0)}%
+              {((value * 100) / Number(target)).toFixed(0)}%
             </CircularProgressLabel>
           </CircularProgress>
         ) : targetGraph === "progress" && target ? (
-          <ProgressBar
-            completed={(processSingleValue(data) * 100) / Number(target)}
-            bg="green"
-          />
+          <ProgressBar completed={(value * 100) / Number(target)} bg="green" />
         ) : null}
-        <Text fontSize={"3.3vh"} color={color} fontWeight="bold">
+        <Text fontSize={`${fontSize}vh`} color={color} fontWeight={fontWeight}>
           {prefix}
-          {numberFormatter.format(processSingleValue(data))}
+          {numberFormatter.format(value)}
           {suffix}
         </Text>
       </Stack>

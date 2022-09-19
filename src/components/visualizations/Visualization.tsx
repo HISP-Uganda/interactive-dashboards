@@ -1,5 +1,6 @@
-import { Spinner, Stack } from "@chakra-ui/react";
+import { Spinner } from "@chakra-ui/react";
 import { useStore } from "effector-react";
+import { fromPairs } from "lodash";
 import { ISection, IVisualization } from "../../interfaces";
 import { useVisualization } from "../../Queries";
 import {
@@ -10,23 +11,22 @@ import {
 } from "../../Store";
 import AreaGraph from "./AreaGraph";
 import BarGraph from "./BarGraph";
+import BoxPlot from "./BoxPlot";
 import BubbleMaps from "./BubbleMaps";
 import FunnelGraph from "./FunnelGraph";
 import GaugeGraph from "./GaugeGraph";
 import Histogram from "./Histogram";
 import LineGraph from "./LineGraph";
 import MapChart from "./MapChart";
+import Marquee from "./Marquee";
+import MultipleChartTypes from "./MultipleChartTypes";
 import PieChart from "./PieChart";
 import RadarGraph from "./RadarGraph";
+import ScatterPlot from "./ScatterPlot";
 import SingleValue from "./SingleValue";
 import SunburstChart from "./SunburstChart";
-import MultipleChartTypes from "./MultipleChartTypes";
-import TreeMaps from "./TreeMaps";
 import Tables from "./Tables";
-import BoxPlot from "./BoxPlot";
-import ScatterPlot from "./ScatterPlot";
-import { fromPairs } from "lodash";
-import Marquee from "./Marquee";
+import TreeMaps from "./TreeMaps";
 
 type VisualizationProps = {
   visualization: IVisualization;
@@ -69,6 +69,7 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
     ),
     pie: (
       <PieChart
+        section={section}
         visualization={visualization}
         {...otherProperties}
         layoutProperties={layoutProperties}
@@ -77,6 +78,7 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
     ),
     map: (
       <MapChart
+        section={section}
         visualization={visualization}
         {...otherProperties}
         layoutProperties={layoutProperties}
@@ -85,6 +87,7 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
     ),
     line: (
       <LineGraph
+        section={section}
         visualization={visualization}
         {...otherProperties}
         layoutProperties={layoutProperties}

@@ -60,6 +60,7 @@ export interface IVisualization extends INamed {
   refreshInterval?: number;
   overrides: { [key: string]: any };
   properties: { [key: string]: any };
+  group: string;
 }
 export interface ISection {
   id: string;
@@ -78,6 +79,7 @@ export interface ISection {
     | "end"
     | "baseline";
   display: string;
+  carouselOver: string;
   colSpan: number;
   rowSpan: number;
 }
@@ -170,3 +172,9 @@ export type OUTreeProps = {
   levels: Option[];
   groups: Option[];
 };
+export interface ChartProps {
+  visualization: IVisualization;
+  layoutProperties?: { [key: string]: any };
+  dataProperties?: { [key: string]: any };
+  section: ISection;
+}

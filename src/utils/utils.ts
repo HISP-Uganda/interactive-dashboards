@@ -554,3 +554,9 @@ export const chartTypes: Option[] = [
   { value: "boxplot", label: "Box Plot" },
   { value: "scatterplot", label: "Scatter Plot" },
 ];
+
+export const createOptions = (options: string[]): Option[] => {
+  return options.map((option: string) => {
+    return { label: option, value: option };
+  });
+};

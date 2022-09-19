@@ -15,47 +15,38 @@ import {
   useDisclosure,
   Radio,
   RadioGroup,
+  NumberDecrementStepper,
+  NumberIncrementStepper,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
 } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { ChangeEvent, useRef, useState } from "react";
 import { SwatchesPicker } from "react-color";
 import useOnClickOutside from "use-onclickoutside";
-import { changeVisualizationProperties } from "../../Events";
+import {
+  changeVisualizationAttribute,
+  changeVisualizationProperties,
+} from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { generateUid } from "../../utils/uid";
+import { createOptions } from "../../utils/utils";
 
 type Threshold = { id: string; min: string; max: string; color: string };
 
-const numberFormats: Option[] = [
-  {
-    label: "Zero decimals Short form",
-    value: ".0s",
-  },
-  {
-    label: "1 decimal Short form",
-    value: ".1s",
-  },
-  {
-    label: "2 decimal Short form",
-    value: ".2s",
-  },
-  {
-    label: "any decimal Short form",
-    value: "~s",
-  },
-  {
-    label: "Zero decimals full number",
-    value: ",.0f",
-  },
-  {
-    label: "1 Decimal full number",
-    value: ",.1f",
-  },
-  {
-    label: "2 Decimal full number",
-    value: ",.2f",
-  },
-];
+const fontWeights: Option[] = createOptions([
+  "100",
+  "200",
+  "300",
+  "400",
+  "500",
+  "600",
+  "700",
+  "800",
+  "900",
+  "950",
+]);
 const progressAlignments: Option[] = [
   {
     label: "Column",
@@ -170,21 +161,126 @@ const SingleValueProperties = ({
           })
         }
       />
-      <Text>Number format</Text>
-      <Select<Option, false, GroupBase<Option>>
-        value={numberFormats.find(
-          (pt) => pt.value === visualization.properties?.["data.valueformat"]
-        )}
-        onChange={(e) =>
+      <Text>Number format style</Text>
+      <RadioGroup
+        onChange={(e: string) =>
           changeVisualizationProperties({
             visualization: visualization.id,
-            attribute: "data.valueformat",
-            value: e?.value,
+            attribute: "data.format.style",
+            value: e,
           })
         }
-        options={numberFormats}
-        isClearable
-      />
+        value={visualization.properties["data.format.style"] || "decimal"}
+      >
+        <Stack direction="row">
+          <Radio value="decimal">Decimal</Radio>
+          <Radio value="percent">Percent</Radio>
+          <Radio value="currency">Currency</Radio>
+        </Stack>
+      </RadioGroup>
+
+      <Text>Number format notation</Text>
+      <RadioGroup
+        onChange={(e: string) =>
+          changeVisualizationProperties({
+            visualization: visualization.id,
+            attribute: "data.format.notation",
+            value: e,
+          })
+        }
+        value={visualization.properties["data.format.notation"] || "standard"}
+      >
+        <Stack direction="row">
+          <Radio value="standard">Standard</Radio>
+          <Radio value="compact">Compact</Radio>
+        </Stack>
+      </RadioGroup>
+
+      <Text>Number format decimal places</Text>
+      <NumberInput
+        value={
+          visualization.properties["data.format.maximumFractionDigits"] || 0
+        }
+        max={4}
+        min={0}
+        onChange={(value1: string, value2: number) =>
+          changeVisualizationProperties({
+            visualization: visualization.id,
+            attribute: "data.format.maximumFractionDigits",
+            value: value2,
+          })
+        }
+      >
+        <NumberInputField />
+        <NumberInputStepper>
+          <NumberIncrementStepper />
+          <NumberDecrementStepper />
+        </NumberInputStepper>
+      </NumberInput>
+
+      <Text>Value Font Size</Text>
+      <NumberInput
+        value={visualization.properties["data.format.fontSize"] || 2}
+        max={10}
+        min={1}
+        step={0.1}
+        onChange={(value1: string, value2: number) =>
+          changeVisualizationProperties({
+            visualization: visualization.id,
+            attribute: "data.format.fontSize",
+            value: value2,
+          })
+        }
+      >
+        <NumberInputField />
+        <NumberInputStepper>
+          <NumberIncrementStepper />
+          <NumberDecrementStepper />
+        </NumberInputStepper>
+      </NumberInput>
+
+      <Text>Value Font Weight</Text>
+      <NumberInput
+        value={visualization.properties["data.format.fontWeight"] || 400}
+        max={1000}
+        min={100}
+        step={50}
+        onChange={(value1: string, value2: number) =>
+          changeVisualizationProperties({
+            visualization: visualization.id,
+            attribute: "data.format.fontWeight",
+            value: value2,
+          })
+        }
+      >
+        <NumberInputField />
+        <NumberInputStepper>
+          <NumberIncrementStepper />
+          <NumberDecrementStepper />
+        </NumberInputStepper>
+      </NumberInput>
+
+      <Text>Label Value Spacing</Text>
+      <NumberInput
+        value={visualization.properties["data.format.spacing"] || 0}
+        max={100}
+        min={0}
+        step={1}
+        onChange={(value1: string, value2: number) =>
+          changeVisualizationProperties({
+            visualization: visualization.id,
+            attribute: "data.format.spacing",
+            value: value2,
+          })
+        }
+      >
+        <NumberInputField />
+        <NumberInputStepper>
+          <NumberIncrementStepper />
+          <NumberDecrementStepper />
+        </NumberInputStepper>
+      </NumberInput>
+
       <Stack direction="row" alignItems="center">
         <Text>Threshold</Text>
         <Spacer />
@@ -300,6 +396,18 @@ const SingleValueProperties = ({
         }
         options={progressAlignments}
         isClearable
+      />
+
+      <Text>Grouping</Text>
+      <Input
+        value={visualization.group}
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          changeVisualizationAttribute({
+            visualization: visualization.id,
+            attribute: "group",
+            value: e.target.value,
+          })
+        }
       />
     </Stack>
   );

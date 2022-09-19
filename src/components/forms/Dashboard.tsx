@@ -96,13 +96,19 @@ const Dashboard = () => {
           ) : (
             <Stack h="100%">
               {section.title && (
-                <VisualizationTitle section={section} fontSize={"18px"} textTransform={"uppercase"} color={"gray.500"} title={section.title} fontWeight="bold"/>
+                <VisualizationTitle
+                  section={section}
+                  fontSize={"18px"}
+                  textTransform={"uppercase"}
+                  color={"gray.500"}
+                  title={section.title}
+                  fontWeight="bold"
+                />
               )}
               <Stack
                 justifyContent={section.justifyContent || "space-around"}
                 direction={section.direction}
                 flex={1}
-                p="5px"
               >
                 {section.visualizations.map((visualization) => (
                   <Visualization
