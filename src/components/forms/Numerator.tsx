@@ -42,7 +42,7 @@ const Numerator = () => {
   const navigate = useNavigate();
 
   return (
-    <Stack spacing="20px" p="20px" w="100%">
+    <Stack spacing="20px" p="20px" w="100%" bg="white">
       <Stack>
         <Text>Numerator Name</Text>
         <Input
@@ -155,7 +155,8 @@ const Numerator = () => {
                   ) : (
                     <Input
                       value={
-                        indicator.numerator?.expressions?.[record]?.value || ""
+                        indicator.numerator?.expressions?.[record]?.value ||
+                        "NULL"
                       }
                       onChange={(e: ChangeEvent<HTMLInputElement>) =>
                         changeNumeratorExpressionValue({

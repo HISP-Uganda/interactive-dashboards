@@ -23,18 +23,7 @@ const SidebarContent = ({ ...rest }: SidebarProps) => {
   const categoryOptions = useStore($categoryOptions);
   const store = useStore($store);
   return (
-    <Stack
-      bg={useColorModeValue("white", "gray.900")}
-      w={{ base: "full", md: "250px" }}
-      backgroundColor="gray.300"
-      {...rest}
-      spacing="15px"
-      p="5px"
-    >
-      {/* <Flex alignItems="center" justifyContent="center">
-        <Image src={moh} alt="Dan Abramov" boxSize="100px" />
-      </Flex>
-      <Divider /> */}
+    <Stack w={{ base: "full", md: "250px" }} {...rest} spacing="15px" p="5px">
       <Button
         fontSize="xl"
         fontWeight="bold"
@@ -58,13 +47,6 @@ const SidebarContent = ({ ...rest }: SidebarProps) => {
           <NavItem key={link.value} option={link} />
         ))
       )}
-      {/* <Spacer />
-      <Divider />
-      <Flex alignItems="center" justifyContent="center">
-        <Image src={who} alt="WHO" boxSize="78px" p={0} m={0} />
-        <Spacer />
-        <Image src={hisp} alt="HISP" boxSize="78px" p={0} m={0} />
-      </Flex> */}
     </Stack>
   );
 };

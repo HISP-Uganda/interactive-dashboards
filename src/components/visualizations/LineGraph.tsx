@@ -62,7 +62,7 @@ const LineGraph = ({
           fontWeight="bold"
         />
       )}
-      <Stack h="100%" w="100%" flex={1}>
+      <Stack flex={1}>
         <Plot
           data={processGraphs(
             data,

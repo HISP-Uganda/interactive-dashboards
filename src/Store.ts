@@ -1,5 +1,5 @@
 import { combine } from "effector";
-import { fromPairs } from "lodash";
+import { fromPairs, isEqual, sortBy } from "lodash";
 import { domain } from "./Domain";
 import {
   addPagination,
@@ -55,6 +55,11 @@ import {
   changeVisualizationType,
   setDefaultDashboard,
   setCurrentPage,
+  setDataSets,
+  assignDataSet,
+  setCategorization,
+  setAvailableCategories,
+  setAvailableCategoryOptionCombos,
 } from "./Events";
 import {
   ICategory,
@@ -139,6 +144,10 @@ export const createDashboard = (id = generateUid()): IDashboard => {
     mode: "edit",
     name: "New Dashboard",
     refreshInterval: "off",
+    dataSet: "",
+    categorization: {},
+    availableCategories: [],
+    availableCategoryOptionCombos: [],
   };
 };
 
@@ -304,7 +313,22 @@ export const $dashboard = domain
       return s;
     });
     return { ...state, sections };
-  });
+  })
+  .on(assignDataSet, (state, dataSet) => {
+    return { ...state, dataSet };
+  })
+  .on(setCategorization, (state, categorization) => {
+    return { ...state, categorization };
+  })
+  .on(setAvailableCategories, (state, availableCategories) => {
+    return { ...state, availableCategories };
+  })
+  .on(
+    setAvailableCategoryOptionCombos,
+    (state, availableCategoryOptionCombos) => {
+      return { ...state, availableCategoryOptionCombos };
+    }
+  );
 
 export const $indicator = domain
   .createStore<IIndicator>(createIndicator())
@@ -552,6 +576,10 @@ export const $dashboards = domain
   .createStore<IDashboard[]>([])
   .on(setDashboards, (_, dashboards) => dashboards);
 
+export const $dataSets = domain
+  .createStore<Option[]>([])
+  .on(setDataSets, (_, dataSets) => dataSets);
+
 export const $hasDHIS2 = combine(
   $indicator,
   $dataSources,
@@ -649,18 +677,56 @@ export const $dashboardCategory = combine(
   }
 );
 
-export const $globalFilters = $store.map((state) => {
-  const periods = state.periods.flatMap(({ id }) => {
-    if (relativePeriodTypes.indexOf(id) !== -1) {
-      return getRelativePeriods(id);
+export const $categoryOptionCombo = $dashboard.map(
+  ({ categorization, availableCategoryOptionCombos }) => {
+    const combos = Object.values(categorization);
+    const availableCombos = availableCategoryOptionCombos.map(
+      ({ categoryOptions, id }: any) => {
+        return {
+          id,
+          categoryOptions: categoryOptions.map(({ id }: any) => id),
+        };
+      }
+    );
+    if (combos.length === 2) {
+      const category1 = combos[0].map(({ value }: any) => value);
+      const category2 = combos[1].map(({ value }: any) => value);
+      return category1
+        .flatMap((v: string) => {
+          return category2.map((v2) => {
+            const search = availableCombos.find(({ categoryOptions }: any) => {
+              return isEqual(sortBy([v, v2]), sortBy(categoryOptions));
+            });
+            return search?.id;
+          });
+        })
+        .filter((v) => !!v);
     }
-    return [id];
-  });
+    return [];
+  }
+);
 
-  return {
-    m5D13FqKZwN: periods,
-    of2WvtwqbHR: state.groups,
-    GQhi6pRnTKF: state.levels,
-    mclvD0Z9mfT: state.organisations,
-  };
+export const $globalFilters = combine(
+  $store,
+  $categoryOptionCombo,
+  (store, categoryOptionCombo) => {
+    const periods = store.periods.flatMap(({ id }) => {
+      if (relativePeriodTypes.indexOf(id) !== -1) {
+        return getRelativePeriods(id);
+      }
+      return [id];
+    });
+
+    return {
+      m5D13FqKZwN: periods,
+      of2WvtwqbHR: store.groups,
+      GQhi6pRnTKF: store.levels,
+      mclvD0Z9mfT: store.organisations,
+      WSiMOMi4QWh: categoryOptionCombo,
+    };
+  }
+);
+
+$categoryOptionCombo.watch((store) => {
+  // console.log(store);
 });

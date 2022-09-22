@@ -2,9 +2,9 @@ import {
   Box,
   Grid,
   GridItem,
+  SimpleGrid,
   Stack,
   useBreakpointValue,
-  Text,
 } from "@chakra-ui/react";
 import { MouseEvent } from "react";
 
@@ -77,9 +77,9 @@ const Dashboard = () => {
               }}
             >
               <Marquee
-                style={{ padding: 0, margin: 0 }}
+                style={{ padding: 0, margin: 0, fontFamily: "sans-serif" }}
                 gradient={false}
-                speed={40}
+                speed={30}
               >
                 {section.visualizations.map((visualization) => (
                   <Stack direction="row" key={visualization.id}>
@@ -105,19 +105,41 @@ const Dashboard = () => {
                   fontWeight="bold"
                 />
               )}
-              <Stack
-                justifyContent={section.justifyContent || "space-around"}
-                direction={section.direction}
-                flex={1}
-              >
-                {section.visualizations.map((visualization) => (
-                  <Visualization
-                    key={visualization.id}
-                    visualization={visualization}
-                    section={section}
-                  />
-                ))}
-              </Stack>
+
+              {section.direction === "grid" ? (
+                <SimpleGrid
+                  columns={2}
+                  h="100%"
+                  justifyContent="space-around"
+                  alignContent="space-around"
+                >
+                  {section.visualizations.map((visualization) => (
+                    <Visualization
+                      key={visualization.id}
+                      visualization={visualization}
+                      section={section}
+                    />
+                  ))}
+                </SimpleGrid>
+              ) : (
+                <Stack
+                  alignItems="center"
+                  justifyItems="center"
+                  alignContent="center"
+                  justifyContent={section.justifyContent || "space-around"}
+                  direction={section.direction}
+                  flex={1}
+                  p="5px"
+                >
+                  {section.visualizations.map((visualization) => (
+                    <Visualization
+                      key={visualization.id}
+                      visualization={visualization}
+                      section={section}
+                    />
+                  ))}
+                </Stack>
+              )}
             </Stack>
           )}
         </GridItem>

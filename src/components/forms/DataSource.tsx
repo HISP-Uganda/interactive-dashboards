@@ -70,7 +70,7 @@ const DataSource = () => {
     setShowSider(true);
   }, []);
   return (
-    <Box flex={1} p="20px">
+    <Box flex={1} p="20px" bg="white">
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing="20px">
           <FormControl isInvalid={!!errors.id}>
