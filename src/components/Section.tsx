@@ -12,6 +12,7 @@ import {
   NumberInputStepper,
   Radio,
   RadioGroup,
+  SimpleGrid,
   Spacer,
   Spinner,
   Stack,
@@ -326,23 +327,40 @@ const Section = () => {
                 fontWeight="bold"
               />
             )}
-            <Stack
-              alignItems="center"
-              justifyItems="center"
-              alignContent="center"
-              justifyContent={section.justifyContent || "space-around"}
-              direction={section.direction}
-              flex={1}
-              p="5px"
-            >
-              {section.visualizations.map((visualization) => (
-                <Visualization
-                  key={visualization.id}
-                  visualization={visualization}
-                  section={section}
-                />
-              ))}
-            </Stack>
+            {section.direction === "grid" ? (
+              <SimpleGrid
+                columns={2}
+                alignItems="center"
+                justifyContent="center"
+                alignContent="center"
+              >
+                {section.visualizations.map((visualization) => (
+                  <Visualization
+                    key={visualization.id}
+                    visualization={visualization}
+                    section={section}
+                  />
+                ))}
+              </SimpleGrid>
+            ) : (
+              <Stack
+                alignItems="center"
+                justifyItems="center"
+                alignContent="center"
+                justifyContent={section.justifyContent || "space-around"}
+                direction={section.direction}
+                flex={1}
+                p="5px"
+              >
+                {section.visualizations.map((visualization) => (
+                  <Visualization
+                    key={visualization.id}
+                    visualization={visualization}
+                    section={section}
+                  />
+                ))}
+              </Stack>
+            )}
           </Stack>
         )}
       </GridItem>
@@ -428,6 +446,7 @@ const Section = () => {
                       <Stack direction="row">
                         <Radio value="row">Horizontal</Radio>
                         <Radio value="column">Vertical</Radio>
+                        <Radio value="grid">Grid</Radio>
                       </Stack>
                     </RadioGroup>
 

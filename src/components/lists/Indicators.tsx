@@ -60,12 +60,7 @@ const Indicators = () => {
       </Stack>
       {isLoading && <Spinner />}
       {isSuccess && (
-        <Stack
-          direction="row"
-          overflow="auto"
-          h="calc(100vh - 300px)"
-          spacing="10px"
-        >
+        <Stack direction="row" overflow="auto" spacing="10px">
           <Table variant="simple">
             <Thead>
               <Tr>

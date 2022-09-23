@@ -66,7 +66,7 @@ export interface ISection {
   id: string;
   title: string;
   visualizations: IVisualization[];
-  direction: "row" | "column";
+  direction: "row" | "column" | "grid";
   justifyContent:
     | "flex-start"
     | "flex-end"
@@ -98,6 +98,10 @@ export interface IDashboard extends INamed {
   refreshInterval: string;
   rows: number;
   columns: number;
+  dataSet: string;
+  categorization: { [key: string]: any[] };
+  availableCategories: any[];
+  availableCategoryOptionCombos: any[];
 }
 export interface Pagination {
   total: number;

@@ -2682,6 +2682,16 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
+"@fontsource/aguafina-script@^4.5.9":
+  version "4.5.9"
+  resolved "https://registry.yarnpkg.com/@fontsource/aguafina-script/-/aguafina-script-4.5.9.tgz#eff83caf77d2d22ad0a1339f47443cb1eb646003"
+  integrity sha512-BqXzOch4h2Fku1XSwByk9BtyCiXi+tPBa0cuP+Z8aipn5oEYuO1BvuRvJXkMI5KcfMtHeFKOUdL/tSacxllmjQ==
+
+"@fontsource/montserrat@^4.5.12":
+  version "4.5.12"
+  resolved "https://registry.yarnpkg.com/@fontsource/montserrat/-/montserrat-4.5.12.tgz#465c61fb508f6d0055dbcbfbc6eb7307a81fdf6f"
+  integrity sha512-UQ+4ijm1sddIBtmEZ9bKgCB1rSi4Imog0YKz7wDLtMQ3Mw2ZaBseTgoLDfbWnfdowS0PLp+Z4T2KZ/1AySTlDQ==
+
 "@fontsource/open-sans@^4.5.11":
   version "4.5.11"
   resolved "https://registry.yarnpkg.com/@fontsource/open-sans/-/open-sans-4.5.11.tgz#1e9f4346599bdc7752b741d17ee30ef4ebbc15e6"

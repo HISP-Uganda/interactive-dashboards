@@ -15,6 +15,7 @@ const MapChart = ({
   section,
 }: ChartProps) => {
   const visualizationData = useStore($visualizationData);
+  console.log(visualizationData);
   const indicators = useStore($indicators);
 
   const indicator = indicators.find((v) => v.id === visualization.indicator);
@@ -83,7 +84,9 @@ const MapChart = ({
                     (ou: { id: string; name: string }) => ou.name
                   ),
                   z: metadata.organisationUnits.map(({ id }: any) => {
-                    const dataValue = data.find((dt: any) => dt.ou === id);
+                    const dataValue = data.find(
+                      (dt: any) => dt.ou === id || dt.c === id
+                    );
                     if (dataValue) {
                       return dataValue.value;
                     }

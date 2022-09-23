@@ -1,6 +1,3 @@
-import { SingleValue } from "chakra-react-select";
-import moment from "moment";
-import { RangeValue } from "rc-picker/lib/interface";
 import { Layout, Layouts } from "react-grid-layout";
 import { domain } from "./Domain";
 import {
@@ -12,7 +9,6 @@ import {
   IIndicator,
   ISection,
   Item,
-  IVisualization,
   Option,
 } from "./interfaces";
 
@@ -182,3 +178,12 @@ export const onChangeOrganisations = domain.createEvent<{
 }>();
 
 export const setCurrentPage = domain.createEvent<string>();
+
+export const setDataSets = domain.createEvent<Option[]>();
+export const assignDataSet = domain.createEvent<string>();
+
+export const setCategorization = domain.createEvent<{
+  [key: string]: any[];
+}>();
+export const setAvailableCategories = domain.createEvent<any[]>();
+export const setAvailableCategoryOptionCombos = domain.createEvent<any[]>();
