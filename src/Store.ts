@@ -85,6 +85,7 @@ export const createSection = (id = generateUid()): ISection => {
     display: "normal",
     justifyContent: "space-around",
     carouselOver: "items",
+    images: [],
   };
 };
 
@@ -148,6 +149,7 @@ export const createDashboard = (id = generateUid()): IDashboard => {
     categorization: {},
     availableCategories: [],
     availableCategoryOptionCombos: [],
+    bottomSection: createSection(),
   };
 };
 
@@ -260,7 +262,12 @@ export const $dashboard = domain
     };
   })
   .on(setCurrentDashboard, (_, dashboard) => {
-    return dashboard;
+    return {
+      ...dashboard,
+      bottomSection: dashboard.bottomSection
+        ? dashboard.bottomSection
+        : createSection(),
+    };
   })
   .on(changeLayouts, (state, { currentLayout, allLayouts }) => {
     const sections = state.sections.map((s) => {
@@ -496,7 +503,7 @@ export const $indicator = domain
 export const $section = domain
   .createStore<ISection>(createSection())
   .on(setCurrentSection, (_, section) => {
-    return section;
+    return { ...section, images: section.images ? section.images : [] };
   })
   .on(addVisualization2Section, (state) => {
     const visualization: IVisualization = {

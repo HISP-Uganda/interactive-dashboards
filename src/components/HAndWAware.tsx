@@ -1,24 +1,31 @@
-import { Box, Flex, Image, Text, StackProps, Stack } from "@chakra-ui/react";
-import React from "react";
+import { Image, Stack, StackProps } from "@chakra-ui/react";
 import { useElementSize } from "usehooks-ts";
 
-interface HAndWAwareProps extends StackProps {}
+interface HAndWAwareProps extends StackProps {
+  src: string;
+  minusH: number;
+  minusW: number;
+}
 
-const HAndWAware = ({ children, ...rest }: HAndWAwareProps) => {
+const HAndWAware = ({ src, minusH, minusW, ...rest }: HAndWAwareProps) => {
   const [squareRef, { width, height }] = useElementSize();
-
   return (
     <Stack
       ref={squareRef}
       h="100%"
-      align="center"
-      width="100%"
+      w="100%"
       alignItems="center"
       justifyItems="center"
       justifyContent="center"
       alignContent="center"
+      flex={1}
+      {...rest}
     >
-      <Stack w={`${width}px`}>{children}</Stack>
+      <Image
+        maxH={`${height - minusH}px`}
+        src={src}
+        maxW={`${width - minusW}px`}
+      />
     </Stack>
   );
 };

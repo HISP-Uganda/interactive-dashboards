@@ -1161,22 +1161,34 @@ export const useVisualization = (
           const numerator: any = data.numerator;
           if (numerator && numerator.listGrid) {
             const { headers, rows } = numerator.listGrid;
-            processed = rows.map((row: string[]) => {
-              return fromPairs(
-                headers.map((h: any, i: number) => [h.name, row[i]])
-              );
-            });
+            if (rows.length > 0) {
+              processed = rows.map((row: string[]) => {
+                return fromPairs(
+                  headers.map((h: any, i: number) => [h.name, row[i]])
+                );
+              });
+            } else {
+              processed = [
+                fromPairs(headers.map((h: any, i: number) => [h.name, 0])),
+              ];
+            }
           } else if (numerator) {
             const {
               headers,
               rows,
               metaData: { items },
             } = numerator;
-            processed = rows.map((row: string[]) => {
-              return fromPairs(
-                headers.map((h: any, i: number) => [h.name, row[i]])
-              );
-            });
+            if (rows.length > 0) {
+              processed = rows.map((row: string[]) => {
+                return fromPairs(
+                  headers.map((h: any, i: number) => [h.name, row[i]])
+                );
+              });
+            } else {
+              processed = [
+                fromPairs(headers.map((h: any, i: number) => [h.name, 0])),
+              ];
+            }
             metadata = items;
           }
         }

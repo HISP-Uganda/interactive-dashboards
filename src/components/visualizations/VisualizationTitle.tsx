@@ -1,4 +1,4 @@
-import { Stack, StackProps, Text } from "@chakra-ui/react";
+import { Spacer, Stack, StackProps, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { ISection } from "../../interfaces";
 import VisualizationMenu from "./VisualizationMenu";
@@ -26,11 +26,13 @@ const VisualizationTitle = ({
       onMouseEnter={() => setShowMenu(true)}
       onMouseLeave={() => setShowMenu(false)}
       bg="gray.200"
+      px="5px"
       {...rest}
     >
-      <Text textAlign="center" noOfLines={1} flex={1}>
+      <Text textAlign="center" noOfLines={1}>
         {title}
       </Text>
+      <Spacer />
       {showMenu && <VisualizationMenu section={section} />}
     </Stack>
   );

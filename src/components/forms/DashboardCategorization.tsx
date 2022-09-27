@@ -4,7 +4,7 @@ import { useStore } from "effector-react";
 import { setCategorization } from "../../Events";
 import { Option } from "../../interfaces";
 import { useDataSet } from "../../Queries";
-import { $dashboard } from "../../Store";
+import { $dashboard, $store } from "../../Store";
 
 type DashboardCategorizationProps = {
   dataSet: string;
@@ -12,11 +12,12 @@ type DashboardCategorizationProps = {
 const DashboardCategorization = ({ dataSet }: DashboardCategorizationProps) => {
   const { isLoading, isSuccess, isError, error } = useDataSet(dataSet);
   const dashboard = useStore($dashboard);
+  const store = useStore($store);
   return (
     <>
       {isLoading && <Spinner />}
       {isSuccess && (
-        <>
+        <Stack flex={1} direction="row" spacing="20px">
           {dashboard.availableCategories.map(
             ({ id, name, categoryOptions }) => {
               return (
@@ -26,8 +27,10 @@ const DashboardCategorization = ({ dataSet }: DashboardCategorizationProps) => {
                   alignItems="center"
                   alignContent="center"
                 >
-                  <Text>{name}</Text>
-                  <Box w="150px" bg="white">
+                  <Text fontWeight="bold" fontSize="16px">
+                    {name}
+                  </Text>
+                  <Box w={store.isAdmin ? "150px" : "100%"} bg="white" flex={1}>
                     <Select<Option, true, GroupBase<Option>>
                       value={dashboard.categorization[id]}
                       hideSelectedOptions={false}
@@ -46,7 +49,7 @@ const DashboardCategorization = ({ dataSet }: DashboardCategorizationProps) => {
               );
             }
           )}
-        </>
+        </Stack>
       )}
     </>
   );

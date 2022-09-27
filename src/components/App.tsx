@@ -4,8 +4,10 @@ import {
   Grid,
   GridItem,
   Image,
+  Spacer,
   Spinner,
   Stack,
+  Text,
 } from "@chakra-ui/react";
 import {
   createHashHistory,
@@ -16,7 +18,9 @@ import {
   Router,
   stringifySearchWith,
 } from "@tanstack/react-location";
+import { useEffect } from "react";
 import { useStore } from "effector-react";
+import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import {
   CategoryForm,
   DashboardForm,
@@ -55,7 +59,7 @@ import {
 } from "../Store";
 import { decodeFromBinary, encodeToBinary } from "../utils/utils";
 import DashboardMenu from "./DashboardMenu";
-import MOHLogo from "./MOHLogo";
+import moh from "../images/moh.json";
 import SectionMenu from "./SectionMenu";
 import SidebarContent from "./SidebarContent";
 
@@ -78,14 +82,25 @@ const App = () => {
   const dataSources = useStore($dataSources);
   const indicators = useStore($indicators);
   const categories = useStore($categories);
+  const handle = useFullScreenHandle();
 
   const topMenuOptions: { [key: string]: any } = {
     dashboards: <DashboardMenu />,
     sections: <SectionMenu />,
   };
 
-  const rowSpans2 = [1, 10, 1];
-  const rowSpans = [1, 11];
+  useEffect(() => {
+    const callback = async (event: KeyboardEvent) => {
+      if (event.key === "F" || event.key === "f") {
+        await handle.enter();
+      }
+    };
+    document.addEventListener("keydown", callback);
+    return () => {
+      document.removeEventListener("keydown", callback);
+    };
+  }, []);
+
   return (
     <>
       {isLoading && (
@@ -235,87 +250,99 @@ const App = () => {
           ]}
         >
           <Grid
-            // templateRows="100px 1fr"
             templateColumns="250px 1fr"
             gap={1}
+            maxH="calc(100vh - 48px)"
             h="calc(100vh - 48px)"
-            // w="100vw"
             p="5px"
           >
             <GridItem h="100%">
-              <Grid templateRows="repeat(12, 1fr)" gap={1} h="100%">
-                <GridItem rowSpan={rowSpans2[0]} h="100%">
+              <Grid templateRows="repeat(14, 1fr)" gap={1} h="100%">
+                <GridItem rowSpan={2} h="100%">
                   <Stack
-                    alignItems="center"
-                    justifyItems="center"
-                    justifyContent="center"
-                    alignContent="center"
                     h="100%"
+                    w="100%"
+                    alignItems="center"
+                    alignContent="center"
+                    justifyContent="center"
+                    justifyItems="center"
                   >
-                    <MOHLogo />
+                    <Image src={moh} maxH="110px" />
                   </Stack>
                 </GridItem>
-                <GridItem rowSpan={rowSpans2[1]}>
+                <GridItem rowSpan={11} h="100%">
                   <SidebarContent />
                 </GridItem>
-                <GridItem rowSpan={rowSpans2[2]} h="100%">
-                  {/* <HAndWAware src={hisp} /> */}
+                <GridItem rowSpan={1} h="100%" bg="white">
                   <Stack
-                    alignItems="center"
-                    justifyItems="center"
-                    justifyContent="center"
-                    alignContent="center"
                     h="100%"
+                    w="100%"
+                    alignItems="center"
+                    alignContent="center"
+                    justifyContent="center"
+                    justifyItems="center"
                   >
                     <Image
                       src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/logo.png"
-                      alt="Ministry of Health"
-                      w="100%"
-                      maxWidth="110px"
-                      h="auto"
+                      maxW="140px"
                     />
                   </Stack>
                 </GridItem>
               </Grid>
             </GridItem>
-            <GridItem h="100%">
-              <Grid templateRows="repeat(12, 1fr)" gap={1} h="100%">
-                <GridItem h="100%" rowSpan={rowSpans[0]}>
-                  <Grid templateColumns="1fr 250px" h="100%" gap={1}>
-                    <GridItem h="100%">
-                      <Stack
-                        h="100%"
-                        justifyContent="center"
-                        alignContent="center"
-                      >
-                        {topMenuOptions[store.currentPage]}
-                      </Stack>
-                    </GridItem>
-                    <GridItem>
-                      {/* <HAndWAware src={who} /> */}
-                      <Stack
-                        alignItems="center"
-                        justifyItems="center"
-                        justifyContent="center"
-                        alignContent="center"
-                        h="100%"
-                      >
-                        <Image
-                          src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/h-logo-blue.svg"
-                          alt="Ministry of Health"
+            <FullScreen handle={handle}>
+              <GridItem
+                h="100%"
+                bg={handle.active ? "gray.300" : ""}
+                p={handle.active ? "5px" : ""}
+              >
+                <Grid templateRows="repeat(14, 1fr)" gap={1} h="100%">
+                  <GridItem h="100%" rowSpan={1}>
+                    <Stack
+                      h="100%"
+                      justifyContent="center"
+                      alignContent="center"
+                    >
+                      {topMenuOptions[store.currentPage]}
+                    </Stack>
+                  </GridItem>
+                  <GridItem rowSpan={12} h="100%">
+                    <Outlet />
+                  </GridItem>
+                  <GridItem rowSpan={1} h="100%" w="100%" bg="white">
+                    <Grid templateColumns="repeat(24, 1fr)" h="100%" w="100%">
+                      <GridItem colSpan={21} h="100%" w="100%">
+                        <Stack
+                          h="100%"
                           w="100%"
-                          maxWidth="160px"
-                          h="auto"
-                        />
-                      </Stack>
-                    </GridItem>
-                  </Grid>
-                </GridItem>
-                <GridItem rowSpan={rowSpans[1]} h="100%">
-                  <Outlet />
-                </GridItem>
-              </Grid>
-            </GridItem>
+                          // alignItems="center"
+                          justifyItems="center"
+                          justifyContent="center"
+                          alignContent="center"
+                        >
+                          <Text>Testing</Text>
+                        </Stack>
+                      </GridItem>
+                      <GridItem h="100%" w="100%" colSpan={3}>
+                        <Stack
+                          h="100%"
+                          w="100%"
+                          alignItems="center"
+                          alignContent="center"
+                          justifyContent="center"
+                          justifyItems="center"
+                        >
+                          <Image
+                            src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/h-logo-blue.svg"
+                            maxH="56px"
+                          />
+                        </Stack>
+                      </GridItem>
+                    </Grid>
+                  </GridItem>
+                </Grid>
+              </GridItem>
+            </FullScreen>
           </Grid>
         </Router>
       )}

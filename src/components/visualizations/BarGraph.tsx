@@ -61,9 +61,9 @@ const BarGraph = ({
       {visualization.name && (
         <VisualizationTitle
           section={section}
-          fontSize={titleFontSize}
-          textTransform={titleCase}
-          color={titleColor}
+          fontSize={"18px"}
+          textTransform={"uppercase"}
+          color={"gray.500"}
           title={visualization.name}
           fontWeight="bold"
         />
