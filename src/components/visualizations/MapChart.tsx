@@ -1,11 +1,11 @@
-import { Spinner, Stack, Text } from "@chakra-ui/react";
+import { Spinner, Stack } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { max, orderBy, sortBy } from "lodash";
+import { max, orderBy } from "lodash";
 import Plot from "react-plotly.js";
-import { ChartProps, IVisualization } from "../../interfaces";
+import { ChartProps } from "../../interfaces";
 import { findLevelsAndOus, useMaps } from "../../Queries";
 import { $indicators, $store, $visualizationData } from "../../Store";
-import { exclusions, createOptions } from "../../utils/utils";
+import { exclusions } from "../../utils/utils";
 import VisualizationTitle from "./VisualizationTitle";
 
 const MapChart = ({
@@ -15,7 +15,6 @@ const MapChart = ({
   section,
 }: ChartProps) => {
   const visualizationData = useStore($visualizationData);
-  console.log(visualizationData);
   const indicators = useStore($indicators);
 
   const indicator = indicators.find((v) => v.id === visualization.indicator);

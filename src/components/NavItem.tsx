@@ -2,11 +2,11 @@ import { groupBy } from "lodash";
 import { useState } from "react";
 
 import { Box, Stack, Text } from "@chakra-ui/react";
-import { useNavigate } from "@tanstack/react-location";
+import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { $category, $dashboard, $dashboards, $store } from "../Store";
 
-import { Option } from "../interfaces";
+import { FormGenerics, Option } from "../interfaces";
 import { changeSelectedCategory } from "../Events";
 
 interface NavItemProps {
@@ -15,11 +15,11 @@ interface NavItemProps {
 }
 const NavItem = ({ option: { label, value } }: NavItemProps) => {
   const navigate = useNavigate();
+  const search = useSearch<FormGenerics>();
   const store = useStore($store);
   const dashboards = groupBy(useStore($dashboards), "category");
   const dashboard = useStore($dashboard);
   const [active, setActive] = useState<string>(store.selectedCategory);
-  const category = useStore($category);
   const toggle = (id: string) => {
     if (active === id) {
       setActive("");
@@ -27,7 +27,6 @@ const NavItem = ({ option: { label, value } }: NavItemProps) => {
       setActive(id);
     }
   };
-
   const getDashboards = (category: string) => {
     return dashboards[category] || [];
   };
@@ -44,13 +43,7 @@ const NavItem = ({ option: { label, value } }: NavItemProps) => {
         if (categoryDashboards.length > 0) {
           navigate({
             to: `/dashboards/${categoryDashboards[0].id}`,
-            search: {
-              category: value,
-              periods: store.periods.map((i) => i.id),
-              organisations: store.organisations,
-              groups: store.groups,
-              levels: store.levels,
-            },
+            search,
           });
         }
       }}
@@ -82,13 +75,7 @@ const NavItem = ({ option: { label, value } }: NavItemProps) => {
                 e.stopPropagation();
                 navigate({
                   to: `/dashboards/${d.id}`,
-                  search: {
-                    category: value,
-                    periods: store.periods.map((i) => i.id),
-                    organisations: store.organisations,
-                    groups: store.groups,
-                    levels: store.levels,
-                  },
+                  search,
                 });
               }}
             >

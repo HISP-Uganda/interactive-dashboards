@@ -15,8 +15,11 @@ const ColorPalette = ({ visualization, attribute }: ColorPalletProps) => {
   const ref = React.useRef(null);
   useOnClickOutside(ref, onClose);
   return (
-    <Stack position="relative">
+    <Stack position="relative" bg="gray.400" p="5px">
       <Text
+        // width="36px"
+        height="24px"
+        borderRadius="2px"
         bg={visualization.properties?.[attribute] || "black"}
         onClick={onToggle}
       >

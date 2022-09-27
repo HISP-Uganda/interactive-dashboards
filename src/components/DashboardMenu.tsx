@@ -10,7 +10,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Spacer,
   Stack,
   Text,
   Textarea,
@@ -30,7 +29,6 @@ import {
   changeDashboardName,
   changePeriods,
   setCurrentDashboard,
-  setCurrentPage,
   setCurrentSection,
   setDashboards,
   setDefaultDashboard,
@@ -113,20 +111,9 @@ const DashboardMenu = () => {
       alignItems="center"
       justifyContent="center"
       justifyItems="center"
+      flex={1}
       h="50px"
     >
-      {/* {store.isAdmin && (
-        <Button
-          type="button"
-          colorScheme="blue"
-          onClick={() => {
-            navigate({ to: "/dashboards" });
-            setCurrentPage("");
-          }}
-        >
-          Manage Dashboards
-        </Button>
-      )} */}
       {store.isAdmin && (
         <Stack
           direction="row"
@@ -146,7 +133,6 @@ const DashboardMenu = () => {
           </Box>
         </Stack>
       )}
-      <Spacer />
       <Text fontSize="xl" fontWeight="bold">
         Filters
       </Text>

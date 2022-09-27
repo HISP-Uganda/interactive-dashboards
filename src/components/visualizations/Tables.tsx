@@ -1,5 +1,4 @@
 import { useStore } from "effector-react";
-import Plot from "react-plotly.js";
 import { IVisualization } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { processGraphs } from "../processors";

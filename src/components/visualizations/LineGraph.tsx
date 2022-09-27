@@ -85,6 +85,7 @@ const LineGraph = ({
             xaxis: {
               automargin: true,
               showgrid: false,
+              type: "category",
             },
             legend: {
               orientation: "h",
