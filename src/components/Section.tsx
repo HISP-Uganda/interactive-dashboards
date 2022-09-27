@@ -1,6 +1,5 @@
 import { ChevronDownIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import {
-  Box,
   Button,
   Grid,
   GridItem,
@@ -20,7 +19,6 @@ import {
 import { GroupBase, Select, SingleValue } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { ChangeEvent, useEffect, useState } from "react";
-import Marquee from "react-fast-marquee";
 import {
   addVisualization2Section,
   changeSectionAttribute,
@@ -34,58 +32,9 @@ import { useVisualizationData } from "../Queries";
 import { $indicators, $section } from "../Store";
 import { chartTypes } from "../utils/utils";
 import ColorPalette from "./ColorPalette";
-import HAndWAware from "./HAndWAware";
-import Carousel from "./visualizations/Carousel";
-import Visualization from "./visualizations/Visualization";
+import SectionImages from "./SectionImages";
+import SectionVisualization from "./SectionVisualization";
 import VisualizationProperties from "./visualizations/VisualizationProperties";
-import VisualizationTitle from "./visualizations/VisualizationTitle";
-
-const fontSizes: Option[] = [
-  {
-    label: "0.5vh",
-    value: "0.5vh",
-  },
-  {
-    label: "1.0vh",
-    value: "1.0vh",
-  },
-  {
-    label: "1.5vh",
-    value: "1.5vh",
-  },
-  {
-    label: "2.0vh",
-    value: "2.0vh",
-  },
-  {
-    label: "2.5vh",
-    value: "2.5vh",
-  },
-  {
-    label: "3.0vh",
-    value: "3.0vh",
-  },
-  {
-    label: "3.5vh",
-    value: "3.5vh",
-  },
-  {
-    label: "4.0vh",
-    value: "4.0vh",
-  },
-  {
-    label: "4.5vh",
-    value: "4.5vh",
-  },
-  {
-    label: "5.0vh",
-    value: "5.0vh",
-  },
-  {
-    label: "5.5vh",
-    value: "5.5vh",
-  },
-];
 
 const alignmentOptions: Option[] = [
   { label: "flex-start", value: "flex-start" },
@@ -293,62 +242,11 @@ const Section = () => {
   return (
     <Grid templateColumns="1fr 30%" gap={1} h="100%">
       <GridItem bg="white" h="100%" w="100%">
-        {section.display === "carousel" ? (
-          <Carousel {...section} />
-        ) : section.display === "marquee" ? (
-          <HAndWAware h="100%" w="100%">
-            <Marquee
-              style={{ padding: 0, margin: 0 }}
-              gradient={false}
-              speed={40}
-            >
-              {section.visualizations.map((visualization) => (
-                <Stack direction="row" key={visualization.id}>
-                  <Visualization
-                    section={section}
-                    key={visualization.id}
-                    visualization={visualization}
-                  />
-                  <Box w="50px">&nbsp;</Box>
-                </Stack>
-              ))}
-            </Marquee>
-          </HAndWAware>
-        ) : (
-          <Stack h="100%">
-            {section.title && (
-              <VisualizationTitle
-                section={section}
-                fontSize={"18px"}
-                textTransform={"uppercase"}
-                color={"gray.500"}
-                title={section.title}
-                fontWeight="bold"
-              />
-            )}
-            <Stack
-              alignItems="center"
-              justifyItems="center"
-              alignContent="center"
-              justifyContent={section.justifyContent || "space-around"}
-              direction={section.direction}
-              flex={1}
-              p="5px"
-            >
-              {section.visualizations.map((visualization) => (
-                <Visualization
-                  key={visualization.id}
-                  visualization={visualization}
-                  section={section}
-                />
-              ))}
-            </Stack>
-          </Stack>
-        )}
+        <SectionVisualization {...section} />
       </GridItem>
       <GridItem h="100%">
         <Grid templateRows="1fr 48px" gap={1} h="100%">
-          <GridItem bg="white" overflow="auto" p="5px">
+          <GridItem bg="white" overflow="auto">
             <Stack h="calc(100vh - 300px)" overflow="auto">
               <Stack spacing="20px">
                 <Stack
@@ -459,9 +357,10 @@ const Section = () => {
                         <Radio value="normal">Normal</Radio>
                         <Radio value="carousel">Carousel</Radio>
                         <Radio value="marquee">Marquee</Radio>
+                        <Radio value="grid">Grid</Radio>
+                        <Radio value="tab">Tabs</Radio>
                       </Stack>
                     </RadioGroup>
-
                     <Text>Carousel Over</Text>
                     <RadioGroup
                       value={section.carouselOver}
@@ -477,6 +376,7 @@ const Section = () => {
                         <Radio value="groups">Groups</Radio>
                       </Stack>
                     </RadioGroup>
+                    <SectionImages />
                   </Stack>
                 )}
               </Stack>

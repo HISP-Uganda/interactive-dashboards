@@ -1,8 +1,12 @@
 import { MakeGenerics } from "@tanstack/react-location";
 import { OptionBase } from "chakra-react-select";
 import { Event } from "effector";
-import { Layout, Layouts } from "react-grid-layout";
 
+export interface Image {
+  id: string;
+  src: string;
+  alignment: string;
+}
 export interface DataValueAttribute {
   attribute: "name" | "description" | "type" | "query" | "accessor";
   value: any;
@@ -78,10 +82,11 @@ export interface ISection {
     | "start"
     | "end"
     | "baseline";
-  display: string;
+  display: "normal" | "carousel" | "marquee" | "grid";
   carouselOver: string;
   colSpan: number;
   rowSpan: number;
+  images: Image[];
 }
 
 export interface IFilter {}
@@ -98,6 +103,11 @@ export interface IDashboard extends INamed {
   refreshInterval: string;
   rows: number;
   columns: number;
+  dataSet: string;
+  categorization: { [key: string]: any[] };
+  availableCategories: any[];
+  availableCategoryOptionCombos: any[];
+  bottomSection: ISection;
 }
 export interface Pagination {
   total: number;

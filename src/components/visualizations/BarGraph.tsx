@@ -28,8 +28,6 @@ const BarGraph = ({
 }: BarGraphProps) => {
   const visualizationData = useStore($visualizationData);
   const metadata = useStore($visualizationMetadata);
-  const [squareRef, { width, height }] = useElementSize();
-
   const data = visualizationData[visualization.id]
     ? visualizationData[visualization.id]
     : [];
@@ -59,13 +57,13 @@ const BarGraph = ({
   const titleCase = dataProperties?.["data.title.case"] || "uppercase";
   const titleColor = dataProperties?.["data.title.color"] || "black";
   return (
-    <Stack ref={squareRef} h="100%" spacing={0}>
+    <Stack h="100%" spacing={0} w="100%">
       {visualization.name && (
         <VisualizationTitle
           section={section}
-          fontSize={titleFontSize}
-          textTransform={titleCase}
-          color={titleColor}
+          fontSize={"18px"}
+          textTransform={"uppercase"}
+          color={"gray.500"}
           title={visualization.name}
           fontWeight="bold"
         />
@@ -93,6 +91,7 @@ const BarGraph = ({
             xaxis: {
               automargin: true,
               showgrid: false,
+              type: "category",
             },
             ...availableProperties.layout,
           }}

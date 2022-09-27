@@ -1,11 +1,11 @@
-import { Spinner, Stack, Text } from "@chakra-ui/react";
+import { Spinner, Stack } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { max, orderBy, sortBy } from "lodash";
+import { max, orderBy } from "lodash";
 import Plot from "react-plotly.js";
-import { ChartProps, IVisualization } from "../../interfaces";
+import { ChartProps } from "../../interfaces";
 import { findLevelsAndOus, useMaps } from "../../Queries";
 import { $indicators, $store, $visualizationData } from "../../Store";
-import { exclusions, createOptions } from "../../utils/utils";
+import { exclusions } from "../../utils/utils";
 import VisualizationTitle from "./VisualizationTitle";
 
 const MapChart = ({
@@ -83,7 +83,9 @@ const MapChart = ({
                     (ou: { id: string; name: string }) => ou.name
                   ),
                   z: metadata.organisationUnits.map(({ id }: any) => {
-                    const dataValue = data.find((dt: any) => dt.ou === id);
+                    const dataValue = data.find(
+                      (dt: any) => dt.ou === id || dt.c === id
+                    );
                     if (dataValue) {
                       return dataValue.value;
                     }

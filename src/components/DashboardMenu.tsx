@@ -2,8 +2,6 @@ import {
   Box,
   Button,
   Checkbox,
-  Grid,
-  GridItem,
   Input,
   Modal,
   ModalBody,
@@ -16,53 +14,48 @@ import {
   Stack,
   Text,
   Textarea,
-  useBreakpointValue,
   useDisclosure,
 } from "@chakra-ui/react";
-import { GroupBase, Select } from "chakra-react-select";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
+import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { useState, ChangeEvent } from "react";
+import { ChangeEvent } from "react";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import {
+  assignDataSet,
   changeCategory,
   changeDashboardDescription,
   changeDashboardName,
   changePeriods,
   setCurrentDashboard,
-  setCurrentPage,
   setCurrentSection,
   setDashboards,
   setDefaultDashboard,
 } from "../Events";
-import {
-  FormGenerics,
-  IDashboard,
-  ISection,
-  Item,
-  Option,
-} from "../interfaces";
+import { FormGenerics, IDashboard, Item, Option } from "../interfaces";
 import {
   $categoryOptions,
   $dashboard,
   $dashboards,
+  $dataSets,
   $store,
   createSection,
 } from "../Store";
 import AutoRefreshPicker from "./AutoRefreshPicker";
+import DashboardCategorization from "./forms/DashboardCategorization";
 import OUTreeSelect from "./OUTreeSelect";
 import PeriodPicker from "./PeriodPicker";
 const DashboardMenu = () => {
   const search = useSearch<FormGenerics>();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { isOpen: isFull, onOpen: onFull, onClose: onUnFull } = useDisclosure();
-  const [section, setSection] = useState<ISection | undefined>();
   const navigate = useNavigate();
   const engine = useDataEngine();
   const dashboards = useStore($dashboards);
+  const dataSets = useStore($dataSets);
   const updateDashboard = async (data: any) => {
+    console.log(data);
     let mutation: any = {
       type: "create",
       resource: `dataStore/i-dashboards/${data.id}`,
@@ -76,13 +69,14 @@ const DashboardMenu = () => {
         id: data.id,
       };
     }
-    const mutation2: any = {
-      type: "update",
-      resource: `dataStore/i-dashboard-settings`,
-      data: { default: store.defaultDashboard },
-      id: "settings",
-    };
-    await Promise.all([engine.mutate(mutation), engine.mutate(mutation2)]);
+    let mutations = [engine.mutate(mutation)];
+    // const mutation2: any = {
+    //   type: "update",
+    //   resource: `dataStore/i-dashboard-settings`,
+    //   data: { default: store.defaultDashboard },
+    //   id: "settings",
+    // };
+    await Promise.all(mutations);
     onClose();
   };
 
@@ -111,11 +105,6 @@ const DashboardMenu = () => {
     changePeriods(periods);
   };
 
-  const displayFull = (section: string) => {
-    setSection(dashboard.sections.find((sec) => sec.id === section));
-    onFull();
-  };
-
   return (
     <Stack
       direction="row"
@@ -123,29 +112,35 @@ const DashboardMenu = () => {
       alignItems="center"
       justifyContent="center"
       justifyItems="center"
+      flex={1}
       h="50px"
     >
       {store.isAdmin && (
-        <Button
-          size="sm"
-          type="button"
-          colorScheme="blue"
-          onClick={() => {
-            navigate({ to: "/dashboards" });
-            setCurrentPage("");
-          }}
+        <Stack
+          direction="row"
+          alignContent="center"
+          alignItems="center"
+          w="250px"
         >
-          Manage Dashboards
-        </Button>
+          <Text>Category</Text>
+          <Box flex={1}>
+            <Select<Option, false, GroupBase<Option>>
+              options={dataSets}
+              value={dataSets.find(
+                (d: Option) => d.value === dashboard.dataSet
+              )}
+              onChange={(e) => assignDataSet(e?.value || "")}
+            />
+          </Box>
+        </Stack>
       )}
-      <Spacer />
+      <Spacer/>
       <Text fontSize="xl" fontWeight="bold">
         Filters
       </Text>
       {store.isAdmin && (
         <>
           <Button
-            size="sm"
             type="button"
             onClick={() => {
               setCurrentSection(createSection());
@@ -157,20 +152,23 @@ const DashboardMenu = () => {
           >
             Add section
           </Button>
-          <Button size="sm" type="button" onClick={onOpen}>
+          <Button type="button" onClick={onOpen}>
             Save
           </Button>
           {dashboard.published && (
-            <Button size="sm" onClick={() => togglePublish(dashboard, false)}>
+            <Button onClick={() => togglePublish(dashboard, false)}>
               Unpublish
             </Button>
           )}
           {!dashboard.published && (
-            <Button size="sm" onClick={() => togglePublish(dashboard, true)}>
+            <Button onClick={() => togglePublish(dashboard, true)}>
               Publish
             </Button>
           )}
         </>
+      )}
+      {dashboard.dataSet && (
+        <DashboardCategorization dataSet={dashboard.dataSet} />
       )}
       <OUTreeSelect />
       <PeriodPicker

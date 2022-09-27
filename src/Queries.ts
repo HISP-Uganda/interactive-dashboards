@@ -4,6 +4,7 @@ import type { DataNode } from "antd/lib/tree";
 import axios, { AxiosRequestConfig } from "axios";
 import { fromPairs, uniq } from "lodash";
 import { useQuery } from "react-query";
+import OrganizationUnitGroups from "./components/data-sources/OrganisationUnitGroups";
 import {
   addPagination,
   changeAdministration,
@@ -12,9 +13,13 @@ import {
   changeSelectedCategory,
   changeSelectedDashboard,
   onChangeOrganisations,
+  setAvailableCategories,
+  setAvailableCategoryOptionCombos,
   setCategories,
+  setCategorization,
   setCurrentDashboard,
   setDashboards,
+  setDataSets,
   setDataSources,
   setDefaultDashboard,
   setVisualizationQueries,
@@ -32,7 +37,7 @@ import {
   IVisualization,
   Option,
 } from "./interfaces";
-import { traverse } from "./utils/utils";
+import { getSearchParams, traverse } from "./utils/utils";
 
 export const api = axios.create({
   baseURL: "https://services.dhis2.hispuganda.org/",
@@ -197,12 +202,20 @@ export const useInitials = () => {
         fields: "organisationUnits[id,name,leaf,level],authorities",
       },
     },
+    dataSets: {
+      resource: "dataSets.json",
+      params: {
+        fields: "id~rename(value),name~rename(label)",
+      },
+    },
   };
   return useQuery<any, Error>(["initial"], async () => {
     try {
       const {
         me: { organisationUnits, authorities },
+        dataSets: { dataSets },
       }: any = await engine.query(ouQuery);
+      setDataSets(dataSets);
       const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
       changeAdministration(isAdmin);
       const facilities: React.Key[] = organisationUnits.map(
@@ -392,6 +405,36 @@ export const useVisualizationData = () => {
     } catch (error) {
       console.error(error);
       return true;
+    }
+  });
+};
+
+export const useDataSet = (dataSet: string) => {
+  const engine = useDataEngine();
+  const namespaceQuery = {
+    dataSet: {
+      resource: `dataSets/${dataSet}`,
+      params: {
+        fields:
+          "categoryCombo[categoryOptionCombos[id,name,categoryOptions],categories[id,name,categoryOptions[id~rename(value),name~rename(label)]]]",
+      },
+    },
+  };
+  return useQuery<void, Error>(["data-set", dataSet], async () => {
+    try {
+      const {
+        dataSet: {
+          categoryCombo: { categories, categoryOptionCombos },
+        },
+      }: any = await engine.query(namespaceQuery);
+      setAvailableCategories(categories);
+      setAvailableCategoryOptionCombos(categoryOptionCombos);
+      const selectedCategories = categories.map(
+        ({ id, categoryOptions }: any) => [id, [categoryOptions[0]]]
+      );
+      setCategorization(fromPairs(selectedCategories));
+    } catch (error) {
+      console.error(error);
     }
   });
 };
@@ -892,18 +935,23 @@ const makeDHIS2Query = (
 
 const makeSQLViewsQueries = (
   expressions: IExpressions = {},
-  globalFilters: { [key: string]: any } = {}
+  globalFilters: { [key: string]: any } = {},
+  otherParameters: { [key: string]: any }
 ) => {
-  return Object.entries(expressions)
-    .flatMap(([col, val]) => {
-      if (val.isGlobal) {
-        if (globalFilters[val.value]) {
-          return [`var=${col}:${globalFilters[val.value].join("-")}`];
-        }
-        return [];
-      }
-      return [`var=${col}:${val.value}`];
-    })
+  let initial = otherParameters;
+  Object.entries(expressions).forEach(([col, val]) => {
+    if (val.isGlobal && globalFilters[val.value]) {
+      initial = {
+        ...initial,
+        [`var=${col}`]: globalFilters[val.value].join("-"),
+      };
+    } else if (!val.isGlobal && val.value) {
+      initial = { ...initial, [`var=${col}`]: val.value };
+    }
+  });
+
+  return Object.entries(initial)
+    .map(([key, value]) => `${key}:${value}`)
     .join("&");
 };
 
@@ -934,14 +982,22 @@ const generateDHIS2Query = (
     Object.keys(indicator.numerator.dataDimensions).length > 0
   ) {
     let currentParams = "";
+    const allParams = fromPairs(
+      getSearchParams(indicator.numerator.query).map((re) => [
+        `var=${re}`,
+        "NULL",
+      ])
+    );
     const params = makeSQLViewsQueries(
       indicator.numerator.expressions,
-      globalFilters
+      globalFilters,
+      allParams
     );
     if (params) {
       currentParams = `?${params}`;
     }
     queries = {
+      ...queries,
       numerator: {
         resource: `sqlViews/${
           Object.keys(indicator.numerator.dataDimensions)[0]
@@ -967,14 +1023,22 @@ const generateDHIS2Query = (
     Object.keys(indicator.denominator.dataDimensions).length > 0
   ) {
     let currentParams = "";
+    const allParams = fromPairs(
+      getSearchParams(indicator.denominator.query).map((re) => [
+        `var=${re}`,
+        "NULL",
+      ])
+    );
     const params = makeSQLViewsQueries(
       indicator.denominator.expressions,
-      globalFilters
+      globalFilters,
+      allParams
     );
     if (params) {
       currentParams = `?${params}`;
     }
     queries = {
+      ...queries,
       denominator: {
         resource: `sqlViews/${
           Object.keys(indicator.denominator.dataDimensions)[0]
@@ -1043,6 +1107,7 @@ export const useVisualization = (
         if (data.numerator && data.denominator) {
           const numerator: any = data.numerator;
           const denominator: any = data.denominator;
+          console.log(data);
 
           let denRows = [];
           let numRows = [];
@@ -1086,7 +1151,7 @@ export const useVisualization = (
               denHeaders.map((h: any, i: number) => {
                 if (i === denHeaders.length - 1) {
                   const currentNum = numerators[currentDenKey] || 0;
-                  return [h.name, (currentNum * 100) / currentDenValue];
+                  return [h.name, currentNum / currentDenValue];
                 }
                 return [h.name, r[i]];
               })
@@ -1096,22 +1161,34 @@ export const useVisualization = (
           const numerator: any = data.numerator;
           if (numerator && numerator.listGrid) {
             const { headers, rows } = numerator.listGrid;
-            processed = rows.map((row: string[]) => {
-              return fromPairs(
-                headers.map((h: any, i: number) => [h.name, row[i]])
-              );
-            });
+            if (rows.length > 0) {
+              processed = rows.map((row: string[]) => {
+                return fromPairs(
+                  headers.map((h: any, i: number) => [h.name, row[i]])
+                );
+              });
+            } else {
+              processed = [
+                fromPairs(headers.map((h: any, i: number) => [h.name, 0])),
+              ];
+            }
           } else if (numerator) {
             const {
               headers,
               rows,
               metaData: { items },
             } = numerator;
-            processed = rows.map((row: string[]) => {
-              return fromPairs(
-                headers.map((h: any, i: number) => [h.name, row[i]])
-              );
-            });
+            if (rows.length > 0) {
+              processed = rows.map((row: string[]) => {
+                return fromPairs(
+                  headers.map((h: any, i: number) => [h.name, row[i]])
+                );
+              });
+            } else {
+              processed = [
+                fromPairs(headers.map((h: any, i: number) => [h.name, 0])),
+              ];
+            }
             metadata = items;
           }
         }

@@ -18,7 +18,6 @@ import GaugeGraph from "./GaugeGraph";
 import Histogram from "./Histogram";
 import LineGraph from "./LineGraph";
 import MapChart from "./MapChart";
-import Marquee from "./Marquee";
 import MultipleChartTypes from "./MultipleChartTypes";
 import PieChart from "./PieChart";
 import RadarGraph from "./RadarGraph";
@@ -184,14 +183,6 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
     ),
     scatterplot: (
       <ScatterPlot
-        visualization={visualization}
-        {...otherProperties}
-        layoutProperties={layoutProperties}
-        dataProperties={dataProperties}
-      />
-    ),
-    marquee: (
-      <Marquee
         visualization={visualization}
         {...otherProperties}
         layoutProperties={layoutProperties}
