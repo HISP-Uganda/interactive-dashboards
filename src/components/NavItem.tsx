@@ -1,6 +1,6 @@
 import { groupBy } from "lodash";
 import { useState } from "react";
-
+import { IoMdArrowDropright } from "react-icons/io";
 import { Box, Stack, Text } from "@chakra-ui/react";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
@@ -8,9 +8,10 @@ import { $category, $dashboard, $dashboards, $store } from "../Store";
 
 import { FormGenerics, Option } from "../interfaces";
 import { changeSelectedCategory } from "../Events";
+import { IconType } from "react-icons";
 
 interface NavItemProps {
-  // icon: IconType;
+  //icon: IconType;
   option: Option;
 }
 const NavItem = ({ option: { label, value } }: NavItemProps) => {
@@ -23,6 +24,7 @@ const NavItem = ({ option: { label, value } }: NavItemProps) => {
   const toggle = (id: string) => {
     if (active === id) {
       setActive("");
+      
     } else {
       setActive(id);
     }
@@ -48,29 +50,30 @@ const NavItem = ({ option: { label, value } }: NavItemProps) => {
         }
       }}
     >
-      <Text fontSize="xl" fontWeight="bold" textTransform="uppercase">
-        {label}
+      <Text fontSize="lg" fontWeight="bold" textTransform="uppercase" >
+        {label} 
       </Text>
       {active === value && (
         <Stack
           pl="20px"
           w="100%"
           color="blue.700"
-          fontWeight="bold"
-          fontSize="xl"
+          // fontWeight="bold"
+          textTransform="uppercase"
+          fontSize="lg"
           spacing="10px"
         >
           {categoryDashboards.map((d) => (
             <Box
               maxW="sm"
-              borderWidth="1px"
-              borderRadius="lg"
+              // borderWidth="1px"
+              // borderRadius="lg"
               overflow="hidden"
               key={d.id}
               p="5px"
               bg={dashboard.id === d.id ? "blue.50" : ""}
               color={dashboard.id === d.id ? "blue.600" : ""}
-              border={dashboard.id === d.id ? "2px" : ""}
+              // border={dashboard.id === d.id ? "2px" : ""}
               onClick={(e) => {
                 e.stopPropagation();
                 navigate({

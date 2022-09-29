@@ -10,6 +10,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Spacer,
   Stack,
   Text,
   Textarea,
@@ -133,6 +134,7 @@ const DashboardMenu = () => {
           </Box>
         </Stack>
       )}
+      <Spacer/>
       <Text fontSize="xl" fontWeight="bold">
         Filters
       </Text>

@@ -273,7 +273,7 @@ const App = () => {
                 <GridItem rowSpan={11} h="100%">
                   <SidebarContent />
                 </GridItem>
-                <GridItem rowSpan={1} h="100%" bg="white">
+                <GridItem rowSpan={1} h="100%" >
                   <Stack
                     h="100%"
                     w="100%"
@@ -309,7 +309,7 @@ const App = () => {
                   <GridItem rowSpan={12} h="100%">
                     <Outlet />
                   </GridItem>
-                  <GridItem rowSpan={1} h="100%" w="100%" bg="white">
+                  <GridItem rowSpan={1} h="100%" w="100%" >
                     <Grid templateColumns="repeat(24, 1fr)" h="100%" w="100%">
                       <GridItem colSpan={21} h="100%" w="100%">
                         <Stack
@@ -320,7 +320,6 @@ const App = () => {
                           justifyContent="center"
                           alignContent="center"
                         >
-                          <Text>Testing</Text>
                         </Stack>
                       </GridItem>
                       <GridItem h="100%" w="100%" colSpan={3}>
