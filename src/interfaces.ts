@@ -87,6 +87,7 @@ export interface ISection {
   colSpan: number;
   rowSpan: number;
   images: Image[];
+  isBottomSection: boolean;
 }
 
 export interface IFilter {}

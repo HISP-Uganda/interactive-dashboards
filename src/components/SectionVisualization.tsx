@@ -1,4 +1,4 @@
-import { Box, SimpleGrid, Stack, Image } from "@chakra-ui/react";
+import { Box, SimpleGrid, Stack } from "@chakra-ui/react";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { MouseEvent } from "react";
@@ -10,11 +10,9 @@ import Carousel from "./visualizations/Carousel";
 import TabPanelVisualization from "./visualizations/TabPanelVisualization";
 import Visualization from "./visualizations/Visualization";
 import VisualizationTitle from "./visualizations/VisualizationTitle";
-import { useElementSize } from "usehooks-ts";
 
 const SectionVisualization = (section: ISection) => {
   const search = useSearch<FormGenerics>();
-  const [squareRef, { width, height }] = useElementSize();
   const store = useStore($store);
   const navigate = useNavigate();
   const dashboard = useStore($dashboard);
@@ -130,13 +128,6 @@ const SectionVisualization = (section: ISection) => {
     ),
     tab: <TabPanelVisualization {...section} />,
   };
-  if (section.images && section.images.length > 0) {
-    return (
-      <Stack direction="row" h="100%" w="100%" bg="yellow.200" ref={squareRef}>
-        {/* <Image src={section.images[0].src} maxH={height} /> */}
-      </Stack>
-    );
-  }
   return displays[section.display] || displays.normal;
 };
 

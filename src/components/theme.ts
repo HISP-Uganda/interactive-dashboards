@@ -9,8 +9,8 @@ const theme = extendTheme({
     },
   },
   fonts: {
-    // heading: `'Montserrat', sans-serif`,
-    // body: "'Montserrat'",
+    heading: `'Open Sans', sans-serif`,
+    body: `'Raleway', sans-serif`,
   },
 });
 

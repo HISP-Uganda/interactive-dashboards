@@ -86,6 +86,7 @@ export const createSection = (id = generateUid()): ISection => {
     justifyContent: "space-around",
     carouselOver: "items",
     images: [],
+    isBottomSection: false,
   };
 };
 
@@ -149,7 +150,7 @@ export const createDashboard = (id = generateUid()): IDashboard => {
     categorization: {},
     availableCategories: [],
     availableCategoryOptionCombos: [],
-    bottomSection: createSection(),
+    bottomSection: { ...createSection(), isBottomSection: true, title: "" },
   };
 };
 
@@ -239,6 +240,9 @@ export const $category = domain
 export const $dashboard = domain
   .createStore<IDashboard>(createDashboard())
   .on(addSection, (state, section) => {
+    if (section.isBottomSection) {
+      return { ...state, bottomSection: section };
+    }
     const isNew = state.sections.find((s) => s.id === section.id);
     let sections: ISection[] = state.sections;
     if (isNew) {
@@ -266,7 +270,7 @@ export const $dashboard = domain
       ...dashboard,
       bottomSection: dashboard.bottomSection
         ? dashboard.bottomSection
-        : createSection(),
+        : { ...createSection(), isBottomSection: true, title: "" },
     };
   })
   .on(changeLayouts, (state, { currentLayout, allLayouts }) => {
@@ -716,7 +720,8 @@ export const $categoryOptionCombo = $dashboard.map(
 export const $globalFilters = combine(
   $store,
   $categoryOptionCombo,
-  (store, categoryOptionCombo) => {
+  $dashboard,
+  (store, categoryOptionCombo, dashboard) => {
     const periods = store.periods.flatMap(({ id }) => {
       if (relativePeriodTypes.indexOf(id) !== -1) {
         return getRelativePeriods(id);
@@ -724,13 +729,27 @@ export const $globalFilters = combine(
       return [id];
     });
 
-    return {
-      m5D13FqKZwN: periods,
-      of2WvtwqbHR: store.groups,
-      GQhi6pRnTKF: store.levels,
-      mclvD0Z9mfT: store.organisations,
-      WSiMOMi4QWh: categoryOptionCombo,
-    };
+    console.log(dashboard.dataSet);
+
+    if (dashboard.dataSet && categoryOptionCombo) {
+      return {
+        m5D13FqKZwN: periods,
+        of2WvtwqbHR: store.groups,
+        GQhi6pRnTKF: store.levels,
+        mclvD0Z9mfT: store.organisations,
+        WSiMOMi4QWh: categoryOptionCombo,
+      };
+    } else if (!dashboard.dataSet) {
+      return {
+        m5D13FqKZwN: periods,
+        of2WvtwqbHR: store.groups,
+        GQhi6pRnTKF: store.levels,
+        mclvD0Z9mfT: store.organisations,
+        WSiMOMi4QWh: categoryOptionCombo,
+      };
+    }
+
+    return {};
   }
 );
 
