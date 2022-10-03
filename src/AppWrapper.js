@@ -1,3 +1,6 @@
+import "@fontsource/raleway";
+import "@fontsource/open-sans";
+
 import { ChakraProvider } from "@chakra-ui/react";
 import { QueryClient, QueryClientProvider } from "react-query";
 

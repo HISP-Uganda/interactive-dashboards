@@ -2,7 +2,7 @@ import { useDataEngine } from "@dhis2/app-runtime";
 import { center } from "@turf/turf";
 import type { DataNode } from "antd/lib/tree";
 import axios, { AxiosRequestConfig } from "axios";
-import { fromPairs, uniq } from "lodash";
+import { fromPairs, isEmpty, uniq } from "lodash";
 import { useQuery } from "react-query";
 import OrganizationUnitGroups from "./components/data-sources/OrganisationUnitGroups";
 import {
@@ -1089,6 +1089,7 @@ export const useVisualization = (
   if (refreshInterval && refreshInterval !== "off") {
     currentInterval = Number(refreshInterval) * 1000;
   }
+  console.log(globalFilters);
   const otherKeys = generateKeys(indicator, globalFilters);
   const overrides = visualization.overrides || {};
   return useQuery<any, Error>(
@@ -1099,7 +1100,12 @@ export const useVisualization = (
       ...Object.values(overrides),
     ],
     async () => {
-      if (indicator && dataSource && dataSource.isCurrentDHIS2) {
+      if (
+        indicator &&
+        !isEmpty(globalFilters) &&
+        dataSource &&
+        dataSource.isCurrentDHIS2
+      ) {
         const queries = generateDHIS2Query(indicator, globalFilters, overrides);
         const data = await engine.query(queries);
         let processed: any[] = [];

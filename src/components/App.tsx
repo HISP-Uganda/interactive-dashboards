@@ -4,10 +4,8 @@ import {
   Grid,
   GridItem,
   Image,
-  Spacer,
   Spinner,
   Stack,
-  Text,
 } from "@chakra-ui/react";
 import {
   createHashHistory,
@@ -18,9 +16,10 @@ import {
   Router,
   stringifySearchWith,
 } from "@tanstack/react-location";
-import { useEffect } from "react";
 import { useStore } from "effector-react";
+import { useEffect } from "react";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
+import { useElementSize } from "usehooks-ts";
 import {
   CategoryForm,
   DashboardForm,
@@ -45,9 +44,11 @@ import {
   setDataSource,
   setIndicator,
 } from "../Events";
+import moh from "../images/moh.json";
 import { useInitials } from "../Queries";
 import {
   $categories,
+  $dashboard,
   $dashboards,
   $dataSources,
   $indicators,
@@ -59,7 +60,7 @@ import {
 } from "../Store";
 import { decodeFromBinary, encodeToBinary } from "../utils/utils";
 import DashboardMenu from "./DashboardMenu";
-import moh from "../images/moh.json";
+import Footer from "./Footer";
 import SectionMenu from "./SectionMenu";
 import SidebarContent from "./SidebarContent";
 
@@ -79,10 +80,17 @@ const App = () => {
   const { isLoading, isSuccess, isError, error } = useInitials();
   const store = useStore($store);
   const dashboards = useStore($dashboards);
+  const dashboard = useStore($dashboard);
   const dataSources = useStore($dataSources);
   const indicators = useStore($indicators);
   const categories = useStore($categories);
   const handle = useFullScreenHandle();
+
+  const [mohLogo, { width, height }] = useElementSize();
+  const [hispLogo, { width: hw, height: hh }] = useElementSize();
+  const [hispLogo1, { width: h1w, height: h1h }] = useElementSize();
+  const [funderLogo, { width: fw, height: fh }] = useElementSize();
+  const [funderLogo1, { width: f1w, height: f1h }] = useElementSize();
 
   const topMenuOptions: { [key: string]: any } = {
     dashboards: <DashboardMenu />,
@@ -266,14 +274,19 @@ const App = () => {
                     alignContent="center"
                     justifyContent="center"
                     justifyItems="center"
+                    ref={mohLogo}
                   >
-                    <Image src={moh} maxH="110px" />
+                    <Image
+                      src={moh}
+                      maxH={`${height * 0.7}px`}
+                      maxW={`${width * 0.7}px`}
+                    />
                   </Stack>
                 </GridItem>
                 <GridItem rowSpan={11} h="100%">
                   <SidebarContent />
                 </GridItem>
-                <GridItem rowSpan={1} h="100%" >
+                <GridItem rowSpan={1} h="100%">
                   <Stack
                     h="100%"
                     w="100%"
@@ -281,10 +294,12 @@ const App = () => {
                     alignContent="center"
                     justifyContent="center"
                     justifyItems="center"
+                    ref={hispLogo}
                   >
                     <Image
                       src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/logo.png"
-                      maxW="140px"
+                      maxH={`${hh * 0.7}px`}
+                      maxW={`${hw * 0.7}px`}
                     />
                   </Stack>
                 </GridItem>
@@ -295,50 +310,49 @@ const App = () => {
                 h="100%"
                 bg={handle.active ? "gray.300" : ""}
                 p={handle.active ? "5px" : ""}
+                maxH={handle.active ? "100vh" : "calc(100vh - 48px)"}
+                w="100%"
               >
                 <Grid templateRows="repeat(14, 1fr)" gap={1} h="100%">
-                  <GridItem h="100%" rowSpan={1}>
+                  <GridItem h="100%" w="100%" rowSpan={1}>
                     <Stack
                       h="100%"
                       justifyContent="center"
                       alignContent="center"
+                      direction="row"
+                      w="100%"
+                      spacing="40px"
+                      ref={hispLogo1}
                     >
+                      {handle.active && (
+                        <Stack
+                          alignContent="center"
+                          alignItems="center"
+                          justifyContent="center"
+                          justifyItems="center"
+                        >
+                          <Image
+                            src={moh}
+                            maxH={`${h1h * 0.85}px`}
+                            maxW={`${h1w * 0.85}px`}
+                          />
+                        </Stack>
+                      )}
                       {topMenuOptions[store.currentPage]}
                     </Stack>
                   </GridItem>
                   <GridItem rowSpan={12} h="100%">
                     <Outlet />
                   </GridItem>
-                  <GridItem rowSpan={1} h="100%" w="100%" >
-                    <Grid templateColumns="repeat(24, 1fr)" h="100%" w="100%">
-                      <GridItem colSpan={21} h="100%" w="100%">
-                        <Stack
-                          h="100%"
-                          w="100%"
-                          // alignItems="center"
-                          justifyItems="center"
-                          justifyContent="center"
-                          alignContent="center"
-                        >
-                        </Stack>
-                      </GridItem>
-                      <GridItem h="100%" w="100%" colSpan={3}>
-                        <Stack
-                          h="100%"
-                          w="100%"
-                          alignItems="center"
-                          alignContent="center"
-                          justifyContent="center"
-                          justifyItems="center"
-                        >
-                          <Image
-                            src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/h-logo-blue.svg"
-                            maxH="56px"
-                          />
-                        </Stack>
-                      </GridItem>
-                    </Grid>
-                  </GridItem>
+                  <Footer
+                    funderLogoRef={funderLogo}
+                    funderLogo1Ref={funderLogo1}
+                    handle={handle}
+                    fh={fh}
+                    fw={fw}
+                    f1h={f1h}
+                    f1w={f1w}
+                  />
                 </Grid>
               </GridItem>
             </FullScreen>

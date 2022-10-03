@@ -18,17 +18,21 @@ const SectionMenu = () => {
     setDashboards(
       dashboards.map((dash) => {
         if (dash.id === dashboard.id) {
-          const isOld = dashboard.sections.find((s) => s.id === section.id);
-          let sections = dashboard.sections.map((s) => {
-            if (section.id === s.id) {
-              return section;
+          if (section.isBottomSection) {
+            return { ...dashboard, bottomSection: section };
+          } else {
+            const isOld = dashboard.sections.find((s) => s.id === section.id);
+            let sections = dashboard.sections.map((s) => {
+              if (section.id === s.id) {
+                return section;
+              }
+              return s;
+            });
+            if (!isOld) {
+              sections = [...sections, section];
             }
-            return s;
-          });
-          if (!isOld) {
-            sections = [...sections, section];
+            return { ...dashboard, sections };
           }
-          return { ...dashboard, sections };
         }
         return dash;
       })

@@ -10,7 +10,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Spacer,
   Stack,
   Text,
   Textarea,
@@ -113,7 +112,8 @@ const DashboardMenu = () => {
       justifyContent="center"
       justifyItems="center"
       flex={1}
-      h="50px"
+      h="100%"
+      w="100%"
     >
       {store.isAdmin && (
         <Stack
@@ -134,7 +134,6 @@ const DashboardMenu = () => {
           </Box>
         </Stack>
       )}
-      <Spacer/>
       <Text fontSize="xl" fontWeight="bold">
         Filters
       </Text>
