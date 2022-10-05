@@ -141,7 +141,8 @@ export const createDashboard = (id = generateUid()): IDashboard => {
     rows: 12,
     columns: 24,
     showSider: true,
-    category: "uDWxMNyXZeo",
+    //category: "",
+    // category: "",
     showTop: true,
     mode: "edit",
     name: "New Dashboard",
@@ -619,7 +620,7 @@ export const $categoryDashboards = combine(
   $store,
   (dashboards, store) => {
     return dashboards
-      .filter((dashboard) => dashboard.category === store.selectedCategory)
+      //.filter((dashboard) => dashboard.category === store.selectedCategory)
       .map((dataSource) => {
         const current: Option = {
           value: dataSource.id,
@@ -674,19 +675,19 @@ export const $visualizationMetadata = domain
     return { ...state, [visualizationId]: data };
   });
 
-export const $dashboardCategory = combine(
-  $dashboard,
-  $categories,
-  (dashboard, categories) => {
-    const category = categories.find((c) => {
-      return c.id === dashboard.category;
-    });
-    if (category) {
-      return category.name;
-    }
-    return "Unknown category";
-  }
-);
+// export const $dashboardCategory = combine(
+//   $dashboard,
+//   $categories,
+//   (dashboard, categories) => {
+//     const category = categories.find((c) => {
+//       return c.id === dashboard.category;
+//     });
+//     if (category) {
+//       return category.name;
+//     }
+//     return "Unknown category";
+//   }
+// );
 
 export const $categoryOptionCombo = $dashboard.map(
   ({ categorization, availableCategoryOptionCombos }) => {

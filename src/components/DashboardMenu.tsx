@@ -112,10 +112,11 @@ const DashboardMenu = () => {
       justifyContent="center"
       justifyItems="center"
       flex={1}
+      spacing="10px"
       h="100%"
       w="100%"
     >
-      {store.isAdmin && (
+      {/* {store.isAdmin && (
         <Stack
           direction="row"
           alignContent="center"
@@ -133,7 +134,7 @@ const DashboardMenu = () => {
             />
           </Box>
         </Stack>
-      )}
+      )} */}
       <Text fontSize="xl" fontWeight="bold">
         Filters
       </Text>
@@ -166,9 +167,9 @@ const DashboardMenu = () => {
           )}
         </>
       )}
-      {dashboard.dataSet && (
+      {/* {dashboard.dataSet && (
         <DashboardCategorization dataSet={dashboard.dataSet} />
-      )}
+      )} */}
       <OUTreeSelect />
       <PeriodPicker
         selectedPeriods={store.periods}

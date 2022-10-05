@@ -45,7 +45,7 @@ const NavItem = ({ option: { label, value, dashboards } }: NavItemProps) => {
       // }}
     >
       <Text
-        color="gray.400"
+        color="gray.600"
         m="3"
         mt="4"
         fontSize="xl"

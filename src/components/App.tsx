@@ -263,9 +263,10 @@ const App = () => {
             maxH="calc(100vh - 48px)"
             h="calc(100vh - 48px)"
             p="5px"
+            
           >
-            <GridItem h="100%">
-              <Grid templateRows="repeat(14, 1fr)" gap={1} h="100%">
+            <GridItem h="100%" >
+              <Grid templateRows="repeat(14, 1fr)" gap={1} h="100%" >
                 <GridItem rowSpan={2} h="100%">
                   <Stack
                     h="100%"
@@ -296,11 +297,11 @@ const App = () => {
                     justifyItems="center"
                     ref={hispLogo}
                   >
-                    <Image
+                    {/* <Image
                       src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/logo.png"
                       maxH={`${hh * 0.7}px`}
                       maxW={`${hw * 0.7}px`}
-                    />
+                    /> */}
                   </Stack>
                 </GridItem>
               </Grid>
@@ -346,7 +347,7 @@ const App = () => {
                   </GridItem>
                   <Footer
                     funderLogoRef={funderLogo}
-                    funderLogo1Ref={funderLogo1}
+                    //funderLogo1Ref={funderLogo1}
                     handle={handle}
                     fh={fh}
                     fw={fw}

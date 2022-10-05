@@ -23,7 +23,6 @@ const ColorPalette = ({ visualization, attribute }: ColorPalletProps) => {
         bg={visualization.properties?.[attribute] || "black"}
         onClick={onToggle}
       >
-        &nbsp;
       </Text>
       {isOpen && (
         <Box bottom={0} top={7} zIndex={1000} position="absolute">

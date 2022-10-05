@@ -3,8 +3,6 @@ import {
   PaginationContainer,
   PaginationNext,
   PaginationPrevious,
-  PaginationPageGroup,
-  PaginationPage,
   usePagination,
 } from "@ajna/pagination";
 import {
