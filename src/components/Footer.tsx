@@ -47,6 +47,7 @@ export default function ({
       rowSpan={1}
       h="100%"
       w="100%"
+      backgroundColor="white"
       onClick={(e: MouseEvent<HTMLElement>) => {
         if (e.detail === 2 && store.isAdmin) {
           setCurrentSection(dashboard.bottomSection);
@@ -57,7 +58,7 @@ export default function ({
         }
       }}
     >
-      <Grid templateColumns="repeat(24, 1fr)" h="100%" w="100%">
+      <Grid templateColumns="repeat(24, 1fr)" h="100%" w="100%" >
         {handle.active && (
           <GridItem h="100%" w="100%" colSpan={3}>
             <Stack
