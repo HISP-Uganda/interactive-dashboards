@@ -297,11 +297,11 @@ const App = () => {
                     justifyItems="center"
                     ref={hispLogo}
                   >
-                    {/* <Image
+                    <Image
                       src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/logo.png"
                       maxH={`${hh * 0.7}px`}
                       maxW={`${hw * 0.7}px`}
-                    /> */}
+                    />
                   </Stack>
                 </GridItem>
               </Grid>
@@ -346,8 +346,8 @@ const App = () => {
                     <Outlet />
                   </GridItem>
                   <Footer
-                    funderLogoRef={funderLogo}
-                    //funderLogo1Ref={funderLogo1}
+                    //funderLogoRef={funderLogo}
+                    funderLogo1Ref={funderLogo1}
                     handle={handle}
                     fh={fh}
                     fw={fw}

@@ -69,12 +69,12 @@ const DashboardMenu = () => {
       };
     }
     let mutations = [engine.mutate(mutation)];
-    // const mutation2: any = {
-    //   type: "update",
-    //   resource: `dataStore/i-dashboard-settings`,
-    //   data: { default: store.defaultDashboard },
-    //   id: "settings",
-    // };
+    const mutation2: any = {
+      type: "update",
+      resource: `dataStore/i-dashboard-settings`,
+      data: { default: store.defaultDashboard },
+      id: "settings",
+    };
     await Promise.all(mutations);
     onClose();
   };
@@ -116,7 +116,7 @@ const DashboardMenu = () => {
       h="100%"
       w="100%"
     >
-      {/* {store.isAdmin && (
+      {store.isAdmin && (
         <Stack
           direction="row"
           alignContent="center"
@@ -134,7 +134,7 @@ const DashboardMenu = () => {
             />
           </Box>
         </Stack>
-      )} */}
+      )}
       <Text fontSize="xl" fontWeight="bold">
         Filters
       </Text>
@@ -167,9 +167,9 @@ const DashboardMenu = () => {
           )}
         </>
       )}
-      {/* {dashboard.dataSet && (
+      {dashboard.dataSet && (
         <DashboardCategorization dataSet={dashboard.dataSet} />
-      )} */}
+      )}
       <OUTreeSelect />
       <PeriodPicker
         selectedPeriods={store.periods}
