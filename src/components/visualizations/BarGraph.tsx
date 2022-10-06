@@ -54,7 +54,7 @@ const BarGraph = ({
   });
 
   const titleFontSize = dataProperties?.["data.title.fontsize"] || "1.5vh";
-  const titleCase = dataProperties?.["data.title.case"] || "uppercase";
+  const titleCase = dataProperties?.["data.title.case"] || "";
   const titleColor = dataProperties?.["data.title.color"] || "black";
   return (
     <Stack h="100%" spacing={0} w="100%">
@@ -62,7 +62,7 @@ const BarGraph = ({
         <VisualizationTitle
           section={section}
           fontSize={"18px"}
-          textTransform={"uppercase"}
+          //textTransform={"uppercase"}
           color={"gray.500"}
           title={visualization.name}
           fontWeight="bold"

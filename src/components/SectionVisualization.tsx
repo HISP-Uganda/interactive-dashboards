@@ -61,7 +61,7 @@ const SectionVisualization = (section: ISection) => {
           <VisualizationTitle
             section={section}
             fontSize={"18px"}
-            textTransform={"uppercase"}
+            //textTransform={"uppercase"}
             color={"gray.500"}
             title={section.title}
             fontWeight="bold"
@@ -100,7 +100,7 @@ const SectionVisualization = (section: ISection) => {
           <VisualizationTitle
             section={section}
             fontSize={"18px"}
-            textTransform={"uppercase"}
+            // textTransform={"uppercase"}
             color={"gray.500"}
             title={section.title}
             fontWeight="bold"

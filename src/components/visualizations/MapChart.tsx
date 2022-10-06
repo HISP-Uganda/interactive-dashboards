@@ -27,8 +27,8 @@ const MapChart = ({
   const zoom = layoutProperties?.["layout.zoom"] || 5.3;
 
   const titleFontSize = dataProperties?.["data.title.fontsize"] || "1.5vh";
-  const titleCase = dataProperties?.["data.title.case"] || "uppercase";
-  const titleColor = dataProperties?.["data.title.color"] || "black";
+  const titleCase = dataProperties?.["data.title.case"] || "";
+  const titleColor = dataProperties?.["data.title.color"] || "gray.500";
   const colorscale = orderBy(
     Object.values(
       dataProperties?.["data.mapKeys"] || {
