@@ -48,8 +48,8 @@ const LineGraph = ({
     update(availableProperties, property, () => value);
   });
   const titleFontSize = dataProperties?.["data.title.fontsize"] || "1.5vh";
-  const titleCase = dataProperties?.["data.title.case"] || "uppercase";
-  const titleColor = dataProperties?.["data.title.color"] || "black";
+  const titleCase = dataProperties?.["data.title.case"] || "";
+  const titleColor = dataProperties?.["data.title.color"] || "gray.500";
   return (
     <Stack w="100%" h="100%" spacing={0}>
       {visualization.name && (

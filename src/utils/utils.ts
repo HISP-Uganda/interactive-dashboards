@@ -505,6 +505,11 @@ export const colors: Option[] = [
     value:
       "#006466,#065a60,#0b525b,#144552,#1b3a4b,#212f45,#272640,#312244,#3e1f47,#4d194d",
   },
+  {
+    label: "Xiketic2",
+    value:
+      "#dc2f02,#ffba08,#2ca02c,#03071e,#370617,#6a040f,#9d0208,#d00000,#e85d04,#f48c06,#faa307",
+  },
 ];
 
 export const exclusions: any[] = [

@@ -46,9 +46,10 @@ const NavItem = ({ option: { label, value, dashboards } }: NavItemProps) => {
     >
       <Text
         color="gray.600"
-        m="3"
+        m="1"
         mt="4"
-        fontSize="xl"
+        fontSize="lg"
+        fontWeight="bold"
         textTransform="uppercase"
       >
         {label}
@@ -59,14 +60,13 @@ const NavItem = ({ option: { label, value, dashboards } }: NavItemProps) => {
           alignItems="center"
           key={d.id}
           gap="5"
-          pt="3"
-          pl="4"
-          pb="2.5"
+          pt="1"
+          pl="2"
           borderRadius="lg"
-          fontSize="xl"
+          fontSize="lg"
           m="2"
           cursor="pointer"
-          _hover={{ bg: "blue.50" }}
+          _hover={{ bg: "#E8EDF2", color: "black" }}
           // color="white"
           // maxW="sm"
           // borderWidth="1px"
@@ -74,8 +74,8 @@ const NavItem = ({ option: { label, value, dashboards } }: NavItemProps) => {
           // overflow="hidden"
           // key={d.id}
           // p="5px"
-          // bg={dashboard.id === d.id ? "blue.50" : ""}
-          color={dashboard.id === d.id ? "blue.500" : ""}
+          bg={dashboard.id === d.id ? "#00796B" : ""}
+          color={dashboard.id === d.id ? "white" : ""}
           // border={dashboard.id === d.id ? "2px" : ""}
           onClick={(e) => {
             e.stopPropagation();

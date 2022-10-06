@@ -102,7 +102,7 @@ const BarGraphProperties = ({
           </Stack>
         </RadioGroup>
       </Stack>
-
+          <Text>Bar Graph Colors</Text>
       <Select<Option, false, GroupBase<Option>>
         value={colors.find((pt) => {
           if (

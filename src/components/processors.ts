@@ -112,7 +112,7 @@ export const processPieChart = (
         textinfo: "label+percent+name",
         hoverinfo: "label+percent+name",
         textposition: "inside",
-        hole: 0.5,
+        hole: 0.1,
       },
     ];
   }

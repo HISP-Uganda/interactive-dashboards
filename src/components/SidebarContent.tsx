@@ -16,17 +16,18 @@ const SidebarContent = ({ ...rest }: SidebarProps) => {
     .filter(({ dashboards }) => dashboards.length > 0);
 
   return (
-    <Stack w="full" {...rest} bg="white" h="100%">
+    <Stack w="full" {...rest} bg="blue.50" h="100%">
       <Text
-        fontSize="2xl"
+        fontSize="xl"
         fontWeight="bold"
         textTransform="uppercase"
-        textAlign="center"
+        textAlign="left"
         p="2"
+        color="blue.600"
       >
         Thematic Areas
       </Text>
-      <Divider />
+      <Divider borderColor="blue.500"/>
 
       {store.isAdmin ? (
         store.currentPage === "dashboards" ? (

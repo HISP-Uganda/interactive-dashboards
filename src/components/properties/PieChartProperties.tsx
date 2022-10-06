@@ -3,7 +3,10 @@ import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { changeVisualizationProperties } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
+import { isArray, uniq } from "lodash";
 import { $visualizationData } from "../../Store";
+import { customComponents } from "../../utils/components";
+import { chartTypes, colors, createOptions } from "../../utils/utils";
 
 const PieChartProperties = ({
   visualization,
@@ -49,6 +52,32 @@ const PieChartProperties = ({
         options={columns}
         isClearable
       />
+      <Text>PieChart Colors</Text>
+      <Select<Option, false, GroupBase<Option>>
+        value={colors.find((pt) => {
+          if (
+            visualization.properties["layout.colorway"] &&
+            isArray(visualization.properties["layout.colorway"])
+          ) {
+            return (
+              visualization.properties["layout.colorway"].join(",") === pt.value
+            );
+          }
+          return false;
+        })}
+        onChange={(e) => {
+          const val = e?.value || "";
+          changeVisualizationProperties({
+            visualization: visualization.id,
+            attribute: "layout.colorway",
+            value: val.split(","),
+          });
+        }}
+        options={colors}
+        isClearable
+        components={customComponents}
+      />
+
     </Stack>
   );
 };

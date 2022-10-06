@@ -265,9 +265,9 @@ const App = () => {
             p="5px"
             
           >
-            <GridItem h="100%" >
+            <GridItem h="100%"  >
               <Grid templateRows="repeat(14, 1fr)" gap={1} h="100%" >
-                <GridItem rowSpan={2} h="100%">
+                <GridItem rowSpan={1} h="100%">
                   <Stack
                     h="100%"
                     w="100%"
@@ -284,7 +284,7 @@ const App = () => {
                     />
                   </Stack>
                 </GridItem>
-                <GridItem rowSpan={11} h="100%">
+                <GridItem rowSpan={12} h="100%">
                   <SidebarContent />
                 </GridItem>
                 <GridItem rowSpan={1} h="100%">
