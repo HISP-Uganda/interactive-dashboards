@@ -434,13 +434,13 @@ export const colors: Option[] = [
   {
     label: "Color1",
     value: [
+      "#e377c2",
       "#1f77b4",
       "#ff7f0e",
       "#2ca02c",
       "#d62728",
       "#9467bd",
       "#8c564b",
-      "#e377c2",
       "#7f7f7f",
       "#bcbd22",
     ].join(","),
@@ -448,27 +448,27 @@ export const colors: Option[] = [
   {
     label: "Rich Black FOGRA 29",
     value:
-      "#001219,#005f73,#0a9396,#94d2bd,#e9d8a6,#ee9b00,#ca6702,#bb3e03,#ae2012,#9b2226",
+      "#ca6702,#001219,#005f73,#0a9396,#94d2bd,#e9d8a6,#ee9b00,#bb3e03,#ae2012,#9b2226",
   },
   {
     label: "Melon",
     value:
-      "#fec5bb,#fcd5ce,#fae1dd,#f8edeb,#e8e8e4,#d8e2dc,#ece4db,#ffe5d9,#ffd7ba,#fec89a",
+      "#ece4db,#fec5bb,#fcd5ce,#fae1dd,#f8edeb,#e8e8e4,#d8e2dc,#ffe5d9,#ffd7ba,#fec89a",
   },
   {
     label: "Xiketic",
     value:
-      "#03071e,#370617,#6a040f,#9d0208,#d00000,#dc2f02,#e85d04,#f48c06,#faa307,#ffba08",
+      "#dc2f02,#03071e,#370617,#6a040f,#9d0208,#d00000,#e85d04,#f48c06,#faa307,#ffba08",
   },
   {
     label: "Pink",
     value:
-      "#f72585,#b5179e,#7209b7,#560bad,#480ca8,#3a0ca3,#3f37c9,#4361ee,#4895ef,#4cc9f0",
+      "#480ca8,#f72585,#b5179e,#7209b7,#560bad,#3a0ca3,#3f37c9,#4361ee,#4895ef,#4cc9f0",
   },
   {
     label: "Purple",
     value:
-      "#7400b8,#6930c3,#5e60ce,#5390d9,#4ea8de,#48bfe3,#56cfe1,#64dfdf,#72efdd,#80ffdb",
+      "#5390d9,#7400b8,#6930c3,#5e60ce,#4ea8de,#48bfe3,#56cfe1,#64dfdf,#72efdd,#80ffdb",
   },
   {
     label: "Desert Sand",

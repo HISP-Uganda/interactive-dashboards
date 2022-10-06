@@ -32,6 +32,7 @@ import {
 import { IVisualization, Option } from "../../interfaces";
 import { generateUid } from "../../utils/uid";
 import { createOptions } from "../../utils/utils";
+import ColorPalette from "../ColorPalette";
 
 type Threshold = { id: string; min: string; max: string; color: string };
 
@@ -195,7 +196,33 @@ const SingleValueProperties = ({
           <Radio value="compact">Compact</Radio>
         </Stack>
       </RadioGroup>
-
+      <Text>Single Value Background Color</Text>
+      <ColorPalette
+        visualization={visualization}
+        attribute="data.backgroundColor"
+      />
+      <Text>Single Value Border and Border Radius</Text>
+      <NumberInput
+        value={
+          visualization.properties["data.border"] || 0
+        }
+        max={2}
+        min={0}
+        step={1}
+        onChange={(value1: string, value2: number) =>
+          changeVisualizationProperties({
+            visualization: visualization.id,
+            attribute: "data.border",
+            value: value2,
+          })
+        }
+      >
+        <NumberInputField />
+        <NumberInputStepper>
+          <NumberIncrementStepper />
+          <NumberDecrementStepper />
+        </NumberInputStepper>
+      </NumberInput>
       <Text>Number format decimal places</Text>
       <NumberInput
         value={

@@ -546,16 +546,6 @@ export const useIndicators = (
 
   let selectedIndicatorsQuery = {};
 
-  // if (selectedIndicators.length > 0) {
-  //   selectedIndicatorsQuery = {
-  //     ...selectedIndicatorsQuery,
-  //     selected: {
-  //       resource: "indicators.json",
-  //       params: { ...params, filter: `id:in:${selectedIndicators.join(",")}` },
-  //     },
-  //   };
-  // }
-
   if (q) {
     params = { ...params, filter: `identifiable:token:${q}` };
   }
@@ -606,14 +596,18 @@ export const useSQLViews = () => {
 export const useProgramIndicators = (
   page: number,
   pageSize: number,
-  q = ""
+  q = "",
+  selectedProgramIndicators: string[] = []
 ) => {
   const engine = useDataEngine();
   let params: { [key: string]: any } = {
     page,
     pageSize,
     fields: "id,name",
+    order: "name:ASC",
   };
+
+  let selectedProgramIndicatorsQuery = {}; 
 
   if (q) {
     params = { ...params, filter: `identifiable:token:${q}` };
@@ -623,9 +617,10 @@ export const useProgramIndicators = (
       resource: "programIndicators.json",
       params,
     },
+    ...selectedProgramIndicatorsQuery
   };
   return useQuery<{ id: string; name: string }[], Error>(
-    ["program-indicators", page, pageSize],
+    ["program-indicators", page, pageSize, q],
     async () => {
       const {
         elements: {

@@ -36,7 +36,7 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
   const [dimension, setDimension] = useState<"filter" | "dimension">(
     "dimension"
   );
-  const [useGlobal, setUseGlobal] = useState<boolean>(true);
+  const [useGlobal, setUseGlobal] = useState<boolean>(false);
   const [q, setQ] = useState<string>("");
   const paginations = useStore($paginations);
 
@@ -59,10 +59,21 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
       currentPage: 1,
     },
   });
+
+  const selectedProgramIndicators = Object.entries(
+    denNum?.dataDimensions || {}
+  ).flatMap(([i, { what }]) => {
+    if (what === "i") {
+      return i;
+    }
+    return [];
+  });
+
   const { isLoading, isSuccess, isError, error, data } = useProgramIndicators(
     currentPage,
     pageSize,
-    q
+    q,
+    selectedProgramIndicators
   );
 
   const handlePageChange = (nextPage: number) => {
@@ -72,51 +83,51 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
   return (
     <Stack spacing="30px">
       <GlobalAndFilter
-        denNum={denNum}
-        dimension={dimension}
-        setDimension={setDimension}
-        useGlobal={useGlobal}
-        setUseGlobal={setUseGlobal}
-        hasGlobalFilter={false}
-        type="pi"
-        onChange={onChange}
-        id={globalIds[1].value}
-      />
-      {!useGlobal && (
-        <Input
-          value={q}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setQ(e.target.value)}
+          denNum={denNum}
+          dimension={dimension}
+          setDimension={setDimension}
+          useGlobal={useGlobal}
+          setUseGlobal={setUseGlobal}
+          hasGlobalFilter={false}
+          type="pi"
+          onChange={onChange}
+          id={globalIds[1].value}
         />
-      )}
+      {!useGlobal && (
+          <Input
+            value={q}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setQ(e.target.value)}
+          />
+        )}
       {isLoading && (
-        <Flex w="100%" alignItems="center" justifyContent="center">
-          <Spinner />
-        </Flex>
-      )}
-      {isSuccess && (
-        <Table
-          size="sm"
-          variant="striped"
-          colorScheme="gray"
-          textTransform="none"
-        >
-          <Thead>
-            <Tr py={1}>
-              <Th>
-                <Checkbox />
-              </Th>
-              <Th>
-                <Heading as="h6" size="xs" textTransform="none">
-                  Id
-                </Heading>
-              </Th>
-              <Th>
-                <Heading as="h6" size="xs" textTransform="none">
-                  Name
-                </Heading>
-              </Th>
-            </Tr>
-          </Thead>
+          <Flex w="100%" alignItems="center" justifyContent="center">
+            <Spinner />
+          </Flex>
+        )}
+        {isSuccess && (
+          <Table
+            size="sm"
+            variant="striped"
+            colorScheme="gray"
+            textTransform="none"
+          >
+            <Thead>
+              <Tr py={1}>
+                <Th>
+                  <Checkbox />
+                </Th>
+                <Th>
+                  <Heading as="h6" size="xs" textTransform="none">
+                    Id
+                  </Heading>
+                </Th>
+                <Th>
+                  <Heading as="h6" size="xs" textTransform="none">
+                    Name
+                  </Heading>
+                </Th>
+              </Tr>
+            </Thead>
           <Tbody py={10}>
             {data.map((record: any) => (
               <Tr key={record.id}>
@@ -138,7 +149,7 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
                         });
                       }
                     }}
-                    checked={!!denNum?.dataDimensions?.[record.id]}
+                    isChecked={!!denNum?.dataDimensions?.[record.id]}
                   />
                 </Td>
                 <Td>{record.id}</Td>
