@@ -109,10 +109,10 @@ const DashboardMenu = () => {
       direction="row"
       alignContent="center"
       alignItems="center"
-      justifyContent="center"
+      justifyContent="right"
       justifyItems="center"
-      flex={1}
-      spacing="10px"
+      // flex={1}
+      spacing="5"
       h="100%"
       w="100%"
     >
