@@ -88,6 +88,7 @@ export interface ISection {
   rowSpan: number;
   images: Image[];
   isBottomSection: boolean;
+  bg: string;
 }
 
 export interface IFilter {}
@@ -100,7 +101,6 @@ export interface IDashboard extends INamed {
   isDefault?: boolean;
   showSider: boolean;
   showTop: boolean;
-  mode: "edit" | "view";
   refreshInterval: string;
   rows: number;
   columns: number;
@@ -109,6 +109,7 @@ export interface IDashboard extends INamed {
   availableCategories: any[];
   availableCategoryOptionCombos: any[];
   bottomSection: ISection;
+  bg: string;
 }
 export interface Pagination {
   total: number;

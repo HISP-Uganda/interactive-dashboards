@@ -1,21 +1,11 @@
-import { MouseEvent } from "react";
-import {
-  Box,
-  Flex,
-  Grid,
-  GridItem,
-  Image,
-  Spacer,
-  Spinner,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
-import { setCurrentSection } from "../Events";
-import { useStore } from "effector-react";
-import { $dashboard, $store } from "../Store";
+import { Grid, GridItem, Image, Stack } from "@chakra-ui/react";
 import { useNavigate, useSearch } from "@tanstack/react-location";
-import { FormGenerics } from "../interfaces";
+import { useStore } from "effector-react";
+import { MouseEvent } from "react";
 import { FullScreenHandle } from "react-full-screen";
+import { setCurrentSection } from "../Events";
+import { FormGenerics } from "../interfaces";
+import { $dashboard, $store } from "../Store";
 import SectionVisualization from "./SectionVisualization";
 
 interface Props {
@@ -58,7 +48,7 @@ export default function ({
         }
       }}
     >
-      <Grid templateColumns="repeat(24, 1fr)" h="100%" w="100%" >
+      <Grid templateColumns="repeat(24, 1fr)" h="100%" w="100%">
         {handle.active && (
           <GridItem h="100%" w="100%" colSpan={3}>
             <Stack

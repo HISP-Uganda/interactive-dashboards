@@ -2,9 +2,8 @@ import { useDataEngine } from "@dhis2/app-runtime";
 import { center } from "@turf/turf";
 import type { DataNode } from "antd/lib/tree";
 import axios, { AxiosRequestConfig } from "axios";
-import { fromPairs, isEmpty, uniq } from "lodash";
+import { fromPairs, isEmpty, max, min, uniq } from "lodash";
 import { useQuery } from "react-query";
-import OrganizationUnitGroups from "./components/data-sources/OrganisationUnitGroups";
 import {
   addPagination,
   changeAdministration,
@@ -221,8 +220,11 @@ export const useInitials = () => {
       const facilities: React.Key[] = organisationUnits.map(
         (unit: any) => unit.id
       );
+      const minLevel: number | null | undefined = min(
+        organisationUnits.map(({ level }: any) => Number(level))
+      );
       onChangeOrganisations({
-        levels: ["3"],
+        levels: [minLevel === 1 ? "3" : `${minLevel ? minLevel + 1 : 4}`],
         organisations: facilities,
         groups: [],
         expandedKeys: [],
@@ -607,7 +609,7 @@ export const useProgramIndicators = (
     order: "name:ASC",
   };
 
-  let selectedProgramIndicatorsQuery = {}; 
+  let selectedProgramIndicatorsQuery = {};
 
   if (q) {
     params = { ...params, filter: `identifiable:token:${q}` };
@@ -617,7 +619,7 @@ export const useProgramIndicators = (
       resource: "programIndicators.json",
       params,
     },
-    ...selectedProgramIndicatorsQuery
+    ...selectedProgramIndicatorsQuery,
   };
   return useQuery<{ id: string; name: string }[], Error>(
     ["program-indicators", page, pageSize, q],

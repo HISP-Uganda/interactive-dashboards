@@ -87,6 +87,7 @@ export const createSection = (id = generateUid()): ISection => {
     carouselOver: "items",
     images: [],
     isBottomSection: false,
+    bg: "white",
   };
 };
 
@@ -141,10 +142,8 @@ export const createDashboard = (id = generateUid()): IDashboard => {
     rows: 12,
     columns: 24,
     showSider: true,
-    //category: "",
     category: "uDWxMNyXZeo",
     showTop: true,
-    mode: "edit",
     name: "New Dashboard",
     refreshInterval: "off",
     dataSet: "",
@@ -152,6 +151,7 @@ export const createDashboard = (id = generateUid()): IDashboard => {
     availableCategories: [],
     availableCategoryOptionCombos: [],
     bottomSection: { ...createSection(), isBottomSection: true, title: "" },
+    bg: "gray.300",
   };
 };
 
