@@ -175,6 +175,7 @@ export const $store = domain
   .createStore<IStore>({
     showSider: true,
     periods: [{ id: "LAST_12_MONTHS", name: "Last 12 months" }],
+    // periods: [{ id: "LAST_MONTH", name: "Last Month" }, { id: "THIS_MONTH", name: "This Month" }],
     organisations: [],
     levels: [],
     groups: [],
