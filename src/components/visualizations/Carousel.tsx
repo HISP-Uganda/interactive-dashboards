@@ -22,14 +22,14 @@ const Carousel = (section: ISection) => {
       setIndex((s: number) => (s + 1) % itemSize);
     }
   };
-  useInterval(increment, 1000 * 10);
+  useInterval(increment, 5000 * 10);
   return (
     <Stack h="100%">
       {section.carouselOver === "groups" && (
         <VisualizationTitle
           section={section}
           fontSize={"18px"}
-          textTransform={"uppercase"}
+          //textTransform={"uppercase"}
           color={"gray.500"}
           title={itemGroupKeys[index]}
           fontWeight="bold"
