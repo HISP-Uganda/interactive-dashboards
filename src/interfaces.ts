@@ -65,6 +65,7 @@ export interface IVisualization extends INamed {
   overrides: { [key: string]: any };
   properties: { [key: string]: any };
   group: string;
+  expression?: string;
 }
 export interface ISection {
   id: string;
@@ -110,6 +111,8 @@ export interface IDashboard extends INamed {
   availableCategoryOptionCombos: any[];
   bottomSection: ISection;
   bg: string;
+  targetCategoryCombo: string;
+  targetCategoryOptionCombos: any[];
 }
 export interface Pagination {
   total: number;

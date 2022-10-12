@@ -11,14 +11,13 @@ import {
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { useQueryClient } from "react-query";
 import {
   changeIndicatorAttribute,
   changeNumeratorDimension,
   changeUseIndicators,
   setIndicator,
-  setShowSider,
 } from "../../Events";
 import { FormGenerics } from "../../interfaces";
 import {

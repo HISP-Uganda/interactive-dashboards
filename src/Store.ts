@@ -21,7 +21,6 @@ import {
   changeVisualizationAttribute,
   changeVisualizationProperties,
   deleteSection,
-  increment,
   onChangeOrganisations,
   setCategories,
   setCategory,
@@ -50,7 +49,6 @@ import {
   changeDashboardId,
   changeAdministration,
   changeHasDashboards,
-  addOverride,
   changeVisualizationOverride,
   changeVisualizationType,
   setDefaultDashboard,
@@ -60,6 +58,7 @@ import {
   setCategorization,
   setAvailableCategories,
   setAvailableCategoryOptionCombos,
+  setTargetCategoryOptionCombos,
 } from "./Events";
 import {
   ICategory,
@@ -152,6 +151,8 @@ export const createDashboard = (id = generateUid()): IDashboard => {
     availableCategoryOptionCombos: [],
     bottomSection: { ...createSection(), isBottomSection: true, title: "" },
     bg: "gray.300",
+    targetCategoryCombo: "",
+    targetCategoryOptionCombos: [],
   };
 };
 
@@ -175,7 +176,6 @@ export const $store = domain
   .createStore<IStore>({
     showSider: true,
     periods: [{ id: "LAST_12_MONTHS", name: "Last 12 months" }],
-    // periods: [{ id: "LAST_MONTH", name: "Last Month" }, { id: "THIS_MONTH", name: "This Month" }],
     organisations: [],
     levels: [],
     groups: [],
@@ -341,7 +341,10 @@ export const $dashboard = domain
     (state, availableCategoryOptionCombos) => {
       return { ...state, availableCategoryOptionCombos };
     }
-  );
+  )
+  .on(setTargetCategoryOptionCombos, (state, targetCategoryOptionCombos) => {
+    return { ...state, targetCategoryOptionCombos };
+  });
 
 export const $indicator = domain
   .createStore<IIndicator>(createIndicator())
@@ -719,11 +722,39 @@ export const $categoryOptionCombo = $dashboard.map(
   }
 );
 
+export const $targetCategoryOptionCombo = $dashboard.map(
+  ({ categorization, availableCategories, targetCategoryOptionCombos }) => {
+    if (
+      availableCategories &&
+      availableCategories.length > 0 &&
+      targetCategoryOptionCombos &&
+      targetCategoryOptionCombos.length > 0
+    ) {
+      const categoryId = availableCategories[0].id;
+      const categories = categorization[categoryId];
+
+      return categories.flatMap(({ value }) => {
+        const targetCOC = targetCategoryOptionCombos.find(
+          ({ categoryOptions }) => {
+            return categoryOptions.map(({ id }: any) => id).join("") === value;
+          }
+        );
+        if (targetCOC) {
+          return [targetCOC.id];
+        }
+        return [];
+      });
+    }
+    return [];
+  }
+);
+
 export const $globalFilters = combine(
   $store,
   $categoryOptionCombo,
   $dashboard,
-  (store, categoryOptionCombo, dashboard) => {
+  $targetCategoryOptionCombo,
+  (store, categoryOptionCombo, dashboard, target) => {
     const periods = store.periods.flatMap(({ id }) => {
       if (relativePeriodTypes.indexOf(id) !== -1) {
         return getRelativePeriods(id);
@@ -731,30 +762,30 @@ export const $globalFilters = combine(
       return [id];
     });
 
-    console.log(dashboard.dataSet);
+    let filters: { [key: string]: any } = {
+      m5D13FqKZwN: periods,
+      GQhi6pRnTKF: store.levels,
+      mclvD0Z9mfT: store.organisations,
+    };
 
-    if (dashboard.dataSet && categoryOptionCombo) {
-      return {
-        m5D13FqKZwN: periods,
-        of2WvtwqbHR: store.groups,
-        GQhi6pRnTKF: store.levels,
-        mclvD0Z9mfT: store.organisations,
-        WSiMOMi4QWh: categoryOptionCombo,
-      };
-    } else if (!dashboard.dataSet) {
-      return {
-        m5D13FqKZwN: periods,
-        of2WvtwqbHR: store.groups,
-        GQhi6pRnTKF: store.levels,
-        mclvD0Z9mfT: store.organisations,
+    if (store.groups.length > 0) {
+      filters = { ...filters, of2WvtwqbHR: store.groups };
+    }
+    if (dashboard.dataSet && categoryOptionCombo.length > 0) {
+      filters = {
+        ...filters,
         WSiMOMi4QWh: categoryOptionCombo,
       };
     }
 
-    return {};
+    if (dashboard.targetCategoryCombo && target.length > 0) {
+      return { ...filters, OOhWJ4gfZy1: target };
+    }
+
+    return filters;
   }
 );
 
-$categoryOptionCombo.watch((store) => {
-  // console.log(store);
-});
+// $targetCategoryOptionCombo.watch((store) => {
+//   console.log(store);
+// });

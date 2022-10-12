@@ -18,6 +18,7 @@ import {
 } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { useEffect } from "react";
+import { useDataEngine } from "@dhis2/app-runtime";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import { useElementSize } from "usehooks-ts";
 import {
@@ -43,12 +44,12 @@ import {
   setCurrentPage,
   setDataSource,
   setIndicator,
+  setTargetCategoryOptionCombos,
 } from "../Events";
 import moh from "../images/moh.json";
 import { useInitials } from "../Queries";
 import {
   $categories,
-  $dashboard,
   $dashboards,
   $dataSources,
   $indicators,
@@ -80,7 +81,6 @@ const App = () => {
   const { isLoading, isSuccess, isError, error } = useInitials();
   const store = useStore($store);
   const dashboards = useStore($dashboards);
-  const dashboard = useStore($dashboard);
   const dataSources = useStore($dataSources);
   const indicators = useStore($indicators);
   const categories = useStore($categories);
@@ -92,6 +92,8 @@ const App = () => {
   const [funderLogo, { width: fw, height: fh }] = useElementSize();
   const [funderLogo1, { width: f1w, height: f1h }] = useElementSize();
 
+  const engine = useDataEngine();
+
   const topMenuOptions: { [key: string]: any } = {
     dashboards: <DashboardMenu />,
     sections: <SectionMenu />,
@@ -99,7 +101,7 @@ const App = () => {
 
   useEffect(() => {
     const callback = async (event: KeyboardEvent) => {
-      if (event.key === "F" || event.key === "f") {
+      if (event.key === "F5" || event.key === "f5") {
         await handle.enter();
       }
     };
@@ -199,6 +201,20 @@ const App = () => {
                         );
                         if (dashboard) {
                           setCurrentDashboard(dashboard);
+                          if (dashboard.targetCategoryCombo) {
+                            const {
+                              combo: { categoryOptionCombos },
+                            }: any = await engine.query({
+                              combo: {
+                                resource: `categoryCombos/${dashboard.targetCategoryCombo}`,
+                                params: {
+                                  fields:
+                                    "categoryOptionCombos[id,name,categoryOptions],categories[id,name,categoryOptions[id~rename(value),name~rename(label)]]",
+                                },
+                              },
+                            });
+                            setTargetCategoryOptionCombos(categoryOptionCombos);
+                          }
                         } else {
                           setCurrentDashboard(createDashboard(dashboardId));
                         }
@@ -263,10 +279,9 @@ const App = () => {
             maxH="calc(100vh - 48px)"
             h="calc(100vh - 48px)"
             p="5px"
-            
           >
-            <GridItem h="100%"  >
-              <Grid templateRows="repeat(14, 1fr)" gap={1} h="100%" >
+            <GridItem h="100%">
+              <Grid templateRows="repeat(14, 1fr)" gap={1} h="100%">
                 <GridItem rowSpan={1} h="100%">
                   <Stack
                     h="100%"
@@ -346,7 +361,7 @@ const App = () => {
                     <Outlet />
                   </GridItem>
                   <Footer
-                    //funderLogoRef={funderLogo}
+                    funderLogoRef={funderLogo}
                     funderLogo1Ref={funderLogo1}
                     handle={handle}
                     fh={fh}
