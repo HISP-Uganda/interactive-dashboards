@@ -2,9 +2,9 @@ import { useDataEngine } from "@dhis2/app-runtime";
 import { center } from "@turf/turf";
 import type { DataNode } from "antd/lib/tree";
 import axios, { AxiosRequestConfig } from "axios";
-import { fromPairs, isEmpty, uniq } from "lodash";
+import { fromPairs, isEmpty, max, min, uniq } from "lodash";
+import { evaluate } from "mathjs";
 import { useQuery } from "react-query";
-import OrganizationUnitGroups from "./components/data-sources/OrganisationUnitGroups";
 import {
   addPagination,
   changeAdministration,
@@ -221,8 +221,11 @@ export const useInitials = () => {
       const facilities: React.Key[] = organisationUnits.map(
         (unit: any) => unit.id
       );
+      const minLevel: number | null | undefined = min(
+        organisationUnits.map(({ level }: any) => Number(level))
+      );
       onChangeOrganisations({
-        levels: ["3"],
+        levels: [minLevel === 1 ? "3" : `${minLevel ? minLevel + 1 : 4}`],
         organisations: facilities,
         groups: [],
         expandedKeys: [],
@@ -607,7 +610,7 @@ export const useProgramIndicators = (
     order: "name:ASC",
   };
 
-  let selectedProgramIndicatorsQuery = {}; 
+  let selectedProgramIndicatorsQuery = {};
 
   if (q) {
     params = { ...params, filter: `identifiable:token:${q}` };
@@ -617,7 +620,7 @@ export const useProgramIndicators = (
       resource: "programIndicators.json",
       params,
     },
-    ...selectedProgramIndicatorsQuery
+    ...selectedProgramIndicatorsQuery,
   };
   return useQuery<{ id: string; name: string }[], Error>(
     ["program-indicators", page, pageSize, q],
@@ -1084,7 +1087,6 @@ export const useVisualization = (
   if (refreshInterval && refreshInterval !== "off") {
     currentInterval = Number(refreshInterval) * 1000;
   }
-  console.log(globalFilters);
   const otherKeys = generateKeys(indicator, globalFilters);
   const overrides = visualization.overrides || {};
   return useQuery<any, Error>(
@@ -1108,8 +1110,6 @@ export const useVisualization = (
         if (data.numerator && data.denominator) {
           const numerator: any = data.numerator;
           const denominator: any = data.denominator;
-          console.log(data);
-
           let denRows = [];
           let numRows = [];
           let denHeaders: any[] = [];
@@ -1152,7 +1152,12 @@ export const useVisualization = (
               denHeaders.map((h: any, i: number) => {
                 if (i === denHeaders.length - 1) {
                   const currentNum = numerators[currentDenKey] || 0;
-                  return [h.name, currentNum / currentDenValue];
+                  const value = currentNum / currentDenValue;
+
+                  if (indicator.factor !== "1") {
+                    return [h.name, evaluate(`${value}${indicator.factor}`)];
+                  }
+                  return [h.name, value];
                 }
                 return [h.name, r[i]];
               })
@@ -1165,7 +1170,12 @@ export const useVisualization = (
             if (rows.length > 0) {
               processed = rows.map((row: string[]) => {
                 return fromPairs(
-                  headers.map((h: any, i: number) => [h.name, row[i]])
+                  headers.map((h: any, i: number) => {
+                    if (indicator.factor !== "1") {
+                      return [h.name, evaluate(`${row[i]}${indicator.factor}`)];
+                    }
+                    return [h.name, row[i]];
+                  })
                 );
               });
             } else {
@@ -1237,7 +1247,6 @@ export const useVisualization = (
         }
 
         if (numerator && denominator) {
-          console.log("Are we here some how");
         } else if (numerator) {
           updateVisualizationData({
             visualizationId: visualization.id,

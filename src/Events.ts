@@ -187,3 +187,4 @@ export const setCategorization = domain.createEvent<{
 }>();
 export const setAvailableCategories = domain.createEvent<any[]>();
 export const setAvailableCategoryOptionCombos = domain.createEvent<any[]>();
+export const setTargetCategoryOptionCombos = domain.createEvent<any[]>();

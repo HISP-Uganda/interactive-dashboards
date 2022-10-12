@@ -1,22 +1,10 @@
-import {
-  Box,
-  Grid,
-  GridItem,
-  SimpleGrid,
-  Stack,
-  useBreakpointValue,
-} from "@chakra-ui/react";
+import { Grid, GridItem, useBreakpointValue } from "@chakra-ui/react";
 import { MouseEvent } from "react";
-
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import Marquee from "react-fast-marquee";
 import { setCurrentSection } from "../../Events";
 import { FormGenerics, ISection } from "../../interfaces";
 import { $dashboard, $store } from "../../Store";
-import Carousel from "../visualizations/Carousel";
-import Visualization from "../visualizations/Visualization";
-import VisualizationTitle from "../visualizations/VisualizationTitle";
 import SectionVisualization from "../SectionVisualization";
 
 const Dashboard = () => {
