@@ -3,10 +3,12 @@ import {
   Flex,
   Grid,
   GridItem,
+  IconButton,
   Image,
   Spinner,
   Stack,
 } from "@chakra-ui/react";
+import { useDataEngine } from "@dhis2/app-runtime";
 import {
   createHashHistory,
   MakeGenerics,
@@ -17,9 +19,9 @@ import {
   stringifySearchWith,
 } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { useEffect } from "react";
-import { useDataEngine } from "@dhis2/app-runtime";
+import { useEffect, useState } from "react";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
+import { BiArrowToLeft, BiArrowToRight } from "react-icons/bi";
 import { useElementSize } from "usehooks-ts";
 import {
   CategoryForm,
@@ -44,6 +46,7 @@ import {
   setCurrentPage,
   setDataSource,
   setIndicator,
+  setShowSider,
   setTargetCategoryOptionCombos,
 } from "../Events";
 import moh from "../images/moh.json";
@@ -98,6 +101,16 @@ const App = () => {
     dashboards: <DashboardMenu />,
     sections: <SectionMenu />,
   };
+
+  const [columns, setColumns] = useState<string>("250px 1fr");
+
+  useEffect(() => {
+    if (store.showSider) {
+      setColumns("250px 1fr");
+    } else {
+      setColumns("1fr");
+    }
+  }, [store.showSider]);
 
   useEffect(() => {
     const callback = async (event: KeyboardEvent) => {
@@ -274,53 +287,55 @@ const App = () => {
           ]}
         >
           <Grid
-            templateColumns="250px 1fr"
+            templateColumns={columns}
             gap={1}
             maxH="calc(100vh - 48px)"
             h="calc(100vh - 48px)"
             p="5px"
           >
-            <GridItem h="100%">
-              <Grid templateRows="repeat(14, 1fr)" gap={1} h="100%">
-                <GridItem rowSpan={1} h="100%">
-                  <Stack
-                    h="100%"
-                    w="100%"
-                    alignItems="center"
-                    alignContent="center"
-                    justifyContent="center"
-                    justifyItems="center"
-                    ref={mohLogo}
-                  >
-                    <Image
-                      src={moh}
-                      maxH={`${height * 0.7}px`}
-                      maxW={`${width * 0.7}px`}
-                    />
-                  </Stack>
-                </GridItem>
-                <GridItem rowSpan={12} h="100%">
-                  <SidebarContent />
-                </GridItem>
-                <GridItem rowSpan={1} h="100%">
-                  <Stack
-                    h="100%"
-                    w="100%"
-                    alignItems="center"
-                    alignContent="center"
-                    justifyContent="center"
-                    justifyItems="center"
-                    ref={hispLogo}
-                  >
-                    <Image
-                      src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/logo.png"
-                      maxH={`${hh * 0.7}px`}
-                      maxW={`${hw * 0.7}px`}
-                    />
-                  </Stack>
-                </GridItem>
-              </Grid>
-            </GridItem>
+            {store.showSider && (
+              <GridItem h="100%">
+                <Grid templateRows="repeat(14, 1fr)" gap={1} h="100%">
+                  <GridItem rowSpan={1} h="100%">
+                    <Stack
+                      h="100%"
+                      w="100%"
+                      alignItems="center"
+                      alignContent="center"
+                      justifyContent="center"
+                      justifyItems="center"
+                      ref={mohLogo}
+                    >
+                      <Image
+                        src={moh}
+                        maxH={`${height * 0.7}px`}
+                        maxW={`${width * 0.7}px`}
+                      />
+                    </Stack>
+                  </GridItem>
+                  <GridItem rowSpan={12} h="100%">
+                    <SidebarContent />
+                  </GridItem>
+                  <GridItem rowSpan={1} h="100%">
+                    <Stack
+                      h="100%"
+                      w="100%"
+                      alignItems="center"
+                      alignContent="center"
+                      justifyContent="center"
+                      justifyItems="center"
+                      ref={hispLogo}
+                    >
+                      <Image
+                        src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/logo.png"
+                        maxH={`${hh * 0.7}px`}
+                        maxW={`${hw * 0.7}px`}
+                      />
+                    </Stack>
+                  </GridItem>
+                </Grid>
+              </GridItem>
+            )}
             <FullScreen handle={handle}>
               <GridItem
                 h="100%"
@@ -333,14 +348,17 @@ const App = () => {
                   <GridItem h="100%" w="100%" rowSpan={1}>
                     <Stack
                       h="100%"
+                      bg="white"
+                      p="5px"
                       justifyContent="center"
                       alignContent="center"
+                      alignItems="center"
                       direction="row"
                       w="100%"
                       spacing="40px"
                       ref={hispLogo1}
                     >
-                      {handle.active && (
+                      {(handle.active || !store.showSider) && (
                         <Stack
                           alignContent="center"
                           alignItems="center"
@@ -353,6 +371,26 @@ const App = () => {
                             maxW={`${h1w * 0.85}px`}
                           />
                         </Stack>
+                      )}
+                      {!handle.active && !store.showSider && (
+                        <IconButton
+                          size="lg"
+                          bg="none"
+                          aria-label="Search database"
+                          icon={<BiArrowToRight />}
+                          onClick={() => setShowSider(true)}
+                          _hover={{ bg: "none" }}
+                        />
+                      )}
+                      {!handle.active && store.showSider && (
+                        <IconButton
+                          size="lg"
+                          bg="none"
+                          aria-label="Search database"
+                          icon={<BiArrowToLeft />}
+                          onClick={() => setShowSider(false)}
+                          _hover={{ bg: "none" }}
+                        />
                       )}
                       {topMenuOptions[store.currentPage]}
                     </Stack>

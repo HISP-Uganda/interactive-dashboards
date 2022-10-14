@@ -59,6 +59,10 @@ import {
   setAvailableCategories,
   setAvailableCategoryOptionCombos,
   setTargetCategoryOptionCombos,
+  setSystemId,
+  setCheckedKeys,
+  setLevels,
+  setGroups,
 } from "./Events";
 import {
   ICategory,
@@ -174,7 +178,7 @@ export const $paginations = domain
 
 export const $store = domain
   .createStore<IStore>({
-    showSider: true,
+    showSider: false,
     periods: [{ id: "LAST_12_MONTHS", name: "Last 12 months" }],
     organisations: [],
     levels: [],
@@ -187,6 +191,8 @@ export const $store = domain
     defaultDashboard: "",
     currentPage: "",
     logo: "",
+    systemId: "",
+    checkedKeys: [],
   })
   .on(setOrganisations, (state, organisations) => {
     return { ...state, organisations };
@@ -199,8 +205,15 @@ export const $store = domain
   })
   .on(
     onChangeOrganisations,
-    (state, { levels, groups, organisations, expandedKeys }) => {
-      return { ...state, levels, groups, organisations, expandedKeys };
+    (state, { levels, groups, organisations, expandedKeys, checkedKeys }) => {
+      return {
+        ...state,
+        levels,
+        groups,
+        organisations,
+        expandedKeys,
+        checkedKeys,
+      };
     }
   )
   .on(changePeriods, (state, periods) => {
@@ -223,6 +236,18 @@ export const $store = domain
   })
   .on(setCurrentPage, (state, currentPage) => {
     return { ...state, currentPage };
+  })
+  .on(setSystemId, (state, systemId) => {
+    return { ...state, systemId };
+  })
+  .on(setCheckedKeys, (state, checkedKeys) => {
+    return { ...state, checkedKeys };
+  })
+  .on(setLevels, (state, levels) => {
+    return { ...state, levels };
+  })
+  .on(setGroups, (state, groups) => {
+    return { ...state, groups };
   });
 
 export const $dataSource = domain

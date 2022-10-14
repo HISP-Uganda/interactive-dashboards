@@ -17,34 +17,27 @@ const DashboardCategorization = ({ dataSet }: DashboardCategorizationProps) => {
     <>
       {isLoading && <Spinner />}
       {isSuccess && (
-        <Stack flex={1} direction="row" spacing="20px">
+        <Stack spacing="30px">
           {dashboard.availableCategories.map(
             ({ id, name, categoryOptions }) => {
               return (
-                <Stack
-                  key={id}
-                  direction="row"
-                  alignItems="center"
-                  alignContent="center"
-                >
+                <Stack key={id}>
                   <Text fontWeight="bold" fontSize="16px">
                     {name}
                   </Text>
-                  <Box w={store.isAdmin ? "150px" : "100%"} bg="white" flex={1}>
-                    <Select<Option, true, GroupBase<Option>>
-                      value={dashboard.categorization[id]}
-                      hideSelectedOptions={false}
-                      selectedOptionStyle="check"
-                      isMulti
-                      onChange={(value: any, actions: any) => {
-                        setCategorization({
-                          ...dashboard.categorization,
-                          [id]: value,
-                        });
-                      }}
-                      options={categoryOptions}
-                    />
-                  </Box>
+                  <Select<Option, true, GroupBase<Option>>
+                    value={dashboard.categorization[id]}
+                    hideSelectedOptions={false}
+                    selectedOptionStyle="check"
+                    isMulti
+                    onChange={(value: any, actions: any) => {
+                      setCategorization({
+                        ...dashboard.categorization,
+                        [id]: value,
+                      });
+                    }}
+                    options={categoryOptions}
+                  />
                 </Stack>
               );
             }

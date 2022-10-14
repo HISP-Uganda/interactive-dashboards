@@ -17,14 +17,15 @@ import { useStore } from "effector-react";
 import { setCategory, setShowSider } from "../../Events";
 import { ICategory } from "../../interfaces";
 import { useCategories } from "../../Queries";
-import { $categories } from "../../Store";
+import { $categories, $store } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import { AddIcon } from "@chakra-ui/icons";
 
 const Categories = () => {
   const navigate = useNavigate();
   const categories = useStore($categories);
-  const { isLoading, isSuccess, isError, error } = useCategories();
+  const { systemId } = useStore($store);
+  const { isLoading, isSuccess, isError, error } = useCategories(systemId);
   useEffect(() => {
     setShowSider(true);
   }, []);

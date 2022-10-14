@@ -31,7 +31,6 @@ const AutoRefreshPicker = () => {
       <Icon as={BiRefresh} w={6} h={6} />
       <Box w="110px">
         <Select<Option, false, GroupBase<Option>>
-          size="sm"
           placeholder="Refresh"
           value={periodTypes.find(
             (pt) => pt.value === dashboard.refreshInterval

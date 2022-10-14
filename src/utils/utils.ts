@@ -568,3 +568,59 @@ export const createOptions = (options: string[]): Option[] => {
     return { label: option, value: option };
   });
 };
+
+export const divide = (expression: string, data: { [key: string]: any[] }) => {
+  const indicators = expression.split("/");
+  if (indicators && indicators.length === 2) {
+    const [ind1, ind2] = indicators;
+    const data1 = data[ind1];
+    const data2 = data[ind2];
+    if (data1 && data1.length === 1 && data2 && data2.length === 1) {
+      return [{ total: data1[0].total / data2[0].total }];
+    }
+  }
+  return [{ total: 0 }];
+};
+
+export const allMetadata: { [key: string]: string } = {
+  CnIU4JH161i: "12 - 24 months",
+  dZN788jq32i: "15 - 60 Years",
+  euNzABJD0rl: "18- 24 months",
+  rSn71nAWEyZ: "2 - <5 years",
+  PkScN8lPCJu: "6 - 14 Years",
+  PmQTItIJKn0: "9 Months - 5 Years",
+  Hi8VxB592t8: "9-11 months",
+  xBpTFgYQbPV: "9-17 months",
+  lFFAVORlK5r: "Broken",
+  jAbqv8bnCqT: "Contamination",
+  daugmmgzAkU: "Day 1",
+  C1IRVkhB3MW: "Day 2",
+  L48zD78K9AI: "Day 3",
+  zPaWaUOubgL: "Day 4",
+  vmPAdWGX6qy: "Day 4 (Mop up day)",
+  J9wUCeShAjk: "Day 5",
+  Y5wiqIU7dAN: "Day 6",
+  vHUFOwDZOc3: "Day 6 (Mop up day)",
+  lUjup7J3S50: "Day 7",
+  AXoc1QOgNgV: "Day 8 (Mop up day)",
+  eSSFwmQpHNb: "Empty Vials",
+  sdEKrqgmNxN: "Health Worker",
+  oEMjNjU2n1l: "Mobiliser",
+  BaOUxUBEAp1: "Other reason",
+  HePDJphrRMS: "Parish Supervisor",
+  BoDgo1kqT4s: "Partial use",
+  CVphMdX3AqR: "Phase 1 (2022)",
+  KGPe25jtndC: "Phase 2 (2023)",
+  CU21ehevOUt: "Phase 3 (2024)",
+  f0y7OUk8wtM: "Reactive (2021)",
+  m7S4M4aWa4q: "Round 0 (2019)",
+  G1R6RsITi8T: "Round 1",
+  gqfR4Qrz6Nm: "Round 1 (2019)",
+  W1PA9ZE0plu: "Round 2",
+  sRZAXWz62eu: "Round 2 (2022)",
+  pSRm6b16Baw: "Unusable Vials",
+  f65rwx7h4rV: "Usable Vials",
+  mlwTknbcGP4: "VVM Color Change",
+  rKD38rD7HZ5: "Village Health Team",
+  xYerKDKCefk: "default",
+};
