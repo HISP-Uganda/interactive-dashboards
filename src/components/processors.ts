@@ -1,4 +1,5 @@
 import { uniq, update } from "lodash";
+import { allMetadata } from "../utils/utils";
 export const processSingleValue = (data: any[]): any => {
   if (data.length > 0) {
     const values = Object.values(data[0]);
@@ -9,7 +10,7 @@ export const processSingleValue = (data: any[]): any => {
       return values[values.length - 1];
     }
   }
-  return "-";
+  return 0;
 };
 
 export const processGraphs = (
@@ -34,7 +35,7 @@ export const processGraphs = (
         return {
           x:
             availableProperties?.data?.orientation === "v"
-              ? x.map((c: any) => metadata?.[c]?.name || c)
+              ? x.map((c: any) => metadata?.[c]?.name || allMetadata[c] || c)
               : x.map((c: any) => {
                   const r = data.find(
                     (num: any) => num[series] === se && num[category] === c
@@ -65,7 +66,7 @@ export const processGraphs = (
         {
           x:
             availableProperties?.data?.orientation === "v"
-              ? x.map((c: any) => metadata?.[c]?.name || c)
+              ? x.map((c: any) => metadata?.[c]?.name || allMetadata[c] || c)
               : x.map((c: any) => {
                   const r = data.find((num: any) => num[category] === c);
                   return r?.count || r?.value || r?.total;
@@ -100,8 +101,9 @@ export const processPieChart = (
   let chartData: any = [];
   if (data && data.length > 0 && labels && values) {
     const x = data.map((num: any) => {
-      const label = num[labels];
-      return metadata?.[num[labels]]?.name || num[labels];
+      return (
+        metadata?.[num[labels]]?.name || allMetadata[labels] || num[labels]
+      );
     });
     const y = data.map((num: any) => num[values]);
     chartData = [

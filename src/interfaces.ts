@@ -155,6 +155,8 @@ export interface IStore {
   defaultDashboard: string;
   currentPage: string;
   logo: string;
+  systemId: string;
+  checkedKeys: { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[];
 }
 
 export type IndicatorProps = {

@@ -20,7 +20,7 @@ import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { ICategory } from "../../interfaces";
 import { useCategories } from "../../Queries";
-import { $categories } from "../../Store";
+import { $categories, $store } from "../../Store";
 
 <Table variant="simple">
   <Thead>
@@ -35,7 +35,8 @@ import { $categories } from "../../Store";
 const DashboardCategories = () => {
   const navigate = useNavigate();
   const categories = useStore($categories);
-  const { isLoading, isSuccess, isError, error } = useCategories();
+  const { systemId } = useStore($store);
+  const { isLoading, isSuccess, isError, error } = useCategories(systemId);
   return (
     <Stack flex={1} p="20px" bg="white">
       <Stack direction="row">

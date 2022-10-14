@@ -19,7 +19,8 @@ import { useForm } from "react-hook-form";
 import { useQueryClient } from "react-query";
 import { setDataSource, setShowSider } from "../../Events";
 import { FormGenerics, IDataSource } from "../../interfaces";
-import { $dataSource, createDataSource } from "../../Store";
+import { $dataSource, $store, createDataSource } from "../../Store";
+import { saveDocument } from "../../Queries";
 
 const DataSource = () => {
   const search = useSearch<FormGenerics>();
@@ -27,6 +28,7 @@ const DataSource = () => {
   const queryClient = useQueryClient();
   const engine = useDataEngine();
   const dataSource = useStore($dataSource);
+  const store = useStore($store);
   const {
     handleSubmit,
     register,
@@ -39,20 +41,21 @@ const DataSource = () => {
   const isCurrentDHIS2 = watch("isCurrentDHIS2");
 
   const add = async (values: IDataSource) => {
-    let mutation: any = {
-      type: "create",
-      resource: `dataStore/i-data-sources/${values.id}`,
-      data: values,
-    };
-    if (search.edit) {
-      mutation = {
-        type: "update",
-        resource: `dataStore/i-data-sources`,
-        data: values,
-        id: values.id,
-      };
-    }
-    await engine.mutate(mutation);
+    // let mutation: any = {
+    //   type: "create",
+    //   resource: `dataStore/i-data-sources/${values.id}`,
+    //   data: values,
+    // };
+    // if (search.edit) {
+    //   mutation = {
+    //     type: "update",
+    //     resource: `dataStore/i-data-sources`,
+    //     data: values,
+    //     id: values.id,
+    //   };
+    // }
+    // await engine.mutate(mutation);
+    await saveDocument("i-data-sources", store.systemId, values);
     await queryClient.invalidateQueries(["data-sources"]);
   };
   async function onSubmit(values: any) {

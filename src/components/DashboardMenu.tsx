@@ -2,6 +2,12 @@ import {
   Box,
   Button,
   Checkbox,
+  Drawer,
+  DrawerBody,
+  DrawerCloseButton,
+  DrawerContent,
+  DrawerHeader,
+  DrawerOverlay,
   Input,
   Modal,
   ModalBody,
@@ -10,12 +16,12 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Spacer,
   Stack,
   Text,
   Textarea,
   useDisclosure,
 } from "@chakra-ui/react";
-import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
@@ -34,6 +40,7 @@ import {
   setDefaultDashboard,
 } from "../Events";
 import { FormGenerics, IDashboard, Item, Option } from "../interfaces";
+import { saveDocument } from "../Queries";
 import {
   $categoryOptions,
   $dashboard,
@@ -50,43 +57,26 @@ const DashboardMenu = () => {
   const search = useSearch<FormGenerics>();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
-  const engine = useDataEngine();
   const dashboards = useStore($dashboards);
   const dataSets = useStore($dataSets);
+  const store = useStore($store);
+  const dashboard = useStore($dashboard);
+  const categoryOptions = useStore($categoryOptions);
   const updateDashboard = async (data: any) => {
-    console.log(data);
-    let mutation: any = {
-      type: "create",
-      resource: `dataStore/i-dashboards/${data.id}`,
-      data,
-    };
-    if (search.edit) {
-      mutation = {
-        type: "update",
-        resource: `dataStore/i-dashboards`,
-        data: data,
-        id: data.id,
-      };
-    }
-    let mutations = [engine.mutate(mutation)];
-    const mutation2: any = {
-      type: "update",
-      resource: `dataStore/i-dashboard-settings`,
-      data: { default: store.defaultDashboard },
-      id: "settings",
-    };
-    await Promise.all(mutations);
+    const response = await saveDocument("i-dashboards", store.systemId, data);
+    console.log(response);
+    await saveDocument("i-dashboard-settings", store.systemId, {
+      default: store.defaultDashboard,
+      id: store.systemId,
+    });
     onClose();
   };
 
   const togglePublish = async (data: IDashboard, value: boolean) => {
-    let mutation: any = {
-      type: "update",
-      resource: `dataStore/i-dashboards`,
-      data: { ...data, published: true },
-      id: data.id,
-    };
-    await engine.mutate(mutation);
+    await saveDocument("i-dashboards", store.systemId, {
+      ...data,
+      published: true,
+    });
     setDashboards(
       dashboards.map((d) => {
         if (data.id === d.id) {
@@ -97,12 +87,16 @@ const DashboardMenu = () => {
     );
     setCurrentDashboard({ ...data, published: value });
   };
-  const store = useStore($store);
-  const dashboard = useStore($dashboard);
-  const categoryOptions = useStore($categoryOptions);
+
   const onChangePeriods = (periods: Item[]) => {
     changePeriods(periods);
   };
+
+  const {
+    isOpen: filterIsOpen,
+    onOpen: onOpenFilter,
+    onClose: onCloseFilter,
+  } = useDisclosure();
 
   return (
     <Stack
@@ -116,6 +110,8 @@ const DashboardMenu = () => {
       h="100%"
       w="100%"
     >
+      <Text fontSize="2xl">{`${dashboard.name} Dashboard`}</Text>
+      <Spacer />
       {store.isAdmin && (
         <Stack
           direction="row"
@@ -135,9 +131,6 @@ const DashboardMenu = () => {
           </Box>
         </Stack>
       )}
-      <Text fontSize="xl" fontWeight="bold">
-        Filters
-      </Text>
       {store.isAdmin && (
         <>
           <Button
@@ -167,15 +160,33 @@ const DashboardMenu = () => {
           )}
         </>
       )}
-      {dashboard.dataSet && (
-        <DashboardCategorization dataSet={dashboard.dataSet} />
-      )}
-      <OUTreeSelect />
-      <PeriodPicker
-        selectedPeriods={store.periods}
-        onChange={onChangePeriods}
-      />
       {store.isAdmin && <AutoRefreshPicker />}
+      <Button colorScheme="teal" onClick={onOpenFilter}>
+        Filter
+      </Button>
+
+      <Drawer
+        isOpen={filterIsOpen}
+        placement="right"
+        onClose={onCloseFilter}
+        size="md"
+      >
+        <DrawerOverlay />
+        <DrawerContent>
+          <DrawerCloseButton />
+          <DrawerHeader>Filters</DrawerHeader>
+          <DrawerBody>
+            <Stack spacing="20px">
+              <DashboardCategorization dataSet={dashboard.dataSet} />
+              <OUTreeSelect />
+              <PeriodPicker
+                selectedPeriods={store.periods}
+                onChange={onChangePeriods}
+              />
+            </Stack>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
 
       <Modal isOpen={isOpen} onClose={onClose} size="2xl">
         <ModalOverlay />

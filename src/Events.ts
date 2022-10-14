@@ -175,6 +175,7 @@ export const onChangeOrganisations = domain.createEvent<{
   organisations: React.Key[];
   groups: string[];
   expandedKeys: React.Key[];
+  checkedKeys: React.Key[];
 }>();
 
 export const setCurrentPage = domain.createEvent<string>();
@@ -188,3 +189,10 @@ export const setCategorization = domain.createEvent<{
 export const setAvailableCategories = domain.createEvent<any[]>();
 export const setAvailableCategoryOptionCombos = domain.createEvent<any[]>();
 export const setTargetCategoryOptionCombos = domain.createEvent<any[]>();
+export const setSystemId = domain.createEvent<string>();
+export const setCheckedKeys = domain.createEvent<
+  { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[]
+>();
+
+export const setLevels = domain.createEvent<string[]>();
+export const setGroups = domain.createEvent<string[]>();

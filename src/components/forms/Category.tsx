@@ -17,8 +17,9 @@ import { useQueryClient } from "react-query";
 import { useStore } from "effector-react";
 import { setCategory, setShowSider } from "../../Events";
 import { FormGenerics, ICategory } from "../../interfaces";
-import { $category, createCategory } from "../../Store";
+import { $category, $store, createCategory } from "../../Store";
 import { useNavigate, useSearch } from "@tanstack/react-location";
+import { saveDocument } from "../../Queries";
 
 const Category = () => {
   const search = useSearch<FormGenerics>();
@@ -26,6 +27,7 @@ const Category = () => {
   const queryClient = useQueryClient();
   const engine = useDataEngine();
   const category = useStore($category);
+  const store = useStore($store);
   const {
     handleSubmit,
     register,
@@ -33,21 +35,22 @@ const Category = () => {
   } = useForm<ICategory, any>({ defaultValues: category });
 
   const add = async (values: ICategory) => {
-    let mutation: any = {
-      type: "create",
-      resource: `dataStore/i-categories/${values.id}`,
-      data: values,
-    };
+    // let mutation: any = {
+    //   type: "create",
+    //   resource: `dataStore/i-categories/${values.id}`,
+    //   data: values,
+    // };
 
-    if (search.edit) {
-      mutation = {
-        type: "update",
-        resource: `dataStore/i-categories`,
-        data: values,
-        id: values.id,
-      };
-    }
-    await engine.mutate(mutation);
+    // if (search.edit) {
+    //   mutation = {
+    //     type: "update",
+    //     resource: `dataStore/i-categories`,
+    //     data: values,
+    //     id: values.id,
+    //   };
+    // }
+    // await engine.mutate(mutation);
+    await saveDocument("i-categories", store.systemId, values);
     await queryClient.invalidateQueries(["categories"]);
   };
   async function onSubmit(values: any) {

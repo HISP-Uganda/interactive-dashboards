@@ -9,7 +9,8 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { IVisualization } from "../../interfaces";
-import { $visualizationData, $visualizationMetadata } from "../../Store";
+import { $visualizationData } from "../../Store";
+import { divide } from "../../utils/utils";
 import { processSingleValue } from "../processors";
 
 type SingleValueProps = {
@@ -51,14 +52,12 @@ const SingleValue = ({
   layoutProperties,
 }: SingleValueProps) => {
   const visualizationData = useStore($visualizationData);
-  const metadata = useStore($visualizationMetadata);
   const [color, setColor] = useState<string>("");
   const data = visualizationData[visualization.id]
     ? visualizationData[visualization.id]
     : [];
 
-  const value = processSingleValue(data);
-
+  const [value, setValue] = useState<any>(processSingleValue(data));
   const colorSearch = dataProperties?.["data.thresholds"]?.find(
     ({ max, min }: any) => {
       if (max && min) {
@@ -103,6 +102,14 @@ const SingleValue = ({
       setColor("");
     }
   }, [dataProperties]);
+
+  useEffect(() => {
+    if (visualization.expression) {
+      setValue(
+        processSingleValue(divide(visualization.expression, visualizationData))
+      );
+    }
+  }, [visualizationData]);
 
   const numberFormatter = Intl.NumberFormat("en-US", format);
 

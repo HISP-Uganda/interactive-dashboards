@@ -1,6 +1,6 @@
+import { AddIcon } from "@chakra-ui/icons";
 import {
   Button,
-  Divider,
   Input,
   Spacer,
   Spinner,
@@ -12,37 +12,44 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
-import { ChangeEvent, useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import {
-  changeVisualizationData,
-  setIndicator,
-  setVisualizationQueries,
-} from "../../Events";
+import { ChangeEvent, useEffect, useState } from "react";
+import { setIndicator, setVisualizationQueries } from "../../Events";
 import { IIndicator } from "../../interfaces";
 import { useVisualizationData } from "../../Queries";
-import { $indicators, $indicator, createIndicator } from "../../Store";
-import { AddIcon } from "@chakra-ui/icons";
+import { $indicators, $store, createIndicator } from "../../Store";
+import PaginatedTable from "./PaginatedTable";
 
 const Indicators = () => {
   const navigate = useNavigate();
-  const indicator = useStore($indicator);
+  const { systemId } = useStore($store);
   const indicators = useStore($indicators);
-  const { isLoading, isSuccess, isError, error } = useVisualizationData();
+  const { isLoading, isSuccess, isError, error } =
+    useVisualizationData(systemId);
+  const [currentPage, setCurrentPage] = useState<number>(2);
+  const [data, setData] = useState<IIndicator[]>([]);
+  const [q, setQ] = useState<string>("");
+  useEffect(() => {
+    const last = currentPage * 10;
+    setData(
+      indicators
+        .filter(({ name, id }) => {
+          return (
+            name?.toLowerCase().includes(q.toLowerCase()) || id.includes(q)
+          );
+        })
+        .slice(last - 10, last)
+    );
+  }, [currentPage, q]);
   return (
-    <Stack bg="white" h="calc(100vh - 145px)">
+    <Stack bg="white" p="10px">
       <Stack direction="row">
         <Input
-          value={indicator.name}
+          value={q}
           placeholder="Search Visualization Data"
           width="50%"
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            changeVisualizationData({
-              attribute: "name",
-              value: e.target.value,
-            })
-          }
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setQ(e.target.value)}
         />
         <Spacer />
         <Button
@@ -59,7 +66,7 @@ const Indicators = () => {
       </Stack>
       {isLoading && <Spinner />}
       {isSuccess && (
-        <Stack direction="row" overflow="auto" spacing="10px">
+        <Stack spacing="10px">
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -70,7 +77,7 @@ const Indicators = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {indicators.map((indicator: IIndicator) => (
+              {data.map((indicator: IIndicator) => (
                 <Tr
                   key={indicator.id}
                   cursor="pointer"
@@ -90,6 +97,18 @@ const Indicators = () => {
               ))}
             </Tbody>
           </Table>
+          <PaginatedTable
+            currentPage={currentPage}
+            setNextPage={setCurrentPage}
+            total={
+              indicators.filter(({ name, id }) => {
+                return (
+                  name?.toLowerCase().includes(q.toLowerCase()) ||
+                  id.includes(q)
+                );
+              }).length
+            }
+          />
         </Stack>
       )}
       {isError && <pre>{JSON.stringify(error, null, 2)}</pre>}

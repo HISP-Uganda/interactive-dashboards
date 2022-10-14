@@ -15,6 +15,7 @@ import {
   Spinner,
   Stack,
   Text,
+  Textarea,
 } from "@chakra-ui/react";
 import { GroupBase, Select, SingleValue } from "chakra-react-select";
 import { useStore } from "effector-react";
@@ -29,7 +30,7 @@ import {
 } from "../Events";
 import { IVisualization, Option } from "../interfaces";
 import { useVisualizationData } from "../Queries";
-import { $indicators, $section } from "../Store";
+import { $indicators, $section, $store } from "../Store";
 import { chartTypes } from "../utils/utils";
 import ColorPalette from "./ColorPalette";
 import SectionImages from "./SectionImages";
@@ -78,7 +79,9 @@ const VisualizationQuery = ({
   visualization: IVisualization;
 }) => {
   const indicators = useStore($indicators);
-  const { isLoading, isSuccess, isError, error } = useVisualizationData();
+  const { systemId } = useStore($store);
+  const { isLoading, isSuccess, isError, error } =
+    useVisualizationData(systemId);
   return (
     <Stack>
       <Text>Visualization Query</Text>
@@ -436,7 +439,8 @@ const Section = () => {
 
                       <NumberInput
                         value={
-                          visualization.properties["data.title.fontWeight"] || 2
+                          visualization.properties["data.title.fontWeight"] ||
+                          250
                         }
                         max={1000}
                         min={100}
@@ -462,6 +466,17 @@ const Section = () => {
                         attribute="data.title.color"
                       />
                       <VisualizationQuery visualization={visualization} />
+                      <Text>Expression</Text>
+                      <Textarea
+                        value={visualization.expression}
+                        onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                          changeVisualizationAttribute({
+                            attribute: "expression",
+                            value: e.target.value,
+                            visualization: visualization.id,
+                          })
+                        }
+                      />
                       <VisualizationOverride visualization={visualization} />
                       <VisualizationTypes visualization={visualization} />
                       <VisualizationProperties visualization={visualization} />

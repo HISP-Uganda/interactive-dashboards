@@ -8,7 +8,6 @@ import {
   Text,
   Textarea,
 } from "@chakra-ui/react";
-import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { ChangeEvent, useState } from "react";
@@ -20,42 +19,29 @@ import {
   setIndicator,
 } from "../../Events";
 import { FormGenerics } from "../../interfaces";
+import { saveDocument } from "../../Queries";
 import {
   $dataSourceType,
   $hasDHIS2,
   $indicator,
+  $store,
   createIndicator,
 } from "../../Store";
 import { displayDataSourceType } from "../data-sources";
 import NamespaceSelect from "../NamespaceSelect";
 
-import "jsoneditor-react/es/editor.min.css";
-
 const Indicator = () => {
   const search = useSearch<FormGenerics>();
   const indicator = useStore($indicator);
+  const store = useStore($store);
   const hasDHIS2 = useStore($hasDHIS2);
   const dataSourceType = useStore($dataSourceType);
   const [loading, setLoading] = useState<boolean>(false);
-  const engine = useDataEngine();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const add = async () => {
     setLoading(true);
-    let mutation: any = {
-      type: "create",
-      resource: `dataStore/i-visualization-queries/${indicator.id}`,
-      data: indicator,
-    };
-    if (search.edit) {
-      mutation = {
-        type: "update",
-        resource: `dataStore/i-visualization-queries`,
-        id: indicator.id,
-        data: indicator,
-      };
-    }
-    await engine.mutate(mutation);
+    await saveDocument("i-visualization-queries", store.systemId, indicator);
     await queryClient.invalidateQueries(["visualization-queries"]);
     setLoading(false);
     navigate({ to: "/indicators" });

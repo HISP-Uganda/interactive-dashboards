@@ -49,7 +49,7 @@ export default function ({
       }}
     >
       <Grid templateColumns="repeat(24, 1fr)" h="100%" w="100%">
-        {handle.active && (
+        {(handle.active || !store.showSider) && (
           <GridItem h="100%" w="100%" colSpan={3}>
             <Stack
               h="100%"
@@ -68,7 +68,11 @@ export default function ({
             </Stack>
           </GridItem>
         )}
-        <GridItem colSpan={handle.active ? 18 : 21} h="100%" w="100%">
+        <GridItem
+          colSpan={handle.active || !store.showSider ? 18 : 21}
+          h="100%"
+          w="100%"
+        >
           <Stack
             h="100%"
             w="100%"

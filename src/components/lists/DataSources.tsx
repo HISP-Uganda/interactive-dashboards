@@ -17,12 +17,15 @@ import { useStore } from "effector-react";
 import { useNavigate } from "@tanstack/react-location";
 import { IDataSource } from "../../interfaces";
 import { useDataSources } from "../../Queries";
-import { $dataSources } from "../../Store";
+import { $dataSources, $store } from "../../Store";
 import { setDataSource, setShowSider } from "../../Events";
 import { generateUid } from "../../utils/uid";
 const DataSources = () => {
   const navigate = useNavigate();
-  const { isLoading, isSuccess, isError, error } = useDataSources();
+  const store = useStore($store);
+  const { isLoading, isSuccess, isError, error } = useDataSources(
+    store.systemId
+  );
   const dataSources = useStore($dataSources);
   useEffect(() => {
     setShowSider(true);

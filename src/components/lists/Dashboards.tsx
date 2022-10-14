@@ -69,8 +69,6 @@ const Dashboards = () => {
             <Th>Category</Th>
             <Th>Published</Th>
             <Th>Refresh Interval</Th>
-            <Th>Is Default</Th>
-            <Th>Item Height</Th>
             <Th>Description</Th>
             {/* <Th>Actions</Th> */}
           </Tr>
@@ -101,7 +99,6 @@ const Dashboards = () => {
               <Td>{dashboard.category}</Td>
               <Td>{dashboard.published ? "Yes" : "No"}</Td>
               <Td>{dashboard.refreshInterval}</Td>
-              <Td>{dashboard.isDefault}</Td>
               <Td>{dashboard.description}</Td>
             </Tr>
           ))}

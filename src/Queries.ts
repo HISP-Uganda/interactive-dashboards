@@ -22,6 +22,7 @@ import {
   setDataSets,
   setDataSources,
   setDefaultDashboard,
+  setSystemId,
   setVisualizationQueries,
   updateVisualizationData,
   updateVisualizationMetadata,
@@ -91,27 +92,36 @@ export const queryDataSource = async (
   return data;
 };
 
-const loadResource = async (engine: any, namespace: string) => {
-  const query = {
-    resource: {
-      resource: `dataStore/${namespace}`,
+const getIndex = async (
+  namespace: string,
+  systemId: string,
+  otherQueries: any[] = []
+) => {
+  let must: any[] = [
+    {
+      term: { "systemId.keyword": systemId },
     },
-  };
-  try {
-    const { resource }: any = await engine.query(query);
-    const query1: any = fromPairs(
-      resource.map((n: string) => [
-        n,
-        {
-          resource: `dataStore/${namespace}/${n}`,
-        },
-      ])
-    );
-    const allData: { [key: string]: any } = await engine.query(query1);
-    return Object.values(allData);
-  } catch (error) {
-    return [];
-  }
+    ...otherQueries,
+  ];
+  let {
+    data: {
+      hits: { hits },
+    },
+  }: any = await api.post("wal/search", {
+    index: namespace,
+    size: 1000,
+    query: {
+      bool: {
+        must,
+      },
+    },
+  });
+  return hits;
+};
+
+const loadResource = async (namespace: string, systemId: string) => {
+  const hits = await getIndex(namespace, systemId);
+  return hits.map(({ _source }: any) => _source);
 };
 
 const loadSingleResource = async (engine: any, resource: string) => {
@@ -140,13 +150,13 @@ export const useOrganisationUnits = () => {
     levels: {
       resource: "organisationUnitLevels.json",
       params: {
-        fields: "id,level,name",
+        fields: "id,level~rename(value),name~rename(label)",
       },
     },
     groups: {
       resource: "organisationUnitGroups.json",
       params: {
-        fields: "id,name",
+        fields: "id~rename(value),name~rename(label)",
       },
     },
   };
@@ -160,7 +170,6 @@ export const useOrganisationUnits = () => {
       levels: { organisationUnitLevels },
       groups: { organisationUnitGroups },
     }: any = await engine.query(ouQuery);
-
     const units: DataNode[] = organisationUnits.map((o: any) => {
       return {
         key: o.id,
@@ -169,26 +178,12 @@ export const useOrganisationUnits = () => {
       };
     });
 
-    const levels: Option[] = organisationUnitLevels.map(
-      ({ level, name }: any) => {
-        return {
-          label: name,
-          value: level,
-        };
-      }
-    );
-
-    const groups: Option[] = organisationUnitGroups.map(({ id, name }: any) => {
-      return {
-        label: name,
-        value: id,
-      };
-    });
-
     return {
       units,
-      levels,
-      groups,
+      levels: organisationUnitLevels.map((x: any) => {
+        return { ...x, value: String(x.value) };
+      }),
+      groups: organisationUnitGroups,
     };
   });
 };
@@ -208,13 +203,18 @@ export const useInitials = () => {
         fields: "id~rename(value),name~rename(label)",
       },
     },
+    systemInfo: {
+      resource: "system/info",
+    },
   };
   return useQuery<any, Error>(["initial"], async () => {
     try {
       const {
+        systemInfo: { systemId },
         me: { organisationUnits, authorities },
         dataSets: { dataSets },
       }: any = await engine.query(ouQuery);
+      setSystemId(systemId);
       setDataSets(dataSets);
       const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
       changeAdministration(isAdmin);
@@ -229,15 +229,16 @@ export const useInitials = () => {
         organisations: facilities,
         groups: [],
         expandedKeys: [],
+        checkedKeys: facilities,
       });
-      const dashboards = await loadResource(engine, "i-dashboards");
-      const categories = await loadResource(engine, "i-categories");
-      const dataSources = await loadResource(engine, "i-data-sources");
+      const dashboards = await loadResource("i-dashboards", systemId);
+      const categories = await loadResource("i-categories", systemId);
+      const dataSources = await loadResource("i-data-sources", systemId);
       const visualizationQueries = await loadResource(
-        engine,
-        "i-visualization-queries"
+        "i-visualization-queries",
+        systemId
       );
-      const settings = await loadResource(engine, "i-dashboard-settings");
+      const settings = await loadResource("i-dashboard-settings", systemId);
       if (isAdmin) {
         setDashboards(dashboards);
       } else {
@@ -281,34 +282,18 @@ export const useInitials = () => {
           }
         }
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
     return true;
   });
 };
 
-export const useDataSources = () => {
-  const engine = useDataEngine();
-  const namespaceQuery = {
-    namespaceKeys: {
-      resource: `dataStore/i-data-sources`,
-    },
-  };
+export const useDataSources = (systemId: string) => {
   return useQuery<boolean, Error>(["data-sources"], async () => {
     try {
-      const { namespaceKeys }: any = await engine.query(namespaceQuery);
-      const query: any = fromPairs(
-        namespaceKeys.map((n: string) => [
-          n,
-          {
-            resource: `dataStore/i-data-sources/${n}`,
-          },
-        ])
-      );
-      const allData = await engine.query(query);
-      const dataSources = Object.values(allData).map((x) => {
-        let value = x as unknown as IDataSource;
-        return value;
-      });
+      const hits = await getIndex("i-data-sources", systemId);
+      const dataSources = hits.map(({ _source }: any) => _source);
       setDataSources(dataSources);
       return true;
     } catch (error) {
@@ -318,29 +303,11 @@ export const useDataSources = () => {
   });
 };
 
-export const useDashboards = () => {
-  const engine = useDataEngine();
-  const namespaceQuery = {
-    namespaceKeys: {
-      resource: `dataStore/i-dashboards`,
-    },
-  };
+export const useDashboards = (systemId: string) => {
   return useQuery<boolean, Error>(["dashboards"], async () => {
     try {
-      const { namespaceKeys }: any = await engine.query(namespaceQuery);
-      const query: any = fromPairs(
-        namespaceKeys.map((n: string) => [
-          n,
-          {
-            resource: `dataStore/i-dashboards/${n}`,
-          },
-        ])
-      );
-      const allData = await engine.query(query);
-      const dashboards = Object.values(allData).map((x) => {
-        let value = x as unknown as IDashboard;
-        return value;
-      });
+      const hits = await getIndex("i-dashboards", systemId);
+      const dashboards = hits.map(({ _source }: any) => _source);
       setDashboards(dashboards);
       return true;
     } catch (error) {
@@ -350,29 +317,11 @@ export const useDashboards = () => {
   });
 };
 
-export const useCategories = () => {
-  const engine = useDataEngine();
-  const namespaceQuery = {
-    namespaceKeys: {
-      resource: `dataStore/i-categories`,
-    },
-  };
+export const useCategories = (systemId: string) => {
   return useQuery<boolean, Error>(["categories"], async () => {
     try {
-      const { namespaceKeys }: any = await engine.query(namespaceQuery);
-      const query: any = fromPairs(
-        namespaceKeys.map((n: string) => [
-          n,
-          {
-            resource: `dataStore/i-categories/${n}`,
-          },
-        ])
-      );
-      const allData = await engine.query(query);
-      const categories = Object.values(allData).map((x) => {
-        let value = x as unknown as ICategory;
-        return value;
-      });
+      const hits = await getIndex("i-categories", systemId);
+      const categories = hits.map(({ _source }: any) => _source);
       setCategories(categories);
       return true;
     } catch (error) {
@@ -382,27 +331,11 @@ export const useCategories = () => {
   });
 };
 
-export const useVisualizationData = () => {
-  const engine = useDataEngine();
-  const namespaceQuery = {
-    namespaceKeys: {
-      resource: `dataStore/i-visualization-queries`,
-    },
-  };
+export const useVisualizationData = (systemId: string) => {
   return useQuery<boolean, Error>(["visualization-queries"], async () => {
     try {
-      const { namespaceKeys }: any = await engine.query(namespaceQuery);
-      const query: any = fromPairs(
-        namespaceKeys.map((n: string) => [
-          n,
-          {
-            resource: `dataStore/i-visualization-queries/${n}`,
-          },
-        ])
-      );
-      const allData: { [key: string]: any } = await engine.query(query);
-
-      const visualizationQueries = Object.values(allData);
+      const hits = await getIndex("i-visualization-queries", systemId);
+      const visualizationQueries = hits.map(({ _source }: any) => _source);
       setVisualizationQueries(visualizationQueries);
       return true;
     } catch (error) {
@@ -1113,16 +1046,20 @@ export const useVisualization = (
           let denRows = [];
           let numRows = [];
           let denHeaders: any[] = [];
+          let numHeaders: any[] = [];
 
           if (numerator && numerator.listGrid) {
-            const { rows } = numerator.listGrid;
+            const { rows, headers } = numerator.listGrid;
             numRows = rows;
+            numHeaders = headers;
           } else if (numerator) {
             const {
               rows,
+              headers,
               metaData: { items },
             } = numerator;
             numRows = rows;
+            numHeaders = headers;
             metadata = items;
           }
           if (denominator && denominator.listGrid) {
@@ -1139,29 +1076,65 @@ export const useVisualization = (
             denHeaders = headers;
             metadata = { ...metadata, ...items };
           }
-          const numerators = fromPairs<number>(
-            numRows.map((r: string[]) => [
-              r.slice(0, -1).join(""),
-              Number(r[r.length - 1]),
-            ])
-          );
-          processed = denRows.map((r: string[]) => {
-            const currentDenKey = r.slice(0, -1).join("");
-            const currentDenValue = Number(r[r.length - 1]);
-            return fromPairs(
-              denHeaders.map((h: any, i: number) => {
-                if (i === denHeaders.length - 1) {
-                  const currentNum = numerators[currentDenKey] || 0;
-                  const value = currentNum / currentDenValue;
 
-                  if (indicator.factor !== "1") {
-                    return [h.name, evaluate(`${value}${indicator.factor}`)];
-                  }
-                  return [h.name, value];
-                }
-                return [h.name, r[i]];
-              })
+          const numerators = numRows.map((rows: string[]) => {
+            return fromPairs(
+              rows.map((r: string, index: number) => [
+                numHeaders[index].name,
+                r,
+              ])
             );
+          });
+
+          const denominators = denRows.map((rows: string[]) => {
+            return fromPairs(
+              rows.map((r: string, index: number) => [
+                denHeaders[index].name,
+                r,
+              ])
+            );
+          });
+
+          processed = numerators.map((numerator: { [key: string]: string }) => {
+            const columns = Object.keys(numerator).sort().join("");
+            const denominator = denominators.find(
+              (row: { [key: string]: string }) =>
+                columns === Object.keys(row).sort().join("")
+            );
+
+            if (denominator) {
+              const { value: v1, total: t1 } = numerator;
+              const { value: v2, total: t2 } = denominator;
+
+              if (v1 && v2 && indicator.factor !== "1") {
+                const computed = Number(v1) / Number(v2);
+                return {
+                  ...numerator,
+                  value: evaluate(`${computed}${indicator.factor}`),
+                };
+              } else if (v1 && v2) {
+                const computed = Number(v1) / Number(v2);
+                return {
+                  ...numerator,
+                  value: computed,
+                };
+              }
+
+              if (t1 && t2 && indicator.factor !== "1") {
+                const computed = Number(t1) / Number(t2);
+                return {
+                  ...numerator,
+                  value: evaluate(`${computed}${indicator.factor}`),
+                };
+              } else if (t1 && t2) {
+                const computed = Number(t1) / Number(t2);
+                return {
+                  ...numerator,
+                  value: computed,
+                };
+              }
+            }
+            return {};
           });
         } else if (data.numerator) {
           const numerator: any = data.numerator;
@@ -1309,4 +1282,15 @@ export const useMaps = (levels: string[], parents: string[]) => {
       organisationUnits,
     };
   });
+};
+
+export const saveDocument = async (
+  index: string,
+  systemId: string,
+  document: { [key: string]: any }
+) => {
+  const { data } = await api.post(`wal/index?index=${index}`, {
+    data: [{ ...document, systemId }],
+  });
+  return data;
 };
