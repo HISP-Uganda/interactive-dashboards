@@ -41,7 +41,13 @@ const Indicator = () => {
   const navigate = useNavigate();
   const add = async () => {
     setLoading(true);
-    await saveDocument("i-visualization-queries", store.systemId, indicator);
+    const response = await saveDocument(
+      "i-visualization-queries",
+      store.systemId,
+      indicator
+    );
+    console.log(indicator);
+    console.log(response);
     await queryClient.invalidateQueries(["visualization-queries"]);
     setLoading(false);
     navigate({ to: "/indicators" });

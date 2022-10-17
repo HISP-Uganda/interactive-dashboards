@@ -1,17 +1,16 @@
+import { Image } from "@chakra-ui/react";
 import { useNavigate } from "@tanstack/react-location";
 import { setCurrentPage } from "../Events";
-import moh from "../images/moh.json";
-import HAndWAware from "./HAndWAware";
 
-const MOHLogo = () => {
+const MOHLogo = ({ width, height }: { height: number; width: number }) => {
   const navigate = useNavigate();
   return (
-    <HAndWAware
-      src={moh}
-      minusH={10}
-      minusW={0}
+    <Image
+      maxH={`${height * 0.7}px`}
+      maxW={`${width * 0.7}px`}
+      src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/Coat_of_arms_of_Uganda.svg"
       onClick={() => {
-        setCurrentPage("");
+        setCurrentPage("dashboards");
         navigate({ to: "/dashboards" });
       }}
     />

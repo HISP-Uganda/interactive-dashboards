@@ -143,6 +143,7 @@ export type PickerProps = {
 };
 export interface IStore {
   showSider: boolean;
+  showFooter: boolean;
   organisations: React.Key[];
   periods: Item[];
   groups: string[];
@@ -156,6 +157,7 @@ export interface IStore {
   currentPage: string;
   logo: string;
   systemId: string;
+  systemName: string;
   checkedKeys: { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[];
 }
 

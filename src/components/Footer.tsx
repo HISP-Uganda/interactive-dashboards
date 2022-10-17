@@ -73,16 +73,18 @@ export default function ({
           h="100%"
           w="100%"
         >
-          <Stack
-            h="100%"
-            w="100%"
-            // alignItems="center"
-            justifyItems="center"
-            justifyContent="center"
-            alignContent="center"
-          >
-            <SectionVisualization {...dashboard.bottomSection} />
-          </Stack>
+          {store.showFooter && (
+            <Stack
+              h="100%"
+              w="100%"
+              // alignItems="center"
+              justifyItems="center"
+              justifyContent="center"
+              alignContent="center"
+            >
+              <SectionVisualization {...dashboard.bottomSection} />
+            </Stack>
+          )}
         </GridItem>
         <GridItem h="100%" w="100%" colSpan={3}>
           <Stack
@@ -95,7 +97,7 @@ export default function ({
             ref={funderLogo1Ref}
           >
             <Image
-              src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/h-logo-blue.svg"
+              src="https://www.gavi.org/sites/default/files/thumbnail/RS28669_gavi_logo_gb_rgb-01_3x2_4.jpg"
               maxH={`${f1h * 0.7}px`}
               maxW={`${f1w * 0.7}px`}
             />

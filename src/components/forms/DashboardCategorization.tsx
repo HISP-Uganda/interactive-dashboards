@@ -1,10 +1,10 @@
-import { Box, Spinner, Stack, Text } from "@chakra-ui/react";
+import { Spinner, Stack, Text } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { setCategorization } from "../../Events";
 import { Option } from "../../interfaces";
 import { useDataSet } from "../../Queries";
-import { $dashboard, $store } from "../../Store";
+import { $dashboard } from "../../Store";
 
 type DashboardCategorizationProps = {
   dataSet: string;
@@ -12,7 +12,6 @@ type DashboardCategorizationProps = {
 const DashboardCategorization = ({ dataSet }: DashboardCategorizationProps) => {
   const { isLoading, isSuccess, isError, error } = useDataSet(dataSet);
   const dashboard = useStore($dashboard);
-  const store = useStore($store);
   return (
     <>
       {isLoading && <Spinner />}

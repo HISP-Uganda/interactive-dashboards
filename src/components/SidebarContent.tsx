@@ -1,4 +1,4 @@
-import { Button, Divider, Stack, StackProps, Text } from "@chakra-ui/react";
+import { Divider, Stack, StackProps, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { groupBy } from "lodash";
 import { $categoryOptions, $dashboards, $store } from "../Store";
@@ -27,10 +27,10 @@ const SidebarContent = ({ ...rest }: SidebarProps) => {
       >
         Thematic Areas
       </Text>
-      <Divider borderColor="blue.500"/>
+      <Divider borderColor="blue.500" />
 
       {store.isAdmin ? (
-        store.currentPage === "dashboards" ? (
+        store.currentPage === "dashboard" ? (
           categoryOptions.map((link) => (
             <NavItem key={link.value} option={link} />
           ))

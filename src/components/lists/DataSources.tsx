@@ -1,6 +1,8 @@
-import { useEffect } from "react";
 import { AddIcon } from "@chakra-ui/icons";
 import {
+  Button,
+  Divider,
+  Spacer,
   Spinner,
   Stack,
   Table,
@@ -9,16 +11,13 @@ import {
   Th,
   Thead,
   Tr,
-  Button,
-  Spacer,
-  Divider,
 } from "@chakra-ui/react";
-import { useStore } from "effector-react";
 import { useNavigate } from "@tanstack/react-location";
+import { useStore } from "effector-react";
+import { setDataSource } from "../../Events";
 import { IDataSource } from "../../interfaces";
 import { useDataSources } from "../../Queries";
 import { $dataSources, $store } from "../../Store";
-import { setDataSource, setShowSider } from "../../Events";
 import { generateUid } from "../../utils/uid";
 const DataSources = () => {
   const navigate = useNavigate();
@@ -27,9 +26,7 @@ const DataSources = () => {
     store.systemId
   );
   const dataSources = useStore($dataSources);
-  useEffect(() => {
-    setShowSider(true);
-  }, []);
+
   return (
     <Stack flex={1} p="20px" bg="white">
       <Stack direction="row" border="1">
