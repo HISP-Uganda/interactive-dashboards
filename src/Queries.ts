@@ -2,7 +2,7 @@ import { useDataEngine } from "@dhis2/app-runtime";
 import { center } from "@turf/turf";
 import type { DataNode } from "antd/lib/tree";
 import axios, { AxiosRequestConfig } from "axios";
-import { fromPairs, isEmpty, max, min, uniq } from "lodash";
+import { fromPairs, isEmpty, min, uniq } from "lodash";
 import { evaluate } from "mathjs";
 import { useQuery } from "react-query";
 import {
@@ -23,12 +23,12 @@ import {
   setDataSources,
   setDefaultDashboard,
   setSystemId,
+  setSystemName,
   setVisualizationQueries,
   updateVisualizationData,
   updateVisualizationMetadata,
 } from "./Events";
 import {
-  ICategory,
   IDashboard,
   IData,
   IDataSource,
@@ -42,6 +42,7 @@ import { getSearchParams, traverse } from "./utils/utils";
 
 export const api = axios.create({
   baseURL: "https://services.dhis2.hispuganda.org/",
+  // baseURL: "http://localhost:3001/",
 });
 
 export const queryDataSource = async (
@@ -210,11 +211,13 @@ export const useInitials = () => {
   return useQuery<any, Error>(["initial"], async () => {
     try {
       const {
-        systemInfo: { systemId },
+        systemInfo: { systemId, systemName },
         me: { organisationUnits, authorities },
         dataSets: { dataSets },
       }: any = await engine.query(ouQuery);
+      console.log(systemId);
       setSystemId(systemId);
+      setSystemName(systemName);
       setDataSets(dataSets);
       const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
       changeAdministration(isAdmin);
@@ -366,7 +369,10 @@ export const useDataSet = (dataSet: string) => {
       setAvailableCategories(categories);
       setAvailableCategoryOptionCombos(categoryOptionCombos);
       const selectedCategories = categories.map(
-        ({ id, categoryOptions }: any) => [id, [categoryOptions[0]]]
+        ({ id, categoryOptions }: any, index: number) => [
+          id,
+          index === 0 ? [categoryOptions[1]] : categoryOptions,
+        ]
       );
       setCategorization(fromPairs(selectedCategories));
     } catch (error) {
@@ -997,6 +1003,8 @@ const generateKeys = (
     return value.value;
   });
 
+  console.log(numExpressions, denExpressions);
+
   const all = uniq([
     ...numKeys,
     ...denKeys,
@@ -1020,6 +1028,8 @@ export const useVisualization = (
   if (refreshInterval && refreshInterval !== "off") {
     currentInterval = Number(refreshInterval) * 1000;
   }
+
+  console.log(globalFilters);
   const otherKeys = generateKeys(indicator, globalFilters);
   const overrides = visualization.overrides || {};
   return useQuery<any, Error>(
@@ -1289,7 +1299,7 @@ export const saveDocument = async (
   systemId: string,
   document: { [key: string]: any }
 ) => {
-  const { data } = await api.post(`wal/index?index=${index}`, {
+  const { data } = await api.post(`wal/bulk?index=${index}`, {
     data: [{ ...document, systemId }],
   });
   return data;

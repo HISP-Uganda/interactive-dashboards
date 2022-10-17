@@ -196,3 +196,5 @@ export const setCheckedKeys = domain.createEvent<
 
 export const setLevels = domain.createEvent<string[]>();
 export const setGroups = domain.createEvent<string[]>();
+export const setShowFooter = domain.createEvent<boolean>();
+export const setSystemName = domain.createEvent<string>();

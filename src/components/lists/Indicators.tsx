@@ -27,7 +27,7 @@ const Indicators = () => {
   const indicators = useStore($indicators);
   const { isLoading, isSuccess, isError, error } =
     useVisualizationData(systemId);
-  const [currentPage, setCurrentPage] = useState<number>(2);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [data, setData] = useState<IIndicator[]>([]);
   const [q, setQ] = useState<string>("");
   useEffect(() => {

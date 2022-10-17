@@ -38,7 +38,6 @@ import {
   DataSources,
   Indicators,
 } from "../components/lists";
-import DashboardCategories from "../components/lists/DashboardCategories";
 import Section from "../components/Section";
 import {
   setCategory,
@@ -46,10 +45,10 @@ import {
   setCurrentPage,
   setDataSource,
   setIndicator,
+  setShowFooter,
   setShowSider,
   setTargetCategoryOptionCombos,
 } from "../Events";
-import moh from "../images/moh.json";
 import { useInitials } from "../Queries";
 import {
   $categories,
@@ -65,6 +64,7 @@ import {
 import { decodeFromBinary, encodeToBinary } from "../utils/utils";
 import DashboardMenu from "./DashboardMenu";
 import Footer from "./Footer";
+import MOHLogo from "./MOHLogo";
 import SectionMenu from "./SectionMenu";
 import SidebarContent from "./SidebarContent";
 
@@ -98,7 +98,7 @@ const App = () => {
   const engine = useDataEngine();
 
   const topMenuOptions: { [key: string]: any } = {
-    dashboards: <DashboardMenu />,
+    dashboard: <DashboardMenu />,
     sections: <SectionMenu />,
   };
 
@@ -148,16 +148,18 @@ const App = () => {
               element: <Home />,
             },
             {
-              loader: async () => {
-                setCurrentPage("");
-              },
               path: "/categories",
+              loader: async () => {
+                setCurrentPage("categories");
+                setShowSider(true);
+              },
               children: [
                 { path: "/", element: <Categories /> },
                 {
                   path: ":categoryId",
                   element: <CategoryForm />,
                   loader: async ({ params: { categoryId } }) => {
+                    setCurrentPage("category");
                     const category = categories.find(
                       (c) => c.id === categoryId
                     );
@@ -172,7 +174,9 @@ const App = () => {
             },
             {
               loader: async () => {
-                setCurrentPage("");
+                setCurrentPage("data-sources");
+                setShowFooter(false);
+                setShowSider(true);
               },
               path: "/data-sources",
               children: [
@@ -181,6 +185,8 @@ const App = () => {
                   path: ":dataSourceId",
                   element: <DataSourceForm />,
                   loader: async ({ params: { dataSourceId } }) => {
+                    setCurrentPage("data-source");
+                    setShowFooter(false);
                     const dataSource = dataSources.find(
                       (c) => c.id === dataSourceId
                     );
@@ -194,11 +200,13 @@ const App = () => {
               ],
             },
             {
-              loader: async () => {
-                setCurrentPage("");
-              },
               path: "/dashboards",
-
+              loader: async () => {
+                setCurrentPage("dashboards");
+                setShowFooter(false);
+                setShowSider(true);
+                11211;
+              },
               children: [
                 { path: "/", element: <Dashboards /> },
                 {
@@ -208,7 +216,8 @@ const App = () => {
                       path: "/",
                       element: <DashboardForm />,
                       loader: async ({ params: { dashboardId } }) => {
-                        setCurrentPage("dashboards");
+                        setCurrentPage("dashboard");
+                        setShowFooter(true);
                         const dashboard = dashboards.find(
                           (c) => c.id === dashboardId
                         );
@@ -238,6 +247,7 @@ const App = () => {
                       element: <Section />,
                       loader: async () => {
                         setCurrentPage("sections");
+                        setShowFooter(false);
                       },
                     },
                   ],
@@ -245,15 +255,10 @@ const App = () => {
               ],
             },
             {
-              path: "/dashboard-categories",
-              children: [{ path: "/", element: <DashboardCategories /> }],
               loader: async () => {
-                setCurrentPage("");
-              },
-            },
-            {
-              loader: async () => {
-                setCurrentPage("");
+                setCurrentPage("indicators");
+                setShowFooter(false);
+                setShowSider(true);
               },
               path: "/indicators",
               children: [
@@ -268,6 +273,7 @@ const App = () => {
                       path: "/",
                       element: <IndicatorForm />,
                       loader: async ({ params: { indicatorId } }) => {
+                        setShowFooter(false);
                         const indicator = indicators.find(
                           (c) => c.id === indicatorId
                         );
@@ -306,11 +312,7 @@ const App = () => {
                       justifyItems="center"
                       ref={mohLogo}
                     >
-                      <Image
-                        src={moh}
-                        maxH={`${height * 0.7}px`}
-                        maxW={`${width * 0.7}px`}
-                      />
+                      <MOHLogo height={height} width={width} />
                     </Stack>
                   </GridItem>
                   <GridItem rowSpan={12} h="100%">
@@ -350,7 +352,6 @@ const App = () => {
                       h="100%"
                       bg="white"
                       p="5px"
-                      justifyContent="center"
                       alignContent="center"
                       alignItems="center"
                       direction="row"
@@ -366,7 +367,7 @@ const App = () => {
                           justifyItems="center"
                         >
                           <Image
-                            src={moh}
+                            src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/Coat_of_arms_of_Uganda.svg"
                             maxH={`${h1h * 0.85}px`}
                             maxW={`${h1w * 0.85}px`}
                           />

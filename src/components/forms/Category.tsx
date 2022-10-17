@@ -35,21 +35,6 @@ const Category = () => {
   } = useForm<ICategory, any>({ defaultValues: category });
 
   const add = async (values: ICategory) => {
-    // let mutation: any = {
-    //   type: "create",
-    //   resource: `dataStore/i-categories/${values.id}`,
-    //   data: values,
-    // };
-
-    // if (search.edit) {
-    //   mutation = {
-    //     type: "update",
-    //     resource: `dataStore/i-categories`,
-    //     data: values,
-    //     id: values.id,
-    //   };
-    // }
-    // await engine.mutate(mutation);
     await saveDocument("i-categories", store.systemId, values);
     await queryClient.invalidateQueries(["categories"]);
   };

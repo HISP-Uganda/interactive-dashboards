@@ -63,6 +63,8 @@ import {
   setCheckedKeys,
   setLevels,
   setGroups,
+  setShowFooter,
+  setSystemName,
 } from "./Events";
 import {
   ICategory,
@@ -193,6 +195,8 @@ export const $store = domain
     logo: "",
     systemId: "",
     checkedKeys: [],
+    showFooter: false,
+    systemName: "",
   })
   .on(setOrganisations, (state, organisations) => {
     return { ...state, organisations };
@@ -248,6 +252,12 @@ export const $store = domain
   })
   .on(setGroups, (state, groups) => {
     return { ...state, groups };
+  })
+  .on(setShowFooter, (state, showFooter) => {
+    return { ...state, showFooter };
+  })
+  .on(setSystemName, (state, systemName) => {
+    return { ...state, systemName };
   });
 
 export const $dataSource = domain
@@ -720,15 +730,20 @@ export const $dashboardCategory = combine(
 
 export const $categoryOptionCombo = $dashboard.map(
   ({ categorization, availableCategoryOptionCombos }) => {
-    const combos = Object.values(categorization);
-    const availableCombos = availableCategoryOptionCombos.map(
-      ({ categoryOptions, id }: any) => {
-        return {
-          id,
-          categoryOptions: categoryOptions.map(({ id }: any) => id),
-        };
-      }
-    );
+    const combos = Object.values(categorization || {});
+    let availableCombos: any[] = [];
+
+    if (availableCategoryOptionCombos) {
+      availableCombos = availableCategoryOptionCombos.map(
+        ({ categoryOptions, id }: any) => {
+          return {
+            id,
+            categoryOptions: categoryOptions.map(({ id }: any) => id),
+          };
+        }
+      );
+    }
+
     if (combos.length === 2) {
       const category1 = combos[0].map(({ value }: any) => value);
       const category2 = combos[1].map(({ value }: any) => value);

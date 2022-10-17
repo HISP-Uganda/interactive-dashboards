@@ -26,11 +26,8 @@ const Categories = () => {
   const categories = useStore($categories);
   const { systemId } = useStore($store);
   const { isLoading, isSuccess, isError, error } = useCategories(systemId);
-  useEffect(() => {
-    setShowSider(true);
-  }, []);
   return (
-    <Stack flex={1} p="20px" bg="white" overflow="auto" h="calc(100vh - 300px)">
+    <Stack flex={1} p="20px" bg="white">
       <Stack direction="row">
         <Spacer />
         <Button

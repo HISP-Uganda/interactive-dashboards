@@ -13,14 +13,12 @@ import {
 } from "@chakra-ui/react";
 import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { useEffect } from "react";
 
 import {
   changeSelectedCategory,
   changeSelectedDashboard,
   setCurrentDashboard,
   setDashboards,
-  setShowSider,
 } from "../../Events";
 import { IDashboard } from "../../interfaces";
 import { $dashboards, $store, createDashboard } from "../../Store";
@@ -29,9 +27,6 @@ const Dashboards = () => {
   const navigate = useNavigate();
   const store = useStore($store);
   const dashboards = useStore($dashboards);
-  useEffect(() => {
-    setShowSider(true);
-  }, []);
 
   return (
     <Stack p="20px" bg="white" flex={1}>

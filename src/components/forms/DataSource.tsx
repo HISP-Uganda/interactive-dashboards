@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import {
   Box,
   Button,
@@ -15,18 +14,17 @@ import {
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "react-query";
 import { setDataSource, setShowSider } from "../../Events";
 import { FormGenerics, IDataSource } from "../../interfaces";
-import { $dataSource, $store, createDataSource } from "../../Store";
 import { saveDocument } from "../../Queries";
+import { $dataSource, $store, createDataSource } from "../../Store";
 
 const DataSource = () => {
-  const search = useSearch<FormGenerics>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const engine = useDataEngine();
   const dataSource = useStore($dataSource);
   const store = useStore($store);
   const {
@@ -35,26 +33,18 @@ const DataSource = () => {
     watch,
     setValue,
     formState: { errors, isSubmitting },
-  } = useForm<IDataSource, any>({ defaultValues: dataSource });
+  } = useForm<IDataSource, any>({
+    defaultValues: {
+      ...dataSource,
+      name: store.systemName,
+      description: store.systemName,
+    },
+  });
 
   const type = watch("type");
   const isCurrentDHIS2 = watch("isCurrentDHIS2");
 
   const add = async (values: IDataSource) => {
-    // let mutation: any = {
-    //   type: "create",
-    //   resource: `dataStore/i-data-sources/${values.id}`,
-    //   data: values,
-    // };
-    // if (search.edit) {
-    //   mutation = {
-    //     type: "update",
-    //     resource: `dataStore/i-data-sources`,
-    //     data: values,
-    //     id: values.id,
-    //   };
-    // }
-    // await engine.mutate(mutation);
     await saveDocument("i-data-sources", store.systemId, values);
     await queryClient.invalidateQueries(["data-sources"]);
   };
@@ -68,6 +58,18 @@ const DataSource = () => {
       setValue("isCurrentDHIS2", false);
     }
   }, [type]);
+
+  useEffect(() => {
+    if (isCurrentDHIS2) {
+      setValue("name", store.systemName);
+      setValue("description", store.systemName);
+    } else {
+      if (isCurrentDHIS2) {
+        setValue("name", "");
+        setValue("description", "");
+      }
+    }
+  }, [isCurrentDHIS2]);
 
   useEffect(() => {
     setShowSider(true);

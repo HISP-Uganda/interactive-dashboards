@@ -63,8 +63,7 @@ const DashboardMenu = () => {
   const dashboard = useStore($dashboard);
   const categoryOptions = useStore($categoryOptions);
   const updateDashboard = async (data: any) => {
-    const response = await saveDocument("i-dashboards", store.systemId, data);
-    console.log(response);
+    await saveDocument("i-dashboards", store.systemId, data);
     await saveDocument("i-dashboard-settings", store.systemId, {
       default: store.defaultDashboard,
       id: store.systemId,
