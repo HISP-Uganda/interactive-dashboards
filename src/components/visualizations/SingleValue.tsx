@@ -1,4 +1,3 @@
-import { useStore } from "effector-react";
 import { useEffect, useState } from "react";
 
 import {
@@ -8,16 +7,8 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { IVisualization } from "../../interfaces";
-import { $visualizationData } from "../../Store";
-import { divide } from "../../utils/utils";
+import { ChartProps } from "../../interfaces";
 import { processSingleValue } from "../processors";
-
-type SingleValueProps = {
-  visualization: IVisualization;
-  layoutProperties?: { [key: string]: any };
-  dataProperties?: { [key: string]: any };
-};
 
 const ProgressBar = ({ bg, completed }: { bg: string; completed: number }) => {
   return (
@@ -50,14 +41,10 @@ const SingleValue = ({
   visualization,
   dataProperties,
   layoutProperties,
-}: SingleValueProps) => {
-  const visualizationData = useStore($visualizationData);
+  data,
+}: ChartProps) => {
   const [color, setColor] = useState<string>("");
-  const data = visualizationData[visualization.id]
-    ? visualizationData[visualization.id]
-    : [];
-
-  const [value, setValue] = useState<any>(processSingleValue(data));
+  const value = processSingleValue(data);
   const colorSearch = dataProperties?.["data.thresholds"]?.find(
     ({ max, min }: any) => {
       if (max && min) {
@@ -102,14 +89,6 @@ const SingleValue = ({
       setColor("");
     }
   }, [dataProperties]);
-
-  useEffect(() => {
-    if (visualization.expression) {
-      setValue(
-        processSingleValue(divide(visualization.expression, visualizationData))
-      );
-    }
-  }, [visualizationData]);
 
   const numberFormatter = Intl.NumberFormat("en-US", format);
 

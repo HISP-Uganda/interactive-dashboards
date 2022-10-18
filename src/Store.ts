@@ -730,7 +730,7 @@ export const $dashboardCategory = combine(
 
 export const $categoryOptionCombo = $dashboard.map(
   ({ categorization, availableCategoryOptionCombos }) => {
-    const combos = Object.values(categorization || {});
+    const combos: any[] = Object.values(categorization || {});
     let availableCombos: any[] = [];
 
     if (availableCategoryOptionCombos) {
@@ -749,14 +749,14 @@ export const $categoryOptionCombo = $dashboard.map(
       const category2 = combos[1].map(({ value }: any) => value);
       return category1
         .flatMap((v: string) => {
-          return category2.map((v2) => {
+          return category2.map((v2: any) => {
             const search = availableCombos.find(({ categoryOptions }: any) => {
               return isEqual(sortBy([v, v2]), sortBy(categoryOptions));
             });
             return search?.id;
           });
         })
-        .filter((v) => !!v);
+        .filter((v: any) => !!v);
     }
     return [];
   }
@@ -825,7 +825,3 @@ export const $globalFilters = combine(
     return filters;
   }
 );
-
-// $targetCategoryOptionCombo.watch((store) => {
-//   console.log(store);
-// });

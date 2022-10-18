@@ -11,14 +11,13 @@ import {
   Stack,
   Textarea,
 } from "@chakra-ui/react";
-import { useDataEngine } from "@dhis2/app-runtime";
-import { useNavigate, useSearch } from "@tanstack/react-location";
+import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "react-query";
 import { setDataSource, setShowSider } from "../../Events";
-import { FormGenerics, IDataSource } from "../../interfaces";
+import { IDataSource } from "../../interfaces";
 import { saveDocument } from "../../Queries";
 import { $dataSource, $store, createDataSource } from "../../Store";
 

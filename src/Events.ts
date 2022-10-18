@@ -20,13 +20,11 @@ export const loadDefaults = domain.createEvent<{
   organisationUnits: DataNode[];
 }>();
 
-// export const addCategory = domain.createEvent<string>();
 export const setShowSider = domain.createEvent<boolean>();
 export const setDataSources = domain.createEvent<IDataSource[]>();
 export const setCategories = domain.createEvent<ICategory[]>();
 export const setDashboards = domain.createEvent<IDashboard[]>();
 export const setCurrentDashboard = domain.createEvent<IDashboard>();
-// export const updateSection = domain.createEvent<void>();
 export const addSection = domain.createEvent<ISection>();
 export const addVisualization2Section = domain.createEvent<void>();
 export const deleteSection = domain.createEvent<string | undefined>();
@@ -36,27 +34,15 @@ export const changeDashboardId = domain.createEvent<string>();
 export const changeCategoryId = domain.createEvent<string>();
 export const changeDataSourceId = domain.createEvent<string>();
 export const changeAdministration = domain.createEvent<boolean>();
-// export const changeVisualizationDataSource = domain.createEvent<IDataSource>();
-// export const changeVisualizationType = domain.createEvent<string>();
-// export const setCurrentVisualization = domain.createEvent<IVisualization>();
 export const addPagination = domain.createEvent<{
   [key: string]: number;
 }>();
 
-// export const changeNumeratorDataSource = domain.createEvent<IDataSource>();
 export const changeDataSource = domain.createEvent<string | undefined>();
 export const setDataSource = domain.createEvent<IDataSource>();
 export const setCategory = domain.createEvent<ICategory>();
 export const setIndicator = domain.createEvent<IIndicator>();
-// export const changeDenominatorDataSource = domain.createEvent<IDataSource>();
-// export const addNumeratorExpression = domain.createEvent<{
-//   key: string;
-//   value: string;
-// }>();
-// export const addDenominatorExpression = domain.createEvent<{
-//   key: string;
-//   value: string;
-// }>();
+
 export const changeLayouts = domain.createEvent<{
   currentLayout: Layout[];
   allLayouts: Layouts;
@@ -104,8 +90,6 @@ export const changeDenominatorDimension = domain.createEvent<{
   replace?: boolean;
   label?: string;
 }>();
-
-// export const removeNumeratorDimension = domain.createEvent<string>();
 
 export const changeUseIndicators = domain.createEvent<boolean>();
 export const setVisualizationQueries = domain.createEvent<IIndicator[]>();

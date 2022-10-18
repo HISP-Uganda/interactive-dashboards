@@ -1,10 +1,8 @@
 import { Box, Spinner } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { Event } from "effector";
-import { useStore } from "effector-react";
 import { IIndicator, IVisualization, Option } from "../interfaces";
 import { useNamespace } from "../Queries";
-import { $indicators } from "../Store";
 
 type VisualizationQuerySelectorProps = {
   namespace: string;
@@ -18,7 +16,6 @@ const VisualizationQuerySelector = ({
 }: VisualizationQuerySelectorProps) => {
   const { isLoading, isSuccess, data, isError, error } =
     useNamespace(namespace);
-  const indicators = useStore($indicators);
   return (
     <>
       {isLoading && <Spinner />}

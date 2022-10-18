@@ -22,10 +22,8 @@ import { useNavigate, useSearch } from "@tanstack/react-location";
 import { saveDocument } from "../../Queries";
 
 const Category = () => {
-  const search = useSearch<FormGenerics>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const engine = useDataEngine();
   const category = useStore($category);
   const store = useStore($store);
   const {

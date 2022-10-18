@@ -1,15 +1,12 @@
 import Plot from "react-plotly.js";
-import { IVisualization } from "../../interfaces";
+import { ChartProps } from "../../interfaces";
 
-type ScatterPlotProps = {
-  visualization: IVisualization;
+interface ScatterPlotProps extends ChartProps {
   category?: string;
   series?: string;
-  layoutProperties?: { [key: string]: any };
-  dataProperties?: { [key: string]: any };
-};
+}
 
-const ScatterPlot = ({ visualization, category, series }: ScatterPlotProps) => {
+const ScatterPlot = ({}: ScatterPlotProps) => {
   const trace1 = {
     x: [1, 2, 3, 4, 5],
     y: [1, 6, 3, 6, 1],

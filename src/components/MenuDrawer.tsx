@@ -1,18 +1,17 @@
 import { HamburgerIcon } from "@chakra-ui/icons";
 import {
+  Box,
+  Button,
   Drawer,
   DrawerBody,
+  DrawerCloseButton,
+  DrawerContent,
   DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
-  DrawerContent,
-  DrawerCloseButton,
-  Button,
-  Box,
-  Input,
+  Flex,
   Text,
   useDisclosure,
-  Flex,
 } from "@chakra-ui/react";
 import React from "react";
 
@@ -34,13 +33,12 @@ const MenuDrawer = () => {
         <DrawerContent>
           <DrawerCloseButton />
           <DrawerHeader>Visual Menu</DrawerHeader>
-
           <DrawerBody>
             <Box>
-                <Text>Something</Text>
+              <Text>Something</Text>
             </Box>
           </DrawerBody>
-ß
+          ß
           <DrawerFooter>
             <Flex>
               <Button

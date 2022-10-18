@@ -31,11 +31,6 @@ const OrgUnitTree = ({ denNum, onChange }: IndicatorProps) => {
         onChange={onChange}
         id={globalIds[5].value}
       />
-      {/* {!useGlobal && (
-        <OUTree
-          
-        />
-      )} */}
     </Stack>
   );
 };

@@ -28,8 +28,7 @@ import { IVisualization, Option } from "../../interfaces";
 import { generateUid } from "../../utils/uid";
 import { createOptions } from "../../utils/utils";
 
-type Threshold = { [key: string]: [number, string] };
-
+type Threshold = { key: number; value: string; id: string };
 const mapStyleOptions = createOptions([
   "carto-darkmatter",
   "carto-positron",
@@ -45,58 +44,53 @@ const MapChartProperties = ({
 }: {
   visualization: IVisualization;
 }) => {
-  const [id, setId] = useState<string>("");
-  const [thresholds, setThresholds] = useState<Threshold>(
-    fromPairs(
-      orderBy(
-        Object.entries(visualization.properties?.["data.mapKeys"] || {}),
-        ([key, val]) => val[0]
-      )
-    )
-  );
+  const [currentId, setCurrentId] = useState<string>("");
   const { isOpen, onClose, onOpen } = useDisclosure();
   const ref = useRef(null);
   const addThreshold = () => {
-    const threshold: Threshold = { [generateUid()]: [0, "#333"] };
-    const all = { ...thresholds, ...threshold };
     changeVisualizationProperties({
       visualization: visualization.id,
       attribute: "data.mapKeys",
-      value: all,
+      value: [
+        ...(visualization.properties["data.mapKeys"] || []),
+        { id: generateUid(), key: 0, value: "#333" },
+      ],
     });
-    setThresholds(all);
   };
 
-  const removeThreshold = (id: string) => {
-    const filtered = Object.entries(thresholds).filter(([key]) => key !== id);
+  console.log(visualization.properties);
+  const removeThreshold = (uid: string) => {
+    const filtered = (visualization.properties["data.mapKeys"] || []).filter(
+      ({ id }: Threshold) => uid !== id
+    );
     changeVisualizationProperties({
       visualization: visualization.id,
       attribute: "data.mapKeys",
-      value: fromPairs(filtered),
+      value: filtered,
     });
-    setThresholds(fromPairs(filtered));
   };
   useOnClickOutside(ref, onClose);
   const changeThreshold = (
-    id: string,
+    uid: string,
     attribute: "color" | "min",
     value: string | number
   ) => {
-    const processed = Object.entries(thresholds).map(([key, values]) => {
-      if (key === id) {
-        if (attribute === "color") {
-          return [key, [values[0], value]];
+    const processed = (visualization.properties["data.mapKeys"] || []).map(
+      (threshold: Threshold) => {
+        if (uid === threshold.id) {
+          if (attribute === "color") {
+            return { ...threshold, value };
+          }
+          return { ...threshold, key: value };
         }
-        return [key, [value, values[1]]];
+        return threshold;
       }
-      return [key, values];
-    });
+    );
     changeVisualizationProperties({
       visualization: visualization.id,
       attribute: "data.mapKeys",
-      value: fromPairs(processed),
+      value: processed,
     });
-    setThresholds(fromPairs(processed));
   };
 
   return (
@@ -121,55 +115,57 @@ const MapChartProperties = ({
             </Tr>
           </Thead>
           <Tbody ref={ref}>
-            {Object.entries(thresholds).map(([key, values]) => (
-              <Tr key={key}>
-                <Td w="35%">
-                  <NumberInput
-                    value={values[0]}
-                    step={0.1}
-                    max={1}
-                    min={0}
-                    onChange={(value1: string, value2: number) =>
-                      changeThreshold(key, "min", value2)
-                    }
+            {(visualization.properties?.["data.mapKeys"] || []).map(
+              ({ key, value, id }: any) => (
+                <Tr key={id}>
+                  <Td w="35%">
+                    <NumberInput
+                      value={key}
+                      step={0.05}
+                      max={1}
+                      min={0}
+                      onChange={(value1: string, value2: number) =>
+                        changeThreshold(id, "min", value2)
+                      }
+                    >
+                      <NumberInputField />
+                      <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                      </NumberInputStepper>
+                    </NumberInput>
+                  </Td>
+                  <Td
+                    w="20%"
+                    bg={value}
+                    position="relative"
+                    onClick={() => {
+                      setCurrentId(id);
+                      onOpen();
+                    }}
                   >
-                    <NumberInputField />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-                </Td>
-                <Td
-                  w="20%"
-                  bg={values[1]}
-                  position="relative"
-                  onClick={() => {
-                    setId(key);
-                    onOpen();
-                  }}
-                >
-                  {isOpen && id === key && (
-                    <SwatchesPicker
-                      key={key}
-                      color={values[1]}
-                      onChangeComplete={(color) => {
-                        changeThreshold(key, "color", color.hex);
-                        onClose();
-                      }}
+                    {isOpen && id === currentId && (
+                      <SwatchesPicker
+                        key={id}
+                        color={value}
+                        onChangeComplete={(color) => {
+                          changeThreshold(id, "color", color.hex);
+                          onClose();
+                        }}
+                      />
+                    )}
+                  </Td>
+                  <Td textAlign="right" w="10%">
+                    <IconButton
+                      aria-label="delete"
+                      bg="none"
+                      icon={<DeleteIcon w={3} h={3} />}
+                      onClick={() => removeThreshold(id)}
                     />
-                  )}
-                </Td>
-                <Td textAlign="right" w="10%">
-                  <IconButton
-                    aria-label="delete"
-                    bg="none"
-                    icon={<DeleteIcon w={3} h={3} />}
-                    onClick={() => removeThreshold(key)}
-                  />
-                </Td>
-              </Tr>
-            ))}
+                  </Td>
+                </Tr>
+              )
+            )}
           </Tbody>
         </Table>
       </TableContainer>

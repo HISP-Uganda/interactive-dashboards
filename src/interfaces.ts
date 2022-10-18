@@ -196,4 +196,5 @@ export interface ChartProps {
   layoutProperties?: { [key: string]: any };
   dataProperties?: { [key: string]: any };
   section: ISection;
+  data: any;
 }
