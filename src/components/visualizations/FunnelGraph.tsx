@@ -1,24 +1,14 @@
 import { useStore } from "effector-react";
 import Plot from "react-plotly.js";
-import { IVisualization } from "../../interfaces";
+import { ChartProps } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
-import { processGraphs } from "../processors";
 
-type FunnelGraphProps = {
-  visualization: IVisualization;
+interface FunnelGraphProps extends ChartProps {
   category?: string;
   series?: string;
-  layoutProperties?: { [key: string]: any };
-  dataProperties?: { [key: string]: any };
-};
+}
 
-const FunnelGraph = ({ visualization, category, series }: FunnelGraphProps) => {
-  const visualizationData = useStore($visualizationData);
-  const metadata = useStore($visualizationMetadata);
-  const data = visualizationData[visualization.id]
-    ? visualizationData[visualization.id]
-    : [];
-
+const FunnelGraph = ({}: FunnelGraphProps) => {
   const datas: any = [
     {
       type: "funnel",

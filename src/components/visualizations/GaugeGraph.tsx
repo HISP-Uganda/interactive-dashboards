@@ -1,24 +1,15 @@
 import { useStore } from "effector-react";
 import Plot from "react-plotly.js";
-import { IVisualization } from "../../interfaces";
+import { ChartProps, IVisualization } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { processGraphs } from "../processors";
 
-type GaugeGraphProps = {
-  visualization: IVisualization;
+interface GaugeGraphProps extends ChartProps {
   category?: string;
   series?: string;
-  layoutProperties?: { [key: string]: any };
-  dataProperties?: { [key: string]: any };
-};
+}
 
-const GaugeGraph = ({ visualization, category, series }: GaugeGraphProps) => {
-  const visualizationData = useStore($visualizationData);
-  const metadata = useStore($visualizationMetadata);
-  const data = visualizationData[visualization.id]
-    ? visualizationData[visualization.id]
-    : [];
-
+const GaugeGraph = ({}: GaugeGraphProps) => {
   const datas: any = [
     {
       domain: { x: [0, 1], y: [0, 1] },

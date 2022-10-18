@@ -215,7 +215,6 @@ export const useInitials = () => {
         me: { organisationUnits, authorities },
         dataSets: { dataSets },
       }: any = await engine.query(ouQuery);
-      console.log(systemId);
       setSystemId(systemId);
       setSystemName(systemName);
       setDataSets(dataSets);
@@ -893,133 +892,134 @@ const makeSQLViewsQueries = (
 };
 
 const generateDHIS2Query = (
-  indicator: IIndicator,
+  indicators: IIndicator[],
   globalFilters: { [key: string]: any } = {},
   overrides: { [key: string]: string } = {}
 ) => {
-  let queries = {};
-  if (
-    indicator.numerator?.type === "ANALYTICS" &&
-    Object.keys(indicator.numerator.dataDimensions).length > 0
-  ) {
-    const params = makeDHIS2Query(
-      indicator.numerator,
-      globalFilters,
-      overrides
-    );
-    if (params) {
-      queries = {
+  return indicators.map((indicator) => {
+    let query = {};
+    if (
+      indicator.numerator?.type === "ANALYTICS" &&
+      Object.keys(indicator.numerator.dataDimensions).length > 0
+    ) {
+      const params = makeDHIS2Query(
+        indicator.numerator,
+        globalFilters,
+        overrides
+      );
+      if (params) {
+        query = {
+          numerator: {
+            resource: `analytics.json?${params}`,
+          },
+        };
+      }
+    } else if (
+      indicator.numerator?.type === "SQL_VIEW" &&
+      Object.keys(indicator.numerator.dataDimensions).length > 0
+    ) {
+      let currentParams = "";
+      const allParams = fromPairs(
+        getSearchParams(indicator.numerator.query).map((re) => [
+          `var=${re}`,
+          "NULL",
+        ])
+      );
+      const params = makeSQLViewsQueries(
+        indicator.numerator.expressions,
+        globalFilters,
+        allParams
+      );
+      if (params) {
+        currentParams = `?${params}`;
+      }
+      query = {
+        ...query,
         numerator: {
-          resource: `analytics.json?${params}`,
+          resource: `sqlViews/${
+            Object.keys(indicator.numerator.dataDimensions)[0]
+          }/data.json${currentParams}`,
         },
       };
     }
-  } else if (
-    indicator.numerator?.type === "SQL_VIEW" &&
-    Object.keys(indicator.numerator.dataDimensions).length > 0
-  ) {
-    let currentParams = "";
-    const allParams = fromPairs(
-      getSearchParams(indicator.numerator.query).map((re) => [
-        `var=${re}`,
-        "NULL",
-      ])
-    );
-    const params = makeSQLViewsQueries(
-      indicator.numerator.expressions,
-      globalFilters,
-      allParams
-    );
-    if (params) {
-      currentParams = `?${params}`;
-    }
-    queries = {
-      ...queries,
-      numerator: {
-        resource: `sqlViews/${
-          Object.keys(indicator.numerator.dataDimensions)[0]
-        }/data.json${currentParams}`,
-      },
-    };
-  }
-  if (
-    indicator.denominator?.type === "ANALYTICS" &&
-    Object.keys(indicator.denominator.dataDimensions).length > 0
-  ) {
-    const params = makeDHIS2Query(indicator.denominator, globalFilters);
-    if (params) {
-      queries = {
-        ...queries,
+    if (
+      indicator.denominator?.type === "ANALYTICS" &&
+      Object.keys(indicator.denominator.dataDimensions).length > 0
+    ) {
+      const params = makeDHIS2Query(indicator.denominator, globalFilters);
+      if (params) {
+        query = {
+          ...query,
+          denominator: {
+            resource: `analytics.json?${params}`,
+          },
+        };
+      }
+    } else if (
+      indicator.denominator?.type === "SQL_VIEW" &&
+      Object.keys(indicator.denominator.dataDimensions).length > 0
+    ) {
+      let currentParams = "";
+      const allParams = fromPairs(
+        getSearchParams(indicator.denominator.query).map((re) => [
+          `var=${re}`,
+          "NULL",
+        ])
+      );
+      const params = makeSQLViewsQueries(
+        indicator.denominator.expressions,
+        globalFilters,
+        allParams
+      );
+      if (params) {
+        currentParams = `?${params}`;
+      }
+      query = {
+        ...query,
         denominator: {
-          resource: `analytics.json?${params}`,
+          resource: `sqlViews/${
+            Object.keys(indicator.denominator.dataDimensions)[0]
+          }/data.json${currentParams}`,
         },
       };
     }
-  } else if (
-    indicator.denominator?.type === "SQL_VIEW" &&
-    Object.keys(indicator.denominator.dataDimensions).length > 0
-  ) {
-    let currentParams = "";
-    const allParams = fromPairs(
-      getSearchParams(indicator.denominator.query).map((re) => [
-        `var=${re}`,
-        "NULL",
-      ])
-    );
-    const params = makeSQLViewsQueries(
-      indicator.denominator.expressions,
-      globalFilters,
-      allParams
-    );
-    if (params) {
-      currentParams = `?${params}`;
-    }
-    queries = {
-      ...queries,
-      denominator: {
-        resource: `sqlViews/${
-          Object.keys(indicator.denominator.dataDimensions)[0]
-        }/data.json${currentParams}`,
-      },
-    };
-  }
-  return queries;
+    return { query, indicator };
+  });
 };
 
 const generateKeys = (
-  indicator?: IIndicator,
+  indicators: IIndicator[] = [],
   globalFilters: { [key: string]: any } = {}
 ) => {
-  const numKeys = Object.keys(indicator?.numerator?.dataDimensions || {});
-  const denKeys = Object.keys(indicator?.denominator?.dataDimensions || {});
-  const numExpressions = Object.entries(
-    indicator?.numerator?.expressions || {}
-  ).map(([e, value]) => {
-    return value.value;
+  const all = indicators.flatMap((indicator) => {
+    const numKeys = Object.keys(indicator?.numerator?.dataDimensions || {});
+    const denKeys = Object.keys(indicator?.denominator?.dataDimensions || {});
+    const numExpressions = Object.entries(
+      indicator?.numerator?.expressions || {}
+    ).map(([e, value]) => {
+      return value.value;
+    });
+    const denExpressions = Object.entries(
+      indicator?.denominator?.expressions || {}
+    ).map(([e, value]) => {
+      return value.value;
+    });
+    return uniq([
+      ...numKeys,
+      ...denKeys,
+      ...numExpressions,
+      ...denExpressions,
+    ]).flatMap((id) => {
+      return globalFilters[id] || [id];
+    });
   });
-  const denExpressions = Object.entries(
-    indicator?.denominator?.expressions || {}
-  ).map(([e, value]) => {
-    return value.value;
-  });
-
-  console.log(numExpressions, denExpressions);
-
-  const all = uniq([
-    ...numKeys,
-    ...denKeys,
-    ...numExpressions,
-    ...denExpressions,
-  ]).flatMap((id) => {
-    return globalFilters[id] || [id];
-  });
-  return all;
+  return uniq(all);
 };
 
 export const useVisualization = (
   visualization: IVisualization,
-  indicator?: IIndicator,
-  dataSource?: IDataSource,
+  indicators: IIndicator[] = [],
+  dataSources: IDataSource[] = [],
   refreshInterval?: string,
   globalFilters?: { [key: string]: any }
 ) => {
@@ -1028,218 +1028,267 @@ export const useVisualization = (
   if (refreshInterval && refreshInterval !== "off") {
     currentInterval = Number(refreshInterval) * 1000;
   }
-
-  console.log(globalFilters);
-  const otherKeys = generateKeys(indicator, globalFilters);
+  let processed: any[] = [];
+  const otherKeys = generateKeys(indicators, globalFilters);
   const overrides = visualization.overrides || {};
+  const dhis2Indicators = indicators.filter((indicator) => {
+    const ds = dataSources.find(
+      (dataSource) => dataSource.id === indicator.dataSource
+    );
+    return ds?.type === "DHIS2";
+  });
+
+  const elasticsearchIndicators = indicators.filter((indicator) => {
+    const ds = dataSources.find(
+      (dataSource) => dataSource.id === indicator.dataSource
+    );
+    return ds?.type === "ELASTICSEARCH";
+  });
+  const apiIndicators = indicators.filter((indicator) => {
+    const ds = dataSources.find(
+      (dataSource) => dataSource.id === indicator.dataSource
+    );
+    return ds?.type === "API";
+  });
   return useQuery<any, Error>(
     [
       "visualizations",
-      indicator?.id,
+      ...indicators.map(({ id }) => id),
       ...otherKeys,
       ...Object.values(overrides),
     ],
     async () => {
       if (
-        indicator &&
+        dhis2Indicators.length > 0 &&
         !isEmpty(globalFilters) &&
-        dataSource &&
-        dataSource.isCurrentDHIS2
+        dataSources.length > 0
       ) {
-        const queries = generateDHIS2Query(indicator, globalFilters, overrides);
-        const data = await engine.query(queries);
-        let processed: any[] = [];
-        let metadata = {};
-        if (data.numerator && data.denominator) {
-          const numerator: any = data.numerator;
-          const denominator: any = data.denominator;
-          let denRows = [];
-          let numRows = [];
-          let denHeaders: any[] = [];
-          let numHeaders: any[] = [];
+        const queries = generateDHIS2Query(
+          dhis2Indicators,
+          globalFilters,
+          overrides
+        );
+        for (const { query, indicator } of queries) {
+          const data = await engine.query(query);
+          let metadata = {};
+          if (data.numerator && data.denominator) {
+            const numerator: any = data.numerator;
+            const denominator: any = data.denominator;
+            let denRows = [];
+            let numRows = [];
+            let denHeaders: any[] = [];
+            let numHeaders: any[] = [];
 
-          if (numerator && numerator.listGrid) {
-            const { rows, headers } = numerator.listGrid;
-            numRows = rows;
-            numHeaders = headers;
-          } else if (numerator) {
-            const {
-              rows,
-              headers,
-              metaData: { items },
-            } = numerator;
-            numRows = rows;
-            numHeaders = headers;
-            metadata = items;
-          }
-          if (denominator && denominator.listGrid) {
-            const { headers, rows } = denominator.listGrid;
-            denRows = rows;
-            denHeaders = headers;
-          } else if (denominator) {
-            const {
-              headers,
-              rows,
-              metaData: { items },
-            } = denominator;
-            denRows = rows;
-            denHeaders = headers;
-            metadata = { ...metadata, ...items };
-          }
-
-          const numerators = numRows.map((rows: string[]) => {
-            return fromPairs(
-              rows.map((r: string, index: number) => [
-                numHeaders[index].name,
-                r,
-              ])
-            );
-          });
-
-          const denominators = denRows.map((rows: string[]) => {
-            return fromPairs(
-              rows.map((r: string, index: number) => [
-                denHeaders[index].name,
-                r,
-              ])
-            );
-          });
-
-          processed = numerators.map((numerator: { [key: string]: string }) => {
-            const columns = Object.keys(numerator).sort().join("");
-            const denominator = denominators.find(
-              (row: { [key: string]: string }) =>
-                columns === Object.keys(row).sort().join("")
-            );
-
-            if (denominator) {
-              const { value: v1, total: t1 } = numerator;
-              const { value: v2, total: t2 } = denominator;
-
-              if (v1 && v2 && indicator.factor !== "1") {
-                const computed = Number(v1) / Number(v2);
-                return {
-                  ...numerator,
-                  value: evaluate(`${computed}${indicator.factor}`),
-                };
-              } else if (v1 && v2) {
-                const computed = Number(v1) / Number(v2);
-                return {
-                  ...numerator,
-                  value: computed,
-                };
-              }
-
-              if (t1 && t2 && indicator.factor !== "1") {
-                const computed = Number(t1) / Number(t2);
-                return {
-                  ...numerator,
-                  value: evaluate(`${computed}${indicator.factor}`),
-                };
-              } else if (t1 && t2) {
-                const computed = Number(t1) / Number(t2);
-                return {
-                  ...numerator,
-                  value: computed,
-                };
-              }
+            if (numerator && numerator.listGrid) {
+              const { rows, headers } = numerator.listGrid;
+              numRows = rows;
+              numHeaders = headers;
+            } else if (numerator) {
+              const {
+                rows,
+                headers,
+                metaData: { items },
+              } = numerator;
+              numRows = rows;
+              numHeaders = headers;
+              metadata = items;
             }
-            return {};
-          });
-        } else if (data.numerator) {
-          const numerator: any = data.numerator;
-          if (numerator && numerator.listGrid) {
-            const { headers, rows } = numerator.listGrid;
-            if (rows.length > 0) {
-              processed = rows.map((row: string[]) => {
-                return fromPairs(
-                  headers.map((h: any, i: number) => {
-                    if (indicator.factor !== "1") {
-                      return [h.name, evaluate(`${row[i]}${indicator.factor}`)];
-                    }
-                    return [h.name, row[i]];
-                  })
+            if (denominator && denominator.listGrid) {
+              const { headers, rows } = denominator.listGrid;
+              denRows = rows;
+              denHeaders = headers;
+            } else if (denominator) {
+              const {
+                headers,
+                rows,
+                metaData: { items },
+              } = denominator;
+              denRows = rows;
+              denHeaders = headers;
+              metadata = { ...metadata, ...items };
+            }
+
+            const numerators = numRows.map((rows: string[]) => {
+              return fromPairs(
+                rows.map((r: string, index: number) => [
+                  numHeaders[index].name,
+                  r,
+                ])
+              );
+            });
+
+            const denominators = denRows.map((rows: string[]) => {
+              return fromPairs(
+                rows.map((r: string, index: number) => [
+                  denHeaders[index].name,
+                  r,
+                ])
+              );
+            });
+
+            processed = [
+              ...processed,
+              ...numerators.map((numerator: { [key: string]: string }) => {
+                const columns = Object.keys(numerator).sort().join("");
+                const denominator = denominators.find(
+                  (row: { [key: string]: string }) =>
+                    columns === Object.keys(row).sort().join("")
                 );
-              });
-            } else {
-              processed = [
-                fromPairs(headers.map((h: any, i: number) => [h.name, 0])),
-              ];
+
+                if (denominator) {
+                  const { value: v1, total: t1 } = numerator;
+                  const { value: v2, total: t2 } = denominator;
+
+                  if (v1 && v2 && indicator.factor !== "1") {
+                    const computed = Number(v1) / Number(v2);
+                    return {
+                      ...numerator,
+                      value: evaluate(`${computed}${indicator.factor}`),
+                    };
+                  } else if (v1 && v2) {
+                    const computed = Number(v1) / Number(v2);
+                    return {
+                      ...numerator,
+                      value: computed,
+                    };
+                  }
+
+                  if (t1 && t2 && indicator.factor !== "1") {
+                    const computed = Number(t1) / Number(t2);
+                    return {
+                      ...numerator,
+                      value: evaluate(`${computed}${indicator.factor}`),
+                    };
+                  } else if (t1 && t2) {
+                    const computed = Number(t1) / Number(t2);
+                    return {
+                      ...numerator,
+                      value: computed,
+                    };
+                  }
+                }
+                return {};
+              }),
+            ];
+          } else if (data.numerator) {
+            const numerator: any = data.numerator;
+            if (numerator && numerator.listGrid) {
+              const { headers, rows } = numerator.listGrid;
+              if (rows.length > 0) {
+                processed = [
+                  ...processed,
+                  ...rows.map((row: string[]) => {
+                    return fromPairs(
+                      headers.map((h: any, i: number) => {
+                        if (indicator.factor !== "1") {
+                          return [
+                            h.name,
+                            evaluate(`${row[i]}${indicator.factor}`),
+                          ];
+                        }
+                        return [h.name, row[i]];
+                      })
+                    );
+                  }),
+                ];
+              } else {
+                processed = [
+                  ...processed,
+                  fromPairs(headers.map((h: any, i: number) => [h.name, 0])),
+                ];
+              }
+            } else if (numerator) {
+              const {
+                headers,
+                rows,
+                metaData: { items },
+              } = numerator;
+              if (rows.length > 0) {
+                processed = [
+                  ...processed,
+                  ...rows.map((row: string[]) => {
+                    return fromPairs(
+                      headers.map((h: any, i: number) => [h.name, row[i]])
+                    );
+                  }),
+                ];
+              } else {
+                processed = [
+                  ...processed,
+                  fromPairs(headers.map((h: any, i: number) => [h.name, 0])),
+                ];
+              }
+              metadata = items;
             }
-          } else if (numerator) {
-            const {
-              headers,
-              rows,
-              metaData: { items },
-            } = numerator;
-            if (rows.length > 0) {
-              processed = rows.map((row: string[]) => {
-                return fromPairs(
-                  headers.map((h: any, i: number) => [h.name, row[i]])
-                );
-              });
-            } else {
-              processed = [
-                fromPairs(headers.map((h: any, i: number) => [h.name, 0])),
-              ];
-            }
-            metadata = items;
           }
-        }
-        updateVisualizationData({
-          visualizationId: visualization.id,
-          data: processed,
-        });
-        updateVisualizationMetadata({
-          visualizationId: visualization.id,
-          data: metadata,
-        });
-      } else if (dataSource?.type === "ELASTICSEARCH") {
-        if (indicator && indicator.query) {
-          const queryString = JSON.parse(
-            indicator.query
-              .replaceAll("${ou}", globalFilters?.["mclvD0Z9mfT"])
-              .replaceAll("${pe}", globalFilters?.["m5D13FqKZwN"])
-              .replaceAll("${le}", globalFilters?.["GQhi6pRnTKF"])
-              .replaceAll("${gp}", globalFilters?.["of2WvtwqbHR"])
-          );
-          const { data } = await axios.post(
-            dataSource.authentication.url,
-            queryString
-          );
           updateVisualizationData({
             visualizationId: visualization.id,
-            data: traverse(data, queryString),
+            data: processed,
           });
-        }
-      } else if (dataSource?.type === "API") {
-        const { data } = await axios.get(dataSource.authentication.url);
-        let numerator: any = undefined;
-        let denominator: any = undefined;
-
-        if (indicator?.numerator?.accessor) {
-          numerator = data[indicator?.numerator?.accessor];
-        } else if (indicator?.numerator?.name) {
-          numerator = data;
-        }
-
-        if (indicator?.denominator?.accessor) {
-          denominator = data[indicator?.denominator?.accessor];
-        } else if (indicator?.denominator?.name) {
-          denominator = data;
-        }
-
-        if (numerator && denominator) {
-        } else if (numerator) {
-          updateVisualizationData({
+          updateVisualizationMetadata({
             visualizationId: visualization.id,
-            data: numerator,
+            data: metadata,
           });
         }
+      } else if (
+        elasticsearchIndicators.length > 0 &&
+        !isEmpty(globalFilters) &&
+        dataSources &&
+        dataSources.length > 0
+      ) {
+        // if (indicator && indicator.query) {
+        //   const queryString = JSON.parse(
+        //     indicator.query
+        //       .replaceAll("${ou}", globalFilters?.["mclvD0Z9mfT"])
+        //       .replaceAll("${pe}", globalFilters?.["m5D13FqKZwN"])
+        //       .replaceAll("${le}", globalFilters?.["GQhi6pRnTKF"])
+        //       .replaceAll("${gp}", globalFilters?.["of2WvtwqbHR"])
+        //   );
+        //   const { data } = await axios.post(
+        //     dataSource.authentication.url,
+        //     queryString
+        //   );
+        //   processed = traverse(data, queryString);
+        //   updateVisualizationData({
+        //     visualizationId: visualization.id,
+        //     data: processed,
+        //   });
+        // }
+      } else if (
+        apiIndicators.length > 0 &&
+        !isEmpty(globalFilters) &&
+        dataSources &&
+        dataSources.length > 0
+      ) {
+        // const { data } = await axios.get(dataSource.authentication.url);
+        // let numerator: any = undefined;
+        // let denominator: any = undefined;
+        // if (indicator?.numerator?.accessor) {
+        //   numerator = data[indicator?.numerator?.accessor];
+        // } else if (indicator?.numerator?.name) {
+        //   numerator = data;
+        // }
+        // if (indicator?.denominator?.accessor) {
+        //   denominator = data[indicator?.denominator?.accessor];
+        // } else if (indicator?.denominator?.name) {
+        //   denominator = data;
+        // }
+        // if (numerator && denominator) {
+        // } else if (numerator) {
+        //   processed = numerator;
+        //   updateVisualizationData({
+        //     visualizationId: visualization.id,
+        //     data: numerator,
+        //   });
+        // }
       }
-      return true;
+      return processed;
     },
-    { refetchInterval: currentInterval }
+    {
+      refetchInterval: currentInterval,
+      refetchIntervalInBackground: true,
+      refetchOnWindowFocus: true,
+    }
   );
 };
 

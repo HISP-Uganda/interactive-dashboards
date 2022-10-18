@@ -17,7 +17,7 @@ import {
   Text,
   Textarea,
 } from "@chakra-ui/react";
-import { GroupBase, Select, SingleValue } from "chakra-react-select";
+import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { ChangeEvent, useEffect, useState } from "react";
 import {
@@ -87,7 +87,8 @@ const VisualizationQuery = ({
       <Text>Visualization Query</Text>
       {isLoading && <Spinner />}
       {isSuccess && (
-        <Select<Option, false, GroupBase<Option>>
+        <Select<Option, true, GroupBase<Option>>
+          isMulti
           value={indicators
             .map((i) => {
               const current: Option = {
@@ -96,11 +97,15 @@ const VisualizationQuery = ({
               };
               return current;
             })
-            .filter((d: Option) => visualization.indicator === d.value)}
-          onChange={(e: SingleValue<Option>) => {
+            .filter(
+              (d: Option) =>
+                String(visualization.indicator).split(",").indexOf(d.value) !==
+                -1
+            )}
+          onChange={(e) => {
             changeVisualizationAttribute({
               attribute: "indicator",
-              value: e?.value,
+              value: e.map((ex) => ex.value).join(","),
               visualization: visualization.id,
             });
           }}

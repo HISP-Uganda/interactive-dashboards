@@ -1,16 +1,10 @@
-import { useStore } from "effector-react";
 import Plot from "react-plotly.js";
-import { IVisualization } from "../../interfaces";
-import { $visualizationData, $visualizationMetadata } from "../../Store";
-import { processGraphs } from "../processors";
+import { ChartProps } from "../../interfaces";
 
-type AreaGraphProps = {
-  visualization: IVisualization;
+interface AreaGraphProps extends ChartProps {
   category?: string;
   series?: string;
-  layoutProperties?: { [key: string]: any };
-  dataProperties?: { [key: string]: any };
-};
+}
 
 const trace1 = {
   x: [1, 2, 3, 4],
@@ -28,13 +22,7 @@ const trace2 = {
 
 const datas: any = [trace1, trace2];
 
-const AreaGraph = ({ visualization, category, series }: AreaGraphProps) => {
-  const visualizationData = useStore($visualizationData);
-  const metadata = useStore($visualizationMetadata);
-  const data = visualizationData[visualization.id]
-    ? visualizationData[visualization.id]
-    : [];
-
+const AreaGraph = ({}: AreaGraphProps) => {
   return (
     <Plot
       data={datas}

@@ -32,7 +32,11 @@ type VisualizationProps = {
   section: ISection;
 };
 
-const getVisualization = (visualization: IVisualization, section: ISection) => {
+const getVisualization = (
+  visualization: IVisualization,
+  data: any,
+  section: ISection
+) => {
   const dataProperties = fromPairs(
     Object.entries(visualization.properties || {}).filter(([key]) =>
       key.startsWith("data")
@@ -51,6 +55,8 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
   const allTypes: any = {
     single: (
       <SingleValue
+        data={data}
+        section={section}
         visualization={visualization}
         {...otherProperties}
         layoutProperties={layoutProperties}
@@ -59,6 +65,7 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
     ),
     bar: (
       <BarGraph
+        data={data}
         section={section}
         visualization={visualization}
         {...otherProperties}
@@ -68,6 +75,7 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
     ),
     pie: (
       <PieChart
+        data={data}
         section={section}
         visualization={visualization}
         {...otherProperties}
@@ -77,6 +85,7 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
     ),
     map: (
       <MapChart
+        data={data}
         section={section}
         visualization={visualization}
         {...otherProperties}
@@ -86,6 +95,7 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
     ),
     line: (
       <LineGraph
+        data={data}
         section={section}
         visualization={visualization}
         {...otherProperties}
@@ -95,6 +105,8 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
     ),
     sunburst: (
       <SunburstChart
+        section={section}
+        data={data}
         visualization={visualization}
         {...otherProperties}
         layoutProperties={layoutProperties}
@@ -103,6 +115,8 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
     ),
     gauge: (
       <GaugeGraph
+        section={section}
+        data={data}
         visualization={visualization}
         {...otherProperties}
         layoutProperties={layoutProperties}
@@ -111,6 +125,8 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
     ),
     histogram: (
       <Histogram
+        section={section}
+        data={data}
         visualization={visualization}
         {...otherProperties}
         layoutProperties={layoutProperties}
@@ -119,6 +135,8 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
     ),
     area: (
       <AreaGraph
+        section={section}
+        data={data}
         visualization={visualization}
         {...otherProperties}
         layoutProperties={layoutProperties}
@@ -127,6 +145,8 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
     ),
     radar: (
       <RadarGraph
+        section={section}
+        data={data}
         visualization={visualization}
         {...otherProperties}
         layoutProperties={layoutProperties}
@@ -135,6 +155,8 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
     ),
     bubblemaps: (
       <BubbleMaps
+        section={section}
+        data={data}
         visualization={visualization}
         {...otherProperties}
         layoutProperties={layoutProperties}
@@ -143,6 +165,8 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
     ),
     funnelplot: (
       <FunnelGraph
+        section={section}
+        data={data}
         visualization={visualization}
         {...otherProperties}
         layoutProperties={layoutProperties}
@@ -151,6 +175,8 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
     ),
     multiplecharts: (
       <MultipleChartTypes
+        section={section}
+        data={data}
         visualization={visualization}
         {...otherProperties}
         layoutProperties={layoutProperties}
@@ -159,6 +185,8 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
     ),
     treemaps: (
       <TreeMaps
+        section={section}
+        data={data}
         visualization={visualization}
         {...otherProperties}
         layoutProperties={layoutProperties}
@@ -167,6 +195,8 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
     ),
     tables: (
       <Tables
+        section={section}
+        data={data}
         visualization={visualization}
         {...otherProperties}
         layoutProperties={layoutProperties}
@@ -175,6 +205,8 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
     ),
     boxplot: (
       <BoxPlot
+        section={section}
+        data={data}
         visualization={visualization}
         {...otherProperties}
         layoutProperties={layoutProperties}
@@ -183,6 +215,8 @@ const getVisualization = (visualization: IVisualization, section: ISection) => {
     ),
     scatterplot: (
       <ScatterPlot
+        section={section}
+        data={data}
         visualization={visualization}
         {...otherProperties}
         layoutProperties={layoutProperties}
@@ -199,15 +233,19 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
   const dataSources = useStore($dataSources);
   const dashboard = useStore($dashboard);
 
-  const indicator = indicators.find((v) => v.id === visualization.indicator);
-  const dataSource = dataSources.find((d) => {
-    return d.id === indicator?.dataSource;
+  const currentIndicators = indicators.filter(
+    (v) => String(visualization.indicator).split(",").indexOf(v.id) !== -1
+  );
+  const currentDataSources = dataSources.filter((d) => {
+    return (
+      currentIndicators.map(({ dataSource }) => dataSource).indexOf(d.id) !== -1
+    );
   });
 
-  const { isLoading, isSuccess, isError, error } = useVisualization(
+  const { isLoading, isSuccess, data, isError, error } = useVisualization(
     visualization,
-    indicator,
-    dataSource,
+    currentIndicators,
+    currentDataSources,
     dashboard.refreshInterval,
     globalFilters
   );
@@ -215,7 +253,7 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
   return (
     <>
       {isLoading && <Spinner />}
-      {isSuccess && getVisualization(visualization, section)}
+      {isSuccess && getVisualization(visualization, data, section)}
       {isError && <pre>{error.message}</pre>}
     </>
   );

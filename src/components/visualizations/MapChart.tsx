@@ -4,7 +4,7 @@ import { max, orderBy } from "lodash";
 import Plot from "react-plotly.js";
 import { ChartProps } from "../../interfaces";
 import { findLevelsAndOus, useMaps } from "../../Queries";
-import { $indicators, $store, $visualizationData } from "../../Store";
+import { $indicators, $store } from "../../Store";
 import { exclusions } from "../../utils/utils";
 import VisualizationTitle from "./VisualizationTitle";
 
@@ -13,16 +13,13 @@ const MapChart = ({
   dataProperties,
   layoutProperties,
   section,
+  data,
 }: ChartProps) => {
-  const visualizationData = useStore($visualizationData);
   const indicators = useStore($indicators);
-
   const indicator = indicators.find((v) => v.id === visualization.indicator);
   const { levels, ous } = findLevelsAndOus(indicator);
-
   const levelIsGlobal = levels.findIndex((l) => l === "GQhi6pRnTKF");
   const ouIsGlobal = ous.findIndex((l) => l === "mclvD0Z9mfT");
-
   const style = layoutProperties?.["layout.mapbox.style"] || "open-street-map";
   const zoom = layoutProperties?.["layout.zoom"] || 5.3;
 
@@ -30,24 +27,15 @@ const MapChart = ({
   const titleCase = dataProperties?.["data.title.case"] || "";
   const titleColor = dataProperties?.["data.title.color"] || "gray.500";
   const colorscale = orderBy(
-    Object.values(
-      dataProperties?.["data.mapKeys"] || {
-        "1": [0, "white"],
-        "2": [0.2, "lightyellow"],
-        "3": [0.4, "orange"],
-        "4": [0.6, "lime"],
-        "5": [0.8, "lightgreen"],
-        "6": [1.0, "green"],
-      }
-    ),
-    (v: [number, string]) => v[0],
+    dataProperties?.["data.mapKeys"] || [
+      { id: "1", key: 0, value: "red" },
+      { id: "2", key: 0.75, value: "yellow" },
+      { id: "6", key: 1.0, value: "green" },
+    ],
+    (v: any) => v.key,
     ["asc"]
-  );
+  ).map(({ key, value }: any) => [key, value]);
   const store = useStore($store);
-  const data = visualizationData[visualization.id]
-    ? visualizationData[visualization.id]
-    : [];
-
   const {
     isLoading,
     isError,
@@ -58,6 +46,8 @@ const MapChart = ({
     levelIsGlobal !== -1 || levels.length === 0 ? store.levels : levels,
     ouIsGlobal !== -1 ? store.organisations.map((k) => String(k)) : ous
   );
+
+  console.log(data);
   return (
     <>
       {isLoading && <Spinner />}
@@ -93,18 +83,10 @@ const MapChart = ({
                   }),
                   featureidkey: "properties.name",
                   geojson: metadata.geojson,
-                  zmin: 0,
+                  zauto: false,
                   autocolorscale: false,
-                  zmax: max([
-                    ...metadata.organisationUnits.map(({ id }: any) => {
-                      const dataValue = data.find((dt: any) => dt.ou === id);
-                      if (dataValue) {
-                        return dataValue.value;
-                      }
-                      return 0;
-                    }),
-                    100,
-                  ]),
+                  zmin: 0,
+                  zmax: max(data.map((d: any) => d.value || d.total)),
                   colorscale,
                 } as any,
               ]}

@@ -3,7 +3,7 @@ import { useStore } from "effector-react";
 import { update } from "lodash";
 import Plot from "react-plotly.js";
 import { ChartProps } from "../../interfaces";
-import { $visualizationData, $visualizationMetadata } from "../../Store";
+import { $visualizationMetadata } from "../../Store";
 import { exclusions } from "../../utils/utils";
 import { processGraphs } from "../processors";
 import VisualizationTitle from "./VisualizationTitle";
@@ -20,12 +20,9 @@ const LineGraph = ({
   layoutProperties,
   dataProperties,
   section,
+  data,
 }: LineGraphProps) => {
-  const visualizationData = useStore($visualizationData);
   const metadata = useStore($visualizationMetadata);
-  const data = visualizationData[visualization.id]
-    ? visualizationData[visualization.id]
-    : [];
   let availableProperties: { [key: string]: any } = {
     layout: {
       legend: { x: 0.5, y: -0.3, orientation: "h" },

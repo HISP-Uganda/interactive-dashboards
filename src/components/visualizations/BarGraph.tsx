@@ -1,22 +1,17 @@
-import { Stack, Text } from "@chakra-ui/react";
+import { Stack } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { update } from "lodash";
-import { useElementSize } from "usehooks-ts";
 import Plot from "react-plotly.js";
-import { ISection, IVisualization } from "../../interfaces";
-import { $visualizationData, $visualizationMetadata } from "../../Store";
+import { ChartProps } from "../../interfaces";
+import { $visualizationMetadata } from "../../Store";
 import { exclusions } from "../../utils/utils";
 import { processGraphs } from "../processors";
 import VisualizationTitle from "./VisualizationTitle";
 
-type BarGraphProps = {
-  visualization: IVisualization;
-  layoutProperties?: { [key: string]: any };
-  dataProperties?: { [key: string]: any };
+interface BarGraphProps extends ChartProps {
   category?: string;
   series?: string;
-  section: ISection;
-};
+}
 
 const BarGraph = ({
   visualization,
@@ -25,13 +20,9 @@ const BarGraph = ({
   layoutProperties,
   dataProperties,
   section,
+  data,
 }: BarGraphProps) => {
-  const visualizationData = useStore($visualizationData);
   const metadata = useStore($visualizationMetadata);
-  const data = visualizationData[visualization.id]
-    ? visualizationData[visualization.id]
-    : [];
-
   let availableProperties: { [key: string]: any } = {
     layout: {
       legend: { x: 0.5, y: -0.3, orientation: "h" },
@@ -52,17 +43,12 @@ const BarGraph = ({
   Object.entries(layoutProperties || {}).forEach(([property, value]) => {
     update(availableProperties, property, () => value);
   });
-
-  const titleFontSize = dataProperties?.["data.title.fontsize"] || "1.5vh";
-  const titleCase = dataProperties?.["data.title.case"] || "";
-  const titleColor = dataProperties?.["data.title.color"] || "black";
   return (
     <Stack h="100%" spacing={0} w="100%">
       {visualization.name && (
         <VisualizationTitle
           section={section}
           fontSize={"18px"}
-          //textTransform={"uppercase"}
           color={"gray.500"}
           title={visualization.name}
           fontWeight="bold"

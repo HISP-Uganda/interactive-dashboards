@@ -147,7 +147,6 @@ const OUTree = ({
             (d: Option) => store.levels.indexOf(d.value) !== -1
           )}
           onChange={(e) => {
-            console.log(e.map((ex) => ex.value));
             setLevels(e.map((ex) => ex.value));
           }}
         />

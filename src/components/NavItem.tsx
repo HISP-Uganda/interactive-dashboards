@@ -1,16 +1,12 @@
-import { groupBy } from "lodash";
 import { useState } from "react";
-
-import { Box, Flex, Stack, Text } from "@chakra-ui/react";
+import { Box, Flex, Text } from "@chakra-ui/react";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { $category, $dashboard, $dashboards, $store } from "../Store";
+import { $dashboard, $store } from "../Store";
 
 import { FormGenerics, IDashboard, Option } from "../interfaces";
-import { changeSelectedCategory } from "../Events";
 
 interface NavItemProps {
-  // icon: IconType;
   option: Option & { dashboards: IDashboard[] };
 }
 const NavItem = ({ option: { label, value, dashboards } }: NavItemProps) => {
@@ -27,23 +23,7 @@ const NavItem = ({ option: { label, value, dashboards } }: NavItemProps) => {
     }
   };
   return (
-    <Box
-      // color={store.selectedCategory === value ? "blue.600" : "none"}
-      // cursor="pointer"
-
-      key={value}
-      // onClick={() => {
-      //   toggle(value);
-      //   changeSelectedCategory(value);
-
-      //   if (categoryDashboards.length > 0) {
-      //     navigate({
-      //       to: `/dashboards/${categoryDashboards[0].id}`,
-      //       search,
-      //     });
-      //   }
-      // }}
-    >
+    <Box key={value}>
       <Text
         color="gray.600"
         m="1"
@@ -67,16 +47,8 @@ const NavItem = ({ option: { label, value, dashboards } }: NavItemProps) => {
           m="2"
           cursor="pointer"
           _hover={{ bg: "#E8EDF2", color: "black" }}
-          // color="white"
-          // maxW="sm"
-          // borderWidth="1px"
-          // borderRadius="lg"
-          // overflow="hidden"
-          // key={d.id}
-          // p="5px"
           bg={dashboard.id === d.id ? "#00796B" : ""}
           color={dashboard.id === d.id ? "white" : ""}
-          // border={dashboard.id === d.id ? "2px" : ""}
           onClick={(e) => {
             e.stopPropagation();
             navigate({
