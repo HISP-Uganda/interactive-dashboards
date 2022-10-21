@@ -136,6 +136,7 @@ export const createIndicator = (id = generateUid()): IIndicator => {
     factor: "1",
     query: "",
     useInBuildIndicators: false,
+    custom: false,
   };
 };
 
@@ -801,10 +802,9 @@ export const $globalFilters = combine(
       }
       return [id];
     });
-
     let filters: { [key: string]: any } = {
       m5D13FqKZwN: periods,
-      GQhi6pRnTKF: store.levels,
+      GQhi6pRnTKF: [store.levels.sort()[store.levels.length - 1]],
       mclvD0Z9mfT: store.organisations,
     };
 

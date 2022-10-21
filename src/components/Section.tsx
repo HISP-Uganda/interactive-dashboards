@@ -263,7 +263,7 @@ const Section = () => {
                   cursor="pointer"
                   fontSize="xl"
                 >
-                  <Text>Section options</Text>
+                  <Text>{`Section options(${section.id})`}</Text>
                   <Spacer />
                   {active === "title" ? (
                     <ChevronDownIcon />
@@ -396,7 +396,7 @@ const Section = () => {
                     cursor="pointer"
                     fontSize="xl"
                   >
-                    <Text>{visualization.name}</Text>
+                    <Text>{`${visualization.name}(${visualization.id})`}</Text>
                     <Spacer />
                     {active === visualization.id ? (
                       <ChevronDownIcon />

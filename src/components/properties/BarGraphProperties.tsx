@@ -30,7 +30,6 @@ const BarGraphProperties = ({
 }) => {
   const visualizationData = useStore($visualizationData);
   const metadata = useStore($visualizationMetadata)[visualization.id];
-  console.log(visualizationData[visualization.id]);
   const columns = visualizationData[visualization.id]
     ? Object.keys(visualizationData[visualization.id][0]).map<Option>((o) => {
         return { value: o, label: o };
@@ -102,7 +101,7 @@ const BarGraphProperties = ({
           </Stack>
         </RadioGroup>
       </Stack>
-          <Text>Bar Graph Colors</Text>
+      <Text>Bar Graph Colors</Text>
       <Select<Option, false, GroupBase<Option>>
         value={colors.find((pt) => {
           if (

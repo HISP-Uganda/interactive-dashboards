@@ -1,9 +1,9 @@
 import { useDataEngine } from "@dhis2/app-runtime";
-import { center } from "@turf/turf";
+import { center, bbox } from "@turf/turf";
 import type { DataNode } from "antd/lib/tree";
 import axios, { AxiosRequestConfig } from "axios";
 import { fromPairs, isEmpty, min, uniq } from "lodash";
-import { evaluate } from "mathjs";
+import { evaluate, map } from "mathjs";
 import { useQuery } from "react-query";
 import {
   addPagination,
@@ -37,6 +37,7 @@ import {
   IIndicator,
   IVisualization,
   Option,
+  Threshold,
 } from "./interfaces";
 import { getSearchParams, traverse } from "./utils/utils";
 
@@ -869,6 +870,14 @@ const makeDHIS2Query = (
   return dd;
 };
 
+const hasGlobal = (globalFilters: { [key: string]: any }, value: string) => {
+  return Object.keys(globalFilters).some((element) => {
+    if (element.indexOf(value) !== -1) {
+      return true;
+    }
+    return false;
+  });
+};
 const makeSQLViewsQueries = (
   expressions: IExpressions = {},
   globalFilters: { [key: string]: any } = {},
@@ -882,10 +891,26 @@ const makeSQLViewsQueries = (
         [`var=${col}`]: globalFilters[val.value].join("-"),
       };
     } else if (!val.isGlobal && val.value) {
-      initial = { ...initial, [`var=${col}`]: val.value };
+      const keys = Object.keys(globalFilters).some(
+        (e) => String(val.value).indexOf(e) !== -1
+      );
+      if (keys) {
+        Object.entries(globalFilters).forEach(([globalId, globalValue]) => {
+          if (String(val.value).indexOf(globalId) !== -1) {
+            initial = {
+              ...initial,
+              [`var=${col}`]: String(val.value).replaceAll(
+                globalId,
+                globalValue.join("-")
+              ),
+            };
+          }
+        });
+      } else {
+        initial = { ...initial, [`var=${col}`]: val.value };
+      }
     }
   });
-
   return Object.entries(initial)
     .map(([key, value]) => `${key}:${value}`)
     .join("&");
@@ -931,7 +956,7 @@ const generateDHIS2Query = (
         allParams
       );
       if (params) {
-        currentParams = `?${params}`;
+        currentParams = `?${params}&paging=false`;
       }
       query = {
         ...query,
@@ -972,7 +997,7 @@ const generateDHIS2Query = (
         allParams
       );
       if (params) {
-        currentParams = `?${params}`;
+        currentParams = `?${params}&paging=false`;
       }
       query = {
         ...query,
@@ -1125,7 +1150,6 @@ export const useVisualization = (
                 ])
               );
             });
-
             processed = [
               ...processed,
               ...numerators.map((numerator: { [key: string]: string }) => {
@@ -1139,17 +1163,39 @@ export const useVisualization = (
                   const { value: v1, total: t1 } = numerator;
                   const { value: v2, total: t2 } = denominator;
 
+                  if (indicator.custom && v1 && v2) {
+                    const expression = indicator.factor
+                      .replaceAll("x", v1)
+                      .replaceAll("y", v2);
+                    return {
+                      ...numerator,
+                      value: evaluate(expression),
+                    };
+                  }
+
                   if (v1 && v2 && indicator.factor !== "1") {
                     const computed = Number(v1) / Number(v2);
                     return {
                       ...numerator,
                       value: evaluate(`${computed}${indicator.factor}`),
                     };
-                  } else if (v1 && v2) {
+                  }
+
+                  if (v1 && v2) {
                     const computed = Number(v1) / Number(v2);
                     return {
                       ...numerator,
                       value: computed,
+                    };
+                  }
+
+                  if (indicator.custom && t1 && t2) {
+                    const expression = indicator.factor
+                      .replaceAll("x", t1)
+                      .replaceAll("y", t2);
+                    return {
+                      ...numerator,
+                      value: evaluate(expression),
                     };
                   }
 
@@ -1159,7 +1205,8 @@ export const useVisualization = (
                       ...numerator,
                       value: evaluate(`${computed}${indicator.factor}`),
                     };
-                  } else if (t1 && t2) {
+                  }
+                  if (t1 && t2) {
                     const computed = Number(t1) / Number(t2);
                     return {
                       ...numerator,
@@ -1167,7 +1214,7 @@ export const useVisualization = (
                     };
                   }
                 }
-                return {};
+                return { ...numerator, value: 0 };
               }),
             ];
           } else if (data.numerator) {
@@ -1175,22 +1222,41 @@ export const useVisualization = (
             if (numerator && numerator.listGrid) {
               const { headers, rows } = numerator.listGrid;
               if (rows.length > 0) {
-                processed = [
-                  ...processed,
-                  ...rows.map((row: string[]) => {
-                    return fromPairs(
-                      headers.map((h: any, i: number) => {
-                        if (indicator.factor !== "1") {
-                          return [
-                            h.name,
-                            evaluate(`${row[i]}${indicator.factor}`),
-                          ];
-                        }
-                        return [h.name, row[i]];
-                      })
-                    );
-                  }),
-                ];
+                let foundRows = rows.map((row: string[]) => {
+                  return fromPairs(
+                    headers.map((h: any, i: number) => {
+                      if (indicator.factor !== "1") {
+                        return [
+                          h.name,
+                          evaluate(`${row[i]}${indicator.factor}`),
+                        ];
+                      }
+                      return [h.name, row[i]];
+                    })
+                  );
+                });
+
+                if (
+                  visualization.id === "AHxO7yowduX" &&
+                  indicator.id === "ejqSEwfG07O"
+                ) {
+                  const firstValue = foundRows[0].value || foundRows[0].total;
+
+                  foundRows = [
+                    "daugmmgzAkU",
+                    "C1IRVkhB3MW",
+                    "L48zD78K9AI",
+                    "zPaWaUOubgL",
+                    "J9wUCeShAjk",
+                  ].map((c1) => {
+                    return {
+                      c1,
+                      c2: "Target",
+                      value: Number(Number(firstValue / 5).toFixed(0)),
+                    };
+                  });
+                }
+                processed = [...processed, ...foundRows];
               } else {
                 processed = [
                   ...processed,
@@ -1292,7 +1358,12 @@ export const useVisualization = (
   );
 };
 
-export const useMaps = (levels: string[], parents: string[]) => {
+export const useMaps = (
+  levels: string[],
+  parents: string[],
+  data: any[],
+  thresholds: Threshold[]
+) => {
   const engine = useDataEngine();
   const parent = parents
     .map((p) => {
@@ -1328,17 +1399,64 @@ export const useMaps = (levels: string[], parents: string[]) => {
   ]);
 
   query = { ...query, ...fromPairs(levelsQuery) };
-
   return useQuery<any, Error>(["maps", ...levels, ...parents], async () => {
     const { geojson, ...otherLevels }: any = await engine.query(query);
     const mapCenter = center(geojson).geometry.coordinates;
+    const bounds = bbox(geojson);
     const organisationUnits = Object.values(otherLevels).flatMap(
       ({ organisationUnits }: any) => organisationUnits
     );
+    const { features, ...rest } = geojson;
+    const processedData = fromPairs(
+      data.map((d) => {
+        const value = d.value || d.total;
+        const id = d.c || d.ou;
+        return [id, value];
+      })
+    );
+
+    const processedFeatures = features.map(
+      ({ id, properties, ...others }: any) => {
+        let value = processedData[id];
+        const colorSearch = thresholds.find(({ max, min }: any) => {
+          if (max && min) {
+            return Number(value) >= Number(min) && Number(value) < Number(max);
+          } else if (min) {
+            return Number(value) >= Number(min);
+          } else if (max) {
+            return Number(value) <= Number(max);
+          }
+        });
+        let color = "white";
+
+        if (value && colorSearch) {
+          color = colorSearch.color;
+        } else if (value && thresholds.length > 0) {
+          color = thresholds[0].color;
+        }
+
+        return {
+          id,
+          ...others,
+          properties: {
+            ...properties,
+            value: value
+              ? Intl.NumberFormat("en-US", {
+                  style: "percent",
+                  notation: "standard",
+                  maximumFractionDigits: 2,
+                }).format(value / 100)
+              : "No Data",
+            color,
+          },
+        };
+      }
+    );
     return {
-      geojson,
+      geojson: { ...rest, features: processedFeatures },
       mapCenter,
       organisationUnits,
+      bounds,
     };
   });
 };

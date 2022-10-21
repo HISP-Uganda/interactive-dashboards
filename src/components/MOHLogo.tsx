@@ -6,8 +6,8 @@ const MOHLogo = ({ width, height }: { height: number; width: number }) => {
   const navigate = useNavigate();
   return (
     <Image
-      maxH={`${height * 0.7}px`}
-      maxW={`${width * 0.7}px`}
+      maxH={`${height * 1}px`}
+      maxW={`${width * 1}px`}
       src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/Coat_of_arms_of_Uganda.svg"
       onClick={() => {
         setCurrentPage("dashboards");

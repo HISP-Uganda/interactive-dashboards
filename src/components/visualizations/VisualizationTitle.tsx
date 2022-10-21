@@ -26,6 +26,7 @@ const VisualizationTitle = ({
       onMouseEnter={() => setShowMenu(true)}
       onMouseLeave={() => setShowMenu(false)}
       bg="gray.200"
+      zIndex={100000}
       px="5px"
       {...rest}
     >

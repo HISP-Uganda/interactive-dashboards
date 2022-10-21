@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Box,
   Button,
@@ -26,8 +27,6 @@ import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { ChangeEvent } from "react";
-import "react-grid-layout/css/styles.css";
-import "react-resizable/css/styles.css";
 import {
   assignDataSet,
   changeCategory,
@@ -62,12 +61,15 @@ const DashboardMenu = () => {
   const store = useStore($store);
   const dashboard = useStore($dashboard);
   const categoryOptions = useStore($categoryOptions);
+  const [loading, setLoading] = useState<boolean>(false);
   const updateDashboard = async (data: any) => {
+    setLoading(true);
     await saveDocument("i-dashboards", store.systemId, data);
     await saveDocument("i-dashboard-settings", store.systemId, {
       default: store.defaultDashboard,
       id: store.systemId,
     });
+    setLoading(false);
     onClose();
   };
 
@@ -238,7 +240,12 @@ const DashboardMenu = () => {
             <Button colorScheme="red" mr={3} onClick={onClose}>
               Close
             </Button>
-            <Button onClick={() => updateDashboard(dashboard)}>Save</Button>
+            <Button
+              onClick={() => updateDashboard(dashboard)}
+              isLoading={loading}
+            >
+              Save
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

@@ -62,8 +62,8 @@ export default function ({
             >
               <Image
                 src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/logo.png"
-                maxH={`${fh * 0.7}px`}
-                maxW={`${fw * 0.7}px`}
+                maxH={`${fh * 0.85}px`}
+                maxW={`${fw * 0.5}px`}
               />
             </Stack>
           </GridItem>
@@ -97,9 +97,9 @@ export default function ({
             ref={funderLogo1Ref}
           >
             <Image
-              src="https://www.gavi.org/sites/default/files/thumbnail/RS28669_gavi_logo_gb_rgb-01_3x2_4.jpg"
-              maxH={`${f1h * 0.7}px`}
-              maxW={`${f1w * 0.7}px`}
+              src="https://tukuz.com/wp-content/uploads/2020/10/gavi-the-vaccine-alliance-logo-vector.png"
+              maxH={`${f1h}px`}
+              maxW={`${f1w}px`}
             />
           </Stack>
         </GridItem>

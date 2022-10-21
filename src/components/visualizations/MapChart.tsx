@@ -2,7 +2,7 @@ import { Spinner, Stack } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { max, orderBy } from "lodash";
 import Plot from "react-plotly.js";
-import { ChartProps } from "../../interfaces";
+import { ChartProps, Threshold } from "../../interfaces";
 import { findLevelsAndOus, useMaps } from "../../Queries";
 import { $indicators, $store } from "../../Store";
 import { exclusions } from "../../utils/utils";
@@ -22,7 +22,11 @@ const MapChart = ({
   const ouIsGlobal = ous.findIndex((l) => l === "mclvD0Z9mfT");
   const style = layoutProperties?.["layout.mapbox.style"] || "open-street-map";
   const zoom = layoutProperties?.["layout.zoom"] || 5.3;
-
+  const thresholds: Threshold[] = dataProperties?.["data.thresholds"] || [
+    { id: "1", min: "0", max: "5000", color: "red" },
+    { id: "2", min: "5001", max: "10000", color: "yellow" },
+    { id: "3", min: "10001", color: "green" },
+  ];
   const titleFontSize = dataProperties?.["data.title.fontsize"] || "1.5vh";
   const titleCase = dataProperties?.["data.title.case"] || "";
   const titleColor = dataProperties?.["data.title.color"] || "gray.500";
@@ -44,10 +48,10 @@ const MapChart = ({
     data: metadata,
   } = useMaps(
     levelIsGlobal !== -1 || levels.length === 0 ? store.levels : levels,
-    ouIsGlobal !== -1 ? store.organisations.map((k) => String(k)) : ous
+    ouIsGlobal !== -1 ? store.organisations.map((k) => String(k)) : ous,
+    data,
+    thresholds
   );
-
-  console.log(data);
   return (
     <>
       {isLoading && <Spinner />}
@@ -68,18 +72,18 @@ const MapChart = ({
               data={[
                 {
                   type: "choroplethmapbox",
-                  hoverformat: ".2r",
+                  // hovertemplate: ".2r",
                   locations: metadata.organisationUnits.map(
                     (ou: { id: string; name: string }) => ou.name
                   ),
-                  z: metadata.organisationUnits.map(({ id }: any) => {
+                  z: metadata.organisationUnits.map(({ id, ...rest }: any) => {
                     const dataValue = data.find(
                       (dt: any) => dt.ou === id || dt.c === id
                     );
                     if (dataValue) {
                       return dataValue.value;
                     }
-                    return 0;
+                    return "";
                   }),
                   featureidkey: "properties.name",
                   geojson: metadata.geojson,
