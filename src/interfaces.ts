@@ -53,6 +53,7 @@ export interface IIndicator extends INamed {
   numerator?: IData;
   denominator?: IData;
   factor: string;
+  custom: boolean;
   dataSource?: string;
   useInBuildIndicators: boolean;
   query?: string;
@@ -197,4 +198,11 @@ export interface ChartProps {
   dataProperties?: { [key: string]: any };
   section: ISection;
   data: any;
+}
+
+export interface Threshold {
+  id: string;
+  min: string;
+  max: string;
+  color: string;
 }

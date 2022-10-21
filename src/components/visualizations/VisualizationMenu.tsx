@@ -24,12 +24,7 @@ import { FaGlobeAfrica } from "react-icons/fa";
 
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { changeVisualizationType, setCurrentSection } from "../../Events";
-import {
-  FormGenerics,
-  IDashboard,
-  ISection,
-  IVisualization,
-} from "../../interfaces";
+import { FormGenerics, ISection } from "../../interfaces";
 import Visualization from "./Visualization";
 
 type VisualizationMenuProps = {
@@ -133,7 +128,14 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
       </Menu>
       <Modal isOpen={isFull} onClose={onUnFull} size="full">
         <ModalOverlay />
-        <ModalContent h="100vh" display="flex" flexDirection="column" w="100vw">
+        <ModalContent
+          h="100vh"
+          display="flex"
+          flexDirection="column"
+          w="100vw"
+          p={0}
+          m={0}
+        >
           <ModalBody>
             <Stack h="100%" w="100%" direction={section?.direction}>
               {section?.visualizations.map((visualization) => (

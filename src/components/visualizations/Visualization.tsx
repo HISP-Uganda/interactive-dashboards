@@ -18,6 +18,8 @@ import GaugeGraph from "./GaugeGraph";
 import Histogram from "./Histogram";
 import LineGraph from "./LineGraph";
 import MapChart from "./MapChart";
+import MapChartLeaflet from "./MapChartLeaflet";
+import MapChartNivo from "./MapChartNivo";
 import MultipleChartTypes from "./MultipleChartTypes";
 import PieChart from "./PieChart";
 import RadarGraph from "./RadarGraph";
@@ -84,7 +86,7 @@ const getVisualization = (
       />
     ),
     map: (
-      <MapChart
+      <MapChartLeaflet
         data={data}
         section={section}
         visualization={visualization}

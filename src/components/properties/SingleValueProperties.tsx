@@ -31,23 +31,11 @@ import {
 } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { generateUid } from "../../utils/uid";
-import { createOptions } from "../../utils/utils";
 import ColorPalette from "../ColorPalette";
+import ColorRangePicker from "../ColorRangePicker";
 
 type Threshold = { id: string; min: string; max: string; color: string };
 
-const fontWeights: Option[] = createOptions([
-  "100",
-  "200",
-  "300",
-  "400",
-  "500",
-  "600",
-  "700",
-  "800",
-  "900",
-  "950",
-]);
 const progressAlignments: Option[] = [
   {
     label: "Column",
@@ -203,9 +191,7 @@ const SingleValueProperties = ({
       />
       <Text>Single Value Border and Border Radius</Text>
       <NumberInput
-        value={
-          visualization.properties["data.border"] || 0
-        }
+        value={visualization.properties["data.border"] || 0}
         max={2}
         min={0}
         step={1}
@@ -307,80 +293,7 @@ const SingleValueProperties = ({
           <NumberDecrementStepper />
         </NumberInputStepper>
       </NumberInput>
-
-      <Stack direction="row" alignItems="center">
-        <Text>Threshold</Text>
-        <Spacer />
-        <IconButton
-          bg="none"
-          aria-label="add"
-          icon={<AddIcon w={2} h={2} />}
-          onClick={() => addThreshold()}
-        />
-      </Stack>
-      <TableContainer>
-        <Table variant="simple" size="xs">
-          <Thead>
-            <Tr>
-              <Th>Min</Th>
-              <Th>Max</Th>
-              <Th>Color</Th>
-              <Th></Th>
-            </Tr>
-          </Thead>
-          <Tbody ref={ref}>
-            {thresholds.map((hold) => (
-              <Tr key={hold.id}>
-                <Td w="35%">
-                  <Input
-                    value={hold.min}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      changeThreshold(hold.id, "min", e.target.value)
-                    }
-                  />
-                </Td>
-                <Td w="35%">
-                  <Input
-                    value={hold.max}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      changeThreshold(hold.id, "max", e.target.value)
-                    }
-                  />
-                </Td>
-                <Td
-                  w="20%"
-                  bg={hold.color}
-                  position="relative"
-                  onClick={() => {
-                    setId(hold.id);
-                    onOpen();
-                  }}
-                >
-                  {isOpen && id === hold.id && (
-                    <SwatchesPicker
-                      key={hold.id}
-                      color={hold.color}
-                      onChangeComplete={(color) => {
-                        changeThreshold(hold.id, "color", color.hex);
-                        onClose();
-                      }}
-                    />
-                  )}
-                </Td>
-                <Td textAlign="right" w="10%">
-                  <IconButton
-                    aria-label="delete"
-                    bg="none"
-                    icon={<DeleteIcon w={3} h={3} />}
-                    onClick={() => removeThreshold(hold.id)}
-                  />
-                </Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </TableContainer>
-
+      <ColorRangePicker visualization={visualization} />
       <Text>Target</Text>
       <Input
         value={visualization.properties?.["data.target"] || ""}

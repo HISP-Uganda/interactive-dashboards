@@ -41,13 +41,7 @@ const Indicator = () => {
   const navigate = useNavigate();
   const add = async () => {
     setLoading(true);
-    const response = await saveDocument(
-      "i-visualization-queries",
-      store.systemId,
-      indicator
-    );
-    console.log(indicator);
-    console.log(response);
+    await saveDocument("i-visualization-queries", store.systemId, indicator);
     await queryClient.invalidateQueries(["visualization-queries"]);
     setLoading(false);
     navigate({ to: "/indicators" });
@@ -104,11 +98,23 @@ const Indicator = () => {
                 }
               />
             </Stack>
+
+            <Checkbox
+              isChecked={indicator.custom}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                changeIndicatorAttribute({
+                  attribute: "custom",
+                  value: e.target.checked,
+                })
+              }
+            >
+              Custom calculations (x is numerator and y is denominator)
+            </Checkbox>
             <Stack>
-              <Text>Factor Expression</Text>
-              <Input
+              <Text>Expression</Text>
+              <Textarea
                 value={indicator.factor}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
                   changeIndicatorAttribute({
                     attribute: "factor",
                     value: e.target.value,

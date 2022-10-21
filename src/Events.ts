@@ -59,7 +59,7 @@ export const changeDenominatorExpressionValue = domain.createEvent<{
 }>();
 
 export const changeIndicatorAttribute = domain.createEvent<{
-  attribute: "name" | "description" | "factor" | "query";
+  attribute: "name" | "description" | "factor" | "query" | "custom";
   value: any;
 }>();
 

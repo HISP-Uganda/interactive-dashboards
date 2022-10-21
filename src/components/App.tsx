@@ -65,6 +65,7 @@ import { decodeFromBinary, encodeToBinary } from "../utils/utils";
 import DashboardMenu from "./DashboardMenu";
 import Footer from "./Footer";
 import MOHLogo from "./MOHLogo";
+import MOHLogo2 from "./MOHLogo2";
 import SectionMenu from "./SectionMenu";
 import SidebarContent from "./SidebarContent";
 
@@ -330,8 +331,8 @@ const App = () => {
                     >
                       <Image
                         src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/logo.png"
-                        maxH={`${hh * 0.7}px`}
-                        maxW={`${hw * 0.7}px`}
+                        maxH={`${hh * 0.85}px`}
+                        maxW={`${hw * 0.85}px`}
                       />
                     </Stack>
                   </GridItem>
@@ -343,7 +344,7 @@ const App = () => {
                 h="100%"
                 bg={handle.active ? "gray.300" : ""}
                 p={handle.active ? "5px" : ""}
-                maxH={handle.active ? "100vh" : "calc(100vh - 48px)"}
+                maxH={handle.active ? "100vh" : "calc(100vh - 58px)"}
                 w="100%"
               >
                 <Grid templateRows="repeat(14, 1fr)" gap={1} h="100%">
@@ -360,18 +361,13 @@ const App = () => {
                       ref={hispLogo1}
                     >
                       {(handle.active || !store.showSider) && (
-                        <Stack
-                          alignContent="center"
-                          alignItems="center"
-                          justifyContent="center"
-                          justifyItems="center"
-                        >
+                        <MOHLogo2>
                           <Image
                             src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/Coat_of_arms_of_Uganda.svg"
                             maxH={`${h1h * 0.85}px`}
                             maxW={`${h1w * 0.85}px`}
                           />
-                        </Stack>
+                        </MOHLogo2>
                       )}
                       {!handle.active && !store.showSider && (
                         <IconButton

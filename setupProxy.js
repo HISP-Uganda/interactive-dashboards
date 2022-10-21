@@ -20,7 +20,7 @@ const options = {
   // target: "http://localhost:8080", // target host
   // target: "https://hmis-repo.health.go.ug/repo", // target host
   // target: "https://tests.dhis2.stephocay.com/sia", // target host
-  //  target: "https://eidsr.health.go.ug", // target host
+  // target: "https://eidsr.health.go.ug", // target host
   target: "https://epivac.health.go.ug", // target host
   onProxyReq,
   onProxyRes,
