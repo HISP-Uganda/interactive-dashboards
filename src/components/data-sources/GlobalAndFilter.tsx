@@ -59,7 +59,7 @@ const GlobalAndFilter = ({
       {hasGlobalFilter && (
         <Checkbox
           onChange={(e: ChangeEvent<HTMLInputElement>) => {
-            setUseGlobal(e.target.checked);
+            setUseGlobal(() => e.target.checked);
             Object.entries(denNum?.dataDimensions || {})
               .filter(([k, { what }]) => what === type)
               .forEach(([key]) => {

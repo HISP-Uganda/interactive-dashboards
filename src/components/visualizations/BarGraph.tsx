@@ -1,4 +1,4 @@
-import { Stack } from "@chakra-ui/react";
+import { Stack, Text, SimpleGrid, Box } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { update } from "lodash";
 import Plot from "react-plotly.js";
@@ -25,7 +25,7 @@ const BarGraph = ({
   const metadata = useStore($visualizationMetadata);
   let availableProperties: { [key: string]: any } = {
     layout: {
-      legend: { x: 0.5, y: -0.3, orientation: "h" },
+      legend: { x: 0.5, y: -0.1, orientation: "h" },
       yaxis: { automargin: true },
       colorway: [
         "#1f77b4",
@@ -43,6 +43,14 @@ const BarGraph = ({
   Object.entries(layoutProperties || {}).forEach(([property, value]) => {
     update(availableProperties, property, () => value);
   });
+  const colors = availableProperties.layout.colorway;
+  const { chartData, allSeries } = processGraphs(
+    data,
+    category,
+    series,
+    dataProperties,
+    metadata[visualization.id]
+  );
   return (
     <Stack h="100%" spacing={0} w="100%">
       {visualization.name && (
@@ -55,44 +63,55 @@ const BarGraph = ({
         />
       )}
 
-      <Stack flex={1}>
-        <Plot
-          data={processGraphs(
-            data,
-            category,
-            series,
-            dataProperties,
-            metadata[visualization.id]
-          )}
-          layout={{
-            margin: {
-              pad: 5,
-              r: 10,
-              t: 0,
-              l: 50,
-              b: 0,
-            },
-            autosize: true,
-            showlegend: true,
-            xaxis: {
-              automargin: true,
-              showgrid: false,
-              type: "category",
-            },
-            ...availableProperties.layout,
-          }}
-          style={{ width: "100%", height: "100%" }}
-          config={{
-            displayModeBar: true,
-            responsive: true,
-            toImageButtonOptions: {
-              format: "svg",
-              scale: 1,
-            },
-            modeBarButtonsToRemove: exclusions,
-            displaylogo: false,
-          }}
-        />
+      <Stack flex={1} direction="column">
+        <Stack flex={1}>
+          <Plot
+            data={chartData}
+            layout={{
+              margin: {
+                pad: 5,
+                r: 10,
+                t: 0,
+                l: 50,
+                b: 0,
+              },
+              autosize: true,
+              showlegend: false,
+              xaxis: {
+                automargin: true,
+                showgrid: false,
+                type: "category",
+              },
+              ...availableProperties.layout,
+            }}
+            style={{ width: "100%", height: "100%" }}
+            config={{
+              displayModeBar: true,
+              responsive: true,
+              toImageButtonOptions: {
+                format: "svg",
+                scale: 1,
+              },
+              modeBarButtonsToRemove: exclusions,
+              displaylogo: false,
+            }}
+          />
+        </Stack>
+        <Stack direction="row" spacing="20px" justify="center">
+          {allSeries.map((series, index) => (
+            <Stack
+              direction="row"
+              spacing="2px"
+              alignItems="center"
+              bg="yellow.50"
+            >
+              <Text bg={colors[index]} w="10px" h="10px">
+                &nbsp;
+              </Text>
+              <Text>{series}</Text>
+            </Stack>
+          ))}
+        </Stack>
       </Stack>
     </Stack>
   );

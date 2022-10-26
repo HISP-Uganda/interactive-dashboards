@@ -124,6 +124,7 @@ export interface DataNode {
   title: string;
   key: string;
   isLeaf?: boolean;
+  level?: string;
   children?: DataNode[];
 }
 
@@ -160,6 +161,8 @@ export interface IStore {
   systemId: string;
   systemName: string;
   checkedKeys: { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[];
+  minSublevel: number;
+  maxLevel: number;
 }
 
 export type IndicatorProps = {

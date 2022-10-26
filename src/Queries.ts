@@ -1,9 +1,9 @@
 import { useDataEngine } from "@dhis2/app-runtime";
-import { center, bbox } from "@turf/turf";
-import type { DataNode } from "antd/lib/tree";
+import { bbox, center } from "@turf/turf";
+// import type { DataNode } from "antd/lib/tree";
 import axios, { AxiosRequestConfig } from "axios";
-import { fromPairs, isEmpty, min, uniq } from "lodash";
-import { evaluate, map } from "mathjs";
+import { fromPairs, isEmpty, max, min, uniq } from "lodash";
+import { evaluate } from "mathjs";
 import { useQuery } from "react-query";
 import {
   addPagination,
@@ -22,6 +22,8 @@ import {
   setDataSets,
   setDataSources,
   setDefaultDashboard,
+  setMaxLevel,
+  setMinSublevel,
   setSystemId,
   setSystemName,
   setVisualizationQueries,
@@ -29,6 +31,7 @@ import {
   updateVisualizationMetadata,
 } from "./Events";
 import {
+  DataNode,
   IDashboard,
   IData,
   IDataSource,
@@ -39,7 +42,7 @@ import {
   Option,
   Threshold,
 } from "./interfaces";
-import { getSearchParams, traverse } from "./utils/utils";
+import { getSearchParams } from "./utils/utils";
 
 export const api = axios.create({
   baseURL: "https://services.dhis2.hispuganda.org/",
@@ -146,7 +149,7 @@ export const useOrganisationUnits = () => {
     me: {
       resource: "me.json",
       params: {
-        fields: "organisationUnits[id,name,leaf]",
+        fields: "organisationUnits[id,name,level,leaf]",
       },
     },
     levels: {
@@ -176,6 +179,7 @@ export const useOrganisationUnits = () => {
       return {
         key: o.id,
         title: o.name,
+        level: o.level,
         isLeaf: o.leaf,
       };
     });
@@ -205,6 +209,14 @@ export const useInitials = () => {
         fields: "id~rename(value),name~rename(label)",
       },
     },
+    levels: {
+      resource: "organisationUnitLevels.json",
+      params: {
+        fields: "level",
+        order: "level:DESC",
+        pageSize: 1,
+      },
+    },
     systemInfo: {
       resource: "system/info",
     },
@@ -214,6 +226,7 @@ export const useInitials = () => {
       const {
         systemInfo: { systemId, systemName },
         me: { organisationUnits, authorities },
+        levels: { organisationUnitLevels },
         dataSets: { dataSets },
       }: any = await engine.query(ouQuery);
       setSystemId(systemId);
@@ -224,9 +237,17 @@ export const useInitials = () => {
       const facilities: React.Key[] = organisationUnits.map(
         (unit: any) => unit.id
       );
-      const minLevel: number | null | undefined = min(
-        organisationUnits.map(({ level }: any) => Number(level))
-      );
+      const maxLevel = organisationUnitLevels[0].level;
+      setMaxLevel(maxLevel);
+      const levels = organisationUnits.map(({ level }: any) => Number(level));
+      const minLevel: number | null | undefined = min(levels);
+      const minSublevel: number | null | undefined = max(levels);
+      if (minSublevel && minSublevel + 1 <= maxLevel) {
+        setMinSublevel(minSublevel + 1);
+      } else {
+        setMinSublevel(maxLevel);
+      }
+
       onChangeOrganisations({
         levels: [minLevel === 1 ? "3" : `${minLevel ? minLevel + 1 : 4}`],
         organisations: facilities,
@@ -897,12 +918,19 @@ const makeSQLViewsQueries = (
       if (keys) {
         Object.entries(globalFilters).forEach(([globalId, globalValue]) => {
           if (String(val.value).indexOf(globalId) !== -1) {
+            let currentValue = String(val.value).replaceAll(
+              globalId,
+              globalValue.join("-")
+            );
+            const calcIndex = currentValue.indexOf("calc");
+            if (calcIndex !== -1) {
+              const original = currentValue.slice(calcIndex);
+              const computed = evaluate(original.replaceAll("calc", ""));
+              currentValue = currentValue.replaceAll(original, computed);
+            }
             initial = {
               ...initial,
-              [`var=${col}`]: String(val.value).replaceAll(
-                globalId,
-                globalValue.join("-")
-              ),
+              [`var=${col}`]: currentValue,
             };
           }
         });

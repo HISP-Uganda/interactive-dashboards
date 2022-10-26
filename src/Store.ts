@@ -65,6 +65,8 @@ import {
   setGroups,
   setShowFooter,
   setSystemName,
+  setMinSublevel,
+  setMaxLevel,
 } from "./Events";
 import {
   ICategory,
@@ -198,6 +200,8 @@ export const $store = domain
     checkedKeys: [],
     showFooter: false,
     systemName: "",
+    minSublevel: 2,
+    maxLevel: 5,
   })
   .on(setOrganisations, (state, organisations) => {
     return { ...state, organisations };
@@ -259,6 +263,12 @@ export const $store = domain
   })
   .on(setSystemName, (state, systemName) => {
     return { ...state, systemName };
+  })
+  .on(setMinSublevel, (state, minSublevel) => {
+    return { ...state, minSublevel };
+  })
+  .on(setMaxLevel, (state, maxLevel) => {
+    return { ...state, maxLevel };
   });
 
 export const $dataSource = domain
@@ -806,6 +816,7 @@ export const $globalFilters = combine(
       m5D13FqKZwN: periods,
       GQhi6pRnTKF: [store.levels.sort()[store.levels.length - 1]],
       mclvD0Z9mfT: store.organisations,
+      ww1uoD3DsYg: [store.minSublevel],
     };
 
     if (store.groups.length > 0) {

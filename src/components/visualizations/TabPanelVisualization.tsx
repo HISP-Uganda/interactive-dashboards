@@ -44,7 +44,7 @@ const TabPanelVisualization = (section: ISection) => {
         <Tabs
           flex={1}
           index={tabIndex}
-          onChange={(index) => setTabIndex(index)}
+          onChange={(index) => setTabIndex(() => index)}
           h="100%"
           w="100%"
           display="flex"
@@ -59,7 +59,7 @@ const TabPanelVisualization = (section: ISection) => {
 
           <TabPanels h="100%">
             {section.visualizations.map((visualization) => (
-              <TabPanel key={visualization.id}>
+              <TabPanel key={visualization.id} h="100%" w="100%">
                 <Stack
                   alignItems="center"
                   alignContent="center"

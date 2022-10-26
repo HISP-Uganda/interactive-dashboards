@@ -107,9 +107,9 @@ const App = () => {
 
   useEffect(() => {
     if (store.showSider) {
-      setColumns("250px 1fr");
+      setColumns((prev) => "250px 1fr");
     } else {
-      setColumns("1fr");
+      setColumns(() => "1fr");
     }
   }, [store.showSider]);
 

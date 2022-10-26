@@ -182,3 +182,5 @@ export const setLevels = domain.createEvent<string[]>();
 export const setGroups = domain.createEvent<string[]>();
 export const setShowFooter = domain.createEvent<boolean>();
 export const setSystemName = domain.createEvent<string>();
+export const setMinSublevel = domain.createEvent<number>();
+export const setMaxLevel = domain.createEvent<number>();
