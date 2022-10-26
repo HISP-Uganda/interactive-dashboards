@@ -23,8 +23,8 @@ const VisualizationTitle = ({
       justifyContent="center"
       _hover={{ bg: "gray.300" }}
       h="35px"
-      onMouseEnter={() => setShowMenu(true)}
-      onMouseLeave={() => setShowMenu(false)}
+      onMouseEnter={() => setShowMenu(() => true)}
+      onMouseLeave={() => setShowMenu(() => false)}
       bg="gray.200"
       zIndex={100000}
       px="5px"

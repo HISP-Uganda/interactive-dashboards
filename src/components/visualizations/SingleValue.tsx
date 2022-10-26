@@ -82,11 +82,11 @@ const SingleValue = ({
 
   useEffect(() => {
     if (colorSearch) {
-      setColor(colorSearch.color);
+      setColor(() => colorSearch.color);
     } else if (dataProperties?.["data.thresholds"]) {
-      setColor(dataProperties?.["data.thresholds"][0].color);
+      setColor(() => dataProperties?.["data.thresholds"][0].color);
     } else {
-      setColor("");
+      setColor(() => "");
     }
   }, [dataProperties]);
 

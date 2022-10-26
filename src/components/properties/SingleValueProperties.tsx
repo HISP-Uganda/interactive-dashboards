@@ -1,40 +1,24 @@
-import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
 import {
-  IconButton,
   Input,
-  Spacer,
-  Stack,
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tr,
-  useDisclosure,
-  Radio,
-  RadioGroup,
   NumberDecrementStepper,
   NumberIncrementStepper,
   NumberInput,
   NumberInputField,
   NumberInputStepper,
+  Radio,
+  RadioGroup,
+  Stack,
+  Text,
 } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
-import { ChangeEvent, useRef, useState } from "react";
-import { SwatchesPicker } from "react-color";
-import useOnClickOutside from "use-onclickoutside";
+import { ChangeEvent } from "react";
 import {
   changeVisualizationAttribute,
   changeVisualizationProperties,
 } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
-import { generateUid } from "../../utils/uid";
 import ColorPalette from "../ColorPalette";
 import ColorRangePicker from "../ColorRangePicker";
-
-type Threshold = { id: string; min: string; max: string; color: string };
 
 const progressAlignments: Option[] = [
   {
@@ -60,57 +44,6 @@ const SingleValueProperties = ({
 }: {
   visualization: IVisualization;
 }) => {
-  const [id, setId] = useState<string>("");
-  const [thresholds, setThresholds] = useState<Threshold[]>(
-    visualization.properties?.["data.thresholds"] || []
-  );
-  const { isOpen, onClose, onOpen } = useDisclosure();
-  const ref = useRef(null);
-  const addThreshold = () => {
-    const threshold: Threshold = {
-      id: generateUid(),
-      color: "#333",
-      min: "50",
-      max: "100",
-    };
-    const all = [...thresholds, threshold];
-    changeVisualizationProperties({
-      visualization: visualization.id,
-      attribute: "data.thresholds",
-      value: all,
-    });
-    setThresholds(all);
-  };
-
-  const removeThreshold = (id: string) => {
-    const filtered = thresholds.filter((threshold) => threshold.id !== id);
-    changeVisualizationProperties({
-      visualization: visualization.id,
-      attribute: "data.thresholds",
-      value: filtered,
-    });
-    setThresholds(filtered);
-  };
-  useOnClickOutside(ref, onClose);
-  const changeThreshold = (
-    id: string,
-    attribute: "color" | "min" | "max",
-    value: string
-  ) => {
-    const processed = thresholds.map((threshold) => {
-      if (threshold.id === id) {
-        return { ...threshold, [attribute]: value };
-      }
-      return threshold;
-    });
-    changeVisualizationProperties({
-      visualization: visualization.id,
-      attribute: "data.thresholds",
-      value: processed,
-    });
-    setThresholds(processed);
-  };
-
   return (
     <Stack>
       <Text>Label Alignment</Text>

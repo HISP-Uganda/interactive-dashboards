@@ -1,9 +1,5 @@
 import { Box, Spinner } from "@chakra-ui/react";
-import { useStore } from "effector-react";
-import React from "react";
-import { onChangeOrganisations } from "../Events";
 import { useOrganisationUnits } from "../Queries";
-import { $store } from "../Store";
 import OUTree from "./OUTree";
 
 const OUTreeSelect = () => {

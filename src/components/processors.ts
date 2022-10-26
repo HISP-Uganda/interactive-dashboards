@@ -23,6 +23,7 @@ export const processGraphs = (
 ) => {
   let chartData: any = [];
   let availableProperties: { [key: string]: any } = {};
+  let allSeries = [];
   update(availableProperties, "data.orientation", () => "v");
   Object.entries(dataProperties).forEach(([property, value]) => {
     availableProperties = update(availableProperties, property, () => value);
@@ -42,9 +43,11 @@ export const processGraphs = (
         }
         return 0;
       });
+
     const realColumns = columns.map(({ name }) => name);
     if (series) {
-      const allSeries = uniq(data.map((num: any) => num[series]));
+      allSeries = uniq(data.map((num: any) => num[series]));
+
       chartData = allSeries.map((se: any) => {
         return {
           x:
@@ -76,6 +79,7 @@ export const processGraphs = (
         };
       });
     } else {
+      allSeries = [];
       chartData = [
         {
           x:
@@ -103,7 +107,7 @@ export const processGraphs = (
       ];
     }
   }
-  return chartData;
+  return { chartData, allSeries };
 };
 
 export const processPieChart = (

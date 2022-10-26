@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Box, Flex, Text } from "@chakra-ui/react";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
@@ -14,14 +13,6 @@ const NavItem = ({ option: { label, value, dashboards } }: NavItemProps) => {
   const search = useSearch<FormGenerics>();
   const store = useStore($store);
   const dashboard = useStore($dashboard);
-  const [active, setActive] = useState<string>(store.selectedCategory);
-  const toggle = (id: string) => {
-    if (active === id) {
-      setActive("");
-    } else {
-      setActive(id);
-    }
-  };
   return (
     <Box key={value}>
       <Text

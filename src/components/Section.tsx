@@ -242,9 +242,9 @@ const Section = () => {
 
   const toggle = (id: string) => {
     if (active === id) {
-      setActive("");
+      setActive(() => "");
     } else {
-      setActive(id);
+      setActive(() => id);
     }
   };
   return (

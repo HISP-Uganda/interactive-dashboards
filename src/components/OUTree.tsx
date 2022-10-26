@@ -1,22 +1,49 @@
 import { Box, Stack, Text } from "@chakra-ui/react";
 import { Tree } from "antd";
-import type { DataNode } from "antd/lib/tree";
+// import type { DataNode } from "antd/lib/tree";
 import { GroupBase, Select } from "chakra-react-select";
 import React, { useState } from "react";
 
 import { useDataEngine } from "@dhis2/app-runtime";
 import "antd/dist/antd.css";
 import { useStore } from "effector-react";
-import { isArray } from "lodash";
+import { flatMapDeep, isArray, max } from "lodash";
 import {
   setCheckedKeys,
   setExpandedKeys,
   setGroups,
   setLevels,
+  setMinSublevel,
   setOrganisations,
 } from "../Events";
-import { Option } from "../interfaces";
+import { DataNode, Option } from "../interfaces";
 import { $store } from "../Store";
+
+function traverse(node: any, path: any[] = [], result: any[] = []) {
+  if (node && (!node.children || node.children.length === 0)) {
+    result.push(path.concat(node.level));
+  }
+  if (node && node.children && node.children.length > 0) {
+    for (const child of node.children) {
+      traverse(child, path.concat(node.level), result);
+    }
+  }
+  return result;
+}
+
+const getMembers: any = (members: any[]) => {
+  let children: any[] = [];
+  const flattenMembers = members.map((m) => {
+    if (m.children && m.children.length) {
+      children = [...children, ...m.children];
+    }
+    return m;
+  });
+
+  return flattenMembers.concat(
+    children.length ? getMembers(children) : children
+  );
+};
 
 const updateTreeData = (
   list: DataNode[],
@@ -51,6 +78,7 @@ const OUTree = ({
   const store = useStore($store);
   const engine = useDataEngine();
   const [treeData, setTreeData] = useState<DataNode[]>(units);
+  const [flattened, setFlattened] = useState<any[]>(units);
 
   const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
 
@@ -59,11 +87,23 @@ const OUTree = ({
       | { checked: React.Key[]; halfChecked: React.Key[] }
       | React.Key[]
   ) => {
+    let checked: React.Key[] = [];
     setCheckedKeys(checkedKeysValue);
     if (isArray(checkedKeysValue)) {
       setOrganisations(checkedKeysValue);
+      checked = checkedKeysValue;
     } else {
       setOrganisations(checkedKeysValue.checked);
+      checked = checkedKeysValue.checked;
+    }
+    const filtered = flattened
+      .filter(({ key }) => checked.indexOf(key) !== -1)
+      .map(({ level }) => Number(level));
+    const minSublevel: number | null | undefined = max(filtered);
+    if (minSublevel && minSublevel + 1 <= store.maxLevel) {
+      setMinSublevel(minSublevel + 1);
+    } else {
+      setMinSublevel(store.maxLevel);
     }
   };
 
@@ -90,7 +130,7 @@ const OUTree = ({
             filter: `id:in:[${key}]`,
             paging: "false",
             order: "shortName:desc",
-            fields: "children[id,name,path,leaf]",
+            fields: "children[id,name,level,path,leaf]",
           },
         },
       });
@@ -101,6 +141,7 @@ const OUTree = ({
               key: child.id,
               title: child.name,
               isLeaf: child.leaf,
+              level: child.level,
             };
             return record;
           })
@@ -114,6 +155,7 @@ const OUTree = ({
             return 0;
           });
       });
+      setFlattened((prev) => [...prev, ...found]);
       setTreeData((origin) => updateTreeData(origin, key, found));
     } catch (e) {
       console.log(e);

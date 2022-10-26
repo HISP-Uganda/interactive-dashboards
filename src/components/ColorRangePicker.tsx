@@ -43,7 +43,7 @@ export default function ({ visualization }: { visualization: IVisualization }) {
       attribute: "data.thresholds",
       value: all,
     });
-    setThresholds(all);
+    setThresholds(() => all);
   };
 
   const removeThreshold = (id: string) => {
@@ -53,7 +53,7 @@ export default function ({ visualization }: { visualization: IVisualization }) {
       attribute: "data.thresholds",
       value: filtered,
     });
-    setThresholds(filtered);
+    setThresholds(() => filtered);
   };
   useOnClickOutside(ref, onClose);
   const changeThreshold = (
@@ -72,7 +72,7 @@ export default function ({ visualization }: { visualization: IVisualization }) {
       attribute: "data.thresholds",
       value: processed,
     });
-    setThresholds(processed);
+    setThresholds(() => processed);
   };
   return (
     <Stack>
@@ -121,7 +121,7 @@ export default function ({ visualization }: { visualization: IVisualization }) {
                   bg={hold.color}
                   position="relative"
                   onClick={() => {
-                    setId(hold.id);
+                    setId(() => hold.id);
                     onOpen();
                   }}
                 >

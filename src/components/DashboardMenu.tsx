@@ -69,7 +69,7 @@ const DashboardMenu = () => {
       default: store.defaultDashboard,
       id: store.systemId,
     });
-    setLoading(false);
+    setLoading(() => false);
     onClose();
   };
 

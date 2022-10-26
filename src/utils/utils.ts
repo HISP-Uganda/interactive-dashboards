@@ -132,6 +132,7 @@ export const globalIds: Option[] = [
   { label: "Attribute Option Combo", value: "WSiMOMi4QWh", id: "aoc" },
   { label: "Category Option Combo", value: "p26VJMtSUSv", id: "coc" },
   { label: "Target Attribute Option Combo", value: "OOhWJ4gfZy1", id: "taoc" },
+  { label: "Organisation Sublevel", value: "ww1uoD3DsYg", id: "osl" },
 ];
 
 export const convertTime = (value: string) => {
