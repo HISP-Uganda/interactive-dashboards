@@ -1,8 +1,9 @@
 import { Feature, Geometry } from "geojson";
 import { Layer } from "leaflet";
-import { GeoJSON } from "react-leaflet";
+import { GeoJSON, useMap } from "react-leaflet";
 
 const Layers = ({ metadata }: { metadata: any }) => {
+  const map = useMap();
   const onEachCountry = (country: Feature<Geometry, any>, layer: Layer) => {
     layer.on("mouseover", (e) => {
       const name = country.properties.name;
@@ -26,6 +27,11 @@ const Layers = ({ metadata }: { metadata: any }) => {
           weight: 1,
         };
         return options;
+      }}
+      eventHandlers={{
+        add: (e) => {
+          map.fitBounds(e.target.getBounds());
+        },
       }}
     />
   );

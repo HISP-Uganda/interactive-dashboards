@@ -67,6 +67,7 @@ export interface IVisualization extends INamed {
   properties: { [key: string]: any };
   group: string;
   expression?: string;
+  showTitle?: boolean;
 }
 export interface ISection {
   id: string;

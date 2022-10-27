@@ -24,8 +24,7 @@ const TabPanelVisualization = (section: ISection) => {
       {section.title && (
         <VisualizationTitle
           section={section}
-          fontSize={"18px"}
-          textTransform={"uppercase"}
+          fontSize="2.1vh"
           color={"gray.500"}
           title={section.title}
           fontWeight="bold"

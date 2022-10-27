@@ -37,6 +37,7 @@ const AutoRefreshPicker = () => {
           )}
           onChange={(e) => setRefreshInterval(e?.value || "off")}
           options={periodTypes}
+          size="sm"
         />
       </Box>
     </Stack>

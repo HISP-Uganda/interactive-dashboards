@@ -128,14 +128,7 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
       </Menu>
       <Modal isOpen={isFull} onClose={onUnFull} size="full">
         <ModalOverlay />
-        <ModalContent
-          h="100vh"
-          display="flex"
-          flexDirection="column"
-          w="100vw"
-          p={0}
-          m={0}
-        >
+        <ModalContent h="100vh" display="flex" flexDirection="column" w="100vw">
           <ModalBody>
             <Stack h="100%" w="100%" direction={section?.direction}>
               {section?.visualizations.map((visualization) => (

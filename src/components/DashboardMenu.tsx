@@ -106,12 +106,15 @@ const DashboardMenu = () => {
       alignItems="center"
       justifyContent="right"
       justifyItems="center"
-      // flex={1}
-      spacing="5"
-      h="100%"
-      w="100%"
+      flex={1}
+      spacing="10px"
+      p="5px"
     >
-      <Text fontSize="2xl">{`${dashboard.name} Dashboard`}</Text>
+      <Text
+        fontSize="2.1vh"
+        fontWeight="700"
+        color="blue.600"
+      >{`${dashboard.name} Dashboard`}</Text>
       <Spacer />
       {store.isAdmin && (
         <Stack
@@ -128,6 +131,7 @@ const DashboardMenu = () => {
                 (d: Option) => d.value === dashboard.dataSet
               )}
               onChange={(e) => assignDataSet(e?.value || "")}
+              size="sm"
             />
           </Box>
         </Stack>
@@ -136,6 +140,7 @@ const DashboardMenu = () => {
         <>
           <Button
             type="button"
+            size="sm"
             onClick={() => {
               setCurrentSection(createSection());
               navigate({
@@ -146,23 +151,23 @@ const DashboardMenu = () => {
           >
             Add section
           </Button>
-          <Button type="button" onClick={onOpen}>
+          <Button type="button" size="sm" onClick={onOpen}>
             Save
           </Button>
           {dashboard.published && (
-            <Button onClick={() => togglePublish(dashboard, false)}>
+            <Button size="sm" onClick={() => togglePublish(dashboard, false)}>
               Unpublish
             </Button>
           )}
           {!dashboard.published && (
-            <Button onClick={() => togglePublish(dashboard, true)}>
+            <Button size="sm" onClick={() => togglePublish(dashboard, true)}>
               Publish
             </Button>
           )}
         </>
       )}
       {store.isAdmin && <AutoRefreshPicker />}
-      <Button colorScheme="teal" onClick={onOpenFilter}>
+      <Button colorScheme="teal" size="sm" onClick={onOpenFilter}>
         Filter
       </Button>
 

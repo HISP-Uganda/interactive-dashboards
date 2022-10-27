@@ -2,7 +2,7 @@ import { Box, SimpleGrid, Stack } from "@chakra-ui/react";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { MouseEvent } from "react";
-import Marquee from "react-fast-marquee";
+import Marquee from "react-marquee-slider";
 import { setCurrentSection } from "../Events";
 import { FormGenerics, ISection } from "../interfaces";
 import { $dashboard, $store } from "../Store";
@@ -25,8 +25,6 @@ const SectionVisualization = (section: ISection) => {
         alignItems="center"
         justifyContent="center"
         justifyItems="center"
-        w="100%"
-        h="100%"
         onClick={(e: MouseEvent<HTMLElement>) => {
           if (e.detail === 2 && store.isAdmin) {
             setCurrentSection(section);
@@ -38,9 +36,17 @@ const SectionVisualization = (section: ISection) => {
         }}
       >
         <Marquee
-          style={{ padding: 0, margin: 0, fontFamily: "sans-serif" }}
-          gradient={false}
-          speed={30}
+          // style={{ padding: 0, margin: 0, fontFamily: "sans-serif" }}
+          // gradient={false}
+          // speed={30}
+          velocity={20}
+          direction="rtl"
+          onFinish={() => {
+            console.log("Finished");
+          }}
+          resetAfterTries={200}
+          scatterRandomly={false}
+          onInit={() => console.log("")}
         >
           {section.visualizations.map((visualization) => (
             <Stack direction="row" key={visualization.id}>
@@ -98,7 +104,7 @@ const SectionVisualization = (section: ISection) => {
         {section.title && (
           <VisualizationTitle
             section={section}
-            fontSize={"18px"}
+            fontSize="2vh"
             color={"gray.500"}
             title={section.title}
             fontWeight="bold"

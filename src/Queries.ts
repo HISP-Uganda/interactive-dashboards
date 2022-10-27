@@ -1178,13 +1178,21 @@ export const useVisualization = (
                 ])
               );
             });
+
+            // console.log(numerators, denominators);
             processed = [
               ...processed,
               ...numerators.map((numerator: { [key: string]: string }) => {
-                const columns = Object.keys(numerator).sort().join("");
+                const { value: v1, total: t1, ...others } = numerator;
+                const columns = Object.values(others).sort().join("");
+
                 const denominator = denominators.find(
-                  (row: { [key: string]: string }) =>
-                    columns === Object.keys(row).sort().join("")
+                  (row: { [key: string]: string }) => {
+                    const { value, total, ...someOthers } = row;
+                    return (
+                      columns === Object.values(someOthers).sort().join("")
+                    );
+                  }
                 );
 
                 if (denominator) {

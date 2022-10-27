@@ -9,13 +9,16 @@ import {
   TabPanels,
   Tab,
   TabPanel,
+  Checkbox,
 } from "@chakra-ui/react";
-
+import { ChangeEvent } from "react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { isArray, uniq } from "lodash";
-import { ChangeEvent } from "react";
-import { changeVisualizationProperties } from "../../Events";
+import {
+  changeVisualizationAttribute,
+  changeVisualizationProperties,
+} from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { customComponents } from "../../utils/components";
@@ -38,6 +41,20 @@ const BarGraphProperties = ({
 
   return (
     <Stack>
+      <Checkbox
+        isChecked={visualization.showTitle}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+          console.log(e.target.checked);
+
+          changeVisualizationAttribute({
+            visualization: visualization.id,
+            attribute: "showTitle",
+            value: e.target.checked,
+          });
+        }}
+      >
+        Show Title
+      </Checkbox>
       <Text>Category</Text>
       <Select<Option, false, GroupBase<Option>>
         value={columns.find(

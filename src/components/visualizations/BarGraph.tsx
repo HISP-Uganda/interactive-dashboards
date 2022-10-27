@@ -53,16 +53,16 @@ const BarGraph = ({
   );
   return (
     <Stack h="100%" spacing={0} w="100%">
-      {visualization.name && (
+      {((visualization.showTitle !== undefined &&
+        visualization.showTitle === true &&
+        visualization.name) ||
+        (visualization.showTitle === undefined && visualization.name)) && (
         <VisualizationTitle
           section={section}
-          fontSize={"18px"}
-          color={"gray.500"}
           title={visualization.name}
           fontWeight="bold"
         />
-      )}
-
+      )}{" "}
       <Stack flex={1} direction="column">
         <Stack flex={1}>
           <Plot
@@ -104,6 +104,7 @@ const BarGraph = ({
               spacing="2px"
               alignItems="center"
               bg="yellow.50"
+              key={index}
             >
               <Text bg={colors[index]} w="10px" h="10px">
                 &nbsp;

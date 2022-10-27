@@ -16,13 +16,13 @@ const SidebarContent = ({ ...rest }: SidebarProps) => {
     .filter(({ dashboards }) => dashboards.length > 0);
 
   return (
-    <Stack w="full" {...rest} bg="blue.50" h="100%">
+    <Stack {...rest} bg="blue.50" h="100%">
       <Text
         fontSize="xl"
         fontWeight="bold"
         textTransform="uppercase"
         textAlign="left"
-        p="2"
+        // p="2"
         color="blue.600"
       >
         Thematic Areas

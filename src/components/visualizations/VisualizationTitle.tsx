@@ -22,11 +22,12 @@ const VisualizationTitle = ({
       alignContent="center"
       justifyContent="center"
       _hover={{ bg: "gray.300" }}
-      h="35px"
+      h="2.5vh"
+      maxH="2.5vh"
       onMouseEnter={() => setShowMenu(() => true)}
       onMouseLeave={() => setShowMenu(() => false)}
       bg="gray.200"
-      zIndex={100000}
+      zIndex={1000}
       px="5px"
       {...rest}
     >
