@@ -57,11 +57,7 @@ const BarGraph = ({
         visualization.showTitle === true &&
         visualization.name) ||
         (visualization.showTitle === undefined && visualization.name)) && (
-        <VisualizationTitle
-          section={section}
-          title={visualization.name}
-          fontWeight="bold"
-        />
+        <VisualizationTitle section={section} title={visualization.name} />
       )}{" "}
       <Stack flex={1} direction="column">
         <Stack flex={1}>

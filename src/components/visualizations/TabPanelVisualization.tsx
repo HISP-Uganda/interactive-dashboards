@@ -22,13 +22,7 @@ const TabPanelVisualization = (section: ISection) => {
   return (
     <Stack h="100%" w="100%" display="flex" flexDirection="column">
       {section.title && (
-        <VisualizationTitle
-          section={section}
-          fontSize="2.1vh"
-          color={"gray.500"}
-          title={section.title}
-          fontWeight="bold"
-        />
+        <VisualizationTitle section={section} title={section.title} />
       )}
       <Stack
         alignItems="center"

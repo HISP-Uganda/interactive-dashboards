@@ -28,6 +28,9 @@ const VisualizationTitle = ({
       onMouseLeave={() => setShowMenu(() => false)}
       bg="gray.200"
       zIndex={1000}
+      fontSize="1.7vh"
+      color={"gray.500"}
+      fontWeight="bold"
       px="5px"
       {...rest}
     >

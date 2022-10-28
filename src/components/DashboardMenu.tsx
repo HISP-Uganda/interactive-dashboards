@@ -65,10 +65,12 @@ const DashboardMenu = () => {
   const updateDashboard = async (data: any) => {
     setLoading(true);
     await saveDocument("i-dashboards", store.systemId, data);
-    await saveDocument("i-dashboard-settings", store.systemId, {
+    const setting = {
       default: store.defaultDashboard,
       id: store.systemId,
-    });
+    };
+    console.log(setting);
+    await saveDocument("i-dashboard-settings", store.systemId, setting);
     setLoading(() => false);
     onClose();
   };

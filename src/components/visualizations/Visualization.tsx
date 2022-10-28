@@ -1,4 +1,4 @@
-import { Spinner } from "@chakra-ui/react";
+import { Spinner, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { fromPairs } from "lodash";
 import { ISection, IVisualization } from "../../interfaces";
@@ -17,9 +17,7 @@ import FunnelGraph from "./FunnelGraph";
 import GaugeGraph from "./GaugeGraph";
 import Histogram from "./Histogram";
 import LineGraph from "./LineGraph";
-import MapChart from "./MapChart";
 import MapChartLeaflet from "./MapChartLeaflet";
-import MapChartNivo from "./MapChartNivo";
 import MultipleChartTypes from "./MultipleChartTypes";
 import PieChart from "./PieChart";
 import RadarGraph from "./RadarGraph";
@@ -256,7 +254,7 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
     <>
       {isLoading && <Spinner />}
       {isSuccess && getVisualization(visualization, data, section)}
-      {isError && <pre>{error.message}</pre>}
+      {isError && <Text>Error occurred</Text>}
     </>
   );
 };

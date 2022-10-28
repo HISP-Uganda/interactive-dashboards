@@ -36,17 +36,12 @@ const SectionVisualization = (section: ISection) => {
         }}
       >
         <Marquee
-          // style={{ padding: 0, margin: 0, fontFamily: "sans-serif" }}
-          // gradient={false}
-          // speed={30}
           velocity={20}
           direction="rtl"
-          onFinish={() => {
-            console.log("Finished");
-          }}
+          onFinish={() => {}}
           resetAfterTries={200}
           scatterRandomly={false}
-          onInit={() => console.log("")}
+          onInit={() => {}}
         >
           {section.visualizations.map((visualization) => (
             <Stack direction="row" key={visualization.id}>
@@ -64,13 +59,7 @@ const SectionVisualization = (section: ISection) => {
     grid: (
       <Stack h="100%" w="100%">
         {section.title && (
-          <VisualizationTitle
-            section={section}
-            fontSize={"18px"}
-            color={"gray.500"}
-            title={section.title}
-            fontWeight="bold"
-          />
+          <VisualizationTitle section={section} title={section.title} />
         )}
         <Stack
           alignItems="center"
@@ -102,13 +91,7 @@ const SectionVisualization = (section: ISection) => {
     normal: (
       <Stack h="100%" w="100%">
         {section.title && (
-          <VisualizationTitle
-            section={section}
-            fontSize="2vh"
-            color={"gray.500"}
-            title={section.title}
-            fontWeight="bold"
-          />
+          <VisualizationTitle section={section} title={section.title} />
         )}
         <Stack
           alignItems="center"

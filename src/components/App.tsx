@@ -84,7 +84,7 @@ const location = new ReactLocation<
 });
 const padding = 5;
 const sideWidth = 250;
-const maxDashboardHeight = 5 * 4 + 48 * 3;
+const maxDashboardHeight = 5 * 2 + 48;
 const realHeight = `calc(100vh - ${maxDashboardHeight}px)`;
 const App = () => {
   const { isLoading, isSuccess, isError, error } = useInitials();
@@ -94,12 +94,6 @@ const App = () => {
   const indicators = useStore($indicators);
   const categories = useStore($categories);
   const handle = useFullScreenHandle();
-
-  const [mohLogo, { width, height }] = useElementSize();
-  const [hispLogo, { width: hw, height: hh }] = useElementSize();
-  const [hispLogo1, { width: h1w, height: h1h }] = useElementSize();
-  const [funderLogo, { width: fw, height: fh }] = useElementSize();
-  const [funderLogo1, { width: f1w, height: f1h }] = useElementSize();
 
   const engine = useDataEngine();
 
@@ -313,54 +307,60 @@ const App = () => {
             maxW="100vw"
           >
             {store.showSider && (
-              <Grid templateRows="48px 1fr 48px" h="100%" pr="5px" gap="5px">
-                <GridItem h="100%">
-                  <Stack
-                    h="100%"
-                    w="100%"
-                    alignItems="center"
-                    alignContent="center"
-                    justifyContent="center"
-                    justifyItems="center"
-                    ref={mohLogo}
-                  >
-                    <MOHLogo height={48} width={250} />
-                  </Stack>
-                </GridItem>
-                <GridItem h={realHeight} maxH={realHeight}>
+              <Grid
+                templateRows="48px 1fr 48px"
+                pr="5px"
+                gap="5px"
+                h={realHeight}
+                maxH={realHeight}
+              >
+                <Stack
+                  h="100%"
+                  w="100%"
+                  alignItems="center"
+                  alignContent="center"
+                  justifyContent="center"
+                  justifyItems="center"
+                >
+                  <MOHLogo height={48} width={250} />
+                </Stack>
+                <GridItem>
                   <SidebarContent />
                 </GridItem>
-                <GridItem h="100%">
-                  <Stack
-                    h="100%"
-                    w="100%"
-                    alignItems="center"
-                    alignContent="center"
-                    justifyContent="center"
-                    justifyItems="center"
-                    ref={hispLogo}
-                  >
-                    <Image
-                      src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/logo.png"
-                      maxH="48px"
-                      maxW="250px"
-                    />
-                  </Stack>
-                </GridItem>
+                <Stack
+                  h="100%"
+                  w="100%"
+                  alignItems="center"
+                  alignContent="center"
+                  justifyContent="center"
+                  justifyItems="center"
+                >
+                  <Image
+                    src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/logo.png"
+                    maxH="48px"
+                    maxW="250px"
+                  />
+                </Stack>
               </Grid>
             )}
             <FullScreen handle={handle}>
-              <Grid templateRows="48px 1fr 48px" gap="5px" h="100%" w="100%">
+              <Grid
+                templateRows="48px 1fr 48px"
+                gap="5px"
+                w={dashboardWidth}
+                maxW={dashboardWidth}
+                h={handle.active ? "100vh" : realHeight}
+                maxH={handle.active ? "100vh" : realHeight}
+                bg={handle.active ? "gray.300" : ""}
+              >
                 <GridItem h="100%" w="100%" bg="white">
                   <Stack
                     h="100%"
-                    // p="5px"
                     alignContent="center"
                     alignItems="center"
                     direction="row"
                     w="100%"
                     spacing="40px"
-                    ref={hispLogo1}
                   >
                     {(handle.active || !store.showSider) && (
                       <MOHLogo2>
@@ -392,19 +392,11 @@ const App = () => {
                     {topMenuOptions[store.currentPage]}
                   </Stack>
                 </GridItem>
-                <GridItem w={dashboardWidth} h={realHeight} maxH={realHeight}>
+                <GridItem>
                   <Outlet />
                 </GridItem>
                 <GridItem w={dashboardWidth} maxW={dashboardWidth}>
-                  <Footer
-                    funderLogoRef={funderLogo}
-                    funderLogo1Ref={funderLogo1}
-                    handle={handle}
-                    fh={fh}
-                    fw={fw}
-                    f1h={f1h}
-                    f1w={f1w}
-                  />
+                  <Footer handle={handle} />
                 </GridItem>
               </Grid>
             </FullScreen>

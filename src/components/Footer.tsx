@@ -1,4 +1,4 @@
-import { Grid, GridItem, Image, Stack } from "@chakra-ui/react";
+import { Image, Stack } from "@chakra-ui/react";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { MouseEvent } from "react";
@@ -10,23 +10,9 @@ import SectionVisualization from "./SectionVisualization";
 
 interface Props {
   handle: FullScreenHandle;
-  funderLogoRef?: React.LegacyRef<HTMLDivElement> | undefined;
-  funderLogo1Ref?: React.LegacyRef<HTMLDivElement> | undefined;
-  fh: number;
-  fw: number;
-  f1h: number;
-  f1w: number;
 }
 
-export default function ({
-  handle,
-  funderLogoRef,
-  funderLogo1Ref,
-  fh,
-  fw,
-  f1h,
-  f1w,
-}: Props) {
+export default function ({ handle }: Props) {
   const dashboard = useStore($dashboard);
   const store = useStore($store);
   const navigate = useNavigate();

@@ -61,7 +61,7 @@ const SingleValue = ({
   const suffix = dataProperties?.["data.suffix"];
   const target = dataProperties?.["data.target"];
   const targetGraph = dataProperties?.["data.targetgraph"];
-  const direction = dataProperties?.["data.direction"] || "column-reverse";
+  const direction = dataProperties?.["data.direction"] || "column";
   const titleFontSize = dataProperties?.["data.title.fontSize"] || "2.0";
   const titleFontWeight = dataProperties?.["data.title.fontWeight"] || 300;
   const titleCase = dataProperties?.["data.title.case"] || "";
@@ -71,9 +71,14 @@ const SingleValue = ({
   const singleValueBorder = dataProperties?.["data.border"] || 0;
   const fontWeight = dataProperties?.["data.format.fontWeight"] || 400;
   const fontSize = dataProperties?.["data.format.fontSize"] || 2;
-  const spacing = dataProperties?.["data.format.spacing"] || 10;
-
   const alignment = dataProperties?.["data.alignment"] || "column";
+
+  const spacing =
+    dataProperties?.["data.format.spacing"] ||
+    ["row", "row-reverse"].indexOf(alignment) !== -1
+      ? 10
+      : 0;
+
   const format = {
     style: dataProperties?.["data.format.style"] || "decimal",
     notation: dataProperties?.["data.format.notation"] || "standard",
@@ -97,13 +102,17 @@ const SingleValue = ({
     <Stack
       alignItems="center"
       justifyItems="center"
+      alignContent="center"
+      justifyContent="center"
       direction={alignment}
       backgroundColor={singleValueBackground}
       border={`${singleValueBorder}px`}
       borderRadius="3px"
-      padding="4px"
+      // padding="4px"
       textAlign="center"
       spacing={`${spacing}px`}
+      h="100%"
+      // bg="red.100"
     >
       {visualization.name && (
         <Text

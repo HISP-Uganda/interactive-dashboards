@@ -124,8 +124,12 @@ const getIndex = async (
   return hits;
 };
 
-const loadResource = async (namespace: string, systemId: string) => {
-  const hits = await getIndex(namespace, systemId);
+const loadResource = async (
+  namespace: string,
+  systemId: string,
+  otherQueries: any[] = []
+) => {
+  const hits = await getIndex(namespace, systemId, otherQueries);
   return hits.map(({ _source }: any) => _source);
 };
 
@@ -247,7 +251,6 @@ export const useInitials = () => {
       } else {
         setMinSublevel(maxLevel);
       }
-
       onChangeOrganisations({
         levels: [minLevel === 1 ? "3" : `${minLevel ? minLevel + 1 : 4}`],
         organisations: facilities,
@@ -263,12 +266,15 @@ export const useInitials = () => {
         systemId
       );
       const settings = await loadResource("i-dashboard-settings", systemId);
+      const defaultDashboard = settings.find(
+        (s: any) => s.id === systemId && s.default
+      );
+      const publishedDashboards = dashboards.filter(
+        (dashboard: IDashboard) => dashboard.published
+      );
       if (isAdmin) {
         setDashboards(dashboards);
       } else {
-        const publishedDashboards = dashboards.filter(
-          (dashboard: IDashboard) => dashboard.published
-        );
         setDashboards(publishedDashboards);
         if (publishedDashboards.length > 0) {
           setCurrentDashboard(publishedDashboards[0]);
@@ -287,23 +293,16 @@ export const useInitials = () => {
       ]);
       setDataSources(dataSources);
       setVisualizationQueries(visualizationQueries);
-      if (settings.length > 0) {
-        const defaults = await loadSingleResource(
-          engine,
-          "i-dashboard-settings/settings"
-        );
-        if (defaults !== null) {
-          const dashboard: any = await loadSingleResource(
-            engine,
-            `i-dashboards/${defaults.default}`
-          );
-          if (dashboard !== null) {
-            setCurrentDashboard(dashboard);
-            changeSelectedDashboard(dashboard.id);
-            changeSelectedCategory(dashboard.category);
-            changeDefaults();
-            setDefaultDashboard(defaults.default);
-          }
+      if (defaultDashboard) {
+        const dashboard = publishedDashboards.find(({ id }: IDashboard) => {
+          return defaultDashboard.default === id;
+        });
+        if (dashboard) {
+          setCurrentDashboard(dashboard);
+          changeSelectedDashboard(dashboard.id);
+          changeSelectedCategory(dashboard.category);
+          changeDefaults();
+          setDefaultDashboard(defaultDashboard.default);
         }
       }
     } catch (error) {
@@ -1454,15 +1453,23 @@ export const useMaps = (
     const processedFeatures = features.map(
       ({ id, properties, ...others }: any) => {
         let value = processedData[id];
-        const colorSearch = thresholds.find(({ max, min }: any) => {
-          if (max && min) {
-            return Number(value) >= Number(min) && Number(value) < Number(max);
-          } else if (min) {
-            return Number(value) >= Number(min);
-          } else if (max) {
-            return Number(value) <= Number(max);
-          }
-        });
+        let colorSearch: any = undefined;
+
+        if (value) {
+          const numericValue = Number(value).toFixed(2);
+          colorSearch = thresholds.find(({ max, min }: any) => {
+            if (max && min) {
+              return (
+                Number(numericValue) >= Number(min) &&
+                Number(value) <= Number(max)
+              );
+            } else if (min) {
+              return Number(numericValue) >= Number(min);
+            } else if (max) {
+              return Number(numericValue) <= Number(max);
+            }
+          });
+        }
         let color = "white";
 
         if (value && colorSearch) {
