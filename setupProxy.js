@@ -36,7 +36,11 @@ const app = express();
 app.use(
   cors({
     credentials: true,
-    origin: "http://localhost:3000",
+    origin: [
+      "http://localhost:3000",
+      "http://172.16.200.117:3000",
+      "http://172.16.200.109:3000",
+    ],
   })
 );
 app.use("/", exampleProxy);

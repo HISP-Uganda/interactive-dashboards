@@ -7,6 +7,7 @@ import {
   Image,
   Spinner,
   Stack,
+  Text,
 } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import {
@@ -81,6 +82,10 @@ const location = new ReactLocation<
     encodeToBinary(JSON.stringify(value))
   ),
 });
+const padding = 5;
+const sideWidth = 250;
+const maxDashboardHeight = 5 * 2 + 48;
+const realHeight = `calc(100vh - ${maxDashboardHeight}px)`;
 const App = () => {
   const { isLoading, isSuccess, isError, error } = useInitials();
   const store = useStore($store);
@@ -90,12 +95,6 @@ const App = () => {
   const categories = useStore($categories);
   const handle = useFullScreenHandle();
 
-  const [mohLogo, { width, height }] = useElementSize();
-  const [hispLogo, { width: hw, height: hh }] = useElementSize();
-  const [hispLogo1, { width: h1w, height: h1h }] = useElementSize();
-  const [funderLogo, { width: fw, height: fh }] = useElementSize();
-  const [funderLogo1, { width: f1w, height: f1h }] = useElementSize();
-
   const engine = useDataEngine();
 
   const topMenuOptions: { [key: string]: any } = {
@@ -103,19 +102,25 @@ const App = () => {
     sections: <SectionMenu />,
   };
 
-  const [columns, setColumns] = useState<string>("250px 1fr");
+  const [columns, setColumns] = useState<string>(`${sideWidth}px 1fr`);
+  const [dashboardWidth, setDashboardWidth] = useState<string>(
+    `calc(100vw - ${250 + padding * 2}px)`
+  );
 
   useEffect(() => {
     if (store.showSider) {
-      setColumns((prev) => "250px 1fr");
+      setColumns((prev) => `${250}px 1fr`);
+      setDashboardWidth(() => `calc(100vw - ${250 + padding * 2}px)`);
     } else {
       setColumns(() => "1fr");
+      setDashboardWidth(() => `100vw - ${padding * 2}px`);
     }
   }, [store.showSider]);
 
   useEffect(() => {
     const callback = async (event: KeyboardEvent) => {
       if (event.key === "F5" || event.key === "f5") {
+        setDashboardWidth(() => "100wv");
         await handle.enter();
       }
     };
@@ -295,117 +300,105 @@ const App = () => {
         >
           <Grid
             templateColumns={columns}
-            gap={1}
             maxH="calc(100vh - 48px)"
             h="calc(100vh - 48px)"
             p="5px"
+            w="100vw"
+            maxW="100vw"
           >
             {store.showSider && (
-              <GridItem h="100%">
-                <Grid templateRows="repeat(14, 1fr)" gap={1} h="100%">
-                  <GridItem rowSpan={1} h="100%">
-                    <Stack
-                      h="100%"
-                      w="100%"
-                      alignItems="center"
-                      alignContent="center"
-                      justifyContent="center"
-                      justifyItems="center"
-                      ref={mohLogo}
-                    >
-                      <MOHLogo height={height} width={width} />
-                    </Stack>
-                  </GridItem>
-                  <GridItem rowSpan={12} h="100%">
-                    <SidebarContent />
-                  </GridItem>
-                  <GridItem rowSpan={1} h="100%">
-                    <Stack
-                      h="100%"
-                      w="100%"
-                      alignItems="center"
-                      alignContent="center"
-                      justifyContent="center"
-                      justifyItems="center"
-                      ref={hispLogo}
-                    >
-                      <Image
-                        src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/logo.png"
-                        maxH={`${hh * 0.85}px`}
-                        maxW={`${hw * 0.85}px`}
-                      />
-                    </Stack>
-                  </GridItem>
-                </Grid>
-              </GridItem>
+              <Grid
+                templateRows="48px 1fr 48px"
+                pr="5px"
+                gap="5px"
+                h={realHeight}
+                maxH={realHeight}
+              >
+                <Stack
+                  h="100%"
+                  w="100%"
+                  alignItems="center"
+                  alignContent="center"
+                  justifyContent="center"
+                  justifyItems="center"
+                >
+                  <MOHLogo height={48} width={250} />
+                </Stack>
+                <GridItem>
+                  <SidebarContent />
+                </GridItem>
+                <Stack
+                  h="100%"
+                  w="100%"
+                  alignItems="center"
+                  alignContent="center"
+                  justifyContent="center"
+                  justifyItems="center"
+                >
+                  <Image
+                    src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/logo.png"
+                    maxH="48px"
+                    maxW="250px"
+                  />
+                </Stack>
+              </Grid>
             )}
             <FullScreen handle={handle}>
-              <GridItem
-                h="100%"
+              <Grid
+                templateRows="48px 1fr 48px"
+                gap="5px"
+                w={dashboardWidth}
+                maxW={dashboardWidth}
+                h={handle.active ? "100vh" : realHeight}
+                maxH={handle.active ? "100vh" : realHeight}
                 bg={handle.active ? "gray.300" : ""}
-                p={handle.active ? "5px" : ""}
-                maxH={handle.active ? "100vh" : "calc(100vh - 58px)"}
-                w="100%"
               >
-                <Grid templateRows="repeat(14, 1fr)" gap={1} h="100%">
-                  <GridItem h="100%" w="100%" rowSpan={1}>
-                    <Stack
-                      h="100%"
-                      bg="white"
-                      p="5px"
-                      alignContent="center"
-                      alignItems="center"
-                      direction="row"
-                      w="100%"
-                      spacing="40px"
-                      ref={hispLogo1}
-                    >
-                      {(handle.active || !store.showSider) && (
-                        <MOHLogo2>
-                          <Image
-                            src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/Coat_of_arms_of_Uganda.svg"
-                            maxH={`${h1h * 0.85}px`}
-                            maxW={`${h1w * 0.85}px`}
-                          />
-                        </MOHLogo2>
-                      )}
-                      {!handle.active && !store.showSider && (
-                        <IconButton
-                          size="lg"
-                          bg="none"
-                          aria-label="Search database"
-                          icon={<BiArrowToRight />}
-                          onClick={() => setShowSider(true)}
-                          _hover={{ bg: "none" }}
+                <GridItem h="100%" w="100%" bg="white">
+                  <Stack
+                    h="100%"
+                    alignContent="center"
+                    alignItems="center"
+                    direction="row"
+                    w="100%"
+                    spacing="40px"
+                  >
+                    {(handle.active || !store.showSider) && (
+                      <MOHLogo2>
+                        <Image
+                          src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/Coat_of_arms_of_Uganda.svg"
+                          maxH="48px"
+                          maxW="250px"
                         />
-                      )}
-                      {!handle.active && store.showSider && (
-                        <IconButton
-                          size="lg"
-                          bg="none"
-                          aria-label="Search database"
-                          icon={<BiArrowToLeft />}
-                          onClick={() => setShowSider(false)}
-                          _hover={{ bg: "none" }}
-                        />
-                      )}
-                      {topMenuOptions[store.currentPage]}
-                    </Stack>
-                  </GridItem>
-                  <GridItem rowSpan={12} h="100%">
-                    <Outlet />
-                  </GridItem>
-                  <Footer
-                    funderLogoRef={funderLogo}
-                    funderLogo1Ref={funderLogo1}
-                    handle={handle}
-                    fh={fh}
-                    fw={fw}
-                    f1h={f1h}
-                    f1w={f1w}
-                  />
-                </Grid>
-              </GridItem>
+                      </MOHLogo2>
+                    )}
+                    {!handle.active && !store.showSider && (
+                      <IconButton
+                        bg="none"
+                        aria-label="Search database"
+                        icon={<BiArrowToRight />}
+                        onClick={() => setShowSider(true)}
+                        _hover={{ bg: "none" }}
+                      />
+                    )}
+                    {!handle.active && store.showSider && (
+                      <IconButton
+                        bg="none"
+                        aria-label="Search database"
+                        icon={<BiArrowToLeft />}
+                        onClick={() => setShowSider(false)}
+                        _hover={{ bg: "none" }}
+                      />
+                    )}
+                    {topMenuOptions[store.currentPage]}
+                  </Stack>
+                </GridItem>
+                <GridItem>
+                  <Outlet />
+                </GridItem>
+                <GridItem w={dashboardWidth} maxW={dashboardWidth}>
+                  <Footer handle={handle} />
+                </GridItem>
+              </Grid>
             </FullScreen>
           </Grid>
         </Router>

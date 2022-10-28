@@ -70,9 +70,11 @@
     "react-icons": "^4.4.0",
     "react-leaflet": "^4.1.0",
     "react-leaflet-choropleth": "^2.0.1",
+    "react-marquee-slider": "^1.1.5",
     "react-plotly.js": "^2.5.1",
     "react-textfit": "^1.1.1",
     "react-useinterval": "^1.0.2",
+    "styled-components": "^5.3.6",
     "use-fit-text": "^2.4.0",
     "use-onclickoutside": "^0.4.0",
     "usehooks-ts": "^2.6.0"

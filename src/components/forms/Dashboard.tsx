@@ -25,7 +25,7 @@ const Dashboard = () => {
     <Grid
       templateColumns={templateColumns}
       templateRows={templateRows}
-      gap={1}
+      gap="5px"
       h="100%"
     >
       {dashboard?.sections.map((section: ISection) => (

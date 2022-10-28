@@ -51,14 +51,7 @@ const PieChart = ({
   return (
     <Stack w="100%" h="100%" spacing={0}>
       {visualization.name && (
-        <VisualizationTitle
-          section={section}
-          fontSize={titleFontSize}
-          textTransform={titleCase}
-          color={titleColor}
-          title={visualization.name}
-          fontWeight="bold"
-        />
+        <VisualizationTitle section={section} title={visualization.name} />
       )}
       <Stack h="100%" w="100%" flex={1}>
         <Plot
