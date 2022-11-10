@@ -99,13 +99,12 @@ const BarGraph = ({
               direction="row"
               spacing="2px"
               alignItems="center"
-              bg="yellow.50"
               key={index}
             >
-              <Text bg={colors[index]} w="10px" h="10px">
+              <Text bgColor={colors[index]} w="10px" h="10px">
                 &nbsp;
               </Text>
-              <Text>{series}</Text>
+              <Text noOfLines={[1, 2, 3]}>{series}</Text>
             </Stack>
           ))}
         </Stack>

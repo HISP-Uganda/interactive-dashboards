@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Box,
   Button,
@@ -22,11 +21,12 @@ import {
   Text,
   Textarea,
   useDisclosure,
+  useMediaQuery,
 } from "@chakra-ui/react";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useState } from "react";
 import {
   assignDataSet,
   changeCategory,
@@ -38,7 +38,7 @@ import {
   setDashboards,
   setDefaultDashboard,
 } from "../Events";
-import { FormGenerics, IDashboard, Item, Option } from "../interfaces";
+import { IDashboard, Item, LocationGenerics, Option } from "../interfaces";
 import { saveDocument } from "../Queries";
 import {
   $categoryOptions,
@@ -53,7 +53,7 @@ import DashboardCategorization from "./forms/DashboardCategorization";
 import OUTreeSelect from "./OUTreeSelect";
 import PeriodPicker from "./PeriodPicker";
 const DashboardMenu = () => {
-  const search = useSearch<FormGenerics>();
+  const search = useSearch<LocationGenerics>();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
   const dashboards = useStore($dashboards);
@@ -62,6 +62,7 @@ const DashboardMenu = () => {
   const dashboard = useStore($dashboard);
   const categoryOptions = useStore($categoryOptions);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isNotDesktop] = useMediaQuery(["(max-width: 992px)"]);
   const updateDashboard = async (data: any) => {
     setLoading(true);
     await saveDocument("i-dashboards", store.systemId, data);
@@ -69,7 +70,6 @@ const DashboardMenu = () => {
       default: store.defaultDashboard,
       id: store.systemId,
     };
-    console.log(setting);
     await saveDocument("i-dashboard-settings", store.systemId, setting);
     setLoading(() => false);
     onClose();
@@ -116,9 +116,10 @@ const DashboardMenu = () => {
         fontSize="2.1vh"
         fontWeight="700"
         color="blue.600"
+        noOfLines={1}
       >{`${dashboard.name} Dashboard`}</Text>
       <Spacer />
-      {store.isAdmin && (
+      {store.isAdmin && !isNotDesktop && (
         <Stack
           direction="row"
           alignContent="center"
@@ -138,7 +139,7 @@ const DashboardMenu = () => {
           </Box>
         </Stack>
       )}
-      {store.isAdmin && (
+      {store.isAdmin && !isNotDesktop && (
         <>
           <Button
             type="button"
@@ -168,7 +169,7 @@ const DashboardMenu = () => {
           )}
         </>
       )}
-      {store.isAdmin && <AutoRefreshPicker />}
+      {store.isAdmin && !isNotDesktop && <AutoRefreshPicker />}
       <Button colorScheme="teal" size="sm" onClick={onOpenFilter}>
         Filter
       </Button>

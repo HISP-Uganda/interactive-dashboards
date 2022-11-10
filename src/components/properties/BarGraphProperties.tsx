@@ -69,6 +69,7 @@ const BarGraphProperties = ({
         }
         options={columns}
         isClearable
+        menuPlacement="auto"
       />
       <Text>Traces</Text>
       <Select<Option, false, GroupBase<Option>>
@@ -84,6 +85,7 @@ const BarGraphProperties = ({
         }
         options={columns}
         isClearable
+        menuPlacement="auto"
       />
       <Text>Bar Mode</Text>
       <Select<Option, false, GroupBase<Option>>
@@ -99,6 +101,7 @@ const BarGraphProperties = ({
         }
         options={barModes}
         isClearable
+        menuPlacement="auto"
       />
       <Stack>
         <Text>Orientation</Text>
@@ -142,6 +145,7 @@ const BarGraphProperties = ({
         options={colors}
         isClearable
         components={customComponents}
+        menuPlacement="auto"
       />
 
       <Text>Legend</Text>
@@ -236,6 +240,7 @@ const BarGraphProperties = ({
                     }}
                     options={chartTypes}
                     isClearable
+                    menuPlacement="auto"
                   />
                 </Stack>
               </TabPanel>

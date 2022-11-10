@@ -1,4 +1,6 @@
 import moment from "moment";
+import { bbox, center } from "@turf/turf";
+
 import {
   format,
   eachDayOfInterval,
@@ -8,8 +10,8 @@ import {
   eachWeekOfInterval,
 } from "date-fns";
 type periodType = "days" | "weeks" | "months" | "years" | "quarters";
-import { Option } from "../interfaces";
-import { uniq } from "lodash";
+import { Option, Threshold } from "../interfaces";
+import { fromPairs, uniq } from "lodash";
 
 export function encodeToBinary(str: string): string {
   return btoa(
@@ -133,6 +135,11 @@ export const globalIds: Option[] = [
   { label: "Category Option Combo", value: "p26VJMtSUSv", id: "coc" },
   { label: "Target Attribute Option Combo", value: "OOhWJ4gfZy1", id: "taoc" },
   { label: "Organisation Sublevel", value: "ww1uoD3DsYg", id: "osl" },
+  {
+    label: "Previous Attribute Option Combo",
+    value: "IK4jwzIuqNO",
+    id: "paoc",
+  },
 ];
 
 export const convertTime = (value: string) => {
@@ -624,4 +631,76 @@ export const allMetadata: { [key: string]: string } = {
   mlwTknbcGP4: "VVM Color Change",
   rKD38rD7HZ5: "Village Health Team",
   xYerKDKCefk: "default",
+};
+
+export const processMap = (
+  geojson: any,
+  otherLevels: any,
+  data: any[],
+  thresholds: Threshold[]
+) => {
+  const mapCenter = center(geojson).geometry.coordinates;
+  const bounds = bbox(geojson);
+  const organisationUnits = Object.values(otherLevels).flatMap(
+    ({ organisationUnits }: any) => organisationUnits
+  );
+  const { features, ...rest } = geojson;
+  const processedData = fromPairs(
+    data.map((d) => {
+      const value = d.value || d.total;
+      const id = d.c || d.ou;
+      return [id, value];
+    })
+  );
+
+  const processedFeatures = features.map(
+    ({ id, properties, ...others }: any) => {
+      let value = processedData[id];
+      let colorSearch: any = undefined;
+
+      if (value) {
+        const numericValue = Number(value).toFixed(2);
+        colorSearch = thresholds.find(({ max, min }: any) => {
+          if (max && min) {
+            return (
+              Number(numericValue) >= Number(min) &&
+              Number(value) <= Number(max)
+            );
+          } else if (min) {
+            return Number(numericValue) >= Number(min);
+          } else if (max) {
+            return Number(numericValue) <= Number(max);
+          }
+        });
+      }
+      let color = "white";
+
+      if (value && colorSearch) {
+        color = colorSearch.color;
+      } else if (value && thresholds.length > 0) {
+        color = thresholds[0].color;
+      }
+
+      return {
+        id,
+        ...others,
+        properties: {
+          ...properties,
+          value: value
+            ? Intl.NumberFormat("en-US", {
+                style: "percent",
+                notation: "standard",
+                maximumFractionDigits: 2,
+              }).format(value / 100)
+            : "No Data",
+          color,
+        },
+      };
+    }
+  );
+  return {
+    geojson: { ...rest, features: processedFeatures },
+    mapCenter,
+    organisationUnits,
+  };
 };

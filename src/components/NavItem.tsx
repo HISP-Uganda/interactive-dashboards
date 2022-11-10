@@ -1,17 +1,15 @@
 import { Box, Flex, Text } from "@chakra-ui/react";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { $dashboard, $store } from "../Store";
-
-import { FormGenerics, IDashboard, Option } from "../interfaces";
+import { IDashboard, LocationGenerics, Option } from "../interfaces";
+import { $dashboard } from "../Store";
 
 interface NavItemProps {
   option: Option & { dashboards: IDashboard[] };
 }
 const NavItem = ({ option: { label, value, dashboards } }: NavItemProps) => {
   const navigate = useNavigate();
-  const search = useSearch<FormGenerics>();
-  const store = useStore($store);
+  const search = useSearch<LocationGenerics>();
   const dashboard = useStore($dashboard);
   return (
     <Box key={value}>
@@ -37,8 +35,8 @@ const NavItem = ({ option: { label, value, dashboards } }: NavItemProps) => {
           fontSize="lg"
           m="2"
           cursor="pointer"
-          _hover={{ bg: "#E8EDF2", color: "black" }}
-          bg={dashboard.id === d.id ? "#00796B" : ""}
+          _hover={{ bgColor: "#E8EDF2", color: "black" }}
+          bgColor={dashboard.id === d.id ? "#00796B" : ""}
           color={dashboard.id === d.id ? "white" : ""}
           onClick={(e) => {
             e.stopPropagation();

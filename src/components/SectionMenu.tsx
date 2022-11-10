@@ -3,12 +3,12 @@ import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { MdKeyboardBackspace } from "react-icons/md";
 import { addSection, setDashboards } from "../Events";
-import { FormGenerics } from "../interfaces";
+import { LocationGenerics } from "../interfaces";
 import { $dashboard, $dashboards, $section } from "../Store";
 
 const SectionMenu = () => {
   const navigate = useNavigate();
-  const search = useSearch<FormGenerics>();
+  const search = useSearch<LocationGenerics>();
   const dashboard = useStore($dashboard);
   const section = useStore($section);
   const dashboards = useStore($dashboards);
@@ -44,27 +44,13 @@ const SectionMenu = () => {
   };
 
   return (
-    <Stack direction="row" h="48px">
-      <Stack direction="row" alignItems="center" justifyItems="center">
-        <IconButton
-          bg="none"
-          _hover={{ bg: "none" }}
-          aria-label="Search database"
-          icon={<MdKeyboardBackspace />}
-          onClick={() => {
-            navigate({
-              to: `/dashboards/${dashboard.id}`,
-              search,
-            });
-          }}
-        />
-        <Stack direction="row" spacing="2px" fontSize="16px">
-          <Text>{dashboard.name}</Text>
-          <Text>/</Text>
-          <Text>{section.id}</Text>
-          <Text>/</Text>
-          <Text>Edit Section</Text>
-        </Stack>
+    <Stack direction="row" alignItems="center" w="100%" p="5px">
+      <Stack direction="row" spacing="2px" fontSize="16px">
+        <Text>{dashboard.name}</Text>
+        <Text>/</Text>
+        <Text>{section.id}</Text>
+        <Text>/</Text>
+        <Text>Edit Section</Text>
       </Stack>
       <Spacer />
       <Button

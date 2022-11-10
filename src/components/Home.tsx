@@ -8,7 +8,7 @@ import { $store } from "../Store";
 
 export default function Home() {
   const store = useStore($store);
-
+  console.log(store);
   useEffect(() => {
     setShowSider(false);
   }, []);
@@ -16,7 +16,7 @@ export default function Home() {
     <Stack>
       {store.isAdmin ? (
         <Navigate to="/data-sources" />
-      ) : store.hasDashboards ? (
+      ) : store.selectedDashboard ? (
         <Navigate
           to={`/dashboards/${store.selectedDashboard}`}
           search={{

@@ -55,6 +55,7 @@ export interface IIndicator extends INamed {
   factor: string;
   custom: boolean;
   dataSource?: string;
+  realDataSource?: IDataSource;
   useInBuildIndicators: boolean;
   query?: string;
 }
@@ -92,6 +93,7 @@ export interface ISection {
   images: Image[];
   isBottomSection: boolean;
   bg: string;
+  height: string;
 }
 
 export interface IFilter {}
@@ -164,6 +166,9 @@ export interface IStore {
   checkedKeys: { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[];
   minSublevel: number;
   maxLevel: number;
+  instanceBaseUrl: string;
+  isNotDesktop: boolean;
+  isFullScreen: boolean;
 }
 
 export type IndicatorProps = {
@@ -180,14 +185,30 @@ export type IndicatorProps = {
   changeQuery?: Event<DataValueAttribute>;
 };
 
-export type FormGenerics = MakeGenerics<{
+export type LocationGenerics = MakeGenerics<{
+  LoaderData: {
+    indicators: IIndicator[];
+    dashboards: IDashboard[];
+    dataSources: IDataSource[];
+    categories: ICategory[];
+    indicator: IIndicator;
+    category: ICategory;
+    dataSource: IDataSource;
+    dataSourceOptions: Option[];
+  };
+  Params: {
+    indicatorId: string;
+    categoryId: string;
+    dataSourceId: string;
+    dashboardId: string;
+  };
   Search: {
-    edit?: boolean;
     category: string;
-    periods: string[];
-    levels: string[];
-    groups: string[];
-    organisations: string[];
+    periods: string;
+    levels: string;
+    groups: string;
+    organisations: string;
+    dataSourceId: string;
   };
 }>;
 

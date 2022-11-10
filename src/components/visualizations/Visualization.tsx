@@ -1,4 +1,4 @@
-import { Spinner, Text } from "@chakra-ui/react";
+import { Spinner, Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { fromPairs } from "lodash";
 import { ISection, IVisualization } from "../../interfaces";
@@ -249,13 +249,23 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
     dashboard.refreshInterval,
     globalFilters
   );
-
   return (
-    <>
+    <Stack
+      alignContent="center"
+      alignItems="center"
+      justifyContent="center"
+      justifyItems="center"
+      spacing={0}
+      p={0}
+      m={0}
+      h="100%"
+      w="100%"
+      flex={1}
+    >
       {isLoading && <Spinner />}
       {isSuccess && getVisualization(visualization, data, section)}
       {isError && <Text>Error occurred</Text>}
-    </>
+    </Stack>
   );
 };
 

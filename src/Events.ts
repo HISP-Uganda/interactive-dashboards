@@ -1,4 +1,3 @@
-import { Layout, Layouts } from "react-grid-layout";
 import { domain } from "./Domain";
 import {
   DataNode,
@@ -9,6 +8,7 @@ import {
   IIndicator,
   ISection,
   Item,
+  IVisualization,
   Option,
 } from "./interfaces";
 
@@ -26,8 +26,10 @@ export const setCategories = domain.createEvent<ICategory[]>();
 export const setDashboards = domain.createEvent<IDashboard[]>();
 export const setCurrentDashboard = domain.createEvent<IDashboard>();
 export const addSection = domain.createEvent<ISection>();
-export const addVisualization2Section = domain.createEvent<void>();
+export const addVisualization2Section = domain.createEvent<string>();
+export const duplicateVisualization = domain.createEvent<IVisualization>();
 export const deleteSection = domain.createEvent<string | undefined>();
+export const deleteSectionVisualization = domain.createEvent<string>();
 export const setCurrentSection = domain.createEvent<ISection>();
 export const toggleDashboard = domain.createEvent<boolean>();
 export const changeDashboardId = domain.createEvent<string>();
@@ -43,10 +45,6 @@ export const setDataSource = domain.createEvent<IDataSource>();
 export const setCategory = domain.createEvent<ICategory>();
 export const setIndicator = domain.createEvent<IIndicator>();
 
-export const changeLayouts = domain.createEvent<{
-  currentLayout: Layout[];
-  allLayouts: Layouts;
-}>();
 export const changeNumeratorExpressionValue = domain.createEvent<{
   attribute: string;
   value: string;
@@ -182,5 +180,8 @@ export const setLevels = domain.createEvent<string[]>();
 export const setGroups = domain.createEvent<string[]>();
 export const setShowFooter = domain.createEvent<boolean>();
 export const setSystemName = domain.createEvent<string>();
+export const setInstanceBaseUrl = domain.createEvent<string>();
 export const setMinSublevel = domain.createEvent<number>();
 export const setMaxLevel = domain.createEvent<number>();
+export const setIsNotDesktop = domain.createEvent<boolean>();
+export const setIsFullScreen = domain.createEvent<boolean>();

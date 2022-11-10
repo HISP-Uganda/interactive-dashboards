@@ -2,7 +2,7 @@ import "@fontsource/raleway";
 import "@fontsource/open-sans";
 
 import { ChakraProvider } from "@chakra-ui/react";
-import { QueryClient, QueryClientProvider } from "react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import App from "./components/App";
 import theme from "./components/theme";

@@ -1,5 +1,6 @@
 import { combine } from "effector";
 import { fromPairs, isEqual, sortBy } from "lodash";
+import { headerHeight, padding, sideWidth } from "./components/constants";
 import { domain } from "./Domain";
 import {
   addPagination,
@@ -11,7 +12,6 @@ import {
   changeDenominatorDimension,
   changeDenominatorExpressionValue,
   changeIndicatorAttribute,
-  changeLayouts,
   changeNumeratorAttribute,
   changeNumeratorDimension,
   changeNumeratorExpressionValue,
@@ -67,6 +67,11 @@ import {
   setSystemName,
   setMinSublevel,
   setMaxLevel,
+  deleteSectionVisualization,
+  setInstanceBaseUrl,
+  setIsNotDesktop,
+  setIsFullScreen,
+  duplicateVisualization,
 } from "./Events";
 import {
   ICategory,
@@ -95,6 +100,7 @@ export const createSection = (id = generateUid()): ISection => {
     images: [],
     isBottomSection: false,
     bg: "white",
+    height: "100%",
   };
 };
 
@@ -202,6 +208,9 @@ export const $store = domain
     systemName: "",
     minSublevel: 2,
     maxLevel: 5,
+    instanceBaseUrl: "",
+    isNotDesktop: false,
+    isFullScreen: false,
   })
   .on(setOrganisations, (state, organisations) => {
     return { ...state, organisations };
@@ -269,6 +278,15 @@ export const $store = domain
   })
   .on(setMaxLevel, (state, maxLevel) => {
     return { ...state, maxLevel };
+  })
+  .on(setInstanceBaseUrl, (state, instanceBaseUrl) => {
+    return { ...state, instanceBaseUrl };
+  })
+  .on(setIsNotDesktop, (state, isNotDesktop) => {
+    return { ...state, isNotDesktop };
+  })
+  .on(setIsFullScreen, (state, isFullScreen) => {
+    return { ...state, isFullScreen };
   });
 
 export const $dataSource = domain
@@ -320,16 +338,6 @@ export const $dashboard = domain
         ? dashboard.bottomSection
         : { ...createSection(), isBottomSection: true, title: "" },
     };
-  })
-  .on(changeLayouts, (state, { currentLayout, allLayouts }) => {
-    const sections = state.sections.map((s) => {
-      const l = currentLayout.find((ll) => ll.i === s.id);
-      if (l) {
-        s = { ...s, ...l };
-      }
-      return s;
-    });
-    return { ...state, sections, layouts: allLayouts };
   })
   .on(changeDefaults, (state) => {
     return { ...state, hasDashboards: true, hasDefaultDashboard: true };
@@ -509,12 +517,12 @@ export const $indicator = domain
     (state, { id, what, type, replace, remove, label = "" }) => {
       if (state.denominator) {
         if (remove) {
-          const { [id]: removed, ...others } = state.denominator.dataDimensions;
+          const { [id]: removed, ...rest } = state.denominator.dataDimensions;
           return {
             ...state,
             denominator: {
               ...state.denominator,
-              dataDimensions: others,
+              dataDimensions: rest,
             },
           };
         }
@@ -560,9 +568,9 @@ export const $section = domain
   .on(setCurrentSection, (_, section) => {
     return { ...section, images: section.images ? section.images : [] };
   })
-  .on(addVisualization2Section, (state) => {
+  .on(addVisualization2Section, (state, id) => {
     const visualization: IVisualization = {
-      id: generateUid(),
+      id,
       indicator: "",
       type: "",
       name: `Visualization ${state.visualizations.length + 1}`,
@@ -573,6 +581,20 @@ export const $section = domain
     return {
       ...state,
       visualizations: [...state.visualizations, visualization],
+    };
+  })
+  .on(duplicateVisualization, (state, visualization) => {
+    return {
+      ...state,
+      visualizations: [...state.visualizations, visualization],
+    };
+  })
+  .on(deleteSectionVisualization, (state, visualizationId) => {
+    return {
+      ...state,
+      visualizations: state.visualizations.filter(
+        ({ id }) => id !== visualizationId
+      ),
     };
   })
   .on(
@@ -729,7 +751,7 @@ export const $dashboardCategory = combine(
   $dashboard,
   $categories,
   (dashboard, categories) => {
-    const category = categories.find((c) => {
+    const category: ICategory | undefined = categories.find((c) => {
       return c.id === dashboard.category;
     });
     if (category) {
@@ -740,10 +762,12 @@ export const $dashboardCategory = combine(
 );
 
 export const $categoryOptionCombo = $dashboard.map(
-  ({ categorization, availableCategoryOptionCombos }) => {
-    const combos: any[] = Object.values(categorization || {});
+  ({ availableCategories, categorization, availableCategoryOptionCombos }) => {
+    const combos: any[] = availableCategories
+      .map(({ id }) => categorization[id])
+      .filter((v) => !!v);
     let availableCombos: any[] = [];
-
+    let result = { prev: [], current: [] };
     if (availableCategoryOptionCombos) {
       availableCombos = availableCategoryOptionCombos.map(
         ({ categoryOptions, id }: any) => {
@@ -756,9 +780,29 @@ export const $categoryOptionCombo = $dashboard.map(
     }
 
     if (combos.length === 2) {
+      const [{ categoryOptions }] = availableCategories;
       const category1 = combos[0].map(({ value }: any) => value);
       const category2 = combos[1].map(({ value }: any) => value);
-      return category1
+      const index = categoryOptions.findIndex(
+        (x: any) => category1[category1.length - 1] === x.value
+      );
+
+      if (index > 0) {
+        const prevOption = categoryOptions[index - 1];
+
+        const prev = category2.map((v: string) => {
+          const search = availableCombos.find(({ categoryOptions }: any) => {
+            return isEqual(
+              sortBy([v, prevOption.value]),
+              sortBy(categoryOptions)
+            );
+          });
+          return search?.id;
+        });
+        result = { ...result, prev };
+      }
+
+      const current = category1
         .flatMap((v: string) => {
           return category2.map((v2: any) => {
             const search = availableCombos.find(({ categoryOptions }: any) => {
@@ -768,8 +812,9 @@ export const $categoryOptionCombo = $dashboard.map(
           });
         })
         .filter((v: any) => !!v);
+      result = { ...result, current };
     }
-    return [];
+    return result;
   }
 );
 
@@ -785,7 +830,7 @@ export const $targetCategoryOptionCombo = $dashboard.map(
       const categories = categorization[categoryId];
 
       return categories.flatMap(({ value }) => {
-        const targetCOC = targetCategoryOptionCombos.find(
+        const targetCOC: any = targetCategoryOptionCombos.find(
           ({ categoryOptions }) => {
             return categoryOptions.map(({ id }: any) => id).join("") === value;
           }
@@ -822,17 +867,66 @@ export const $globalFilters = combine(
     if (store.groups.length > 0) {
       filters = { ...filters, of2WvtwqbHR: store.groups };
     }
-    if (dashboard.dataSet && categoryOptionCombo.length > 0) {
+    if (dashboard.dataSet && categoryOptionCombo.current.length > 0) {
       filters = {
         ...filters,
-        WSiMOMi4QWh: categoryOptionCombo,
+        WSiMOMi4QWh: categoryOptionCombo.current,
       };
     }
-
+    if (dashboard.dataSet && categoryOptionCombo.prev.length > 0) {
+      filters = { ...filters, IK4jwzIuqNO: categoryOptionCombo.prev };
+    }
     if (dashboard.targetCategoryCombo && target.length > 0) {
       return { ...filters, OOhWJ4gfZy1: target };
     }
-
     return filters;
   }
 );
+
+export const $dimensions = $store.map(
+  ({ isNotDesktop, showSider, isFullScreen }) => {
+    const maxDashboardHeight = padding * 2 + headerHeight;
+    const otherHeight = padding * 4 + headerHeight * 3;
+    const realHeight = `calc(100vh - ${maxDashboardHeight}px)`;
+    let initial = {
+      dashboardHeight: realHeight,
+      dashboardWidth: `calc(100vw - ${sideWidth + padding * 2}px)`,
+      dashboardColumns: `${sideWidth}px 1fr`,
+      showSide: true,
+      otherHeight: `calc(100vh - ${otherHeight}px)`,
+      sectionHeight: `calc(100vh - ${otherHeight}px - ${headerHeight})`,
+      isNotDesktop,
+    };
+
+    if (isFullScreen) {
+      initial = {
+        ...initial,
+        showSide: false,
+        dashboardWidth: `100vw - ${padding * 2}px`,
+      };
+    } else if (isNotDesktop) {
+      initial = {
+        ...initial,
+        showSide: false,
+        dashboardWidth: `100vw - ${padding * 2}px`,
+      };
+    } else if (!isNotDesktop) {
+      if (showSider) {
+        initial = {
+          ...initial,
+          showSide: true,
+          dashboardWidth: `calc(100vw - ${sideWidth + padding * 2}px)`,
+        };
+      } else {
+        initial = {
+          ...initial,
+          showSide: false,
+          dashboardWidth: `100vw - ${padding * 2}px`,
+          dashboardColumns: "auto",
+        };
+      }
+    }
+    return initial;
+  }
+);
+// $previousCategoryOptionCombo.watch((v) => console.log(v));

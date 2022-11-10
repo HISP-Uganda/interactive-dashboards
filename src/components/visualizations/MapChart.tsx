@@ -4,7 +4,7 @@ import { max, orderBy } from "lodash";
 import Plot from "react-plotly.js";
 import { ChartProps, Threshold } from "../../interfaces";
 import { findLevelsAndOus, useMaps } from "../../Queries";
-import { $indicators, $store } from "../../Store";
+import { $globalFilters, $indicators, $store } from "../../Store";
 import { exclusions } from "../../utils/utils";
 import VisualizationTitle from "./VisualizationTitle";
 
@@ -21,6 +21,7 @@ const MapChart = ({
   const levelIsGlobal = levels.findIndex((l) => l === "GQhi6pRnTKF");
   const ouIsGlobal = ous.findIndex((l) => l === "mclvD0Z9mfT");
   const style = layoutProperties?.["layout.mapbox.style"] || "open-street-map";
+  const globalFilters = useStore($globalFilters);
   const zoom = layoutProperties?.["layout.zoom"] || 5.3;
   const thresholds: Threshold[] = dataProperties?.["data.thresholds"] || [
     { id: "1", min: "0", max: "5000", color: "red" },
@@ -50,7 +51,13 @@ const MapChart = ({
     levelIsGlobal !== -1 || levels.length === 0 ? store.levels : levels,
     ouIsGlobal !== -1 ? store.organisations.map((k) => String(k)) : ous,
     data,
-    thresholds
+    thresholds,
+    [
+      visualization.id,
+      ...Object.keys(globalFilters).flatMap((v) => {
+        return v;
+      }),
+    ]
   );
   return (
     <>

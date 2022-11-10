@@ -3,7 +3,7 @@ import { Tree } from "antd";
 // import type { DataNode } from "antd/lib/tree";
 import { GroupBase, Select } from "chakra-react-select";
 import React, { useState } from "react";
-
+import { useQueryClient } from "@tanstack/react-query";
 import { useDataEngine } from "@dhis2/app-runtime";
 import "antd/dist/antd.css";
 import { useStore } from "effector-react";
@@ -79,14 +79,14 @@ const OUTree = ({
   const engine = useDataEngine();
   const [treeData, setTreeData] = useState<DataNode[]>(units);
   const [flattened, setFlattened] = useState<any[]>(units);
-
   const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
-
+  const queryClient = useQueryClient();
   const onCheck = (
     checkedKeysValue:
       | { checked: React.Key[]; halfChecked: React.Key[] }
       | React.Key[]
   ) => {
+    queryClient.cancelQueries();
     let checked: React.Key[] = [];
     setCheckedKeys(checkedKeysValue);
     if (isArray(checkedKeysValue)) {
@@ -163,7 +163,7 @@ const OUTree = ({
   };
 
   return (
-    <Stack bg="white" spacing="20px">
+    <Stack bgColor="white" spacing="20px">
       <Box border="1px solid gray" h="250px" overflow="auto">
         <Tree
           multiple

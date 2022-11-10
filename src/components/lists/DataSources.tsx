@@ -1,4 +1,5 @@
 import { AddIcon } from "@chakra-ui/icons";
+import { useState, useEffect } from "react";
 import {
   Button,
   Divider,
@@ -12,23 +13,42 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
-import { useNavigate } from "@tanstack/react-location";
+import { Link, useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { setDataSource } from "../../Events";
 import { IDataSource } from "../../interfaces";
-import { useDataSources } from "../../Queries";
-import { $dataSources, $store } from "../../Store";
+import { deleteDocument, useDataSources } from "../../Queries";
+import { $store } from "../../Store";
 import { generateUid } from "../../utils/uid";
+import { generalPadding, otherHeight } from "../constants";
 const DataSources = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState<boolean>(false);
   const store = useStore($store);
-  const { isLoading, isSuccess, isError, error } = useDataSources(
+  const [currentId, setCurrentId] = useState<string>("");
+  const { isLoading, isSuccess, isError, error, data } = useDataSources(
     store.systemId
   );
-  const dataSources = useStore($dataSources);
+  const [response, setResponse] = useState<IDataSource[] | undefined>(data);
+  const deleteDataSource = async (id: string) => {
+    setCurrentId(() => id);
+    setLoading(() => true);
+    await deleteDocument("i-data-sources", id);
+    setResponse((prev) => prev?.filter((p) => p.id !== id));
+    setLoading(() => false);
+  };
+
+  useEffect(() => {
+    setResponse(() => data);
+  }, [data]);
 
   return (
-    <Stack flex={1} p="20px" bg="white">
+    <Stack
+      p={`${generalPadding}px`}
+      bgColor="white"
+      flex={1}
+      h={otherHeight}
+      maxH={otherHeight}
+    >
       <Stack direction="row" border="1">
         <Spacer />
         <Button
@@ -40,36 +60,54 @@ const DataSources = () => {
         </Button>
       </Stack>
       <Divider borderColor="blue.500" />
-      {isLoading && <Spinner />}
-      {isSuccess && (
-        <Table variant="simple">
-          <Thead>
-            <Tr>
-              <Th>Name</Th>
-              <Th>Description</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {dataSources.map((dataSource: IDataSource) => (
-              <Tr
-                key={dataSource.id}
-                cursor="pointer"
-                onClick={() => {
-                  setDataSource(dataSource);
-                  navigate({
-                    to: `/data-sources/${dataSource.id}`,
-                    search: { edit: true },
-                  });
-                }}
-              >
-                <Td>{dataSource.name}</Td>
-                <Td>{dataSource.description}</Td>
+      <Stack
+        justifyItems="center"
+        alignContent="center"
+        alignItems="center"
+        flex={1}
+      >
+        {isLoading && <Spinner />}
+        {isSuccess && (
+          <Table variant="simple" w="100%">
+            <Thead>
+              <Tr>
+                <Th>Name</Th>
+                <Th>Description</Th>
+                <Th>Actions</Th>
               </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      )}
-      {isError && <pre>{JSON.stringify(error, null, 2)}</pre>}
+            </Thead>
+            <Tbody>
+              {response?.map((dataSource: IDataSource) => (
+                <Tr key={dataSource.id}>
+                  <Td>
+                    <Link to={`/data-sources/${dataSource.id}`}>
+                      {dataSource.name}
+                    </Link>
+                  </Td>
+                  <Td>{dataSource.description}</Td>
+                  <Td>
+                    <Stack direction="row" spacing="5px">
+                      <Button colorScheme="green" size="xs">
+                        Edit
+                      </Button>
+                      <Button size="xs">Duplicate</Button>
+                      <Button
+                        colorScheme="red"
+                        size="xs"
+                        isLoading={loading && currentId === dataSource.id}
+                        onClick={() => deleteDataSource(dataSource.id)}
+                      >
+                        Delete
+                      </Button>
+                    </Stack>
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        )}
+        {isError && <pre>{JSON.stringify(error, null, 2)}</pre>}
+      </Stack>
     </Stack>
   );
 };
