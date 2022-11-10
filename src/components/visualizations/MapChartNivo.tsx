@@ -1,4 +1,4 @@
-import { ResponsiveChoropleth } from "@nivo/geo";
+// import { ResponsiveChoropleth } from "@nivo/geo";
 import { Spinner, Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { ChartProps, Threshold } from "../../interfaces";
@@ -59,7 +59,7 @@ export default function ({
           )}
           <Stack h="100%" w="100%" flex={1} spacing={0}>
             <Stack flex={1} h="400px" w="100%" spacing={0}>
-              <ResponsiveChoropleth
+              {/* <ResponsiveChoropleth
                 data={data.map(({ c, value }: any) => {
                   return { id: c, value };
                 })}
@@ -77,60 +77,60 @@ export default function ({
                 borderWidth={0.5}
                 borderColor="#152538"
                 projectionScale={600}
-                // defs={[
-                //   {
-                //     id: "dots",
-                //     type: "patternDots",
-                //     background: "inherit",
-                //     color: "#38bcb2",
-                //     size: 4,
-                //     padding: 1,
-                //     stagger: true,
-                //   },
-                //   {
-                //     id: "lines",
-                //     type: "patternLines",
-                //     background: "inherit",
-                //     color: "#eed312",
-                //     rotation: -45,
-                //     lineWidth: 6,
-                //     spacing: 10,
-                //   },
-                //   {
-                //     id: "gradient",
-                //     type: "linearGradient",
-                //     colors: [
-                //       {
-                //         offset: 0,
-                //         color: "#000",
-                //       },
-                //       {
-                //         offset: 100,
-                //         color: "inherit",
-                //       },
-                //     ],
-                //   },
-                // ]}
-                // fill={[
-                //   {
-                //     match: {
-                //       id: "CAN",
-                //     },
-                //     id: "dots",
-                //   },
-                //   {
-                //     match: {
-                //       id: "CHN",
-                //     },
-                //     id: "lines",
-                //   },
-                //   {
-                //     match: {
-                //       id: "ATA",
-                //     },
-                //     id: "gradient",
-                //   },
-                // ]}
+                defs={[
+                  {
+                    id: "dots",
+                    type: "patternDots",
+                    background: "inherit",
+                    color: "#38bcb2",
+                    size: 4,
+                    padding: 1,
+                    stagger: true,
+                  },
+                  {
+                    id: "lines",
+                    type: "patternLines",
+                    background: "inherit",
+                    color: "#eed312",
+                    rotation: -45,
+                    lineWidth: 6,
+                    spacing: 10,
+                  },
+                  {
+                    id: "gradient",
+                    type: "linearGradient",
+                    colors: [
+                      {
+                        offset: 0,
+                        color: "#000",
+                      },
+                      {
+                        offset: 100,
+                        color: "inherit",
+                      },
+                    ],
+                  },
+                ]}
+                fill={[
+                  {
+                    match: {
+                      id: "CAN",
+                    },
+                    id: "dots",
+                  },
+                  {
+                    match: {
+                      id: "CHN",
+                    },
+                    id: "lines",
+                  },
+                  {
+                    match: {
+                      id: "ATA",
+                    },
+                    id: "gradient",
+                  },
+                ]}
                 legends={[
                   {
                     anchor: "bottom-left",
@@ -156,7 +156,7 @@ export default function ({
                     ],
                   },
                 ]}
-              />
+              /> */}
             </Stack>
             <Stack h="20px" direction="row" spacing={0}>
               {thresholds.map((item) => (

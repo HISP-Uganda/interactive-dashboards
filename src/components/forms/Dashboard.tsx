@@ -1,25 +1,30 @@
 import { Grid, GridItem, useBreakpointValue } from "@chakra-ui/react";
-import { MouseEvent } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
+import { MouseEvent } from "react";
 import { setCurrentSection } from "../../Events";
-import { FormGenerics, ISection } from "../../interfaces";
-import { $dashboard, $store } from "../../Store";
+import { ISection, LocationGenerics } from "../../interfaces";
+import { $dashboard, $dimensions, $store } from "../../Store";
 import SectionVisualization from "../SectionVisualization";
 
 const Dashboard = () => {
-  const search = useSearch<FormGenerics>();
+  const search = useSearch<LocationGenerics>();
   const navigate = useNavigate();
   const store = useStore($store);
   const dashboard = useStore($dashboard);
+  const { isNotDesktop } = useStore($dimensions);
 
   const templateColumns = useBreakpointValue({
-    base: "100%",
-    md: `repeat(${dashboard.columns}, 1fr)`,
+    base: "auto",
+    sm: "auto",
+    md: "auto",
+    lg: `repeat(${dashboard.columns}, 1fr)`,
   });
   const templateRows = useBreakpointValue({
-    base: "100%",
-    md: `repeat(${dashboard.rows}, 1fr)`,
+    base: "auto",
+    sm: "auto",
+    md: "auto",
+    lg: `repeat(${dashboard.rows}, 1fr)`,
   });
   return (
     <Grid
@@ -27,14 +32,18 @@ const Dashboard = () => {
       templateRows={templateRows}
       gap="5px"
       h="100%"
+      w="100%"
     >
       {dashboard?.sections.map((section: ISection) => (
         <GridItem
-          bg="white"
-          h="100%"
+          bgColor="white"
           key={section.id}
-          colSpan={section.colSpan}
-          rowSpan={section.rowSpan}
+          colSpan={{ lg: section.colSpan, md: 1 }}
+          rowSpan={{ lg: section.rowSpan, md: 1 }}
+          h={isNotDesktop ? (section.height ? section.height : "15vh") : "100%"}
+          maxH={
+            isNotDesktop ? (section.height ? section.height : "15vh") : "100%"
+          }
           onClick={(e: MouseEvent<HTMLElement>) => {
             if (e.detail === 2 && store.isAdmin) {
               setCurrentSection(section);

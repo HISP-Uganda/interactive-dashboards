@@ -22,7 +22,7 @@ const ProgressBar = ({ bg, completed }: { bg: string; completed: number }) => {
       <Box
         height="100%"
         width={`${completed > 100 ? "100" : completed}%`}
-        bg={bg}
+        bgColor={bg}
         borderRadius="inherit"
         textAlign="right"
       >
@@ -110,9 +110,9 @@ const SingleValue = ({
       borderRadius="3px"
       // padding="4px"
       textAlign="center"
+      flex={1}
       spacing={`${spacing}px`}
       h="100%"
-      // bg="red.100"
     >
       {visualization.name && (
         <Text
@@ -140,7 +140,10 @@ const SingleValue = ({
             </CircularProgressLabel>
           </CircularProgress>
         ) : targetGraph === "progress" && target ? (
-          <ProgressBar completed={(value * 100) / Number(target)} bg="green" />
+          <ProgressBar
+            completed={(value * 100) / Number(target)}
+            bgColor="green"
+          />
         ) : null}
         <Text fontSize={`${fontSize}vh`} color={color} fontWeight={fontWeight}>
           {prefix}

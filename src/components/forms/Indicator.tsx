@@ -18,7 +18,7 @@ import {
   changeUseIndicators,
   setIndicator,
 } from "../../Events";
-import { FormGenerics } from "../../interfaces";
+import { LocationGenerics } from "../../interfaces";
 import { saveDocument } from "../../Queries";
 import {
   $dataSourceType,
@@ -27,11 +27,12 @@ import {
   $store,
   createIndicator,
 } from "../../Store";
+import { generalPadding, otherHeight } from "../constants";
 import { displayDataSourceType } from "../data-sources";
 import NamespaceSelect from "../NamespaceSelect";
 
 const Indicator = () => {
-  const search = useSearch<FormGenerics>();
+  const search = useSearch<LocationGenerics>();
   const indicator = useStore($indicator);
   const store = useStore($store);
   const hasDHIS2 = useStore($hasDHIS2);
@@ -48,7 +49,14 @@ const Indicator = () => {
   };
 
   return (
-    <Box flex={1} p="20px" bg="white">
+    <Box
+      p={`${generalPadding}px`}
+      bgColor="white"
+      flex={1}
+      h={otherHeight}
+      maxH={otherHeight}
+      w="100%"
+    >
       <Stack spacing="20px">
         <Stack>
           <Text>Data Source</Text>

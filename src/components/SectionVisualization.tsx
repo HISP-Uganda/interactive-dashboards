@@ -4,7 +4,7 @@ import { useStore } from "effector-react";
 import { MouseEvent } from "react";
 import Marquee from "react-marquee-slider";
 import { setCurrentSection } from "../Events";
-import { FormGenerics, ISection } from "../interfaces";
+import { LocationGenerics, ISection } from "../interfaces";
 import { $dashboard, $store } from "../Store";
 import Carousel from "./visualizations/Carousel";
 import TabPanelVisualization from "./visualizations/TabPanelVisualization";
@@ -12,7 +12,7 @@ import Visualization from "./visualizations/Visualization";
 import VisualizationTitle from "./visualizations/VisualizationTitle";
 
 const SectionVisualization = (section: ISection) => {
-  const search = useSearch<FormGenerics>();
+  const search = useSearch<LocationGenerics>();
   const store = useStore($store);
   const navigate = useNavigate();
   const dashboard = useStore($dashboard);
@@ -57,39 +57,31 @@ const SectionVisualization = (section: ISection) => {
       </Stack>
     ),
     grid: (
-      <Stack h="100%" w="100%">
+      <Stack
+        h="100%"
+        w="100%"
+        spacing={0}
+        alignItems="center"
+        alignContent="center"
+        justifyContent="center"
+        justifyItems="center"
+      >
         {section.title && (
           <VisualizationTitle section={section} title={section.title} />
         )}
-        <Stack
-          alignItems="center"
-          justifyItems="center"
-          alignContent="center"
-          justifyContent={section.justifyContent || "space-around"}
-          direction={section.direction}
-          flex={1}
-          w="100%"
-          h="100%"
-        >
-          <SimpleGrid
-            columns={2}
-            h="100%"
-            justifyContent="space-around"
-            alignContent="space-around"
-          >
-            {section.visualizations.map((visualization) => (
-              <Visualization
-                key={visualization.id}
-                visualization={visualization}
-                section={section}
-              />
-            ))}
-          </SimpleGrid>
-        </Stack>
+        <SimpleGrid columns={2} h="100%" w="100%" flex={1} spacing="0">
+          {section.visualizations.map((visualization, i) => (
+            <Visualization
+              key={visualization.id}
+              visualization={visualization}
+              section={section}
+            />
+          ))}
+        </SimpleGrid>
       </Stack>
     ),
     normal: (
-      <Stack h="100%" w="100%">
+      <Stack h="100%" w="100%" spacing={0}>
         {section.title && (
           <VisualizationTitle section={section} title={section.title} />
         )}

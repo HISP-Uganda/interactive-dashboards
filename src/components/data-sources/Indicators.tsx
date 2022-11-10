@@ -176,7 +176,7 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
               _hover={{
                 bg: "yellow.400",
               }}
-              bg="yellow.300"
+              bgColor="yellow.300"
             >
               <Text>Previous</Text>
             </PaginationPrevious>
@@ -184,7 +184,7 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
               _hover={{
                 bg: "yellow.400",
               }}
-              bg="yellow.300"
+              bgColor="yellow.300"
             >
               <Text>Next</Text>
             </PaginationNext>

@@ -70,7 +70,7 @@ export default function ({ currentPage, setNextPage, total }: Props) {
             _hover={{
               bg: "yellow.400",
             }}
-            bg="yellow.300"
+            bgColor="yellow.300"
           >
             <Text>Previous</Text>
           </PaginationPrevious>
@@ -79,7 +79,7 @@ export default function ({ currentPage, setNextPage, total }: Props) {
             align="center"
             separator={
               <PaginationSeparator
-                bg="blue.300"
+                bgColor="blue.300"
                 fontSize="sm"
                 w={14}
                 jumpSize={11}
@@ -107,7 +107,7 @@ export default function ({ currentPage, setNextPage, total }: Props) {
             _hover={{
               bg: "yellow.400",
             }}
-            bg="yellow.300"
+            bgColor="yellow.300"
           >
             <Text>Next</Text>
           </PaginationNext>

@@ -80,7 +80,7 @@ export default function ({ visualization }: { visualization: IVisualization }) {
         <Text>Threshold</Text>
         <Spacer />
         <IconButton
-          bg="none"
+          bgColor="none"
           aria-label="add"
           icon={<AddIcon w={2} h={2} />}
           onClick={() => addThreshold()}
@@ -118,7 +118,7 @@ export default function ({ visualization }: { visualization: IVisualization }) {
                 </Td>
                 <Td
                   w="20%"
-                  bg={hold.color}
+                  bgColor={hold.color}
                   position="relative"
                   onClick={() => {
                     setId(() => hold.id);
@@ -139,7 +139,7 @@ export default function ({ visualization }: { visualization: IVisualization }) {
                 <Td textAlign="right" w="10%">
                   <IconButton
                     aria-label="delete"
-                    bg="none"
+                    bgColor="none"
                     icon={<DeleteIcon w={3} h={3} />}
                     onClick={() => removeThreshold(hold.id)}
                   />

@@ -1,25 +1,24 @@
 import {
+  Box,
   Button,
   FormControl,
   FormErrorMessage,
   FormLabel,
   Input,
-  Stack,
-  Box,
-  Textarea,
   Spacer,
+  Stack,
+  Textarea,
 } from "@chakra-ui/react";
 import { useEffect } from "react";
-import { useDataEngine } from "@dhis2/app-runtime";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "react-query";
 
+import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { setCategory, setShowSider } from "../../Events";
-import { FormGenerics, ICategory } from "../../interfaces";
-import { $category, $store, createCategory } from "../../Store";
-import { useNavigate, useSearch } from "@tanstack/react-location";
+import { ICategory } from "../../interfaces";
 import { saveDocument } from "../../Queries";
+import { $category, $store, createCategory } from "../../Store";
 
 const Category = () => {
   const navigate = useNavigate();
@@ -40,11 +39,8 @@ const Category = () => {
     await add(values);
     navigate({ to: "/categories" });
   }
-  useEffect(() => {
-    setShowSider(true);
-  }, []);
   return (
-    <Box flex={1} p="20px" bg="white">
+    <Box flex={1} p="20px" bgColor="white">
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing="20px">
           <FormControl isInvalid={!!errors.id}>

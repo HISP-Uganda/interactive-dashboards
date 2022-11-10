@@ -2,16 +2,13 @@ import { Spinner, Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { ChartProps, Threshold } from "../../interfaces";
 import { findLevelsAndOus, useMaps } from "../../Queries";
-import { $indicators, $store } from "../../Store";
-import VisualizationTitle from "./VisualizationTitle";
-
-import "leaflet/dist/leaflet.css";
+import { $globalFilters, $indicators, $store } from "../../Store";
 import MapVisualization from "./MapVisualization";
+import VisualizationTitle from "./VisualizationTitle";
 
 const MapChartLeaflet = ({
   visualization,
   dataProperties,
-  layoutProperties,
   section,
   data,
 }: ChartProps) => {
@@ -20,12 +17,7 @@ const MapChartLeaflet = ({
   const { levels, ous } = findLevelsAndOus(indicator);
   const levelIsGlobal = levels.findIndex((l) => l === "GQhi6pRnTKF");
   const ouIsGlobal = ous.findIndex((l) => l === "mclvD0Z9mfT");
-  const style = layoutProperties?.["layout.mapbox.style"] || "open-street-map";
-  const zoom = layoutProperties?.["layout.zoom"] || 5.3;
-
-  const titleFontSize = dataProperties?.["data.title.fontsize"] || "1.5vh";
-  const titleCase = dataProperties?.["data.title.case"] || "";
-  const titleColor = dataProperties?.["data.title.color"] || "gray.500";
+  const globalFilters = useStore($globalFilters);
   const thresholds: Threshold[] = dataProperties?.["data.thresholds"] || [
     { id: "1", min: "0", max: "5000", color: "red" },
     { id: "2", min: "5001", max: "10000", color: "yellow" },
@@ -42,22 +34,39 @@ const MapChartLeaflet = ({
     levelIsGlobal !== -1 || levels.length === 0 ? store.levels : levels,
     ouIsGlobal !== -1 ? store.organisations.map((k) => String(k)) : ous,
     data,
-    thresholds
+    thresholds,
+    [
+      visualization.id,
+      ...Object.keys(globalFilters).flatMap((v) => {
+        return v;
+      }),
+    ]
   );
 
   return (
     <>
       {isLoading && <Spinner />}
       {isSuccess && (
-        <Stack w="100%" h="100%" spacing={0}>
+        <Stack w="100%" h="100%" spacing="0" flex={1}>
           {visualization.name && (
             <VisualizationTitle section={section} title={visualization.name} />
           )}
-          <Stack h="100%" w="100%" flex={1} spacing={0}>
-            <Stack flex={1} h="100%" w="100%" spacing={0}>
-              <MapVisualization metadata={metadata} id={visualization.id} />
+          <Stack h="100%" w="100%" flex={1} spacing="0">
+            <Stack flex={1} h="100%" w="100%" spacing="0">
+              <MapVisualization
+                metadata={metadata}
+                data={data}
+                id={visualization.id}
+                otherParams={{
+                  thresholds,
+                  levels:
+                    levelIsGlobal !== -1 || levels.length === 0
+                      ? store.levels
+                      : levels,
+                }}
+              />
             </Stack>
-            <Stack h="20px" direction="row" spacing={0}>
+            <Stack h="20px" direction="row" spacing="0">
               {thresholds.map((item) => (
                 <Text
                   key={item.id}

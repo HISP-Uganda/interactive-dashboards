@@ -88,7 +88,7 @@ export default function () {
                 <Td textAlign="right" w="10%">
                   <IconButton
                     aria-label="delete"
-                    bg="none"
+                    bgColor="none"
                     icon={<DeleteIcon w={3} h={3} />}
                     onClick={() => removeImage(id)}
                   />

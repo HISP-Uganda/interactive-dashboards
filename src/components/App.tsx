@@ -7,23 +7,21 @@ import {
   Image,
   Spinner,
   Stack,
-  Text,
+  useMediaQuery,
 } from "@chakra-ui/react";
-import { useDataEngine } from "@dhis2/app-runtime";
 import {
   createHashHistory,
-  MakeGenerics,
   Outlet,
   parseSearchWith,
   ReactLocation,
+  Route,
   Router,
   stringifySearchWith,
 } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import { BiArrowToLeft, BiArrowToRight } from "react-icons/bi";
-import { useElementSize } from "usehooks-ts";
 import {
   CategoryForm,
   DashboardForm,
@@ -41,28 +39,17 @@ import {
 } from "../components/lists";
 import Section from "../components/Section";
 import {
-  setCategory,
-  setCurrentDashboard,
   setCurrentPage,
-  setDataSource,
-  setIndicator,
+  setIsFullScreen,
+  setIsNotDesktop,
   setShowFooter,
   setShowSider,
-  setTargetCategoryOptionCombos,
 } from "../Events";
+import { LocationGenerics } from "../interfaces";
 import { useInitials } from "../Queries";
-import {
-  $categories,
-  $dashboards,
-  $dataSources,
-  $indicators,
-  $store,
-  createCategory,
-  createDashboard,
-  createDataSource,
-  createIndicator,
-} from "../Store";
+import { $dimensions, $store } from "../Store";
 import { decodeFromBinary, encodeToBinary } from "../utils/utils";
+import { otherHeaders, padding, sideWidth } from "./constants";
 import DashboardMenu from "./DashboardMenu";
 import Footer from "./Footer";
 import MOHLogo from "./MOHLogo";
@@ -71,57 +58,40 @@ import SectionMenu from "./SectionMenu";
 import SidebarContent from "./SidebarContent";
 
 const history = createHashHistory();
-const location = new ReactLocation<
-  MakeGenerics<{
-    LoaderData: {};
-  }>
->({
+const location = new ReactLocation<LocationGenerics>({
   history,
   parseSearch: parseSearchWith((value) => JSON.parse(decodeFromBinary(value))),
   stringifySearch: stringifySearchWith((value) =>
     encodeToBinary(JSON.stringify(value))
   ),
 });
-const padding = 5;
-const sideWidth = 250;
-const maxDashboardHeight = 5 * 2 + 48;
-const realHeight = `calc(100vh - ${maxDashboardHeight}px)`;
+
 const App = () => {
   const { isLoading, isSuccess, isError, error } = useInitials();
   const store = useStore($store);
-  const dashboards = useStore($dashboards);
-  const dataSources = useStore($dataSources);
-  const indicators = useStore($indicators);
-  const categories = useStore($categories);
+  const { dashboardHeight, dashboardColumns, dashboardWidth, showSide } =
+    useStore($dimensions);
   const handle = useFullScreenHandle();
-
-  const engine = useDataEngine();
-
   const topMenuOptions: { [key: string]: any } = {
     dashboard: <DashboardMenu />,
     sections: <SectionMenu />,
   };
-
-  const [columns, setColumns] = useState<string>(`${sideWidth}px 1fr`);
-  const [dashboardWidth, setDashboardWidth] = useState<string>(
-    `calc(100vw - ${250 + padding * 2}px)`
-  );
+  const [isNotDesktop] = useMediaQuery(["(max-width: 992px)"]);
 
   useEffect(() => {
-    if (store.showSider) {
-      setColumns((prev) => `${250}px 1fr`);
-      setDashboardWidth(() => `calc(100vw - ${250 + padding * 2}px)`);
-    } else {
-      setColumns(() => "1fr");
-      setDashboardWidth(() => `100vw - ${padding * 2}px`);
-    }
-  }, [store.showSider]);
+    setIsNotDesktop(isNotDesktop);
+  }, [isNotDesktop]);
 
   useEffect(() => {
     const callback = async (event: KeyboardEvent) => {
       if (event.key === "F5" || event.key === "f5") {
-        setDashboardWidth(() => "100wv");
         await handle.enter();
+        if (handle.active) {
+          setIsFullScreen(true);
+        } else {
+          setShowSider(true);
+          setIsFullScreen(true);
+        }
       }
     };
     document.addEventListener("keydown", callback);
@@ -129,6 +99,137 @@ const App = () => {
       document.removeEventListener("keydown", callback);
     };
   }, []);
+
+  const routes: Route<LocationGenerics>[] = [
+    {
+      loader: async () => {
+        setCurrentPage("");
+        return {};
+      },
+      path: "/",
+      element: <Home />,
+    },
+    {
+      path: "/categories",
+
+      children: [
+        {
+          path: "/",
+          element: <Categories />,
+          loader: async () => {
+            setCurrentPage("categories");
+            setShowSider(true);
+            return {};
+          },
+        },
+        {
+          path: ":categoryId",
+          element: <CategoryForm />,
+          loader: () => {
+            setCurrentPage("category");
+            setShowFooter(false);
+            setShowSider(true);
+            return {};
+          },
+        },
+      ],
+    },
+    {
+      path: "/data-sources",
+      children: [
+        {
+          path: "/",
+          element: <DataSources />,
+          loader: () => {
+            setCurrentPage("data-sources");
+            setShowFooter(false);
+            setShowSider(true);
+            return {};
+          },
+        },
+        {
+          path: ":dataSourceId",
+          element: <DataSourceForm />,
+          loader: () => {
+            setCurrentPage("data-source");
+            setShowFooter(false);
+            return {};
+          },
+        },
+      ],
+    },
+    {
+      path: "/dashboards",
+      children: [
+        {
+          path: "/",
+          element: <Dashboards />,
+          loader: () => {
+            setCurrentPage("dashboards");
+            setShowFooter(false);
+            setShowSider(true);
+            return {};
+          },
+        },
+        {
+          path: ":dashboardId",
+          children: [
+            {
+              path: "/",
+              element: <DashboardForm />,
+              loader: () => {
+                setCurrentPage("dashboard");
+                setShowFooter(true);
+                setShowSider(true);
+                return {};
+              },
+            },
+            {
+              path: "section",
+              element: <Section />,
+              loader: async () => {
+                setCurrentPage("sections");
+                setShowFooter(false);
+                return {};
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      path: "/indicators",
+      children: [
+        {
+          path: "/",
+          element: <Indicators />,
+          loader: () => {
+            setCurrentPage("indicators");
+            setShowFooter(false);
+            setShowSider(true);
+            return {};
+          },
+        },
+        {
+          path: ":indicatorId",
+          children: [
+            {
+              path: "/",
+              element: <IndicatorForm />,
+              loader: () => {
+                setShowFooter(false);
+                setCurrentPage("indicator");
+                setShowSider(true);
+                return {};
+              },
+            },
+            { path: "/numerator", element: <Numerator /> },
+            { path: "/denominator", element: <Denominator /> },
+          ],
+        },
+      ],
+    },
+  ];
 
   return (
     <>
@@ -145,174 +246,24 @@ const App = () => {
       {isSuccess && (
         <Router
           location={location}
-          routes={[
-            {
-              loader: async () => {
-                setCurrentPage("");
-              },
-              path: "/",
-              element: <Home />,
-            },
-            {
-              path: "/categories",
-              loader: async () => {
-                setCurrentPage("categories");
-                setShowSider(true);
-              },
-              children: [
-                { path: "/", element: <Categories /> },
-                {
-                  path: ":categoryId",
-                  element: <CategoryForm />,
-                  loader: async ({ params: { categoryId } }) => {
-                    setCurrentPage("category");
-                    const category = categories.find(
-                      (c) => c.id === categoryId
-                    );
-                    if (category) {
-                      setCategory(category);
-                    } else {
-                      setCategory(createCategory(categoryId));
-                    }
-                  },
-                },
-              ],
-            },
-            {
-              loader: async () => {
-                setCurrentPage("data-sources");
-                setShowFooter(false);
-                setShowSider(true);
-              },
-              path: "/data-sources",
-              children: [
-                { path: "/", element: <DataSources /> },
-                {
-                  path: ":dataSourceId",
-                  element: <DataSourceForm />,
-                  loader: async ({ params: { dataSourceId } }) => {
-                    setCurrentPage("data-source");
-                    setShowFooter(false);
-                    const dataSource = dataSources.find(
-                      (c) => c.id === dataSourceId
-                    );
-                    if (dataSource) {
-                      setDataSource(dataSource);
-                    } else {
-                      setDataSource(createDataSource(dataSourceId));
-                    }
-                  },
-                },
-              ],
-            },
-            {
-              path: "/dashboards",
-              loader: async () => {
-                setCurrentPage("dashboards");
-                setShowFooter(false);
-                setShowSider(true);
-                11211;
-              },
-              children: [
-                { path: "/", element: <Dashboards /> },
-                {
-                  path: ":dashboardId",
-                  children: [
-                    {
-                      path: "/",
-                      element: <DashboardForm />,
-                      loader: async ({ params: { dashboardId } }) => {
-                        setCurrentPage("dashboard");
-                        setShowFooter(true);
-                        const dashboard = dashboards.find(
-                          (c) => c.id === dashboardId
-                        );
-                        if (dashboard) {
-                          setCurrentDashboard(dashboard);
-                          if (dashboard.targetCategoryCombo) {
-                            const {
-                              combo: { categoryOptionCombos },
-                            }: any = await engine.query({
-                              combo: {
-                                resource: `categoryCombos/${dashboard.targetCategoryCombo}`,
-                                params: {
-                                  fields:
-                                    "categoryOptionCombos[id,name,categoryOptions],categories[id,name,categoryOptions[id~rename(value),name~rename(label)]]",
-                                },
-                              },
-                            });
-                            setTargetCategoryOptionCombos(categoryOptionCombos);
-                          }
-                        } else {
-                          setCurrentDashboard(createDashboard(dashboardId));
-                        }
-                      },
-                    },
-                    {
-                      path: "section",
-                      element: <Section />,
-                      loader: async () => {
-                        setCurrentPage("sections");
-                        setShowFooter(false);
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              loader: async () => {
-                setCurrentPage("indicators");
-                setShowFooter(false);
-                setShowSider(true);
-              },
-              path: "/indicators",
-              children: [
-                {
-                  path: "/",
-                  element: <Indicators />,
-                },
-                {
-                  path: ":indicatorId",
-                  children: [
-                    {
-                      path: "/",
-                      element: <IndicatorForm />,
-                      loader: async ({ params: { indicatorId } }) => {
-                        setShowFooter(false);
-                        const indicator = indicators.find(
-                          (c) => c.id === indicatorId
-                        );
-                        if (indicator) {
-                          setIndicator(indicator);
-                        } else {
-                          setIndicator(createIndicator(indicatorId));
-                        }
-                      },
-                    },
-                    { path: "/numerator", element: <Numerator /> },
-                    { path: "/denominator", element: <Denominator /> },
-                  ],
-                },
-              ],
-            },
-          ]}
+          routes={routes}
+          defaultPendingElement={<Spinner />}
         >
           <Grid
-            templateColumns={columns}
-            maxH="calc(100vh - 48px)"
-            h="calc(100vh - 48px)"
-            p="5px"
+            templateColumns={{ md: "auto", lg: dashboardColumns }}
+            maxH={{ md: "calc(100vh - 48px)" }}
+            h={{ md: "calc(100vh - 48px)" }}
+            p={`${padding}px`}
             w="100vw"
             maxW="100vw"
           >
-            {store.showSider && (
+            {showSide && (
               <Grid
-                templateRows="48px 1fr 48px"
-                pr="5px"
-                gap="5px"
-                h={realHeight}
-                maxH={realHeight}
+                templateRows={`${otherHeaders}px 1fr ${otherHeaders}px`}
+                pr={`${padding}px`}
+                gap={`${padding}px`}
+                h={dashboardHeight}
+                maxH={dashboardHeight}
               >
                 <Stack
                   h="100%"
@@ -322,7 +273,7 @@ const App = () => {
                   justifyContent="center"
                   justifyItems="center"
                 >
-                  <MOHLogo height={48} width={250} />
+                  <MOHLogo height={otherHeaders} width={sideWidth} />
                 </Stack>
                 <GridItem>
                   <SidebarContent />
@@ -337,23 +288,29 @@ const App = () => {
                 >
                   <Image
                     src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/logo.png"
-                    maxH="48px"
-                    maxW="250px"
+                    maxH={`${otherHeaders}px`}
+                    maxW={`${sideWidth}px`}
                   />
                 </Stack>
               </Grid>
             )}
             <FullScreen handle={handle}>
               <Grid
-                templateRows="48px 1fr 48px"
-                gap="5px"
+                templateRows={`${otherHeaders}px 1fr ${otherHeaders}px`}
+                gap={`${padding}px`}
                 w={dashboardWidth}
                 maxW={dashboardWidth}
-                h={handle.active ? "100vh" : realHeight}
-                maxH={handle.active ? "100vh" : realHeight}
-                bg={handle.active ? "gray.300" : ""}
+                h={handle.active ? "100vh" : dashboardHeight}
+                maxH={handle.active ? "100vh" : dashboardHeight}
+                bgColor={handle.active ? "gray.300" : ""}
               >
-                <GridItem h="100%" w="100%" bg="white">
+                <GridItem
+                  h="100%"
+                  w={dashboardWidth}
+                  maxW={dashboardWidth}
+                  bgColor="white"
+                  p="5px"
+                >
                   <Stack
                     h="100%"
                     alignContent="center"
@@ -362,18 +319,19 @@ const App = () => {
                     w="100%"
                     spacing="40px"
                   >
-                    {(handle.active || !store.showSider) && (
+                    {(handle.active || !showSide) && (
                       <MOHLogo2>
                         <Image
                           src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/Coat_of_arms_of_Uganda.svg"
-                          maxH="48px"
-                          maxW="250px"
+                          maxH={`${otherHeaders}px`}
+                          maxW={`${sideWidth}px`}
                         />
                       </MOHLogo2>
                     )}
                     {!handle.active && !store.showSider && (
                       <IconButton
-                        bg="none"
+                        bgColor="none"
+                        variant="ghost"
                         aria-label="Search database"
                         icon={<BiArrowToRight />}
                         onClick={() => setShowSider(true)}
@@ -382,7 +340,8 @@ const App = () => {
                     )}
                     {!handle.active && store.showSider && (
                       <IconButton
-                        bg="none"
+                        variant="ghost"
+                        bgColor="none"
                         aria-label="Search database"
                         icon={<BiArrowToLeft />}
                         onClick={() => setShowSider(false)}
@@ -395,7 +354,11 @@ const App = () => {
                 <GridItem>
                   <Outlet />
                 </GridItem>
-                <GridItem w={dashboardWidth} maxW={dashboardWidth}>
+                <GridItem
+                  w={dashboardWidth}
+                  maxW={dashboardWidth}
+                  bgColor="white"
+                >
                   <Footer handle={handle} />
                 </GridItem>
               </Grid>

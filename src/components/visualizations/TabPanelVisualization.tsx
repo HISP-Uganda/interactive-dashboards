@@ -5,6 +5,7 @@ import {
   TabPanels,
   Tabs,
   TabPanel,
+  Text,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 import useInterval from "react-useinterval";
@@ -20,7 +21,7 @@ const TabPanelVisualization = (section: ISection) => {
   useInterval(increment, 1000 * 20);
 
   return (
-    <Stack h="100%" w="100%" display="flex" flexDirection="column">
+    <Stack h="100%" w="100%" flexDirection="column">
       {section.title && (
         <VisualizationTitle section={section} title={section.title} />
       )}
@@ -44,9 +45,11 @@ const TabPanelVisualization = (section: ISection) => {
           flexDirection="column"
           alignContent="center"
         >
-          <TabList>
+          <TabList fontSize="1.4vh">
             {section.visualizations.map((visualization) => (
-              <Tab key={visualization.id}>{visualization.name}</Tab>
+              <Tab key={visualization.id}>
+                <Text noOfLines={1}>{visualization.name}</Text>
+              </Tab>
             ))}
           </TabList>
 

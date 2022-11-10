@@ -20,6 +20,7 @@ import { setDataSource, setShowSider } from "../../Events";
 import { IDataSource } from "../../interfaces";
 import { saveDocument } from "../../Queries";
 import { $dataSource, $store, createDataSource } from "../../Store";
+import { generalPadding, otherHeight } from "../constants";
 
 const DataSource = () => {
   const navigate = useNavigate();
@@ -37,6 +38,7 @@ const DataSource = () => {
       ...dataSource,
       name: store.systemName,
       description: store.systemName,
+      authentication: { url: store.instanceBaseUrl },
     },
   });
 
@@ -62,19 +64,23 @@ const DataSource = () => {
     if (isCurrentDHIS2) {
       setValue("name", store.systemName);
       setValue("description", store.systemName);
-    } else {
-      if (isCurrentDHIS2) {
-        setValue("name", "");
-        setValue("description", "");
-      }
+      setValue("authentication.url", store.instanceBaseUrl);
+    } else if (!isCurrentDHIS2) {
+      setValue("name", "");
+      setValue("description", "");
+      setValue("authentication.url", "");
     }
   }, [isCurrentDHIS2]);
 
-  useEffect(() => {
-    setShowSider(true);
-  }, []);
   return (
-    <Box flex={1} p="20px" bg="white">
+    <Box
+      p={`${generalPadding}px`}
+      bgColor="white"
+      flex={1}
+      h={otherHeight}
+      maxH={otherHeight}
+      w="100%"
+    >
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing="20px">
           <FormControl isInvalid={!!errors.id}>

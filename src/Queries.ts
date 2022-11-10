@@ -1,6 +1,4 @@
 import { useDataEngine } from "@dhis2/app-runtime";
-import { bbox, center } from "@turf/turf";
-// import type { DataNode } from "antd/lib/tree";
 import axios, { AxiosRequestConfig } from "axios";
 import { fromPairs, isEmpty, max, min, uniq } from "lodash";
 import { evaluate } from "mathjs";
@@ -8,30 +6,34 @@ import { useQuery } from "react-query";
 import {
   addPagination,
   changeAdministration,
-  changeDefaults,
-  changeHasDashboards,
   changeSelectedCategory,
   changeSelectedDashboard,
   onChangeOrganisations,
   setAvailableCategories,
   setAvailableCategoryOptionCombos,
   setCategories,
-  setCategorization,
+  setCategory,
   setCurrentDashboard,
-  setDashboards,
+  setCurrentPage,
   setDataSets,
+  setDataSource,
   setDataSources,
-  setDefaultDashboard,
+  setIndicator,
+  setInstanceBaseUrl,
   setMaxLevel,
   setMinSublevel,
+  setShowFooter,
+  setShowSider,
   setSystemId,
   setSystemName,
+  setTargetCategoryOptionCombos,
   setVisualizationQueries,
   updateVisualizationData,
   updateVisualizationMetadata,
 } from "./Events";
 import {
   DataNode,
+  ICategory,
   IDashboard,
   IData,
   IDataSource,
@@ -42,7 +44,13 @@ import {
   Option,
   Threshold,
 } from "./interfaces";
-import { getSearchParams } from "./utils/utils";
+import {
+  createCategory,
+  createDashboard,
+  createDataSource,
+  createIndicator,
+} from "./Store";
+import { getSearchParams, processMap } from "./utils/utils";
 
 export const api = axios.create({
   baseURL: "https://services.dhis2.hispuganda.org/",
@@ -97,10 +105,11 @@ export const queryDataSource = async (
   return data;
 };
 
-const getIndex = async (
+export const getIndex = async (
   namespace: string,
   systemId: string,
-  otherQueries: any[] = []
+  otherQueries: any[] = [],
+  signal?: AbortSignal
 ) => {
   let must: any[] = [
     {
@@ -112,39 +121,53 @@ const getIndex = async (
     data: {
       hits: { hits },
     },
-  }: any = await api.post("wal/search", {
-    index: namespace,
-    size: 1000,
-    query: {
-      bool: {
-        must,
+  }: any = await api.post(
+    "wal/search",
+    {
+      index: namespace,
+      size: 1000,
+      query: {
+        bool: {
+          must,
+        },
       },
     },
-  });
-  return hits;
+    { signal }
+  );
+  return hits.map(({ _source }: any) => _source);
+};
+
+export const getOneRecord = async (
+  index: string,
+  id: string,
+  signal: AbortSignal | undefined
+) => {
+  try {
+    let {
+      data: {
+        body: { _source },
+      },
+    }: any = await api.post(
+      "wal/get",
+      {
+        index,
+        id,
+      },
+      { signal }
+    );
+    return _source;
+  } catch (error) {
+    return null;
+  }
 };
 
 const loadResource = async (
   namespace: string,
   systemId: string,
-  otherQueries: any[] = []
+  otherQueries: any[] = [],
+  signal?: AbortSignal
 ) => {
-  const hits = await getIndex(namespace, systemId, otherQueries);
-  return hits.map(({ _source }: any) => _source);
-};
-
-const loadSingleResource = async (engine: any, resource: string) => {
-  const query = {
-    resource: {
-      resource: `dataStore/${resource}`,
-    },
-  };
-  try {
-    const { resource }: any = await engine.query(query);
-    return resource;
-  } catch (error) {
-    return null;
-  }
+  return await getIndex(namespace, systemId, otherQueries, signal);
 };
 
 export const useOrganisationUnits = () => {
@@ -225,17 +248,19 @@ export const useInitials = () => {
       resource: "system/info",
     },
   };
-  return useQuery<any, Error>(["initial"], async () => {
+  return useQuery<any, Error>(["initial"], async ({ signal }) => {
     try {
       const {
-        systemInfo: { systemId, systemName },
+        systemInfo: { systemId, systemName, instanceBaseUrl },
         me: { organisationUnits, authorities },
         levels: { organisationUnitLevels },
         dataSets: { dataSets },
       }: any = await engine.query(ouQuery);
+
       setSystemId(systemId);
       setSystemName(systemName);
       setDataSets(dataSets);
+      setInstanceBaseUrl(instanceBaseUrl);
       const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
       changeAdministration(isAdmin);
       const facilities: React.Key[] = organisationUnits.map(
@@ -258,52 +283,18 @@ export const useInitials = () => {
         expandedKeys: [],
         checkedKeys: facilities,
       });
-      const dashboards = await loadResource("i-dashboards", systemId);
-      const categories = await loadResource("i-categories", systemId);
-      const dataSources = await loadResource("i-data-sources", systemId);
-      const visualizationQueries = await loadResource(
-        "i-visualization-queries",
-        systemId
+      const settings = await loadResource(
+        "i-dashboard-settings",
+        systemId,
+        [],
+        signal
       );
-      const settings = await loadResource("i-dashboard-settings", systemId);
       const defaultDashboard = settings.find(
         (s: any) => s.id === systemId && s.default
       );
-      const publishedDashboards = dashboards.filter(
-        (dashboard: IDashboard) => dashboard.published
-      );
-      if (isAdmin) {
-        setDashboards(dashboards);
-      } else {
-        setDashboards(publishedDashboards);
-        if (publishedDashboards.length > 0) {
-          setCurrentDashboard(publishedDashboards[0]);
-          changeSelectedDashboard(publishedDashboards[0].id);
-          changeSelectedCategory(publishedDashboards[0].category);
-          changeHasDashboards(true);
-        }
-      }
-      setCategories([
-        ...categories,
-        {
-          id: "uDWxMNyXZeo",
-          name: "Uncategorised",
-          description: "Uncategorised",
-        },
-      ]);
-      setDataSources(dataSources);
-      setVisualizationQueries(visualizationQueries);
+
       if (defaultDashboard) {
-        const dashboard = publishedDashboards.find(({ id }: IDashboard) => {
-          return defaultDashboard.default === id;
-        });
-        if (dashboard) {
-          setCurrentDashboard(dashboard);
-          changeSelectedDashboard(dashboard.id);
-          changeSelectedCategory(dashboard.category);
-          changeDefaults();
-          setDefaultDashboard(defaultDashboard.default);
-        }
+        changeSelectedDashboard(defaultDashboard.default);
       }
     } catch (error) {
       console.error(error);
@@ -313,59 +304,158 @@ export const useInitials = () => {
 };
 
 export const useDataSources = (systemId: string) => {
-  return useQuery<boolean, Error>(["data-sources"], async () => {
-    try {
-      const hits = await getIndex("i-data-sources", systemId);
-      const dataSources = hits.map(({ _source }: any) => _source);
-      setDataSources(dataSources);
-      return true;
-    } catch (error) {
-      console.error(error);
-      return true;
+  return useQuery<IDataSource[], Error>(
+    ["i-data-sources"],
+    async ({ signal }) => {
+      try {
+        setCurrentPage("data-sources");
+        setShowFooter(false);
+        setShowSider(true);
+        return await getIndex("i-data-sources", systemId, [], signal);
+      } catch (error) {
+        console.error(error);
+        return [];
+      }
     }
+  );
+};
+export const useDataSource = (id: string) => {
+  return useQuery<void, Error>(["i-data-sources", id], async ({ signal }) => {
+    const dataSource: IDataSource =
+      (await getOneRecord("i-data-sources", id, signal)) ||
+      createDataSource(id);
+    setDataSource(dataSource);
   });
 };
 
 export const useDashboards = (systemId: string) => {
-  return useQuery<boolean, Error>(["dashboards"], async () => {
+  return useQuery<IDashboard[], Error>(["i-dashboards"], async ({ signal }) => {
     try {
-      const hits = await getIndex("i-dashboards", systemId);
-      const dashboards = hits.map(({ _source }: any) => _source);
-      setDashboards(dashboards);
-      return true;
+      return await getIndex("i-dashboards", systemId, [], signal);
     } catch (error) {
       console.error(error);
-      return true;
+      return [];
+    }
+  });
+};
+
+export const useDashboard = (id: string, systemId: string) => {
+  const engine = useDataEngine();
+  return useQuery<void, Error>(["i-dashboards", id], async ({ signal }) => {
+    try {
+      let dashboard: IDashboard | null = await getOneRecord(
+        "i-dashboards",
+        id,
+        signal
+      );
+      if (!dashboard) {
+        dashboard = createDashboard(id);
+      } else {
+        const categories = await getIndex("i-categories", systemId, [], signal);
+        setCategories(categories);
+        if (dashboard.targetCategoryCombo) {
+          const {
+            combo: { categoryOptionCombos },
+          }: any = await engine.query({
+            combo: {
+              resource: `categoryCombos/${dashboard.targetCategoryCombo}`,
+              params: {
+                fields:
+                  "categoryOptionCombos[id,name,categoryOptions],categories[id,name,categoryOptions[id~rename(value),name~rename(label)]]",
+              },
+            },
+          });
+          setTargetCategoryOptionCombos(categoryOptionCombos);
+        }
+      }
+      const queries = await getIndex(
+        "i-visualization-queries",
+        systemId,
+        [],
+        signal
+      );
+      const dataSources = await getIndex(
+        "i-data-sources",
+        systemId,
+        [],
+        signal
+      );
+      setDataSources(dataSources);
+      setCurrentDashboard(dashboard);
+      changeSelectedDashboard(dashboard.id);
+      changeSelectedCategory(dashboard.category || "");
+      setVisualizationQueries(queries);
+    } catch (error) {
+      console.error(error);
     }
   });
 };
 
 export const useCategories = (systemId: string) => {
-  return useQuery<boolean, Error>(["categories"], async () => {
+  return useQuery<ICategory[], Error>(["i-categories"], async ({ signal }) => {
     try {
-      const hits = await getIndex("i-categories", systemId);
-      const categories = hits.map(({ _source }: any) => _source);
-      setCategories(categories);
-      return true;
+      return await getIndex("i-categories", systemId, [], signal);
     } catch (error) {
       console.error(error);
-      return true;
+      return [];
     }
   });
 };
 
-export const useVisualizationData = (systemId: string) => {
-  return useQuery<boolean, Error>(["visualization-queries"], async () => {
+export const useCategory = (id: string) => {
+  return useQuery<void, Error>(["i-categories", id], async ({ signal }) => {
     try {
-      const hits = await getIndex("i-visualization-queries", systemId);
-      const visualizationQueries = hits.map(({ _source }: any) => _source);
-      setVisualizationQueries(visualizationQueries);
-      return true;
+      let category = await getOneRecord("i-categories", id, signal);
+      if (!category) {
+        category = createCategory(id);
+      }
+      setCategory(category);
+      return;
     } catch (error) {
       console.error(error);
-      return true;
     }
   });
+};
+export const useVisualizationData = (systemId: string) => {
+  return useQuery<IIndicator[], Error>(
+    ["i-visualization-queries"],
+    async ({ signal }) => {
+      try {
+        return await getIndex("i-visualization-queries", systemId, [], signal);
+      } catch (error) {
+        console.error(error);
+        return [];
+      }
+    }
+  );
+};
+
+export const useVisualizationDatum = (id: string, systemId: string) => {
+  return useQuery<void, Error>(
+    ["i-visualization-queries", id],
+    async ({ signal }) => {
+      try {
+        const dataSources = await getIndex(
+          "i-data-sources",
+          systemId,
+          [],
+          signal
+        );
+        let indicator = await getOneRecord(
+          "i-visualization-queries",
+          id,
+          signal
+        );
+        if (!indicator) {
+          indicator = createIndicator(id);
+        }
+        setDataSources(dataSources);
+        setIndicator(indicator);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  );
 };
 
 export const useDataSet = (dataSet: string) => {
@@ -379,80 +469,32 @@ export const useDataSet = (dataSet: string) => {
       },
     },
   };
-  return useQuery<void, Error>(["data-set", dataSet], async () => {
-    try {
-      const {
-        dataSet: {
-          categoryCombo: { categories, categoryOptionCombos },
-        },
-      }: any = await engine.query(namespaceQuery);
-      setAvailableCategories(categories);
-      setAvailableCategoryOptionCombos(categoryOptionCombos);
-      const selectedCategories = categories.map(
-        ({ id, categoryOptions }: any, index: number) => [
-          id,
-          index === 0 ? [categoryOptions[1]] : categoryOptions,
-        ]
-      );
-      setCategorization(fromPairs(selectedCategories));
-    } catch (error) {
-      console.error(error);
-    }
-  });
-};
-
-export const useNamespace = (namespace: string) => {
-  const engine = useDataEngine();
-  const namespaceQuery = {
-    namespaceKeys: {
-      resource: `dataStore/${namespace}`,
-    },
-  };
-  return useQuery<any[], Error>(["namespaces", namespace], async () => {
-    try {
-      const { namespaceKeys }: any = await engine.query(namespaceQuery);
-      const query: any = fromPairs(
-        namespaceKeys.map((n: string) => [
-          n,
-          {
-            resource: `dataStore/${namespace}/${n}`,
+  return useQuery<{ [key: string]: any }, Error>(
+    ["data-set", dataSet],
+    async () => {
+      try {
+        const {
+          dataSet: {
+            categoryCombo: { categories, categoryOptionCombos },
           },
-        ])
-      );
-      const allData = await engine.query(query);
-      return Object.values(allData);
-    } catch (error) {
-      console.error(error);
-      return [];
+        }: any = await engine.query(namespaceQuery);
+        setAvailableCategories(categories);
+        setAvailableCategoryOptionCombos(categoryOptionCombos);
+        const selectedCategories = categories.map(
+          ({ id, categoryOptions }: any, index: number) => [
+            id,
+            index === 0
+              ? [categoryOptions[categoryOptions.length - 1]]
+              : categoryOptions,
+          ]
+        );
+        // setCategorization();
+        return fromPairs(selectedCategories);
+      } catch (error) {
+        console.error(error);
+      }
     }
-  });
-};
-
-export const useNamespaceKey = (namespace: string, key: string) => {
-  const engine = useDataEngine();
-  const namespaceQuery = {
-    dashboard: {
-      resource: `dataStore/${namespace}/${key}`,
-    },
-  };
-  return useQuery<boolean, Error>(["namespace", namespace, key], async () => {
-    const { dashboard }: any = await engine.query(namespaceQuery);
-    setCurrentDashboard(dashboard);
-    return true;
-  });
-};
-
-export const useNamespaceKey2 = (namespace: string, key: string) => {
-  const engine = useDataEngine();
-  const namespaceQuery = {
-    dashboard: {
-      resource: `dataStore/${namespace}/${key}`,
-    },
-  };
-  return useQuery<any, Error>(["namespace-key-2", namespace, key], async () => {
-    const { dashboard }: any = await engine.query(namespaceQuery);
-    return dashboard;
-  });
+  );
 };
 
 export const useDataElements = (page: number, pageSize: number, q = "") => {
@@ -949,7 +991,7 @@ const generateDHIS2Query = (
   overrides: { [key: string]: string } = {}
 ) => {
   return indicators.map((indicator) => {
-    let query = {};
+    let query: { numerator?: string; denominator?: string } = {};
     if (
       indicator.numerator?.type === "ANALYTICS" &&
       Object.keys(indicator.numerator.dataDimensions).length > 0
@@ -961,9 +1003,8 @@ const generateDHIS2Query = (
       );
       if (params) {
         query = {
-          numerator: {
-            resource: `analytics.json?${params}`,
-          },
+          ...query,
+          numerator: `analytics.json?${params}`,
         };
       }
     } else if (
@@ -987,11 +1028,9 @@ const generateDHIS2Query = (
       }
       query = {
         ...query,
-        numerator: {
-          resource: `sqlViews/${
-            Object.keys(indicator.numerator.dataDimensions)[0]
-          }/data.json${currentParams}`,
-        },
+        numerator: `sqlViews/${
+          Object.keys(indicator.numerator.dataDimensions)[0]
+        }/data.json${currentParams}`,
       };
     }
     if (
@@ -1002,9 +1041,7 @@ const generateDHIS2Query = (
       if (params) {
         query = {
           ...query,
-          denominator: {
-            resource: `analytics.json?${params}`,
-          },
+          denominator: `analytics.json?${params}`,
         };
       }
     } else if (
@@ -1028,11 +1065,9 @@ const generateDHIS2Query = (
       }
       query = {
         ...query,
-        denominator: {
-          resource: `sqlViews/${
-            Object.keys(indicator.denominator.dataDimensions)[0]
-          }/data.json${currentParams}`,
-        },
+        denominator: `sqlViews/${
+          Object.keys(indicator.denominator.dataDimensions)[0]
+        }/data.json${currentParams}`,
       };
     }
     return { query, indicator };
@@ -1083,11 +1118,15 @@ export const useVisualization = (
   let processed: any[] = [];
   const otherKeys = generateKeys(indicators, globalFilters);
   const overrides = visualization.overrides || {};
-  const dhis2Indicators = indicators.filter((indicator) => {
+  const dhis2Indicators = indicators.flatMap((indicator) => {
     const ds = dataSources.find(
-      (dataSource) => dataSource.id === indicator.dataSource
+      (dataSource) =>
+        dataSource.id === indicator.dataSource && dataSource.type === "DHIS2"
     );
-    return ds?.type === "DHIS2";
+    if (ds) {
+      return { ...indicator, realDataSource: ds };
+    }
+    return [];
   });
 
   const elasticsearchIndicators = indicators.filter((indicator) => {
@@ -1109,7 +1148,7 @@ export const useVisualization = (
       ...otherKeys,
       ...Object.values(overrides),
     ],
-    async () => {
+    async ({ signal }) => {
       if (
         dhis2Indicators.length > 0 &&
         !isEmpty(globalFilters) &&
@@ -1121,11 +1160,82 @@ export const useVisualization = (
           overrides
         );
         for (const { query, indicator } of queries) {
-          const data = await engine.query(query);
+          let allQueries: Promise<any>[] = [];
+          let dhis2Queries = {};
+          if (query.numerator) {
+            if (indicator.realDataSource?.isCurrentDHIS2) {
+              dhis2Queries = {
+                ...dhis2Queries,
+                numerator: {
+                  resource: query.numerator,
+                },
+              };
+            } else {
+              allQueries = [
+                ...allQueries,
+                axios.get(
+                  `${indicator.realDataSource?.authentication.url || ""}/api/${
+                    query.numerator
+                  }`,
+                  {
+                    auth: {
+                      username:
+                        indicator.realDataSource?.authentication.username || "",
+                      password:
+                        indicator.realDataSource?.authentication.password || "",
+                    },
+                  }
+                ),
+              ];
+            }
+          }
+          if (query.denominator) {
+            if (indicator.realDataSource?.isCurrentDHIS2) {
+              dhis2Queries = {
+                ...dhis2Queries,
+                denominator: {
+                  resource: query.denominator,
+                },
+              };
+            } else {
+              allQueries = [
+                ...allQueries,
+                axios.get(
+                  `${indicator.realDataSource?.authentication.url || ""}/api/${
+                    query.denominator
+                  }`,
+                  {
+                    auth: {
+                      username:
+                        indicator.realDataSource?.authentication.username || "",
+                      password:
+                        indicator.realDataSource?.authentication.password || "",
+                    },
+                  }
+                ),
+              ];
+            }
+          }
+
+          let numerator = undefined;
+          let denominator = undefined;
+
+          if (Object.keys(dhis2Queries).length > 0) {
+            const response: any = await engine.query(dhis2Queries);
+
+            numerator = response.numerator;
+            denominator = response.denominator;
+          } else if (allQueries.length > 0) {
+            console.log("This is wrong");
+            const [{ data: num }, { data: den }] = await Promise.all(
+              allQueries
+            );
+            numerator = num;
+            denominator = den;
+          }
+
           let metadata = {};
-          if (data.numerator && data.denominator) {
-            const numerator: any = data.numerator;
-            const denominator: any = data.denominator;
+          if (numerator && denominator) {
             let denRows = [];
             let numRows = [];
             let denHeaders: any[] = [];
@@ -1178,7 +1288,6 @@ export const useVisualization = (
               );
             });
 
-            // console.log(numerators, denominators);
             processed = [
               ...processed,
               ...numerators.map((numerator: { [key: string]: string }) => {
@@ -1252,8 +1361,7 @@ export const useVisualization = (
                 return { ...numerator, value: 0 };
               }),
             ];
-          } else if (data.numerator) {
-            const numerator: any = data.numerator;
+          } else if (numerator) {
             if (numerator && numerator.listGrid) {
               const { headers, rows } = numerator.listGrid;
               if (rows.length > 0) {
@@ -1272,11 +1380,11 @@ export const useVisualization = (
                 });
 
                 if (
-                  visualization.id === "AHxO7yowduX" &&
-                  indicator.id === "ejqSEwfG07O"
+                  ["AHxO7yowduX", "a19pSPoyUl9"].indexOf(visualization.id) !==
+                    -1 &&
+                  ["ejqSEwfG07O", "FOgNEFzg210"].indexOf(indicator.id) !== -1
                 ) {
                   const firstValue = foundRows[0].value || foundRows[0].total;
-
                   foundRows = [
                     "daugmmgzAkU",
                     "C1IRVkhB3MW",
@@ -1397,7 +1505,8 @@ export const useMaps = (
   levels: string[],
   parents: string[],
   data: any[],
-  thresholds: Threshold[]
+  thresholds: Threshold[],
+  otherKeys: string[]
 ) => {
   const engine = useDataEngine();
   const parent = parents
@@ -1434,74 +1543,14 @@ export const useMaps = (
   ]);
 
   query = { ...query, ...fromPairs(levelsQuery) };
-  return useQuery<any, Error>(["maps", ...levels, ...parents], async () => {
-    const { geojson, ...otherLevels }: any = await engine.query(query);
-    const mapCenter = center(geojson).geometry.coordinates;
-    const bounds = bbox(geojson);
-    const organisationUnits = Object.values(otherLevels).flatMap(
-      ({ organisationUnits }: any) => organisationUnits
-    );
-    const { features, ...rest } = geojson;
-    const processedData = fromPairs(
-      data.map((d) => {
-        const value = d.value || d.total;
-        const id = d.c || d.ou;
-        return [id, value];
-      })
-    );
-
-    const processedFeatures = features.map(
-      ({ id, properties, ...others }: any) => {
-        let value = processedData[id];
-        let colorSearch: any = undefined;
-
-        if (value) {
-          const numericValue = Number(value).toFixed(2);
-          colorSearch = thresholds.find(({ max, min }: any) => {
-            if (max && min) {
-              return (
-                Number(numericValue) >= Number(min) &&
-                Number(value) <= Number(max)
-              );
-            } else if (min) {
-              return Number(numericValue) >= Number(min);
-            } else if (max) {
-              return Number(numericValue) <= Number(max);
-            }
-          });
-        }
-        let color = "white";
-
-        if (value && colorSearch) {
-          color = colorSearch.color;
-        } else if (value && thresholds.length > 0) {
-          color = thresholds[0].color;
-        }
-
-        return {
-          id,
-          ...others,
-          properties: {
-            ...properties,
-            value: value
-              ? Intl.NumberFormat("en-US", {
-                  style: "percent",
-                  notation: "standard",
-                  maximumFractionDigits: 2,
-                }).format(value / 100)
-              : "No Data",
-            color,
-          },
-        };
-      }
-    );
-    return {
-      geojson: { ...rest, features: processedFeatures },
-      mapCenter,
-      organisationUnits,
-      bounds,
-    };
-  });
+  return useQuery<any, Error>(
+    ["maps", ...levels, ...parents, ...otherKeys],
+    async () => {
+      const { geojson, ...otherLevels }: any = await engine.query(query);
+      return processMap(geojson, otherLevels, data, thresholds);
+    },
+    { refetchInterval: 7 }
+  );
 };
 
 export const saveDocument = async (
@@ -1509,8 +1558,14 @@ export const saveDocument = async (
   systemId: string,
   document: { [key: string]: any }
 ) => {
-  const { data } = await api.post(`wal/bulk?index=${index}`, {
-    data: [{ ...document, systemId }],
+  const { data } = await api.post(`wal/index?index=${index}`, {
+    ...document,
+    systemId,
   });
+  return data;
+};
+
+export const deleteDocument = async (index: string, id: string) => {
+  const { data } = await api.post(`wal/delete?index=${index}&id=${id}`);
   return data;
 };
