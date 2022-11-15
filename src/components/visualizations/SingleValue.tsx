@@ -10,7 +10,13 @@ import {
 import { ChartProps } from "../../interfaces";
 import { processSingleValue } from "../processors";
 
-const ProgressBar = ({ bg, completed }: { bg: string; completed: number }) => {
+const ProgressBar = ({
+  bgColor,
+  completed,
+}: {
+  bgColor: string;
+  completed: number;
+}) => {
   return (
     <Box
       height="20px"
@@ -22,7 +28,7 @@ const ProgressBar = ({ bg, completed }: { bg: string; completed: number }) => {
       <Box
         height="100%"
         width={`${completed > 100 ? "100" : completed}%`}
-        bgColor={bg}
+        bgColor={bgColor}
         borderRadius="inherit"
         textAlign="right"
       >

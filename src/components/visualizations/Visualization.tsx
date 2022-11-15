@@ -8,7 +8,9 @@ import {
   $dataSources,
   $globalFilters,
   $indicators,
+  $visualizationData,
 } from "../../Store";
+import { deriveSingleValues } from "../../utils/utils";
 import AreaGraph from "./AreaGraph";
 import BarGraph from "./BarGraph";
 import BoxPlot from "./BoxPlot";
@@ -232,6 +234,7 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
   const globalFilters = useStore($globalFilters);
   const dataSources = useStore($dataSources);
   const dashboard = useStore($dashboard);
+  const visualizationData = useStore($visualizationData);
 
   const currentIndicators = indicators.filter(
     (v) => String(visualization.indicator).split(",").indexOf(v.id) !== -1
@@ -242,13 +245,14 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
     );
   });
 
-  const { isLoading, isSuccess, data, isError, error } = useVisualization(
+  const { isLoading, isSuccess, data, isError } = useVisualization(
     visualization,
     currentIndicators,
     currentDataSources,
     dashboard.refreshInterval,
     globalFilters
   );
+  deriveSingleValues(visualizationData, visualization.expression);
   return (
     <Stack
       alignContent="center"
@@ -262,9 +266,19 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
       w="100%"
       flex={1}
     >
-      {isLoading && <Spinner />}
-      {isSuccess && getVisualization(visualization, data, section)}
-      {isError && <Text>Error occurred</Text>}
+      {visualization.expression &&
+        getVisualization(
+          visualization,
+          deriveSingleValues(visualizationData, visualization.expression),
+          section
+        )}
+      {!visualization.expression && (
+        <>
+          {isLoading && <Spinner />}
+          {isSuccess && getVisualization(visualization, data, section)}
+          {isError && <Text>Error occurred</Text>}
+        </>
+      )}
     </Stack>
   );
 };

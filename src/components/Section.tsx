@@ -287,7 +287,7 @@ const Section = () => {
               colorScheme={active === visualization.id ? "teal" : "gray"}
               onClick={() => setActive(() => visualization.id)}
             >
-              {visualization.name}
+              {visualization.name || visualization.id}
             </Button>
           ))}
           <Button

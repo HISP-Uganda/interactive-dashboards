@@ -12,6 +12,7 @@ import {
 type periodType = "days" | "weeks" | "months" | "years" | "quarters";
 import { Option, Threshold } from "../interfaces";
 import { fromPairs, uniq } from "lodash";
+import { evaluate } from "mathjs";
 
 export function encodeToBinary(str: string): string {
   return btoa(
@@ -105,24 +106,6 @@ export const getRelativePeriods = (periodString: string) => {
   return relativePeriods[periodString] || relativePeriods["LAST_MONTH"];
 };
 
-const isWorthy = (data: any[]) => {
-  if (data.length === 1 && Object.keys(data[0]).length <= 2) {
-    return ["single"];
-  }
-  if (data.length > 1 && Object.keys(data[0]).length === 2) {
-    return ["bar", "pie", "map"];
-  }
-
-  if (data.length > 1 && Object.keys(data[0]).length === 3) {
-    return ["bar"];
-  }
-
-  if (data.length > 1 && Object.keys(data[0]).length === 4) {
-    return ["multiple"];
-  }
-  return [];
-};
-
 export const globalIds: Option[] = [
   { label: "Period", value: "m5D13FqKZwN", id: "pe" },
   { label: "Program Indicator", value: "Eep3rko7uh6", id: "pi" },
@@ -161,7 +144,6 @@ export const getSearchParams = (query?: string) => {
   }
   return [];
 };
-
 export const getPeriodsBetweenDates = (
   start?: Date,
   end?: Date,
@@ -227,19 +209,6 @@ export const oneBucketAggregation = (data: { [key: string]: any }) => {
 };
 export const oneMetricAggregation = (data: { [key: string]: any }) => {
   return data;
-};
-
-const getKeyString = (data: { [key: string]: any }) => {
-  if (data.pe) {
-    return "pe";
-  }
-  if (data.dx) {
-    return "dx";
-  }
-  if (data.ou) {
-    return "ou";
-  }
-  return "";
 };
 
 export const bucketMetricAggregation = (data: { [key: string]: any }) => {
@@ -703,4 +672,27 @@ export const processMap = (
     mapCenter,
     organisationUnits,
   };
+};
+
+export const deriveSingleValues = (
+  data: { [key: string]: any[] },
+  expression?: string
+) => {
+  if (expression !== undefined) {
+    let finalExpression = expression;
+    const all = expression.match(/\w+/g);
+    if (all) {
+      all.forEach((s) => {
+        const val = data[s]?.[0].value || 0;
+        finalExpression = finalExpression.replace(s, val);
+      });
+    }
+
+    try {
+      const evaluation = evaluate(finalExpression);
+      return [{ value: evaluation }];
+    } catch (error) {
+      return [{ value: "null" }];
+    }
+  }
 };

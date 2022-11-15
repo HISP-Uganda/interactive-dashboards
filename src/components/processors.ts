@@ -10,7 +10,7 @@ export const processSingleValue = (data: any[]): any => {
       return values[values.length - 1];
     }
   }
-  return 0;
+  return "-";
 };
 
 export const processGraphs = (
