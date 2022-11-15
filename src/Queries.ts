@@ -18,6 +18,7 @@ import {
   setDataSets,
   setDataSource,
   setDataSources,
+  setDefaultDashboard,
   setIndicator,
   setInstanceBaseUrl,
   setMaxLevel,
@@ -292,9 +293,9 @@ export const useInitials = () => {
       const defaultDashboard = settings.find(
         (s: any) => s.id === systemId && s.default
       );
-
       if (defaultDashboard) {
         changeSelectedDashboard(defaultDashboard.default);
+        setDefaultDashboard(defaultDashboard.default);
       }
     } catch (error) {
       console.error(error);
