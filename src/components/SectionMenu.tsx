@@ -1,42 +1,19 @@
-import { Button, IconButton, Spacer, Stack, Text } from "@chakra-ui/react";
+import { Button, Spacer, Stack, Text } from "@chakra-ui/react";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { MdKeyboardBackspace } from "react-icons/md";
-import { addSection, setDashboards } from "../Events";
+import { addSection, setRefresh } from "../Events";
 import { LocationGenerics } from "../interfaces";
-import { $dashboard, $dashboards, $section } from "../Store";
+import { $dashboard, $section } from "../Store";
 
 const SectionMenu = () => {
   const navigate = useNavigate();
   const search = useSearch<LocationGenerics>();
   const dashboard = useStore($dashboard);
   const section = useStore($section);
-  const dashboards = useStore($dashboards);
 
   const onApply = () => {
     addSection(section);
-    setDashboards(
-      dashboards.map((dash) => {
-        if (dash.id === dashboard.id) {
-          if (section.isBottomSection) {
-            return { ...dashboard, bottomSection: section };
-          } else {
-            const isOld = dashboard.sections.find((s) => s.id === section.id);
-            let sections = dashboard.sections.map((s) => {
-              if (section.id === s.id) {
-                return section;
-              }
-              return s;
-            });
-            if (!isOld) {
-              sections = [...sections, section];
-            }
-            return { ...dashboard, sections };
-          }
-        }
-        return dash;
-      })
-    );
+    setRefresh(false);
     navigate({
       to: `/dashboards/${dashboard.id}`,
       search,

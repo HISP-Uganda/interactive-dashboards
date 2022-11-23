@@ -340,21 +340,23 @@ export const useDashboards = (systemId: string) => {
   });
 };
 
-export const useDashboard = (id: string, systemId: string) => {
+export const useDashboard = (
+  id: string,
+  systemId: string,
+  refresh: boolean = true
+) => {
   const engine = useDataEngine();
   return useQuery<void, Error>(["i-dashboards", id], async ({ signal }) => {
-    try {
-      let dashboard: IDashboard | null = await getOneRecord(
-        "i-dashboards",
-        id,
-        signal
-      );
-      if (!dashboard) {
-        dashboard = createDashboard(id);
-      } else {
-        const categories = await getIndex("i-categories", systemId, [], signal);
-        setCategories(categories);
-        if (dashboard.targetCategoryCombo) {
+    if (refresh) {
+      try {
+        let dashboard: IDashboard | null = await getOneRecord(
+          "i-dashboards",
+          id,
+          signal
+        );
+        if (!dashboard) {
+          dashboard = createDashboard(id);
+        } else if (dashboard.targetCategoryCombo) {
           const {
             combo: { categoryOptionCombos },
           }: any = await engine.query({
@@ -368,26 +370,29 @@ export const useDashboard = (id: string, systemId: string) => {
           });
           setTargetCategoryOptionCombos(categoryOptionCombos);
         }
+
+        const queries = await getIndex(
+          "i-visualization-queries",
+          systemId,
+          [],
+          signal
+        );
+        const dataSources = await getIndex(
+          "i-data-sources",
+          systemId,
+          [],
+          signal
+        );
+        const categories = await getIndex("i-categories", systemId, [], signal);
+        setCategories(categories);
+        setDataSources(dataSources);
+        setCurrentDashboard(dashboard);
+        changeSelectedDashboard(dashboard.id);
+        changeSelectedCategory(dashboard.category || "");
+        setVisualizationQueries(queries);
+      } catch (error) {
+        console.error(error);
       }
-      const queries = await getIndex(
-        "i-visualization-queries",
-        systemId,
-        [],
-        signal
-      );
-      const dataSources = await getIndex(
-        "i-data-sources",
-        systemId,
-        [],
-        signal
-      );
-      setDataSources(dataSources);
-      setCurrentDashboard(dashboard);
-      changeSelectedDashboard(dashboard.id);
-      changeSelectedCategory(dashboard.category || "");
-      setVisualizationQueries(queries);
-    } catch (error) {
-      console.error(error);
     }
   });
 };

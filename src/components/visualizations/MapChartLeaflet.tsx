@@ -1,4 +1,5 @@
-import { Spinner, Stack, Text } from "@chakra-ui/react";
+import { useRef } from "react";
+import { Spinner, Stack, Text, useDimensions } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { ChartProps, Threshold } from "../../interfaces";
 import { findLevelsAndOus, useMaps } from "../../Queries";
@@ -12,6 +13,9 @@ const MapChartLeaflet = ({
   section,
   data,
 }: ChartProps) => {
+  const elementRef = useRef<any>();
+  const dimensions = useDimensions(elementRef);
+
   const indicators = useStore($indicators);
   const indicator = indicators.find((v) => v.id === visualization.indicator);
   const { levels, ous } = findLevelsAndOus(indicator);
@@ -52,7 +56,7 @@ const MapChartLeaflet = ({
             <VisualizationTitle section={section} title={visualization.name} />
           )}
           <Stack h="100%" w="100%" flex={1} spacing="0">
-            <Stack flex={1} h="100%" w="100%" spacing="0">
+            <Stack flex={1} h="100%" w="100%" spacing="0" ref={elementRef}>
               <MapVisualization
                 metadata={metadata}
                 data={data}
@@ -64,6 +68,8 @@ const MapChartLeaflet = ({
                       ? store.levels
                       : levels,
                 }}
+                height={dimensions?.borderBox.height}
+                width={dimensions?.borderBox.width}
               />
             </Stack>
             <Stack h="20px" direction="row" spacing="0">

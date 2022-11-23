@@ -169,6 +169,7 @@ export interface IStore {
   instanceBaseUrl: string;
   isNotDesktop: boolean;
   isFullScreen: boolean;
+  refresh: boolean;
 }
 
 export type IndicatorProps = {
