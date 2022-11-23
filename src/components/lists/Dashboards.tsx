@@ -20,10 +20,12 @@ import {
   changeSelectedDashboard,
   setCurrentDashboard,
   setDashboards,
+  setRefresh,
 } from "../../Events";
 import { IDashboard } from "../../interfaces";
 import { useDashboards } from "../../Queries";
 import { $dashboards, $store, createDashboard } from "../../Store";
+import { generateUid } from "../../utils/uid";
 import { generalPadding, otherHeight } from "../constants";
 
 const Dashboards = () => {
@@ -47,16 +49,10 @@ const Dashboards = () => {
         <Spacer />
         <Button
           onClick={() => {
-            const dashboard = createDashboard();
-            setCurrentDashboard(dashboard);
-            changeSelectedDashboard(dashboard.id);
-            changeSelectedCategory(dashboard.category || "");
-            // setDashboards([...dashboards, dashboard]);
+            setRefresh(true);
             navigate({
-              to: `/dashboards/${dashboard.id}`,
+              to: `/dashboards/${generateUid()}`,
               search: {
-                edit: true,
-                category: dashboard.category,
                 periods: store.periods.map((i) => i.id).join("-"),
                 organisations: store.organisations.join("-"),
                 groups: store.groups.join("-"),

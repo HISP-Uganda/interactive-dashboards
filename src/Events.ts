@@ -185,3 +185,4 @@ export const setMinSublevel = domain.createEvent<number>();
 export const setMaxLevel = domain.createEvent<number>();
 export const setIsNotDesktop = domain.createEvent<boolean>();
 export const setIsFullScreen = domain.createEvent<boolean>();
+export const setRefresh = domain.createEvent<boolean>();

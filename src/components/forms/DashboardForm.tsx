@@ -13,7 +13,8 @@ export default function DashboardForm() {
   } = useMatch<LocationGenerics>();
   const { isLoading, isSuccess, isError, error, isFetching } = useDashboard(
     dashboardId,
-    store.systemId
+    store.systemId,
+    store.refresh
   );
   return (
     <Stack

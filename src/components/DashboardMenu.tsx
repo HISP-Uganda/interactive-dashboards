@@ -37,6 +37,7 @@ import {
   setCurrentSection,
   setDashboards,
   setDefaultDashboard,
+  setRefresh,
 } from "../Events";
 import { IDashboard, Item, LocationGenerics, Option } from "../interfaces";
 import { saveDocument } from "../Queries";
@@ -72,6 +73,7 @@ const DashboardMenu = () => {
     };
     await saveDocument("i-dashboard-settings", store.systemId, setting);
     setLoading(() => false);
+    setRefresh(true);
     onClose();
   };
 

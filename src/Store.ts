@@ -72,6 +72,7 @@ import {
   setIsNotDesktop,
   setIsFullScreen,
   duplicateVisualization,
+  setRefresh,
 } from "./Events";
 import {
   ICategory,
@@ -211,6 +212,7 @@ export const $store = domain
     instanceBaseUrl: "",
     isNotDesktop: false,
     isFullScreen: false,
+    refresh: true,
   })
   .on(setOrganisations, (state, organisations) => {
     return { ...state, organisations };
@@ -287,6 +289,9 @@ export const $store = domain
   })
   .on(setIsFullScreen, (state, isFullScreen) => {
     return { ...state, isFullScreen };
+  })
+  .on(setRefresh, (state, refresh) => {
+    return { ...state, refresh };
   });
 
 export const $dataSource = domain
