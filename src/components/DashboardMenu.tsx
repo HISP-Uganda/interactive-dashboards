@@ -2,12 +2,6 @@ import {
   Box,
   Button,
   Checkbox,
-  Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerHeader,
-  DrawerOverlay,
   Input,
   Modal,
   ModalBody,
@@ -23,6 +17,7 @@ import {
   useDisclosure,
   useMediaQuery,
 } from "@chakra-ui/react";
+import { DropdownButton } from "@dhis2/ui";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
@@ -37,6 +32,7 @@ import {
   setCurrentSection,
   setDashboards,
   setDefaultDashboard,
+  setOrganisations,
   setRefresh,
 } from "../Events";
 import { IDashboard, Item, LocationGenerics, Option } from "../interfaces";
@@ -53,6 +49,8 @@ import AutoRefreshPicker from "./AutoRefreshPicker";
 import DashboardCategorization from "./forms/DashboardCategorization";
 import OUTreeSelect from "./OUTreeSelect";
 import PeriodPicker from "./PeriodPicker";
+import ThemeTree from "./ThemeTree";
+
 const DashboardMenu = () => {
   const search = useSearch<LocationGenerics>();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -96,12 +94,6 @@ const DashboardMenu = () => {
   const onChangePeriods = (periods: Item[]) => {
     changePeriods(periods);
   };
-
-  const {
-    isOpen: filterIsOpen,
-    onOpen: onOpenFilter,
-    onClose: onCloseFilter,
-  } = useDisclosure();
 
   return (
     <Stack
@@ -172,32 +164,43 @@ const DashboardMenu = () => {
         </>
       )}
       {store.isAdmin && !isNotDesktop && <AutoRefreshPicker />}
-      <Button colorScheme="teal" size="sm" onClick={onOpenFilter}>
-        Filter
-      </Button>
+      <DropdownButton
+        primary
+        component={
+          <Stack
+            w="600px"
+            p="15px"
+            mt="7px"
+            bg="white"
+            boxShadow="2xl"
+            // borderTopRadius="lg"
+            overflow="auto"
+            h="calc(100vh - 170px)"
+          >
+            <Text>Theme</Text>
+            <ThemeTree />
+            <DashboardCategorization dataSet={dashboard.dataSet} />
+            <Text>Organisation</Text>
+            <OUTreeSelect
+              value={store.organisations}
+              onChange={(value) => {
+                if (Array.isArray(value)) {
+                  setOrganisations(value);
+                }
+              }}
+            />
 
-      <Drawer
-        isOpen={filterIsOpen}
-        placement="right"
-        onClose={onCloseFilter}
-        size="md"
+            <PeriodPicker
+              selectedPeriods={store.periods}
+              onChange={onChangePeriods}
+            />
+          </Stack>
+        }
+        name="buttonName"
+        value="buttonValue"
       >
-        <DrawerOverlay />
-        <DrawerContent>
-          <DrawerCloseButton />
-          <DrawerHeader>Filters</DrawerHeader>
-          <DrawerBody>
-            <Stack spacing="20px">
-              <DashboardCategorization dataSet={dashboard.dataSet} />
-              <OUTreeSelect />
-              <PeriodPicker
-                selectedPeriods={store.periods}
-                onChange={onChangePeriods}
-              />
-            </Stack>
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
+        Filter
+      </DropdownButton>
 
       <Modal isOpen={isOpen} onClose={onClose} size="2xl">
         <ModalOverlay />

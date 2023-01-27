@@ -2,7 +2,7 @@ import { useDataEngine } from "@dhis2/app-runtime";
 import axios, { AxiosRequestConfig } from "axios";
 import { fromPairs, isEmpty, max, min, uniq } from "lodash";
 import { evaluate } from "mathjs";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   addPagination,
   changeAdministration,
@@ -52,6 +52,7 @@ import {
   createIndicator,
 } from "./Store";
 import { getSearchParams, processMap } from "./utils/utils";
+import { db } from "./db";
 
 export const api = axios.create({
   baseURL: "https://services.dhis2.hispuganda.org/",
@@ -158,7 +159,7 @@ export const getOneRecord = async (
     );
     return _source;
   } catch (error) {
-    return null;
+    return {};
   }
 };
 
@@ -205,6 +206,7 @@ export const useOrganisationUnits = () => {
     }: any = await engine.query(ouQuery);
     const units: DataNode[] = organisationUnits.map((o: any) => {
       return {
+        pId: "",
         key: o.id,
         title: o.name,
         level: o.level,
@@ -250,6 +252,7 @@ export const useInitials = () => {
     },
   };
   return useQuery<any, Error>(["initial"], async ({ signal }) => {
+    const organisations = await db.organisations.toArray();
     try {
       const {
         systemInfo: { systemId, systemName, instanceBaseUrl },
@@ -257,14 +260,13 @@ export const useInitials = () => {
         levels: { organisationUnitLevels },
         dataSets: { dataSets },
       }: any = await engine.query(ouQuery);
-
       setSystemId(systemId);
       setSystemName(systemName);
       setDataSets(dataSets);
       setInstanceBaseUrl(instanceBaseUrl);
       const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
       changeAdministration(isAdmin);
-      const facilities: React.Key[] = organisationUnits.map(
+      const facilities: string[] = organisationUnits.map(
         (unit: any) => unit.id
       );
       const maxLevel = organisationUnitLevels[0].level;
@@ -276,6 +278,18 @@ export const useInitials = () => {
         setMinSublevel(minSublevel + 1);
       } else {
         setMinSublevel(maxLevel);
+      }
+      const availableUnits = organisationUnits.map((unit: any) => {
+        return {
+          id: unit.id,
+          pId: unit.pId || "",
+          value: unit.id,
+          title: unit.name,
+          isLeaf: unit.leaf,
+        };
+      });
+      if (organisations.length === 0) {
+        await db.organisations.bulkAdd(availableUnits);
       }
       onChangeOrganisations({
         levels: [minLevel === 1 ? "3" : `${minLevel ? minLevel + 1 : 4}`],
@@ -346,54 +360,51 @@ export const useDashboard = (
   refresh: boolean = true
 ) => {
   const engine = useDataEngine();
-  return useQuery<void, Error>(["i-dashboards", id], async ({ signal }) => {
+  return useQuery<boolean, Error>(["i-dashboards", id], async ({ signal }) => {
     if (refresh) {
-      try {
-        let dashboard: IDashboard | null = await getOneRecord(
-          "i-dashboards",
-          id,
-          signal
-        );
-        if (!dashboard) {
-          dashboard = createDashboard(id);
-        } else if (dashboard.targetCategoryCombo) {
-          const {
-            combo: { categoryOptionCombos },
-          }: any = await engine.query({
-            combo: {
-              resource: `categoryCombos/${dashboard.targetCategoryCombo}`,
-              params: {
-                fields:
-                  "categoryOptionCombos[id,name,categoryOptions],categories[id,name,categoryOptions[id~rename(value),name~rename(label)]]",
-              },
+      let dashboard: IDashboard | null = await getOneRecord(
+        "i-dashboards",
+        id,
+        signal
+      );
+      if (!dashboard) {
+        dashboard = createDashboard(id);
+      } else if (dashboard.targetCategoryCombo) {
+        const {
+          combo: { categoryOptionCombos },
+        }: any = await engine.query({
+          combo: {
+            resource: `categoryCombos/${dashboard.targetCategoryCombo}`,
+            params: {
+              fields:
+                "categoryOptionCombos[id,name,categoryOptions],categories[id,name,categoryOptions[id~rename(value),name~rename(label)]]",
             },
-          });
-          setTargetCategoryOptionCombos(categoryOptionCombos);
-        }
-
-        const queries = await getIndex(
-          "i-visualization-queries",
-          systemId,
-          [],
-          signal
-        );
-        const dataSources = await getIndex(
-          "i-data-sources",
-          systemId,
-          [],
-          signal
-        );
-        const categories = await getIndex("i-categories", systemId, [], signal);
-        setCategories(categories);
-        setDataSources(dataSources);
-        setCurrentDashboard(dashboard);
-        changeSelectedDashboard(dashboard.id);
-        changeSelectedCategory(dashboard.category || "");
-        setVisualizationQueries(queries);
-      } catch (error) {
-        console.error(error);
+          },
+        });
+        setTargetCategoryOptionCombos(categoryOptionCombos);
       }
+
+      const queries = await getIndex(
+        "i-visualization-queries",
+        systemId,
+        [],
+        signal
+      );
+      const dataSources = await getIndex(
+        "i-data-sources",
+        systemId,
+        [],
+        signal
+      );
+      const categories = await getIndex("i-categories", systemId, [], signal);
+      setCategories(categories);
+      setDataSources(dataSources);
+      setCurrentDashboard(dashboard);
+      changeSelectedDashboard(dashboard.id);
+      changeSelectedCategory(dashboard.category || "");
+      setVisualizationQueries(queries);
     }
+    return true;
   });
 };
 
@@ -464,11 +475,12 @@ export const useVisualizationDatum = (id: string, systemId: string) => {
   );
 };
 
-export const useDataSet = (dataSet: string) => {
+export const useDataSet = (dataSetId: string) => {
+  console.log(dataSetId);
   const engine = useDataEngine();
   const namespaceQuery = {
     dataSet: {
-      resource: `dataSets/${dataSet}`,
+      resource: `dataSets/${dataSetId}`,
       params: {
         fields:
           "categoryCombo[categoryOptionCombos[id,name,categoryOptions],categories[id,name,categoryOptions[id~rename(value),name~rename(label)]]]",
@@ -476,28 +488,26 @@ export const useDataSet = (dataSet: string) => {
     },
   };
   return useQuery<{ [key: string]: any }, Error>(
-    ["data-set", dataSet],
+    ["data-set", dataSetId],
     async () => {
       try {
-        const {
-          dataSet: {
-            categoryCombo: { categories, categoryOptionCombos },
-          },
-        }: any = await engine.query(namespaceQuery);
-        setAvailableCategories(categories);
-        setAvailableCategoryOptionCombos(categoryOptionCombos);
-        const selectedCategories = categories.map(
-          ({ id, categoryOptions }: any, index: number) => [
-            id,
-            index === 0
-              ? [categoryOptions[categoryOptions.length - 1]]
-              : categoryOptions,
-          ]
-        );
-        // setCategorization();
-        return fromPairs(selectedCategories);
+        const { dataSet }: any = await engine.query(namespaceQuery);
+        // setAvailableCategories(categories);
+        // setAvailableCategoryOptionCombos(categoryOptionCombos);
+        // const selectedCategories = categories.map(
+        //   ({ id, categoryOptions }: any, index: number) => [
+        //     id,
+        //     index === 0
+        //       ? [categoryOptions[categoryOptions.length - 1]]
+        //       : categoryOptions,
+        //   ]
+        // );
+        // // setCategorization();
+        // return fromPairs(selectedCategories);
+        return {};
       } catch (error) {
         console.error(error);
+        return {};
       }
     }
   );
@@ -1574,4 +1584,53 @@ export const saveDocument = async (
 export const deleteDocument = async (index: string, id: string) => {
   const { data } = await api.post(`wal/delete?index=${index}&id=${id}`);
   return data;
+};
+
+export const useOptionSet = (optionSetId: string) => {
+  const engine = useDataEngine();
+  const query = {
+    optionSet: {
+      resource: `optionSets/${optionSetId}.json`,
+      params: {
+        fields: "options[name,code]",
+      },
+    },
+  };
+
+  return useQuery<{ code: string; name: string }[], Error>(
+    ["optionSet", optionSetId],
+    async () => {
+      const {
+        optionSet: { options },
+      }: any = await engine.query(query);
+      return options;
+    }
+  );
+};
+
+export const useTheme = (optionSetId: string) => {
+  const engine = useDataEngine();
+  const query = {
+    optionSet: {
+      resource: `optionSets/${optionSetId}.json`,
+      params: {
+        fields: "options[name,code]",
+      },
+    },
+  };
+
+  return useQuery<boolean, Error>(["optionSet", optionSetId], async () => {
+    const themes = await db.themes.toArray();
+    if (themes.length === 0) {
+      const {
+        optionSet: { options },
+      }: any = await engine.query(query);
+      await db.themes.bulkAdd(
+        options.map(({ code, name }: any) => {
+          return { title: name, key: code, id: code, pId: "", value: code };
+        })
+      );
+    }
+    return true;
+  });
 };

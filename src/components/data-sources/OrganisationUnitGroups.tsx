@@ -86,16 +86,11 @@ const OrganizationUnitGroups = ({ denNum, onChange }: IndicatorProps) => {
           <Spinner />
         </Flex>
       )}
-      {isSuccess && !useGlobal && (
-        <Table
-          size="sm"
-          variant="striped"
-          colorScheme="gray"
-          textTransform="none"
-        >
+      {isSuccess && data && !useGlobal && (
+        <Table variant="striped" colorScheme="gray" textTransform="none">
           <Thead>
             <Tr py={1}>
-              <Th>
+              <Th w="10px">
                 <Checkbox />
               </Th>
               <Th>

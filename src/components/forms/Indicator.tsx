@@ -11,7 +11,7 @@ import {
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { ChangeEvent, useState } from "react";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   changeIndicatorAttribute,
   changeNumeratorDimension,

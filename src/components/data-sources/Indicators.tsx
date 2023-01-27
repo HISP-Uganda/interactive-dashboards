@@ -88,7 +88,7 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
         setDimension={setDimension}
         useGlobal={useGlobal}
         setUseGlobal={setUseGlobal}
-        hasGlobalFilter={false}
+        hasGlobalFilter={true}
         type="i"
         onChange={onChange}
         id={globalIds[2].value}
@@ -104,16 +104,11 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
           <Spinner />
         </Flex>
       )}
-      {isSuccess && (
-        <Table
-          size="sm"
-          variant="striped"
-          colorScheme="gray"
-          textTransform="none"
-        >
+      {isSuccess && data && !useGlobal && (
+        <Table variant="striped" colorScheme="gray" textTransform="none">
           <Thead>
             <Tr py={1}>
-              <Th>
+              <Th w="10px">
                 <Checkbox />
               </Th>
               <Th>

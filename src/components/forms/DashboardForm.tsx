@@ -1,4 +1,4 @@
-import { Spinner, Stack } from "@chakra-ui/react";
+import { Spinner, Stack, Text } from "@chakra-ui/react";
 import { useMatch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { LocationGenerics } from "../../interfaces";
@@ -11,7 +11,7 @@ export default function DashboardForm() {
   const {
     params: { dashboardId },
   } = useMatch<LocationGenerics>();
-  const { isLoading, isSuccess, isError, error, isFetching } = useDashboard(
+  const { isLoading, isSuccess, isError, error } = useDashboard(
     dashboardId,
     store.systemId,
     store.refresh
@@ -25,7 +25,7 @@ export default function DashboardForm() {
       h="100%"
       w="100%"
     >
-      {(isLoading || isFetching) && <Spinner />}
+      {isLoading && <Spinner />}
       {isSuccess && <Dashboard />}
       {isError && <pre>{JSON.stringify(error)}</pre>}
     </Stack>

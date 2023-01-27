@@ -73,6 +73,7 @@ import {
   setIsFullScreen,
   duplicateVisualization,
   setRefresh,
+  setThemes,
 } from "./Events";
 import {
   ICategory,
@@ -213,6 +214,7 @@ export const $store = domain
     isNotDesktop: false,
     isFullScreen: false,
     refresh: true,
+    themes: [],
   })
   .on(setOrganisations, (state, organisations) => {
     return { ...state, organisations };
@@ -292,6 +294,9 @@ export const $store = domain
   })
   .on(setRefresh, (state, refresh) => {
     return { ...state, refresh };
+  })
+  .on(setThemes, (state, themes) => {
+    return { ...state, themes };
   });
 
 export const $dataSource = domain

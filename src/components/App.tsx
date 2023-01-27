@@ -286,11 +286,11 @@ const App = () => {
                   justifyContent="center"
                   justifyItems="center"
                 >
-                  <Image
+                  {/* <Image
                     src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/logo.png"
                     maxH={`${otherHeaders}px`}
                     maxW={`${sideWidth}px`}
-                  />
+                  /> */}
                 </Stack>
               </Grid>
             )}
@@ -319,7 +319,7 @@ const App = () => {
                     w="100%"
                     spacing="40px"
                   >
-                    {(handle.active || !showSide) && (
+                    {/* {(handle.active || !showSide) && (
                       <MOHLogo2>
                         <Image
                           src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/Coat_of_arms_of_Uganda.svg"
@@ -327,7 +327,7 @@ const App = () => {
                           maxW={`${sideWidth}px`}
                         />
                       </MOHLogo2>
-                    )}
+                    )} */}
                     {!handle.active && !store.showSider && (
                       <IconButton
                         bgColor="none"

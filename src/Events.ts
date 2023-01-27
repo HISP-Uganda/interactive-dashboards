@@ -139,7 +139,7 @@ export const updateVisualizationMetadata = domain.createEvent<{
   data: any;
 }>();
 
-export const setOrganisations = domain.createEvent<React.Key[]>();
+export const setOrganisations = domain.createEvent<string[]>();
 export const setExpandedKeys = domain.createEvent<React.Key[]>();
 export const changeOrganisations = domain.createEvent<string>();
 export const setRefreshInterval = domain.createEvent<string>();
@@ -154,7 +154,7 @@ export const changePeriods = domain.createEvent<Item[]>();
 
 export const onChangeOrganisations = domain.createEvent<{
   levels: string[];
-  organisations: React.Key[];
+  organisations: string[];
   groups: string[];
   expandedKeys: React.Key[];
   checkedKeys: React.Key[];
@@ -178,6 +178,7 @@ export const setCheckedKeys = domain.createEvent<
 
 export const setLevels = domain.createEvent<string[]>();
 export const setGroups = domain.createEvent<string[]>();
+export const setThemes = domain.createEvent<string[]>();
 export const setShowFooter = domain.createEvent<boolean>();
 export const setSystemName = domain.createEvent<string>();
 export const setInstanceBaseUrl = domain.createEvent<string>();

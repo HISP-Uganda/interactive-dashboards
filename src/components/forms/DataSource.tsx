@@ -15,7 +15,7 @@ import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { setDataSource, setShowSider } from "../../Events";
 import { IDataSource } from "../../interfaces";
 import { saveDocument } from "../../Queries";
