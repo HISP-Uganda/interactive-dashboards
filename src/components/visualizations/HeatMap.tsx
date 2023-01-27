@@ -1,11 +1,12 @@
-import React from 'react'
+import React from "react";
+import { ChartProps } from "../../interfaces";
 
-const HeatMap = () => {
-    return (
-        <div>
-            
-        </div>
-    )
+interface HeatMapProps extends ChartProps {
+  category?: string;
+  series?: string;
 }
+const HeatMap = ({}: HeatMapProps) => {
+  return <div></div>;
+};
 
-export default HeatMap
+export default HeatMap;

@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import {
   Box,
   Button,
@@ -12,47 +11,42 @@ import {
   Stack,
   Textarea,
 } from "@chakra-ui/react";
-import { useDataEngine } from "@dhis2/app-runtime";
-import { useNavigate, useSearch } from "@tanstack/react-location";
+import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "react-query";
 import { setDataSource, setShowSider } from "../../Events";
-import { FormGenerics, IDataSource } from "../../interfaces";
-import { $dataSource, createDataSource } from "../../Store";
+import { IDataSource } from "../../interfaces";
+import { saveDocument } from "../../Queries";
+import { $dataSource, $store, createDataSource } from "../../Store";
+import { generalPadding, otherHeight } from "../constants";
 
 const DataSource = () => {
-  const search = useSearch<FormGenerics>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const engine = useDataEngine();
   const dataSource = useStore($dataSource);
+  const store = useStore($store);
   const {
     handleSubmit,
     register,
     watch,
     setValue,
     formState: { errors, isSubmitting },
-  } = useForm<IDataSource, any>({ defaultValues: dataSource });
+  } = useForm<IDataSource, any>({
+    defaultValues: {
+      ...dataSource,
+      name: store.systemName,
+      description: store.systemName,
+      authentication: { url: store.instanceBaseUrl },
+    },
+  });
 
   const type = watch("type");
   const isCurrentDHIS2 = watch("isCurrentDHIS2");
 
   const add = async (values: IDataSource) => {
-    let mutation: any = {
-      type: "create",
-      resource: `dataStore/i-data-sources/${values.id}`,
-      data: values,
-    };
-    if (search.edit) {
-      mutation = {
-        type: "update",
-        resource: `dataStore/i-data-sources`,
-        data: values,
-        id: values.id,
-      };
-    }
-    await engine.mutate(mutation);
+    await saveDocument("i-data-sources", store.systemId, values);
     await queryClient.invalidateQueries(["data-sources"]);
   };
   async function onSubmit(values: any) {
@@ -67,10 +61,26 @@ const DataSource = () => {
   }, [type]);
 
   useEffect(() => {
-    setShowSider(true);
-  }, []);
+    if (isCurrentDHIS2) {
+      setValue("name", store.systemName);
+      setValue("description", store.systemName);
+      setValue("authentication.url", store.instanceBaseUrl);
+    } else if (!isCurrentDHIS2) {
+      setValue("name", "");
+      setValue("description", "");
+      setValue("authentication.url", "");
+    }
+  }, [isCurrentDHIS2]);
+
   return (
-    <Box flex={1} p="20px">
+    <Box
+      p={`${generalPadding}px`}
+      bgColor="white"
+      flex={1}
+      h={otherHeight}
+      maxH={otherHeight}
+      w="100%"
+    >
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing="20px">
           <FormControl isInvalid={!!errors.id}>
@@ -97,7 +107,7 @@ const DataSource = () => {
             </FormErrorMessage>
           </FormControl>
           {type === "DHIS2" && (
-            <FormControl isInvalid={!!errors.name} isRequired={true}>
+            <FormControl isInvalid={!!errors.name} isRequired={false}>
               <Checkbox {...register("isCurrentDHIS2")} colorScheme="green">
                 Is Current DHIS2
               </Checkbox>

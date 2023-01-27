@@ -1,20 +1,17 @@
-import { Stack, Text } from "@chakra-ui/react";
+import { Stack } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { update } from "lodash";
-import React from "react";
 import Plot from "react-plotly.js";
-import { IVisualization } from "../../interfaces";
-import { $visualizationData, $visualizationMetadata } from "../../Store";
+import { ChartProps } from "../../interfaces";
+import { $visualizationMetadata } from "../../Store";
 import { exclusions } from "../../utils/utils";
 import { processGraphs } from "../processors";
+import VisualizationTitle from "./VisualizationTitle";
 
-type LineGraphProps = {
-  visualization: IVisualization;
+interface LineGraphProps extends ChartProps {
   category?: string;
   series?: string;
-  layoutProperties?: { [key: string]: any };
-  dataProperties?: { [key: string]: any };
-};
+}
 
 const LineGraph = ({
   visualization,
@@ -22,12 +19,10 @@ const LineGraph = ({
   series,
   layoutProperties,
   dataProperties,
+  section,
+  data,
 }: LineGraphProps) => {
-  const visualizationData = useStore($visualizationData);
   const metadata = useStore($visualizationMetadata);
-  const data = visualizationData[visualization.id]
-    ? visualizationData[visualization.id]
-    : [];
   let availableProperties: { [key: string]: any } = {
     layout: {
       legend: { x: 0.5, y: -0.3, orientation: "h" },
@@ -50,21 +45,21 @@ const LineGraph = ({
     update(availableProperties, property, () => value);
   });
   const titleFontSize = dataProperties?.["data.title.fontsize"] || "1.5vh";
-  const titleCase = dataProperties?.["data.title.case"] || "uppercase";
-  const titleColor = dataProperties?.["data.title.color"] || "black";
+  const titleCase = dataProperties?.["data.title.case"] || "";
+  const titleColor = dataProperties?.["data.title.color"] || "gray.500";
   return (
-    <Stack w="100%" h="100%">
+    <Stack w="100%" h="100%" spacing={0}>
       {visualization.name && (
-        <Text
-          textAlign="center"
+        <VisualizationTitle
+          section={section}
           fontSize={titleFontSize}
           textTransform={titleCase}
           color={titleColor}
-        >
-          {visualization.name}
-        </Text>
+          title={visualization.name}
+          fontWeight="bold"
+        />
       )}
-      <Stack h="100%" w="100%" flex={1}>
+      <Stack flex={1}>
         <Plot
           data={processGraphs(
             data,
@@ -87,6 +82,7 @@ const LineGraph = ({
             xaxis: {
               automargin: true,
               showgrid: false,
+              type: "category",
             },
             legend: {
               orientation: "h",

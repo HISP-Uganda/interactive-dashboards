@@ -14,7 +14,7 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
-import { useNavigate, useSearch } from "@tanstack/react-location";
+import { useNavigate } from "@tanstack/react-location";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { ChangeEvent } from "react";
@@ -23,11 +23,12 @@ import {
   changeNumeratorAttribute,
   changeNumeratorDimension,
   changeNumeratorExpressionValue,
-  setVisualizationQueries,
 } from "../../Events";
-import { FormGenerics, Option } from "../../interfaces";
-import { $dataSourceType, $indicator, $indicators } from "../../Store";
+import { Option } from "../../interfaces";
+import { saveDocument } from "../../Queries";
+import { $dataSourceType, $indicator, $store } from "../../Store";
 import { getSearchParams, globalIds } from "../../utils/utils";
+import { generalPadding, otherHeight } from "../constants";
 import { displayDataSourceType } from "../data-sources";
 
 const availableOptions: Option[] = [
@@ -35,14 +36,20 @@ const availableOptions: Option[] = [
   { value: "ANALYTICS", label: "Analytics" },
 ];
 const Numerator = () => {
-  const search = useSearch<FormGenerics>();
   const indicator = useStore($indicator);
-  const indicators = useStore($indicators);
   const dataSourceType = useStore($dataSourceType);
+  const store = useStore($store);
   const navigate = useNavigate();
 
   return (
-    <Stack spacing="20px" p="20px" w="100%">
+    <Stack
+      p={`${generalPadding}px`}
+      h={otherHeight}
+      maxH={otherHeight}
+      w="100%"
+      overflow="auto"
+      bgColor="white"
+    >
       <Stack>
         <Text>Numerator Name</Text>
         <Input
@@ -155,7 +162,8 @@ const Numerator = () => {
                   ) : (
                     <Input
                       value={
-                        indicator.numerator?.expressions?.[record]?.value || ""
+                        indicator.numerator?.expressions?.[record]?.value ||
+                        "NULL"
                       }
                       onChange={(e: ChangeEvent<HTMLInputElement>) =>
                         changeNumeratorExpressionValue({
@@ -175,16 +183,13 @@ const Numerator = () => {
       <Stack direction="row">
         <Spacer />
         <Button
-          onClick={() => {
-            setVisualizationQueries(
-              indicators.map((i) => {
-                if (i.id === indicator.id) {
-                  return indicator;
-                }
-                return i;
-              })
+          onClick={async () => {
+            await saveDocument(
+              "i-visualization-queries",
+              store.systemId,
+              indicator
             );
-            navigate({ to: `/indicators/${indicator.id}`, search });
+            navigate({ to: `/indicators/${indicator.id}` });
           }}
         >
           OK

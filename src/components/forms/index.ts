@@ -1,4 +1,4 @@
-export { default as CategoryForm } from "./Category";
-export { default as IndicatorForm } from "./Indicator";
-export { default as DataSourceForm } from "./DataSource";
-export { default as DashboardForm } from "./Dashboard";
+export { default as CategoryForm } from "./CategoryForm";
+export { default as IndicatorForm } from "./IndicatorForm";
+export { default as DataSourceForm } from "./DataSourceForm";
+export { default as DashboardForm } from "./DashboardForm";

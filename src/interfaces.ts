@@ -1,8 +1,12 @@
 import { MakeGenerics } from "@tanstack/react-location";
 import { OptionBase } from "chakra-react-select";
 import { Event } from "effector";
-import { Layout, Layouts } from "react-grid-layout";
 
+export interface Image {
+  id: string;
+  src: string;
+  alignment: string;
+}
 export interface DataValueAttribute {
   attribute: "name" | "description" | "type" | "query" | "accessor";
   value: any;
@@ -49,7 +53,9 @@ export interface IIndicator extends INamed {
   numerator?: IData;
   denominator?: IData;
   factor: string;
+  custom: boolean;
   dataSource?: string;
+  realDataSource?: IDataSource;
   useInBuildIndicators: boolean;
   query?: string;
 }
@@ -60,15 +66,34 @@ export interface IVisualization extends INamed {
   refreshInterval?: number;
   overrides: { [key: string]: any };
   properties: { [key: string]: any };
+  group: string;
+  expression?: string;
+  showTitle?: boolean;
 }
 export interface ISection {
   id: string;
   title: string;
   visualizations: IVisualization[];
   direction: "row" | "column";
-  display: string;
+  justifyContent:
+    | "flex-start"
+    | "flex-end"
+    | "center"
+    | "space-between"
+    | "space-around"
+    | "space-evenly"
+    | "stretch"
+    | "start"
+    | "end"
+    | "baseline";
+  display: "normal" | "carousel" | "marquee" | "grid";
+  carouselOver: string;
   colSpan: number;
   rowSpan: number;
+  images: Image[];
+  isBottomSection: boolean;
+  bg: string;
+  height: string;
 }
 
 export interface IFilter {}
@@ -81,10 +106,17 @@ export interface IDashboard extends INamed {
   isDefault?: boolean;
   showSider: boolean;
   showTop: boolean;
-  mode: "edit" | "view";
   refreshInterval: string;
   rows: number;
   columns: number;
+  dataSet: string;
+  categorization: { [key: string]: any[] };
+  availableCategories: any[];
+  availableCategoryOptionCombos: any[];
+  bottomSection: ISection;
+  bg: string;
+  targetCategoryCombo: string;
+  targetCategoryOptionCombos: any[];
 }
 export interface Pagination {
   total: number;
@@ -95,6 +127,7 @@ export interface DataNode {
   title: string;
   key: string;
   isLeaf?: boolean;
+  level?: string;
   children?: DataNode[];
 }
 
@@ -115,6 +148,7 @@ export type PickerProps = {
 };
 export interface IStore {
   showSider: boolean;
+  showFooter: boolean;
   organisations: React.Key[];
   periods: Item[];
   groups: string[];
@@ -127,6 +161,15 @@ export interface IStore {
   defaultDashboard: string;
   currentPage: string;
   logo: string;
+  systemId: string;
+  systemName: string;
+  checkedKeys: { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[];
+  minSublevel: number;
+  maxLevel: number;
+  instanceBaseUrl: string;
+  isNotDesktop: boolean;
+  isFullScreen: boolean;
+  refresh: boolean;
 }
 
 export type IndicatorProps = {
@@ -143,14 +186,30 @@ export type IndicatorProps = {
   changeQuery?: Event<DataValueAttribute>;
 };
 
-export type FormGenerics = MakeGenerics<{
+export type LocationGenerics = MakeGenerics<{
+  LoaderData: {
+    indicators: IIndicator[];
+    dashboards: IDashboard[];
+    dataSources: IDataSource[];
+    categories: ICategory[];
+    indicator: IIndicator;
+    category: ICategory;
+    dataSource: IDataSource;
+    dataSourceOptions: Option[];
+  };
+  Params: {
+    indicatorId: string;
+    categoryId: string;
+    dataSourceId: string;
+    dashboardId: string;
+  };
   Search: {
-    edit?: boolean;
     category: string;
-    periods: string[];
-    levels: string[];
-    groups: string[];
-    organisations: string[];
+    periods: string;
+    levels: string;
+    groups: string;
+    organisations: string;
+    dataSourceId: string;
   };
 }>;
 
@@ -159,3 +218,17 @@ export type OUTreeProps = {
   levels: Option[];
   groups: Option[];
 };
+export interface ChartProps {
+  visualization: IVisualization;
+  layoutProperties?: { [key: string]: any };
+  dataProperties?: { [key: string]: any };
+  section: ISection;
+  data: any;
+}
+
+export interface Threshold {
+  id: string;
+  min: string;
+  max: string;
+  color: string;
+}

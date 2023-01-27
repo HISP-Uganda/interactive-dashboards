@@ -14,19 +14,21 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
+import { useNavigate } from "@tanstack/react-location";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { ChangeEvent, useState } from "react";
-import { useNavigate, useSearch } from "@tanstack/react-location";
+import { ChangeEvent } from "react";
 
 import {
   changeDenominatorAttribute,
   changeDenominatorDimension,
   changeDenominatorExpressionValue,
 } from "../../Events";
-import { FormGenerics, Option } from "../../interfaces";
-import { $dataSourceType, $indicator } from "../../Store";
+import { Option } from "../../interfaces";
+import { saveDocument } from "../../Queries";
+import { $dataSourceType, $indicator, $store } from "../../Store";
 import { getSearchParams, globalIds } from "../../utils/utils";
+import { generalPadding, otherHeight } from "../constants";
 import { displayDataSourceType } from "../data-sources";
 
 const availableOptions: Option[] = [
@@ -34,16 +36,24 @@ const availableOptions: Option[] = [
   { value: "ANALYTICS", label: "Analytics" },
 ];
 const Denominator = () => {
-  const search = useSearch<FormGenerics>();
+  const store = useStore($store);
   const indicator = useStore($indicator);
   const dataSourceType = useStore($dataSourceType);
   const navigate = useNavigate();
+
   return (
-    <Stack spacing="20px" p="20px" w="100%">
+    <Stack
+      p={`${generalPadding}px`}
+      h={otherHeight}
+      maxH={otherHeight}
+      w="100%"
+      overflow="auto"
+      bgColor="white"
+    >
       <Stack>
         <Text>Numerator Name</Text>
         <Input
-          value={indicator.denominator?.name}
+          value={indicator.denominator?.name || ""}
           onChange={(e: ChangeEvent<HTMLInputElement>) =>
             changeDenominatorAttribute({
               attribute: "name",
@@ -55,7 +65,7 @@ const Denominator = () => {
       <Stack>
         <Text>Numerator Description</Text>
         <Textarea
-          value={indicator.denominator?.description}
+          value={indicator.denominator?.description || ""}
           onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
             changeDenominatorAttribute({
               attribute: "description",
@@ -94,12 +104,12 @@ const Denominator = () => {
         <Table size="sm" textTransform="none">
           <Thead>
             <Tr py={1}>
-              <Th>
+              <Th w="50%">
                 <Heading as="h6" size="xs" textTransform="none">
                   Key
                 </Heading>
               </Th>
-              <Th>
+              <Th w="200px" textAlign="center">
                 <Heading as="h6" size="xs" textTransform="none">
                   Use Global Filter
                 </Heading>
@@ -117,10 +127,10 @@ const Denominator = () => {
                 <Td>
                   <Input readOnly value={record} />
                 </Td>
-                <Td>
+                <Td textAlign="center">
                   <Checkbox
                     isChecked={
-                      indicator.denominator?.expressions?.[record].isGlobal
+                      indicator.denominator?.expressions?.[record]?.isGlobal
                     }
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
                       changeDenominatorExpressionValue({
@@ -132,12 +142,12 @@ const Denominator = () => {
                   />
                 </Td>
                 <Td>
-                  {indicator.denominator?.expressions?.[record].isGlobal ? (
+                  {indicator.denominator?.expressions?.[record]?.isGlobal ? (
                     <Select<Option, false, GroupBase<Option>>
                       value={globalIds.find(
                         (pt) =>
                           pt.value ===
-                          indicator.denominator?.expressions?.[record].value
+                          indicator.denominator?.expressions?.[record]?.value
                       )}
                       onChange={(e) =>
                         changeDenominatorExpressionValue({
@@ -151,7 +161,10 @@ const Denominator = () => {
                     />
                   ) : (
                     <Input
-                      value={indicator.denominator?.expressions?.[record].value}
+                      value={
+                        indicator.denominator?.expressions?.[record]?.value ||
+                        "NULL"
+                      }
                       onChange={(e: ChangeEvent<HTMLInputElement>) =>
                         changeDenominatorExpressionValue({
                           attribute: record,
@@ -168,9 +181,17 @@ const Denominator = () => {
         </Table>
       )}
       <Stack direction="row">
-        {/* <Button colorScheme="red">Cancel</Button> */}
         <Spacer />
-        <Button onClick={() => navigate({ to: "/indicators/form", search })}>
+        <Button
+          onClick={async () => {
+            await saveDocument(
+              "i-visualization-queries",
+              store.systemId,
+              indicator
+            );
+            navigate({ to: `/indicators/${indicator.id}` });
+          }}
+        >
           OK
         </Button>
       </Stack>

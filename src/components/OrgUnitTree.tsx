@@ -90,13 +90,13 @@ const OrgUnitTree = ({
         keys: true,
       }
     );
-    setExpanded(expandedKeys);
+    setExpanded(() => expandedKeys);
   };
   return (
     <TreeSelect
       allowClear={true}
       treeDataSimpleMode
-      style={{ width: "100%"}}
+      style={{ width: "100%" }}
       value={value}
       listHeight={700}
       treeExpandedKeys={expanded}

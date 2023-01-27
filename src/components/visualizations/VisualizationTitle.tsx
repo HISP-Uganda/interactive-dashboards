@@ -1,24 +1,17 @@
-import React, { useState } from "react";
-import { Stack, Text } from "@chakra-ui/react";
-import { IDashboard, IVisualization, ISection } from "../../interfaces";
+import { Spacer, Stack, StackProps, Text } from "@chakra-ui/react";
+import { useState } from "react";
+import { ISection } from "../../interfaces";
 import VisualizationMenu from "./VisualizationMenu";
-import { useStore } from "effector-react";
-import { $dashboard } from "../../Store";
 
-type VisualizationTitleProps = {
-  titleFontSize: string;
-  titleCase: "lowercase" | "uppercase" | "capitalize";
-  titleColor: string;
-  visualization: IVisualization;
+interface VisualizationTitleProps extends StackProps {
+  title: string;
   section: ISection;
-};
+}
 
 const VisualizationTitle = ({
-  titleFontSize,
-  titleCase,
-  titleColor,
-  visualization,
+  title,
   section,
+  ...rest
 }: VisualizationTitleProps) => {
   const [showMenu, setShowMenu] = useState<boolean>(false);
   return (
@@ -29,21 +22,23 @@ const VisualizationTitle = ({
       alignContent="center"
       justifyContent="center"
       _hover={{ bg: "gray.300" }}
-      h="30px"
-      onMouseEnter={() => setShowMenu(true)}
-      onMouseLeave={() => setShowMenu(false)}
-      bg="gray.200"
+      h="3vh"
+      maxH="3vh"
+      onMouseEnter={() => setShowMenu(() => true)}
+      onMouseLeave={() => setShowMenu(() => false)}
+      bgColor="gray.200"
+      // zIndex={1000}
+      w="100%"
+      fontSize="1.4vh"
+      color={"gray.500"}
+      fontWeight="bold"
+      px="5px"
+      {...rest}
     >
-      <Text
-        textAlign="center"
-        noOfLines={1}
-        fontSize={titleFontSize}
-        textTransform={titleCase}
-        color={titleColor}
-        flex={1}
-      >
-        {visualization.name}
+      <Text textAlign="center" noOfLines={1}>
+        {title}
       </Text>
+      <Spacer />
       {showMenu && <VisualizationMenu section={section} />}
     </Stack>
   );

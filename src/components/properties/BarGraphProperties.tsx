@@ -9,18 +9,20 @@ import {
   TabPanels,
   Tab,
   TabPanel,
+  Checkbox,
 } from "@chakra-ui/react";
-
+import { ChangeEvent } from "react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { isArray, uniq } from "lodash";
-import { ChangeEvent } from "react";
-import { changeVisualizationProperties } from "../../Events";
+import {
+  changeVisualizationAttribute,
+  changeVisualizationProperties,
+} from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { customComponents } from "../../utils/components";
-import { chartTypes, colors } from "../../utils/utils";
-import { createOptions } from "./AvialableOptions";
+import { chartTypes, colors, createOptions } from "../../utils/utils";
 
 const barModes = createOptions(["stack", "group", "overlay", "relative"]);
 
@@ -39,6 +41,20 @@ const BarGraphProperties = ({
 
   return (
     <Stack>
+      <Checkbox
+        isChecked={visualization.showTitle}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+          console.log(e.target.checked);
+
+          changeVisualizationAttribute({
+            visualization: visualization.id,
+            attribute: "showTitle",
+            value: e.target.checked,
+          });
+        }}
+      >
+        Show Title
+      </Checkbox>
       <Text>Category</Text>
       <Select<Option, false, GroupBase<Option>>
         value={columns.find(
@@ -53,6 +69,7 @@ const BarGraphProperties = ({
         }
         options={columns}
         isClearable
+        menuPlacement="auto"
       />
       <Text>Traces</Text>
       <Select<Option, false, GroupBase<Option>>
@@ -68,6 +85,7 @@ const BarGraphProperties = ({
         }
         options={columns}
         isClearable
+        menuPlacement="auto"
       />
       <Text>Bar Mode</Text>
       <Select<Option, false, GroupBase<Option>>
@@ -83,6 +101,7 @@ const BarGraphProperties = ({
         }
         options={barModes}
         isClearable
+        menuPlacement="auto"
       />
       <Stack>
         <Text>Orientation</Text>
@@ -102,7 +121,7 @@ const BarGraphProperties = ({
           </Stack>
         </RadioGroup>
       </Stack>
-
+      <Text>Bar Graph Colors</Text>
       <Select<Option, false, GroupBase<Option>>
         value={colors.find((pt) => {
           if (
@@ -126,6 +145,7 @@ const BarGraphProperties = ({
         options={colors}
         isClearable
         components={customComponents}
+        menuPlacement="auto"
       />
 
       <Text>Legend</Text>
@@ -220,6 +240,7 @@ const BarGraphProperties = ({
                     }}
                     options={chartTypes}
                     isClearable
+                    menuPlacement="auto"
                   />
                 </Stack>
               </TabPanel>

@@ -1,4 +1,6 @@
 import moment from "moment";
+import { bbox, center } from "@turf/turf";
+
 import {
   format,
   eachDayOfInterval,
@@ -8,8 +10,9 @@ import {
   eachWeekOfInterval,
 } from "date-fns";
 type periodType = "days" | "weeks" | "months" | "years" | "quarters";
-import { Option } from "../interfaces";
-import { uniq } from "lodash";
+import { Option, Threshold } from "../interfaces";
+import { fromPairs, uniq } from "lodash";
+import { evaluate } from "mathjs";
 
 export function encodeToBinary(str: string): string {
   return btoa(
@@ -103,24 +106,6 @@ export const getRelativePeriods = (periodString: string) => {
   return relativePeriods[periodString] || relativePeriods["LAST_MONTH"];
 };
 
-const isWorthy = (data: any[]) => {
-  if (data.length === 1 && Object.keys(data[0]).length <= 2) {
-    return ["single"];
-  }
-  if (data.length > 1 && Object.keys(data[0]).length === 2) {
-    return ["bar", "pie", "map"];
-  }
-
-  if (data.length > 1 && Object.keys(data[0]).length === 3) {
-    return ["bar"];
-  }
-
-  if (data.length > 1 && Object.keys(data[0]).length === 4) {
-    return ["multiple"];
-  }
-  return [];
-};
-
 export const globalIds: Option[] = [
   { label: "Period", value: "m5D13FqKZwN", id: "pe" },
   { label: "Program Indicator", value: "Eep3rko7uh6", id: "pi" },
@@ -129,6 +114,15 @@ export const globalIds: Option[] = [
   { label: "Organisation Level", value: "GQhi6pRnTKF", id: "oul" },
   { label: "Organisation", value: "mclvD0Z9mfT", id: "ou" },
   { label: "Data Element", value: "h9oh0VhweQM", id: "de" },
+  { label: "Attribute Option Combo", value: "WSiMOMi4QWh", id: "aoc" },
+  { label: "Category Option Combo", value: "p26VJMtSUSv", id: "coc" },
+  { label: "Target Attribute Option Combo", value: "OOhWJ4gfZy1", id: "taoc" },
+  { label: "Organisation Sublevel", value: "ww1uoD3DsYg", id: "osl" },
+  {
+    label: "Previous Attribute Option Combo",
+    value: "IK4jwzIuqNO",
+    id: "paoc",
+  },
 ];
 
 export const convertTime = (value: string) => {
@@ -150,7 +144,6 @@ export const getSearchParams = (query?: string) => {
   }
   return [];
 };
-
 export const getPeriodsBetweenDates = (
   start?: Date,
   end?: Date,
@@ -216,19 +209,6 @@ export const oneBucketAggregation = (data: { [key: string]: any }) => {
 };
 export const oneMetricAggregation = (data: { [key: string]: any }) => {
   return data;
-};
-
-const getKeyString = (data: { [key: string]: any }) => {
-  if (data.pe) {
-    return "pe";
-  }
-  if (data.dx) {
-    return "dx";
-  }
-  if (data.ou) {
-    return "ou";
-  }
-  return "";
 };
 
 export const bucketMetricAggregation = (data: { [key: string]: any }) => {
@@ -432,13 +412,13 @@ export const colors: Option[] = [
   {
     label: "Color1",
     value: [
+      "#e377c2",
       "#1f77b4",
       "#ff7f0e",
       "#2ca02c",
       "#d62728",
       "#9467bd",
       "#8c564b",
-      "#e377c2",
       "#7f7f7f",
       "#bcbd22",
     ].join(","),
@@ -446,27 +426,27 @@ export const colors: Option[] = [
   {
     label: "Rich Black FOGRA 29",
     value:
-      "#001219,#005f73,#0a9396,#94d2bd,#e9d8a6,#ee9b00,#ca6702,#bb3e03,#ae2012,#9b2226",
+      "#ca6702,#001219,#005f73,#0a9396,#94d2bd,#e9d8a6,#ee9b00,#bb3e03,#ae2012,#9b2226",
   },
   {
     label: "Melon",
     value:
-      "#fec5bb,#fcd5ce,#fae1dd,#f8edeb,#e8e8e4,#d8e2dc,#ece4db,#ffe5d9,#ffd7ba,#fec89a",
+      "#ece4db,#fec5bb,#fcd5ce,#fae1dd,#f8edeb,#e8e8e4,#d8e2dc,#ffe5d9,#ffd7ba,#fec89a",
   },
   {
     label: "Xiketic",
     value:
-      "#03071e,#370617,#6a040f,#9d0208,#d00000,#dc2f02,#e85d04,#f48c06,#faa307,#ffba08",
+      "#dc2f02,#03071e,#370617,#6a040f,#9d0208,#d00000,#e85d04,#f48c06,#faa307,#ffba08",
   },
   {
     label: "Pink",
     value:
-      "#f72585,#b5179e,#7209b7,#560bad,#480ca8,#3a0ca3,#3f37c9,#4361ee,#4895ef,#4cc9f0",
+      "#480ca8,#f72585,#b5179e,#7209b7,#560bad,#3a0ca3,#3f37c9,#4361ee,#4895ef,#4cc9f0",
   },
   {
     label: "Purple",
     value:
-      "#7400b8,#6930c3,#5e60ce,#5390d9,#4ea8de,#48bfe3,#56cfe1,#64dfdf,#72efdd,#80ffdb",
+      "#5390d9,#7400b8,#6930c3,#5e60ce,#4ea8de,#48bfe3,#56cfe1,#64dfdf,#72efdd,#80ffdb",
   },
   {
     label: "Desert Sand",
@@ -502,6 +482,11 @@ export const colors: Option[] = [
     label: "Midnight Green",
     value:
       "#006466,#065a60,#0b525b,#144552,#1b3a4b,#212f45,#272640,#312244,#3e1f47,#4d194d",
+  },
+  {
+    label: "Xiketic2",
+    value:
+      "#dc2f02,#ffba08,#2ca02c,#03071e,#370617,#6a040f,#9d0208,#d00000,#e85d04,#f48c06,#faa307",
   },
 ];
 
@@ -554,3 +539,160 @@ export const chartTypes: Option[] = [
   { value: "boxplot", label: "Box Plot" },
   { value: "scatterplot", label: "Scatter Plot" },
 ];
+
+export const createOptions = (options: string[]): Option[] => {
+  return options.map((option: string) => {
+    return { label: option, value: option };
+  });
+};
+
+export const divide = (expression: string, data: { [key: string]: any[] }) => {
+  const indicators = expression.split("/");
+  if (indicators && indicators.length === 2) {
+    const [ind1, ind2] = indicators;
+    const data1 = data[ind1];
+    const data2 = data[ind2];
+    if (data1 && data1.length === 1 && data2 && data2.length === 1) {
+      return [{ total: data1[0].total / data2[0].total }];
+    }
+  }
+  return [{ total: 0 }];
+};
+
+export const allMetadata: { [key: string]: string } = {
+  CnIU4JH161i: "12 - 24 months",
+  dZN788jq32i: "15 - 60 Years",
+  euNzABJD0rl: "18- 24 months",
+  rSn71nAWEyZ: "2 - <5 years",
+  PkScN8lPCJu: "6 - 14 Years",
+  PmQTItIJKn0: "9 Months - 5 Years",
+  Hi8VxB592t8: "9-11 months",
+  xBpTFgYQbPV: "9-17 months",
+  lFFAVORlK5r: "Broken",
+  jAbqv8bnCqT: "Contamination",
+  daugmmgzAkU: "Day 1",
+  C1IRVkhB3MW: "Day 2",
+  L48zD78K9AI: "Day 3",
+  zPaWaUOubgL: "Day 4",
+  vmPAdWGX6qy: "Day 4 (Mop up day)",
+  J9wUCeShAjk: "Day 5",
+  Y5wiqIU7dAN: "Day 6",
+  vHUFOwDZOc3: "Day 6 (Mop up day)",
+  lUjup7J3S50: "Day 7",
+  AXoc1QOgNgV: "Day 8 (Mop up day)",
+  eSSFwmQpHNb: "Empty Vials",
+  sdEKrqgmNxN: "Health Worker",
+  oEMjNjU2n1l: "Mobiliser",
+  BaOUxUBEAp1: "Other reason",
+  HePDJphrRMS: "Parish Supervisor",
+  BoDgo1kqT4s: "Partial use",
+  CVphMdX3AqR: "Phase 1 (2022)",
+  KGPe25jtndC: "Phase 2 (2023)",
+  CU21ehevOUt: "Phase 3 (2024)",
+  f0y7OUk8wtM: "Reactive (2021)",
+  m7S4M4aWa4q: "Round 0 (2019)",
+  G1R6RsITi8T: "Round 1",
+  gqfR4Qrz6Nm: "Round 1 (2019)",
+  W1PA9ZE0plu: "Round 2",
+  sRZAXWz62eu: "Round 2 (2022)",
+  pSRm6b16Baw: "Unusable Vials",
+  f65rwx7h4rV: "Usable Vials",
+  mlwTknbcGP4: "VVM Color Change",
+  rKD38rD7HZ5: "Village Health Team",
+  xYerKDKCefk: "default",
+};
+
+export const processMap = (
+  geojson: any,
+  otherLevels: any,
+  data: any[],
+  thresholds: Threshold[]
+) => {
+  const mapCenter = center(geojson).geometry.coordinates;
+  const bounds = bbox(geojson);
+  const organisationUnits = Object.values(otherLevels).flatMap(
+    ({ organisationUnits }: any) => organisationUnits
+  );
+  const { features, ...rest } = geojson;
+  const processedData = fromPairs(
+    data.map((d) => {
+      const value = d.value || d.total;
+      const id = d.c || d.ou;
+      return [id, value];
+    })
+  );
+
+  const processedFeatures = features.map(
+    ({ id, properties, ...others }: any) => {
+      let value = processedData[id];
+      let colorSearch: any = undefined;
+
+      if (value) {
+        const numericValue = Number(value).toFixed(2);
+        colorSearch = thresholds.find(({ max, min }: any) => {
+          if (max && min) {
+            return (
+              Number(numericValue) >= Number(min) &&
+              Number(value) <= Number(max)
+            );
+          } else if (min) {
+            return Number(numericValue) >= Number(min);
+          } else if (max) {
+            return Number(numericValue) <= Number(max);
+          }
+        });
+      }
+      let color = "white";
+
+      if (value && colorSearch) {
+        color = colorSearch.color;
+      } else if (value && thresholds.length > 0) {
+        color = thresholds[0].color;
+      }
+
+      return {
+        id,
+        ...others,
+        properties: {
+          ...properties,
+          value: value
+            ? Intl.NumberFormat("en-US", {
+                style: "percent",
+                notation: "standard",
+                maximumFractionDigits: 2,
+              }).format(value / 100)
+            : "No Data",
+          color,
+        },
+      };
+    }
+  );
+  return {
+    geojson: { ...rest, features: processedFeatures },
+    mapCenter,
+    organisationUnits,
+  };
+};
+
+export const deriveSingleValues = (
+  data: { [key: string]: any[] },
+  expression?: string
+) => {
+  if (expression !== undefined) {
+    let finalExpression = expression;
+    const all = expression.match(/\w+/g);
+    if (all) {
+      all.forEach((s) => {
+        const val = data[s]?.[0].value || 0;
+        finalExpression = finalExpression.replace(s, val);
+      });
+    }
+
+    try {
+      const evaluation = evaluate(finalExpression);
+      return [{ value: evaluation }];
+    } catch (error) {
+      return [{ value: "null" }];
+    }
+  }
+};

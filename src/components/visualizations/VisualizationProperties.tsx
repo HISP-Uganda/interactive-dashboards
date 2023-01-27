@@ -1,3 +1,4 @@
+import { Box, Stack } from "@chakra-ui/react";
 import { IVisualization } from "../../interfaces";
 import BarGraphProperties from "../properties/BarGraphProperties";
 import LineGraphProperties from "../properties/LineGraphProperties";

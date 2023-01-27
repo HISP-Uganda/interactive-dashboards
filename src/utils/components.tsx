@@ -12,9 +12,7 @@ export const customComponents = {
         <Text>{children}</Text>
         <Stack w="100%" direction="row" spacing="0">
           {props.data.value.split(",").map((c) => (
-            <Box bg={c} key={c} w="100%">
-              <Text>&nbsp;</Text>
-            </Box>
+            <Box bgColor={c} key={c} w="100%"></Box>
           ))}
         </Stack>
       </Stack>

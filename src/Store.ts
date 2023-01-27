@@ -1,5 +1,6 @@
 import { combine } from "effector";
-import { fromPairs } from "lodash";
+import { fromPairs, isEqual, sortBy } from "lodash";
+import { headerHeight, padding, sideWidth } from "./components/constants";
 import { domain } from "./Domain";
 import {
   addPagination,
@@ -11,7 +12,6 @@ import {
   changeDenominatorDimension,
   changeDenominatorExpressionValue,
   changeIndicatorAttribute,
-  changeLayouts,
   changeNumeratorAttribute,
   changeNumeratorDimension,
   changeNumeratorExpressionValue,
@@ -21,7 +21,6 @@ import {
   changeVisualizationAttribute,
   changeVisualizationProperties,
   deleteSection,
-  increment,
   onChangeOrganisations,
   setCategories,
   setCategory,
@@ -50,11 +49,30 @@ import {
   changeDashboardId,
   changeAdministration,
   changeHasDashboards,
-  addOverride,
   changeVisualizationOverride,
   changeVisualizationType,
   setDefaultDashboard,
   setCurrentPage,
+  setDataSets,
+  assignDataSet,
+  setCategorization,
+  setAvailableCategories,
+  setAvailableCategoryOptionCombos,
+  setTargetCategoryOptionCombos,
+  setSystemId,
+  setCheckedKeys,
+  setLevels,
+  setGroups,
+  setShowFooter,
+  setSystemName,
+  setMinSublevel,
+  setMaxLevel,
+  deleteSectionVisualization,
+  setInstanceBaseUrl,
+  setIsNotDesktop,
+  setIsFullScreen,
+  duplicateVisualization,
+  setRefresh,
 } from "./Events";
 import {
   ICategory,
@@ -78,6 +96,12 @@ export const createSection = (id = generateUid()): ISection => {
     visualizations: [],
     direction: "row",
     display: "normal",
+    justifyContent: "space-around",
+    carouselOver: "items",
+    images: [],
+    isBottomSection: false,
+    bg: "white",
+    height: "100%",
   };
 };
 
@@ -121,6 +145,7 @@ export const createIndicator = (id = generateUid()): IIndicator => {
     factor: "1",
     query: "",
     useInBuildIndicators: false,
+    custom: false,
   };
 };
 
@@ -134,9 +159,16 @@ export const createDashboard = (id = generateUid()): IDashboard => {
     showSider: true,
     category: "uDWxMNyXZeo",
     showTop: true,
-    mode: "edit",
     name: "New Dashboard",
     refreshInterval: "off",
+    dataSet: "",
+    categorization: {},
+    availableCategories: [],
+    availableCategoryOptionCombos: [],
+    bottomSection: { ...createSection(), isBottomSection: true, title: "" },
+    bg: "gray.300",
+    targetCategoryCombo: "",
+    targetCategoryOptionCombos: [],
   };
 };
 
@@ -158,7 +190,7 @@ export const $paginations = domain
 
 export const $store = domain
   .createStore<IStore>({
-    showSider: true,
+    showSider: false,
     periods: [{ id: "LAST_12_MONTHS", name: "Last 12 months" }],
     organisations: [],
     levels: [],
@@ -171,6 +203,16 @@ export const $store = domain
     defaultDashboard: "",
     currentPage: "",
     logo: "",
+    systemId: "",
+    checkedKeys: [],
+    showFooter: false,
+    systemName: "",
+    minSublevel: 2,
+    maxLevel: 5,
+    instanceBaseUrl: "",
+    isNotDesktop: false,
+    isFullScreen: false,
+    refresh: true,
   })
   .on(setOrganisations, (state, organisations) => {
     return { ...state, organisations };
@@ -183,8 +225,15 @@ export const $store = domain
   })
   .on(
     onChangeOrganisations,
-    (state, { levels, groups, organisations, expandedKeys }) => {
-      return { ...state, levels, groups, organisations, expandedKeys };
+    (state, { levels, groups, organisations, expandedKeys, checkedKeys }) => {
+      return {
+        ...state,
+        levels,
+        groups,
+        organisations,
+        expandedKeys,
+        checkedKeys,
+      };
     }
   )
   .on(changePeriods, (state, periods) => {
@@ -207,6 +256,42 @@ export const $store = domain
   })
   .on(setCurrentPage, (state, currentPage) => {
     return { ...state, currentPage };
+  })
+  .on(setSystemId, (state, systemId) => {
+    return { ...state, systemId };
+  })
+  .on(setCheckedKeys, (state, checkedKeys) => {
+    return { ...state, checkedKeys };
+  })
+  .on(setLevels, (state, levels) => {
+    return { ...state, levels };
+  })
+  .on(setGroups, (state, groups) => {
+    return { ...state, groups };
+  })
+  .on(setShowFooter, (state, showFooter) => {
+    return { ...state, showFooter };
+  })
+  .on(setSystemName, (state, systemName) => {
+    return { ...state, systemName };
+  })
+  .on(setMinSublevel, (state, minSublevel) => {
+    return { ...state, minSublevel };
+  })
+  .on(setMaxLevel, (state, maxLevel) => {
+    return { ...state, maxLevel };
+  })
+  .on(setInstanceBaseUrl, (state, instanceBaseUrl) => {
+    return { ...state, instanceBaseUrl };
+  })
+  .on(setIsNotDesktop, (state, isNotDesktop) => {
+    return { ...state, isNotDesktop };
+  })
+  .on(setIsFullScreen, (state, isFullScreen) => {
+    return { ...state, isFullScreen };
+  })
+  .on(setRefresh, (state, refresh) => {
+    return { ...state, refresh };
   });
 
 export const $dataSource = domain
@@ -226,6 +311,9 @@ export const $category = domain
 export const $dashboard = domain
   .createStore<IDashboard>(createDashboard())
   .on(addSection, (state, section) => {
+    if (section.isBottomSection) {
+      return { ...state, bottomSection: section };
+    }
     const isNew = state.sections.find((s) => s.id === section.id);
     let sections: ISection[] = state.sections;
     if (isNew) {
@@ -249,17 +337,12 @@ export const $dashboard = domain
     };
   })
   .on(setCurrentDashboard, (_, dashboard) => {
-    return dashboard;
-  })
-  .on(changeLayouts, (state, { currentLayout, allLayouts }) => {
-    const sections = state.sections.map((s) => {
-      const l = currentLayout.find((ll) => ll.i === s.id);
-      if (l) {
-        s = { ...s, ...l };
-      }
-      return s;
-    });
-    return { ...state, sections, layouts: allLayouts };
+    return {
+      ...dashboard,
+      bottomSection: dashboard.bottomSection
+        ? dashboard.bottomSection
+        : { ...createSection(), isBottomSection: true, title: "" },
+    };
   })
   .on(changeDefaults, (state) => {
     return { ...state, hasDashboards: true, hasDefaultDashboard: true };
@@ -302,6 +385,24 @@ export const $dashboard = domain
       return s;
     });
     return { ...state, sections };
+  })
+  .on(assignDataSet, (state, dataSet) => {
+    return { ...state, dataSet };
+  })
+  .on(setCategorization, (state, categorization) => {
+    return { ...state, categorization };
+  })
+  .on(setAvailableCategories, (state, availableCategories) => {
+    return { ...state, availableCategories };
+  })
+  .on(
+    setAvailableCategoryOptionCombos,
+    (state, availableCategoryOptionCombos) => {
+      return { ...state, availableCategoryOptionCombos };
+    }
+  )
+  .on(setTargetCategoryOptionCombos, (state, targetCategoryOptionCombos) => {
+    return { ...state, targetCategoryOptionCombos };
   });
 
 export const $indicator = domain
@@ -421,12 +522,12 @@ export const $indicator = domain
     (state, { id, what, type, replace, remove, label = "" }) => {
       if (state.denominator) {
         if (remove) {
-          const { [id]: removed, ...others } = state.denominator.dataDimensions;
+          const { [id]: removed, ...rest } = state.denominator.dataDimensions;
           return {
             ...state,
             denominator: {
               ...state.denominator,
-              dataDimensions: others,
+              dataDimensions: rest,
             },
           };
         }
@@ -470,20 +571,35 @@ export const $indicator = domain
 export const $section = domain
   .createStore<ISection>(createSection())
   .on(setCurrentSection, (_, section) => {
-    return section;
+    return { ...section, images: section.images ? section.images : [] };
   })
-  .on(addVisualization2Section, (state) => {
+  .on(addVisualization2Section, (state, id) => {
     const visualization: IVisualization = {
-      id: generateUid(),
+      id,
       indicator: "",
       type: "",
       name: `Visualization ${state.visualizations.length + 1}`,
       properties: {},
       overrides: {},
+      group: "",
     };
     return {
       ...state,
       visualizations: [...state.visualizations, visualization],
+    };
+  })
+  .on(duplicateVisualization, (state, visualization) => {
+    return {
+      ...state,
+      visualizations: [...state.visualizations, visualization],
+    };
+  })
+  .on(deleteSectionVisualization, (state, visualizationId) => {
+    return {
+      ...state,
+      visualizations: state.visualizations.filter(
+        ({ id }) => id !== visualizationId
+      ),
     };
   })
   .on(
@@ -548,6 +664,10 @@ export const $categories = domain
 export const $dashboards = domain
   .createStore<IDashboard[]>([])
   .on(setDashboards, (_, dashboards) => dashboards);
+
+export const $dataSets = domain
+  .createStore<Option[]>([])
+  .on(setDataSets, (_, dataSets) => dataSets);
 
 export const $hasDHIS2 = combine(
   $indicator,
@@ -636,7 +756,7 @@ export const $dashboardCategory = combine(
   $dashboard,
   $categories,
   (dashboard, categories) => {
-    const category = categories.find((c) => {
+    const category: ICategory | undefined = categories.find((c) => {
       return c.id === dashboard.category;
     });
     if (category) {
@@ -646,18 +766,172 @@ export const $dashboardCategory = combine(
   }
 );
 
-export const $globalFilters = $store.map((state) => {
-  const periods = state.periods.flatMap(({ id }) => {
-    if (relativePeriodTypes.indexOf(id) !== -1) {
-      return getRelativePeriods(id);
+export const $categoryOptionCombo = $dashboard.map(
+  ({ availableCategories, categorization, availableCategoryOptionCombos }) => {
+    const combos: any[] = availableCategories
+      .map(({ id }) => categorization[id])
+      .filter((v) => !!v);
+    let availableCombos: any[] = [];
+    let result = { prev: [], current: [] };
+    if (availableCategoryOptionCombos) {
+      availableCombos = availableCategoryOptionCombos.map(
+        ({ categoryOptions, id }: any) => {
+          return {
+            id,
+            categoryOptions: categoryOptions.map(({ id }: any) => id),
+          };
+        }
+      );
     }
-    return [id];
-  });
 
-  return {
-    m5D13FqKZwN: periods,
-    of2WvtwqbHR: state.groups,
-    GQhi6pRnTKF: state.levels,
-    mclvD0Z9mfT: state.organisations,
-  };
-});
+    if (combos.length === 2) {
+      const [{ categoryOptions }] = availableCategories;
+      const category1 = combos[0].map(({ value }: any) => value);
+      const category2 = combos[1].map(({ value }: any) => value);
+      const index = categoryOptions.findIndex(
+        (x: any) => category1[category1.length - 1] === x.value
+      );
+
+      if (index > 0) {
+        const prevOption = categoryOptions[index - 1];
+
+        const prev = category2.map((v: string) => {
+          const search = availableCombos.find(({ categoryOptions }: any) => {
+            return isEqual(
+              sortBy([v, prevOption.value]),
+              sortBy(categoryOptions)
+            );
+          });
+          return search?.id;
+        });
+        result = { ...result, prev };
+      }
+
+      const current = category1
+        .flatMap((v: string) => {
+          return category2.map((v2: any) => {
+            const search = availableCombos.find(({ categoryOptions }: any) => {
+              return isEqual(sortBy([v, v2]), sortBy(categoryOptions));
+            });
+            return search?.id;
+          });
+        })
+        .filter((v: any) => !!v);
+      result = { ...result, current };
+    }
+    return result;
+  }
+);
+
+export const $targetCategoryOptionCombo = $dashboard.map(
+  ({ categorization, availableCategories, targetCategoryOptionCombos }) => {
+    if (
+      availableCategories &&
+      availableCategories.length > 0 &&
+      targetCategoryOptionCombos &&
+      targetCategoryOptionCombos.length > 0
+    ) {
+      const categoryId = availableCategories[0].id;
+      const categories = categorization[categoryId];
+
+      return categories.flatMap(({ value }) => {
+        const targetCOC: any = targetCategoryOptionCombos.find(
+          ({ categoryOptions }) => {
+            return categoryOptions.map(({ id }: any) => id).join("") === value;
+          }
+        );
+        if (targetCOC) {
+          return [targetCOC.id];
+        }
+        return [];
+      });
+    }
+    return [];
+  }
+);
+
+export const $globalFilters = combine(
+  $store,
+  $categoryOptionCombo,
+  $dashboard,
+  $targetCategoryOptionCombo,
+  (store, categoryOptionCombo, dashboard, target) => {
+    const periods = store.periods.flatMap(({ id }) => {
+      if (relativePeriodTypes.indexOf(id) !== -1) {
+        return getRelativePeriods(id);
+      }
+      return [id];
+    });
+    let filters: { [key: string]: any } = {
+      m5D13FqKZwN: periods,
+      GQhi6pRnTKF: [store.levels.sort()[store.levels.length - 1]],
+      mclvD0Z9mfT: store.organisations,
+      ww1uoD3DsYg: [store.minSublevel],
+    };
+
+    if (store.groups.length > 0) {
+      filters = { ...filters, of2WvtwqbHR: store.groups };
+    }
+    if (dashboard.dataSet && categoryOptionCombo.current.length > 0) {
+      filters = {
+        ...filters,
+        WSiMOMi4QWh: categoryOptionCombo.current,
+      };
+    }
+    if (dashboard.dataSet && categoryOptionCombo.prev.length > 0) {
+      filters = { ...filters, IK4jwzIuqNO: categoryOptionCombo.prev };
+    }
+    if (dashboard.targetCategoryCombo && target.length > 0) {
+      return { ...filters, OOhWJ4gfZy1: target };
+    }
+    return filters;
+  }
+);
+
+export const $dimensions = $store.map(
+  ({ isNotDesktop, showSider, isFullScreen }) => {
+    const maxDashboardHeight = padding * 2 + headerHeight;
+    const otherHeight = padding * 4 + headerHeight * 3;
+    const realHeight = `calc(100vh - ${maxDashboardHeight}px)`;
+    let initial = {
+      dashboardHeight: realHeight,
+      dashboardWidth: `calc(100vw - ${sideWidth + padding * 2}px)`,
+      dashboardColumns: `${sideWidth}px 1fr`,
+      showSide: true,
+      otherHeight: `calc(100vh - ${otherHeight}px)`,
+      sectionHeight: `calc(100vh - ${otherHeight}px - ${headerHeight})`,
+      isNotDesktop,
+    };
+
+    if (isFullScreen) {
+      initial = {
+        ...initial,
+        showSide: false,
+        dashboardWidth: `100vw - ${padding * 2}px`,
+      };
+    } else if (isNotDesktop) {
+      initial = {
+        ...initial,
+        showSide: false,
+        dashboardWidth: `100vw - ${padding * 2}px`,
+      };
+    } else if (!isNotDesktop) {
+      if (showSider) {
+        initial = {
+          ...initial,
+          showSide: true,
+          dashboardWidth: `calc(100vw - ${sideWidth + padding * 2}px)`,
+        };
+      } else {
+        initial = {
+          ...initial,
+          showSide: false,
+          dashboardWidth: `100vw - ${padding * 2}px`,
+          dashboardColumns: "auto",
+        };
+      }
+    }
+    return initial;
+  }
+);
+// $previousCategoryOptionCombo.watch((v) => console.log(v));

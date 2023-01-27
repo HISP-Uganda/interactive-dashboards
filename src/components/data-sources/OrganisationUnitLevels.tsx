@@ -39,10 +39,11 @@ const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
     .map(([key]) => {
       return key;
     });
-    const [useGlobal, setUseGlobal] = useState<boolean>(selected.indexOf("GQhi6pRnTKF") !== -1);
+  const [useGlobal, setUseGlobal] = useState<boolean>(
+    selected.indexOf("GQhi6pRnTKF") !== -1
+  );
   const [q, setQ] = useState<string>("");
   const paginations = useStore($paginations);
-
 
   const {
     pages,
@@ -69,8 +70,6 @@ const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
   const handlePageChange = (nextPage: number) => {
     setCurrentPage(nextPage);
   };
-
-
 
   return (
     <Stack spacing="30px">
@@ -167,7 +166,7 @@ const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
               _hover={{
                 bg: "yellow.400",
               }}
-              bg="yellow.300"
+              bgColor="yellow.300"
             >
               <Text>Previous</Text>
             </PaginationPrevious>
@@ -175,7 +174,7 @@ const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
               _hover={{
                 bg: "yellow.400",
               }}
-              bg="yellow.300"
+              bgColor="yellow.300"
             >
               <Text>Next</Text>
             </PaginationNext>

@@ -1,7 +1,3 @@
-import { SingleValue } from "chakra-react-select";
-import moment from "moment";
-import { RangeValue } from "rc-picker/lib/interface";
-import { Layout, Layouts } from "react-grid-layout";
 import { domain } from "./Domain";
 import {
   DataNode,
@@ -24,47 +20,31 @@ export const loadDefaults = domain.createEvent<{
   organisationUnits: DataNode[];
 }>();
 
-// export const addCategory = domain.createEvent<string>();
 export const setShowSider = domain.createEvent<boolean>();
 export const setDataSources = domain.createEvent<IDataSource[]>();
 export const setCategories = domain.createEvent<ICategory[]>();
 export const setDashboards = domain.createEvent<IDashboard[]>();
 export const setCurrentDashboard = domain.createEvent<IDashboard>();
-// export const updateSection = domain.createEvent<void>();
 export const addSection = domain.createEvent<ISection>();
-export const addVisualization2Section = domain.createEvent<void>();
+export const addVisualization2Section = domain.createEvent<string>();
+export const duplicateVisualization = domain.createEvent<IVisualization>();
 export const deleteSection = domain.createEvent<string | undefined>();
+export const deleteSectionVisualization = domain.createEvent<string>();
 export const setCurrentSection = domain.createEvent<ISection>();
 export const toggleDashboard = domain.createEvent<boolean>();
 export const changeDashboardId = domain.createEvent<string>();
 export const changeCategoryId = domain.createEvent<string>();
 export const changeDataSourceId = domain.createEvent<string>();
 export const changeAdministration = domain.createEvent<boolean>();
-// export const changeVisualizationDataSource = domain.createEvent<IDataSource>();
-// export const changeVisualizationType = domain.createEvent<string>();
-// export const setCurrentVisualization = domain.createEvent<IVisualization>();
 export const addPagination = domain.createEvent<{
   [key: string]: number;
 }>();
 
-// export const changeNumeratorDataSource = domain.createEvent<IDataSource>();
 export const changeDataSource = domain.createEvent<string | undefined>();
 export const setDataSource = domain.createEvent<IDataSource>();
 export const setCategory = domain.createEvent<ICategory>();
 export const setIndicator = domain.createEvent<IIndicator>();
-// export const changeDenominatorDataSource = domain.createEvent<IDataSource>();
-// export const addNumeratorExpression = domain.createEvent<{
-//   key: string;
-//   value: string;
-// }>();
-// export const addDenominatorExpression = domain.createEvent<{
-//   key: string;
-//   value: string;
-// }>();
-export const changeLayouts = domain.createEvent<{
-  currentLayout: Layout[];
-  allLayouts: Layouts;
-}>();
+
 export const changeNumeratorExpressionValue = domain.createEvent<{
   attribute: string;
   value: string;
@@ -77,7 +57,7 @@ export const changeDenominatorExpressionValue = domain.createEvent<{
 }>();
 
 export const changeIndicatorAttribute = domain.createEvent<{
-  attribute: "name" | "description" | "factor" | "query";
+  attribute: "name" | "description" | "factor" | "query" | "custom";
   value: any;
 }>();
 
@@ -108,8 +88,6 @@ export const changeDenominatorDimension = domain.createEvent<{
   replace?: boolean;
   label?: string;
 }>();
-
-// export const removeNumeratorDimension = domain.createEvent<string>();
 
 export const changeUseIndicators = domain.createEvent<boolean>();
 export const setVisualizationQueries = domain.createEvent<IIndicator[]>();
@@ -179,6 +157,32 @@ export const onChangeOrganisations = domain.createEvent<{
   organisations: React.Key[];
   groups: string[];
   expandedKeys: React.Key[];
+  checkedKeys: React.Key[];
 }>();
 
 export const setCurrentPage = domain.createEvent<string>();
+
+export const setDataSets = domain.createEvent<Option[]>();
+export const assignDataSet = domain.createEvent<string>();
+
+export const setCategorization = domain.createEvent<{
+  [key: string]: any[];
+}>();
+export const setAvailableCategories = domain.createEvent<any[]>();
+export const setAvailableCategoryOptionCombos = domain.createEvent<any[]>();
+export const setTargetCategoryOptionCombos = domain.createEvent<any[]>();
+export const setSystemId = domain.createEvent<string>();
+export const setCheckedKeys = domain.createEvent<
+  { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[]
+>();
+
+export const setLevels = domain.createEvent<string[]>();
+export const setGroups = domain.createEvent<string[]>();
+export const setShowFooter = domain.createEvent<boolean>();
+export const setSystemName = domain.createEvent<string>();
+export const setInstanceBaseUrl = domain.createEvent<string>();
+export const setMinSublevel = domain.createEvent<number>();
+export const setMaxLevel = domain.createEvent<number>();
+export const setIsNotDesktop = domain.createEvent<boolean>();
+export const setIsFullScreen = domain.createEvent<boolean>();
+export const setRefresh = domain.createEvent<boolean>();

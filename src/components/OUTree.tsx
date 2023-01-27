@@ -1,13 +1,49 @@
-import { Box, Button, Checkbox, Spacer, Stack, Text } from "@chakra-ui/react";
+import { Box, Stack, Text } from "@chakra-ui/react";
 import { Tree } from "antd";
-import type { DataNode } from "antd/lib/tree";
+// import type { DataNode } from "antd/lib/tree";
 import { GroupBase, Select } from "chakra-react-select";
 import React, { useState } from "react";
-
+import { useQueryClient } from "@tanstack/react-query";
 import { useDataEngine } from "@dhis2/app-runtime";
 import "antd/dist/antd.css";
-import { isArray } from "lodash";
-import { Option } from "../interfaces";
+import { useStore } from "effector-react";
+import { flatMapDeep, isArray, max } from "lodash";
+import {
+  setCheckedKeys,
+  setExpandedKeys,
+  setGroups,
+  setLevels,
+  setMinSublevel,
+  setOrganisations,
+} from "../Events";
+import { DataNode, Option } from "../interfaces";
+import { $store } from "../Store";
+
+function traverse(node: any, path: any[] = [], result: any[] = []) {
+  if (node && (!node.children || node.children.length === 0)) {
+    result.push(path.concat(node.level));
+  }
+  if (node && node.children && node.children.length > 0) {
+    for (const child of node.children) {
+      traverse(child, path.concat(node.level), result);
+    }
+  }
+  return result;
+}
+
+const getMembers: any = (members: any[]) => {
+  let children: any[] = [];
+  const flattenMembers = members.map((m) => {
+    if (m.children && m.children.length) {
+      children = [...children, ...m.children];
+    }
+    return m;
+  });
+
+  return flattenMembers.concat(
+    children.length ? getMembers(children) : children
+  );
+};
 
 const updateTreeData = (
   list: DataNode[],
@@ -34,59 +70,50 @@ const OUTree = ({
   units,
   groups,
   levels,
-  selectedUnits,
-  selectedLevels,
-  selectedGroups,
-  expandedKeys,
-  onChange,
 }: {
   units: DataNode[];
   levels: Option[];
   groups: Option[];
-  selectedUnits: React.Key[];
-  selectedLevels: string[];
-  selectedGroups: string[];
-  expandedKeys: React.Key[];
-  onChange: (data: {
-    selectedUnits: React.Key[];
-    selectedLevels: string[];
-    selectedGroups: string[];
-    expandedKeys: React.Key[];
-  }) => void;
 }) => {
+  const store = useStore($store);
   const engine = useDataEngine();
   const [treeData, setTreeData] = useState<DataNode[]>(units);
-  const [availableLevels, setAvailableLevels] =
-    useState<string[]>(selectedLevels);
-  const [availableGroups, setAvailableGroups] =
-    useState<string[]>(selectedGroups);
-  const [expanded, setExpanded] = useState<React.Key[]>(expandedKeys);
+  const [flattened, setFlattened] = useState<any[]>(units);
   const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
-  const [checkedKeys, setCheckedKeys] = useState<
-    { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[]
-  >({ checked: selectedUnits, halfChecked: [] });
-  const [selectedKeys, setSelectedKeys] = useState<React.Key[]>(selectedUnits);
-
+  const queryClient = useQueryClient();
   const onCheck = (
     checkedKeysValue:
       | { checked: React.Key[]; halfChecked: React.Key[] }
       | React.Key[]
   ) => {
+    queryClient.cancelQueries();
+    let checked: React.Key[] = [];
     setCheckedKeys(checkedKeysValue);
     if (isArray(checkedKeysValue)) {
-      setSelectedKeys(checkedKeysValue);
+      setOrganisations(checkedKeysValue);
+      checked = checkedKeysValue;
     } else {
-      setSelectedKeys(checkedKeysValue.checked);
+      setOrganisations(checkedKeysValue.checked);
+      checked = checkedKeysValue.checked;
+    }
+    const filtered = flattened
+      .filter(({ key }) => checked.indexOf(key) !== -1)
+      .map(({ level }) => Number(level));
+    const minSublevel: number | null | undefined = max(filtered);
+    if (minSublevel && minSublevel + 1 <= store.maxLevel) {
+      setMinSublevel(minSublevel + 1);
+    } else {
+      setMinSublevel(store.maxLevel);
     }
   };
 
   const onSelect = (selectedKeysValue: React.Key[]) => {
-    setSelectedKeys(selectedKeysValue);
+    setOrganisations(selectedKeysValue);
     setCheckedKeys({ checked: selectedKeysValue, halfChecked: [] });
   };
 
   const onExpand = (expandedKeysValue: React.Key[]) => {
-    setExpanded(expandedKeysValue);
+    setExpandedKeys(expandedKeysValue);
     setAutoExpandParent(false);
   };
   const onLoadData = async ({ key, children }: any) => {
@@ -103,7 +130,7 @@ const OUTree = ({
             filter: `id:in:[${key}]`,
             paging: "false",
             order: "shortName:desc",
-            fields: "children[id,name,path,leaf]",
+            fields: "children[id,name,level,path,leaf]",
           },
         },
       });
@@ -114,6 +141,7 @@ const OUTree = ({
               key: child.id,
               title: child.name,
               isLeaf: child.leaf,
+              level: child.level,
             };
             return record;
           })
@@ -127,6 +155,7 @@ const OUTree = ({
             return 0;
           });
       });
+      setFlattened((prev) => [...prev, ...found]);
       setTreeData((origin) => updateTreeData(origin, key, found));
     } catch (e) {
       console.log(e);
@@ -134,11 +163,8 @@ const OUTree = ({
   };
 
   return (
-    <Stack w="500px" bg="white" p="30px" spacing="10px">
-      <Stack direction="row">
-        <Checkbox>User OrgUnit</Checkbox>
-      </Stack>
-      <Box border="1px solid gray" h="300px" overflow="auto">
+    <Stack bgColor="white" spacing="20px">
+      <Box border="1px solid gray" h="250px" overflow="auto">
         <Tree
           multiple
           checkable
@@ -146,56 +172,39 @@ const OUTree = ({
           loadData={onLoadData}
           checkStrictly
           onExpand={onExpand}
-          expandedKeys={expanded}
+          expandedKeys={store.expandedKeys}
           autoExpandParent={autoExpandParent}
           onCheck={onCheck}
-          checkedKeys={checkedKeys}
+          checkedKeys={store.checkedKeys}
           onSelect={onSelect}
-          selectedKeys={selectedKeys}
+          selectedKeys={store.organisations}
         />
       </Box>
-      <Stack direction="row" width="100%" alignItems="center">
-        <Text w="50px">Level</Text>
-        <Box flex={1}>
-          <Select<Option, true, GroupBase<Option>>
-            size="sm"
-            isMulti
-            options={levels}
-            value={levels.filter(
-              (d: Option) => availableLevels.indexOf(String(d.value)) !== -1
-            )}
-            onChange={(e) => setAvailableLevels(e.map((ex) => ex.value))}
-          />
-        </Box>
+      <Stack>
+        <Text>Level</Text>
+        <Select<Option, true, GroupBase<Option>>
+          isMulti
+          options={levels}
+          value={levels.filter(
+            (d: Option) => store.levels.indexOf(d.value) !== -1
+          )}
+          onChange={(e) => {
+            setLevels(e.map((ex) => ex.value));
+          }}
+        />
       </Stack>
-      <Stack direction="row" width="100%" alignItems="center">
-        <Text w="50px">Group</Text>
-        <Box flex={1}>
-          <Select<Option, true, GroupBase<Option>>
-            size="sm"
-            isMulti
-            options={groups}
-            value={groups.filter(
-              (d: Option) => availableGroups.indexOf(d.value) !== -1
-            )}
-            onChange={(e) => setAvailableGroups(e.map((ex) => ex.value))}
-          />
-        </Box>
-      </Stack>
-      <Stack direction="row" mt="10px">
-        <Spacer />
-        <Button
-          onClick={() =>
-            onChange({
-              selectedUnits: selectedKeys,
-              selectedLevels: availableLevels,
-              selectedGroups: availableGroups,
-              expandedKeys: expanded,
-            })
-          }
-        >
-          Update
-        </Button>
+      <Stack>
+        <Text>Group</Text>
+        <Select<Option, true, GroupBase<Option>>
+          isMulti
+          options={groups}
+          value={groups.filter(
+            (d: Option) => store.groups.indexOf(d.value) !== -1
+          )}
+          onChange={(e) => {
+            setGroups(e.map((ex) => ex.value));
+          }}
+        />
       </Stack>
     </Stack>
   );

@@ -164,7 +164,7 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
               _hover={{
                 bg: "yellow.400",
               }}
-              bg="yellow.300"
+              bgColor="yellow.300"
             >
               <Text>Previous</Text>
             </PaginationPrevious>
@@ -172,7 +172,7 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
               _hover={{
                 bg: "yellow.400",
               }}
-              bg="yellow.300"
+              bgColor="yellow.300"
             >
               <Text>Next</Text>
             </PaginationNext>

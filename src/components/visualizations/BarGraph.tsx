@@ -1,22 +1,17 @@
-import { Stack, Text } from "@chakra-ui/react";
+import { Stack, Text, SimpleGrid, Box } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { update } from "lodash";
-import { useElementSize } from "usehooks-ts";
 import Plot from "react-plotly.js";
-import { ISection, IVisualization } from "../../interfaces";
-import { $visualizationData, $visualizationMetadata } from "../../Store";
+import { ChartProps } from "../../interfaces";
+import { $visualizationMetadata } from "../../Store";
 import { exclusions } from "../../utils/utils";
 import { processGraphs } from "../processors";
 import VisualizationTitle from "./VisualizationTitle";
 
-type BarGraphProps = {
-  visualization: IVisualization;
-  layoutProperties?: { [key: string]: any };
-  dataProperties?: { [key: string]: any };
+interface BarGraphProps extends ChartProps {
   category?: string;
   series?: string;
-  section: ISection;
-};
+}
 
 const BarGraph = ({
   visualization,
@@ -25,18 +20,12 @@ const BarGraph = ({
   layoutProperties,
   dataProperties,
   section,
+  data,
 }: BarGraphProps) => {
-  const visualizationData = useStore($visualizationData);
   const metadata = useStore($visualizationMetadata);
-  const [squareRef, { width, height }] = useElementSize();
-
-  const data = visualizationData[visualization.id]
-    ? visualizationData[visualization.id]
-    : [];
-
   let availableProperties: { [key: string]: any } = {
     layout: {
-      legend: { x: 0.5, y: -0.3, orientation: "h" },
+      legend: { x: 0.5, y: -0.1, orientation: "h" },
       yaxis: { automargin: true },
       colorway: [
         "#1f77b4",
@@ -54,59 +43,71 @@ const BarGraph = ({
   Object.entries(layoutProperties || {}).forEach(([property, value]) => {
     update(availableProperties, property, () => value);
   });
-
-  const titleFontSize = dataProperties?.["data.title.fontsize"] || "1.5vh";
-  const titleCase = dataProperties?.["data.title.case"] || "uppercase";
-  const titleColor = dataProperties?.["data.title.color"] || "black";
+  const colors = availableProperties.layout.colorway;
+  const { chartData, allSeries } = processGraphs(
+    data,
+    category,
+    series,
+    dataProperties,
+    metadata[visualization.id]
+  );
   return (
-    <Stack ref={squareRef} h="100%" spacing={0}>
-      {visualization.name && (
-        <VisualizationTitle
-          visualization={visualization}
-          titleFontSize={titleFontSize}
-          titleCase={titleCase}
-          titleColor={titleColor}
-          section={section}
-        />
-      )}
-
-      <Stack flex={1}>
-        <Plot
-          data={processGraphs(
-            data,
-            category,
-            series,
-            dataProperties,
-            metadata[visualization.id]
-          )}
-          layout={{
-            margin: {
-              pad: 5,
-              r: 10,
-              t: 0,
-              l: 50,
-              b: 0,
-            },
-            autosize: true,
-            showlegend: true,
-            xaxis: {
-              automargin: true,
-              showgrid: false,
-            },
-            ...availableProperties.layout,
-          }}
-          style={{ width: "100%", height: "100%" }}
-          config={{
-            displayModeBar: true,
-            responsive: true,
-            toImageButtonOptions: {
-              format: "svg",
-              scale: 1,
-            },
-            modeBarButtonsToRemove: exclusions,
-            displaylogo: false,
-          }}
-        />
+    <Stack h="100%" spacing={0} w="100%">
+      {((visualization.showTitle !== undefined &&
+        visualization.showTitle === true &&
+        visualization.name) ||
+        (visualization.showTitle === undefined && visualization.name)) && (
+        <VisualizationTitle section={section} title={visualization.name} />
+      )}{" "}
+      <Stack flex={1} direction="column">
+        <Stack flex={1}>
+          <Plot
+            data={chartData}
+            layout={{
+              margin: {
+                pad: 5,
+                r: 10,
+                t: 0,
+                l: 50,
+                b: 0,
+              },
+              autosize: true,
+              showlegend: false,
+              xaxis: {
+                automargin: true,
+                showgrid: false,
+                type: "category",
+              },
+              ...availableProperties.layout,
+            }}
+            style={{ width: "100%", height: "100%" }}
+            config={{
+              displayModeBar: true,
+              responsive: true,
+              toImageButtonOptions: {
+                format: "svg",
+                scale: 1,
+              },
+              modeBarButtonsToRemove: exclusions,
+              displaylogo: false,
+            }}
+          />
+        </Stack>
+        <Stack direction="row" spacing="20px" justify="center">
+          {allSeries.map((series, index) => (
+            <Stack
+              direction="row"
+              spacing="2px"
+              alignItems="center"
+              key={index}
+            >
+              <Text bgColor={colors[index]} w="10px" h="10px">
+                &nbsp;
+              </Text>
+              <Text noOfLines={[1, 2, 3]}>{series}</Text>
+            </Stack>
+          ))}
+        </Stack>
       </Stack>
     </Stack>
   );

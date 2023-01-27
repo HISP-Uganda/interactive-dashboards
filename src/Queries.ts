@@ -1,27 +1,39 @@
 import { useDataEngine } from "@dhis2/app-runtime";
-import { center } from "@turf/turf";
-import type { DataNode } from "antd/lib/tree";
 import axios, { AxiosRequestConfig } from "axios";
-import { fromPairs, uniq } from "lodash";
+import { fromPairs, isEmpty, max, min, uniq } from "lodash";
+import { evaluate } from "mathjs";
 import { useQuery } from "react-query";
 import {
   addPagination,
   changeAdministration,
-  changeDefaults,
-  changeHasDashboards,
   changeSelectedCategory,
   changeSelectedDashboard,
   onChangeOrganisations,
+  setAvailableCategories,
+  setAvailableCategoryOptionCombos,
   setCategories,
+  setCategory,
   setCurrentDashboard,
-  setDashboards,
+  setCurrentPage,
+  setDataSets,
+  setDataSource,
   setDataSources,
   setDefaultDashboard,
+  setIndicator,
+  setInstanceBaseUrl,
+  setMaxLevel,
+  setMinSublevel,
+  setShowFooter,
+  setShowSider,
+  setSystemId,
+  setSystemName,
+  setTargetCategoryOptionCombos,
   setVisualizationQueries,
   updateVisualizationData,
   updateVisualizationMetadata,
 } from "./Events";
 import {
+  DataNode,
   ICategory,
   IDashboard,
   IData,
@@ -31,11 +43,19 @@ import {
   IIndicator,
   IVisualization,
   Option,
+  Threshold,
 } from "./interfaces";
-import { traverse } from "./utils/utils";
+import {
+  createCategory,
+  createDashboard,
+  createDataSource,
+  createIndicator,
+} from "./Store";
+import { getSearchParams, processMap } from "./utils/utils";
 
 export const api = axios.create({
   baseURL: "https://services.dhis2.hispuganda.org/",
+  // baseURL: "http://localhost:3001/",
 });
 
 export const queryDataSource = async (
@@ -86,41 +106,69 @@ export const queryDataSource = async (
   return data;
 };
 
-const loadResource = async (engine: any, namespace: string) => {
-  const query = {
-    resource: {
-      resource: `dataStore/${namespace}`,
+export const getIndex = async (
+  namespace: string,
+  systemId: string,
+  otherQueries: any[] = [],
+  signal?: AbortSignal
+) => {
+  let must: any[] = [
+    {
+      term: { "systemId.keyword": systemId },
     },
-  };
-  try {
-    const { resource }: any = await engine.query(query);
-    const query1: any = fromPairs(
-      resource.map((n: string) => [
-        n,
-        {
-          resource: `dataStore/${namespace}/${n}`,
+    ...otherQueries,
+  ];
+  let {
+    data: {
+      hits: { hits },
+    },
+  }: any = await api.post(
+    "wal/search",
+    {
+      index: namespace,
+      size: 1000,
+      query: {
+        bool: {
+          must,
         },
-      ])
-    );
-    const allData: { [key: string]: any } = await engine.query(query1);
-    return Object.values(allData);
-  } catch (error) {
-    return [];
-  }
+      },
+    },
+    { signal }
+  );
+  return hits.map(({ _source }: any) => _source);
 };
 
-const loadSingleResource = async (engine: any, resource: string) => {
-  const query = {
-    resource: {
-      resource: `dataStore/${resource}`,
-    },
-  };
+export const getOneRecord = async (
+  index: string,
+  id: string,
+  signal: AbortSignal | undefined
+) => {
   try {
-    const { resource }: any = await engine.query(query);
-    return resource;
+    let {
+      data: {
+        body: { _source },
+      },
+    }: any = await api.post(
+      "wal/get",
+      {
+        index,
+        id,
+      },
+      { signal }
+    );
+    return _source;
   } catch (error) {
     return null;
   }
+};
+
+const loadResource = async (
+  namespace: string,
+  systemId: string,
+  otherQueries: any[] = [],
+  signal?: AbortSignal
+) => {
+  return await getIndex(namespace, systemId, otherQueries, signal);
 };
 
 export const useOrganisationUnits = () => {
@@ -129,19 +177,19 @@ export const useOrganisationUnits = () => {
     me: {
       resource: "me.json",
       params: {
-        fields: "organisationUnits[id,name,leaf]",
+        fields: "organisationUnits[id,name,level,leaf]",
       },
     },
     levels: {
       resource: "organisationUnitLevels.json",
       params: {
-        fields: "id,level,name",
+        fields: "id,level~rename(value),name~rename(label)",
       },
     },
     groups: {
       resource: "organisationUnitGroups.json",
       params: {
-        fields: "id,name",
+        fields: "id~rename(value),name~rename(label)",
       },
     },
   };
@@ -155,35 +203,21 @@ export const useOrganisationUnits = () => {
       levels: { organisationUnitLevels },
       groups: { organisationUnitGroups },
     }: any = await engine.query(ouQuery);
-
     const units: DataNode[] = organisationUnits.map((o: any) => {
       return {
         key: o.id,
         title: o.name,
+        level: o.level,
         isLeaf: o.leaf,
-      };
-    });
-
-    const levels: Option[] = organisationUnitLevels.map(
-      ({ level, name }: any) => {
-        return {
-          label: name,
-          value: level,
-        };
-      }
-    );
-
-    const groups: Option[] = organisationUnitGroups.map(({ id, name }: any) => {
-      return {
-        label: name,
-        value: id,
       };
     });
 
     return {
       units,
-      levels,
-      groups,
+      levels: organisationUnitLevels.map((x: any) => {
+        return { ...x, value: String(x.value) };
+      }),
+      groups: organisationUnitGroups,
     };
   });
 };
@@ -197,226 +231,108 @@ export const useInitials = () => {
         fields: "organisationUnits[id,name,leaf,level],authorities",
       },
     },
+    dataSets: {
+      resource: "dataSets.json",
+      params: {
+        fields: "id~rename(value),name~rename(label)",
+      },
+    },
+    levels: {
+      resource: "organisationUnitLevels.json",
+      params: {
+        fields: "level",
+        order: "level:DESC",
+        pageSize: 1,
+      },
+    },
+    systemInfo: {
+      resource: "system/info",
+    },
   };
-  return useQuery<any, Error>(["initial"], async () => {
+  return useQuery<any, Error>(["initial"], async ({ signal }) => {
     try {
       const {
+        systemInfo: { systemId, systemName, instanceBaseUrl },
         me: { organisationUnits, authorities },
+        levels: { organisationUnitLevels },
+        dataSets: { dataSets },
       }: any = await engine.query(ouQuery);
+
+      setSystemId(systemId);
+      setSystemName(systemName);
+      setDataSets(dataSets);
+      setInstanceBaseUrl(instanceBaseUrl);
       const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
       changeAdministration(isAdmin);
       const facilities: React.Key[] = organisationUnits.map(
         (unit: any) => unit.id
       );
+      const maxLevel = organisationUnitLevels[0].level;
+      setMaxLevel(maxLevel);
+      const levels = organisationUnits.map(({ level }: any) => Number(level));
+      const minLevel: number | null | undefined = min(levels);
+      const minSublevel: number | null | undefined = max(levels);
+      if (minSublevel && minSublevel + 1 <= maxLevel) {
+        setMinSublevel(minSublevel + 1);
+      } else {
+        setMinSublevel(maxLevel);
+      }
       onChangeOrganisations({
-        levels: ["3"],
+        levels: [minLevel === 1 ? "3" : `${minLevel ? minLevel + 1 : 4}`],
         organisations: facilities,
         groups: [],
         expandedKeys: [],
+        checkedKeys: facilities,
       });
-      const dashboards = await loadResource(engine, "i-dashboards");
-      const categories = await loadResource(engine, "i-categories");
-      const dataSources = await loadResource(engine, "i-data-sources");
-      const visualizationQueries = await loadResource(
-        engine,
-        "i-visualization-queries"
+      const settings = await loadResource(
+        "i-dashboard-settings",
+        systemId,
+        [],
+        signal
       );
-      const settings = await loadResource(engine, "i-dashboard-settings");
-      if (isAdmin) {
-        setDashboards(dashboards);
-      } else {
-        const publishedDashboards = dashboards.filter(
-          (dashboard: IDashboard) => dashboard.published
-        );
-        setDashboards(publishedDashboards);
-        if (publishedDashboards.length > 0) {
-          setCurrentDashboard(publishedDashboards[0]);
-          changeSelectedDashboard(publishedDashboards[0].id);
-          changeSelectedCategory(publishedDashboards[0].category);
-          changeHasDashboards(true);
-        }
+      const defaultDashboard = settings.find(
+        (s: any) => s.id === systemId && s.default
+      );
+      if (defaultDashboard) {
+        changeSelectedDashboard(defaultDashboard.default);
+        setDefaultDashboard(defaultDashboard.default);
       }
-      setCategories([
-        ...categories,
-        {
-          id: "uDWxMNyXZeo",
-          name: "Uncategorised",
-          description: "Uncategorised",
-        },
-      ]);
-      setDataSources(dataSources);
-      setVisualizationQueries(visualizationQueries);
-      if (settings.length > 0) {
-        const defaults = await loadSingleResource(
-          engine,
-          "i-dashboard-settings/settings"
-        );
-        console.log(defaults);
-        if (defaults !== null) {
-          const dashboard: any = await loadSingleResource(
-            engine,
-            `i-dashboards/${defaults.default}`
-          );
-          if (dashboard !== null) {
-            setCurrentDashboard(dashboard);
-            changeSelectedDashboard(dashboard.id);
-            changeSelectedCategory(dashboard.category);
-            changeDefaults();
-            setDefaultDashboard(defaults.default);
-          }
-        }
-      }
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
     return true;
   });
 };
 
-export const useDataSources = () => {
-  const engine = useDataEngine();
-  const namespaceQuery = {
-    namespaceKeys: {
-      resource: `dataStore/i-data-sources`,
-    },
-  };
-  return useQuery<boolean, Error>(["data-sources"], async () => {
-    try {
-      const { namespaceKeys }: any = await engine.query(namespaceQuery);
-      const query: any = fromPairs(
-        namespaceKeys.map((n: string) => [
-          n,
-          {
-            resource: `dataStore/i-data-sources/${n}`,
-          },
-        ])
-      );
-      const allData = await engine.query(query);
-      const dataSources = Object.values(allData).map((x) => {
-        let value = x as unknown as IDataSource;
-        return value;
-      });
-      setDataSources(dataSources);
-      return true;
-    } catch (error) {
-      console.error(error);
-      return true;
+export const useDataSources = (systemId: string) => {
+  return useQuery<IDataSource[], Error>(
+    ["i-data-sources"],
+    async ({ signal }) => {
+      try {
+        setCurrentPage("data-sources");
+        setShowFooter(false);
+        setShowSider(true);
+        return await getIndex("i-data-sources", systemId, [], signal);
+      } catch (error) {
+        console.error(error);
+        return [];
+      }
     }
+  );
+};
+export const useDataSource = (id: string) => {
+  return useQuery<void, Error>(["i-data-sources", id], async ({ signal }) => {
+    const dataSource: IDataSource =
+      (await getOneRecord("i-data-sources", id, signal)) ||
+      createDataSource(id);
+    setDataSource(dataSource);
   });
 };
 
-export const useDashboards = () => {
-  const engine = useDataEngine();
-  const namespaceQuery = {
-    namespaceKeys: {
-      resource: `dataStore/i-dashboards`,
-    },
-  };
-  return useQuery<boolean, Error>(["dashboards"], async () => {
+export const useDashboards = (systemId: string) => {
+  return useQuery<IDashboard[], Error>(["i-dashboards"], async ({ signal }) => {
     try {
-      const { namespaceKeys }: any = await engine.query(namespaceQuery);
-      const query: any = fromPairs(
-        namespaceKeys.map((n: string) => [
-          n,
-          {
-            resource: `dataStore/i-dashboards/${n}`,
-          },
-        ])
-      );
-      const allData = await engine.query(query);
-      const dashboards = Object.values(allData).map((x) => {
-        let value = x as unknown as IDashboard;
-        return value;
-      });
-      setDashboards(dashboards);
-      return true;
-    } catch (error) {
-      console.error(error);
-      return true;
-    }
-  });
-};
-
-export const useCategories = () => {
-  const engine = useDataEngine();
-  const namespaceQuery = {
-    namespaceKeys: {
-      resource: `dataStore/i-categories`,
-    },
-  };
-  return useQuery<boolean, Error>(["categories"], async () => {
-    try {
-      const { namespaceKeys }: any = await engine.query(namespaceQuery);
-      const query: any = fromPairs(
-        namespaceKeys.map((n: string) => [
-          n,
-          {
-            resource: `dataStore/i-categories/${n}`,
-          },
-        ])
-      );
-      const allData = await engine.query(query);
-      const categories = Object.values(allData).map((x) => {
-        let value = x as unknown as ICategory;
-        return value;
-      });
-      setCategories(categories);
-      return true;
-    } catch (error) {
-      console.error(error);
-      return true;
-    }
-  });
-};
-
-export const useVisualizationData = () => {
-  const engine = useDataEngine();
-  const namespaceQuery = {
-    namespaceKeys: {
-      resource: `dataStore/i-visualization-queries`,
-    },
-  };
-  return useQuery<boolean, Error>(["visualization-queries"], async () => {
-    try {
-      const { namespaceKeys }: any = await engine.query(namespaceQuery);
-      const query: any = fromPairs(
-        namespaceKeys.map((n: string) => [
-          n,
-          {
-            resource: `dataStore/i-visualization-queries/${n}`,
-          },
-        ])
-      );
-      const allData: { [key: string]: any } = await engine.query(query);
-
-      const visualizationQueries = Object.values(allData);
-      setVisualizationQueries(visualizationQueries);
-      return true;
-    } catch (error) {
-      console.error(error);
-      return true;
-    }
-  });
-};
-
-export const useNamespace = (namespace: string) => {
-  const engine = useDataEngine();
-  const namespaceQuery = {
-    namespaceKeys: {
-      resource: `dataStore/${namespace}`,
-    },
-  };
-  return useQuery<any[], Error>(["namespaces", namespace], async () => {
-    try {
-      const { namespaceKeys }: any = await engine.query(namespaceQuery);
-      const query: any = fromPairs(
-        namespaceKeys.map((n: string) => [
-          n,
-          {
-            resource: `dataStore/${namespace}/${n}`,
-          },
-        ])
-      );
-      const allData = await engine.query(query);
-      return Object.values(allData);
+      return await getIndex("i-dashboards", systemId, [], signal);
     } catch (error) {
       console.error(error);
       return [];
@@ -424,31 +340,167 @@ export const useNamespace = (namespace: string) => {
   });
 };
 
-export const useNamespaceKey = (namespace: string, key: string) => {
+export const useDashboard = (
+  id: string,
+  systemId: string,
+  refresh: boolean = true
+) => {
   const engine = useDataEngine();
-  const namespaceQuery = {
-    dashboard: {
-      resource: `dataStore/${namespace}/${key}`,
-    },
-  };
-  return useQuery<boolean, Error>(["namespace", namespace, key], async () => {
-    const { dashboard }: any = await engine.query(namespaceQuery);
-    setCurrentDashboard(dashboard);
-    return true;
+  return useQuery<void, Error>(["i-dashboards", id], async ({ signal }) => {
+    if (refresh) {
+      try {
+        let dashboard: IDashboard | null = await getOneRecord(
+          "i-dashboards",
+          id,
+          signal
+        );
+        if (!dashboard) {
+          dashboard = createDashboard(id);
+        } else if (dashboard.targetCategoryCombo) {
+          const {
+            combo: { categoryOptionCombos },
+          }: any = await engine.query({
+            combo: {
+              resource: `categoryCombos/${dashboard.targetCategoryCombo}`,
+              params: {
+                fields:
+                  "categoryOptionCombos[id,name,categoryOptions],categories[id,name,categoryOptions[id~rename(value),name~rename(label)]]",
+              },
+            },
+          });
+          setTargetCategoryOptionCombos(categoryOptionCombos);
+        }
+
+        const queries = await getIndex(
+          "i-visualization-queries",
+          systemId,
+          [],
+          signal
+        );
+        const dataSources = await getIndex(
+          "i-data-sources",
+          systemId,
+          [],
+          signal
+        );
+        const categories = await getIndex("i-categories", systemId, [], signal);
+        setCategories(categories);
+        setDataSources(dataSources);
+        setCurrentDashboard(dashboard);
+        changeSelectedDashboard(dashboard.id);
+        changeSelectedCategory(dashboard.category || "");
+        setVisualizationQueries(queries);
+      } catch (error) {
+        console.error(error);
+      }
+    }
   });
 };
 
-export const useNamespaceKey2 = (namespace: string, key: string) => {
+export const useCategories = (systemId: string) => {
+  return useQuery<ICategory[], Error>(["i-categories"], async ({ signal }) => {
+    try {
+      return await getIndex("i-categories", systemId, [], signal);
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  });
+};
+
+export const useCategory = (id: string) => {
+  return useQuery<void, Error>(["i-categories", id], async ({ signal }) => {
+    try {
+      let category = await getOneRecord("i-categories", id, signal);
+      if (!category) {
+        category = createCategory(id);
+      }
+      setCategory(category);
+      return;
+    } catch (error) {
+      console.error(error);
+    }
+  });
+};
+export const useVisualizationData = (systemId: string) => {
+  return useQuery<IIndicator[], Error>(
+    ["i-visualization-queries"],
+    async ({ signal }) => {
+      try {
+        return await getIndex("i-visualization-queries", systemId, [], signal);
+      } catch (error) {
+        console.error(error);
+        return [];
+      }
+    }
+  );
+};
+
+export const useVisualizationDatum = (id: string, systemId: string) => {
+  return useQuery<void, Error>(
+    ["i-visualization-queries", id],
+    async ({ signal }) => {
+      try {
+        const dataSources = await getIndex(
+          "i-data-sources",
+          systemId,
+          [],
+          signal
+        );
+        let indicator = await getOneRecord(
+          "i-visualization-queries",
+          id,
+          signal
+        );
+        if (!indicator) {
+          indicator = createIndicator(id);
+        }
+        setDataSources(dataSources);
+        setIndicator(indicator);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  );
+};
+
+export const useDataSet = (dataSet: string) => {
   const engine = useDataEngine();
   const namespaceQuery = {
-    dashboard: {
-      resource: `dataStore/${namespace}/${key}`,
+    dataSet: {
+      resource: `dataSets/${dataSet}`,
+      params: {
+        fields:
+          "categoryCombo[categoryOptionCombos[id,name,categoryOptions],categories[id,name,categoryOptions[id~rename(value),name~rename(label)]]]",
+      },
     },
   };
-  return useQuery<any, Error>(["namespace-key-2", namespace, key], async () => {
-    const { dashboard }: any = await engine.query(namespaceQuery);
-    return dashboard;
-  });
+  return useQuery<{ [key: string]: any }, Error>(
+    ["data-set", dataSet],
+    async () => {
+      try {
+        const {
+          dataSet: {
+            categoryCombo: { categories, categoryOptionCombos },
+          },
+        }: any = await engine.query(namespaceQuery);
+        setAvailableCategories(categories);
+        setAvailableCategoryOptionCombos(categoryOptionCombos);
+        const selectedCategories = categories.map(
+          ({ id, categoryOptions }: any, index: number) => [
+            id,
+            index === 0
+              ? [categoryOptions[categoryOptions.length - 1]]
+              : categoryOptions,
+          ]
+        );
+        // setCategorization();
+        return fromPairs(selectedCategories);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  );
 };
 
 export const useDataElements = (page: number, pageSize: number, q = "") => {
@@ -504,16 +556,6 @@ export const useIndicators = (
 
   let selectedIndicatorsQuery = {};
 
-  // if (selectedIndicators.length > 0) {
-  //   selectedIndicatorsQuery = {
-  //     ...selectedIndicatorsQuery,
-  //     selected: {
-  //       resource: "indicators.json",
-  //       params: { ...params, filter: `id:in:${selectedIndicators.join(",")}` },
-  //     },
-  //   };
-  // }
-
   if (q) {
     params = { ...params, filter: `identifiable:token:${q}` };
   }
@@ -564,14 +606,18 @@ export const useSQLViews = () => {
 export const useProgramIndicators = (
   page: number,
   pageSize: number,
-  q = ""
+  q = "",
+  selectedProgramIndicators: string[] = []
 ) => {
   const engine = useDataEngine();
   let params: { [key: string]: any } = {
     page,
     pageSize,
     fields: "id,name",
+    order: "name:ASC",
   };
+
+  let selectedProgramIndicatorsQuery = {};
 
   if (q) {
     params = { ...params, filter: `identifiable:token:${q}` };
@@ -581,9 +627,10 @@ export const useProgramIndicators = (
       resource: "programIndicators.json",
       params,
     },
+    ...selectedProgramIndicatorsQuery,
   };
   return useQuery<{ id: string; name: string }[], Error>(
-    ["program-indicators", page, pageSize],
+    ["program-indicators", page, pageSize, q],
     async () => {
       const {
         elements: {
@@ -891,133 +938,181 @@ const makeDHIS2Query = (
   return dd;
 };
 
+const hasGlobal = (globalFilters: { [key: string]: any }, value: string) => {
+  return Object.keys(globalFilters).some((element) => {
+    if (element.indexOf(value) !== -1) {
+      return true;
+    }
+    return false;
+  });
+};
 const makeSQLViewsQueries = (
   expressions: IExpressions = {},
-  globalFilters: { [key: string]: any } = {}
+  globalFilters: { [key: string]: any } = {},
+  otherParameters: { [key: string]: any }
 ) => {
-  return Object.entries(expressions)
-    .flatMap(([col, val]) => {
-      if (val.isGlobal) {
-        if (globalFilters[val.value]) {
-          return [`var=${col}:${globalFilters[val.value].join("-")}`];
-        }
-        return [];
+  let initial = otherParameters;
+  Object.entries(expressions).forEach(([col, val]) => {
+    if (val.isGlobal && globalFilters[val.value]) {
+      initial = {
+        ...initial,
+        [`var=${col}`]: globalFilters[val.value].join("-"),
+      };
+    } else if (!val.isGlobal && val.value) {
+      const keys = Object.keys(globalFilters).some(
+        (e) => String(val.value).indexOf(e) !== -1
+      );
+      if (keys) {
+        Object.entries(globalFilters).forEach(([globalId, globalValue]) => {
+          if (String(val.value).indexOf(globalId) !== -1) {
+            let currentValue = String(val.value).replaceAll(
+              globalId,
+              globalValue.join("-")
+            );
+            const calcIndex = currentValue.indexOf("calc");
+            if (calcIndex !== -1) {
+              const original = currentValue.slice(calcIndex);
+              const computed = evaluate(original.replaceAll("calc", ""));
+              currentValue = currentValue.replaceAll(original, computed);
+            }
+            initial = {
+              ...initial,
+              [`var=${col}`]: currentValue,
+            };
+          }
+        });
+      } else {
+        initial = { ...initial, [`var=${col}`]: val.value };
       }
-      return [`var=${col}:${val.value}`];
-    })
+    }
+  });
+  return Object.entries(initial)
+    .map(([key, value]) => `${key}:${value}`)
     .join("&");
 };
 
 const generateDHIS2Query = (
-  indicator: IIndicator,
+  indicators: IIndicator[],
   globalFilters: { [key: string]: any } = {},
   overrides: { [key: string]: string } = {}
 ) => {
-  let queries = {};
-  if (
-    indicator.numerator?.type === "ANALYTICS" &&
-    Object.keys(indicator.numerator.dataDimensions).length > 0
-  ) {
-    const params = makeDHIS2Query(
-      indicator.numerator,
-      globalFilters,
-      overrides
-    );
-    if (params) {
-      queries = {
-        numerator: {
-          resource: `analytics.json?${params}`,
-        },
-      };
-    }
-  } else if (
-    indicator.numerator?.type === "SQL_VIEW" &&
-    Object.keys(indicator.numerator.dataDimensions).length > 0
-  ) {
-    let currentParams = "";
-    const params = makeSQLViewsQueries(
-      indicator.numerator.expressions,
-      globalFilters
-    );
-    if (params) {
-      currentParams = `?${params}`;
-    }
-    queries = {
-      numerator: {
-        resource: `sqlViews/${
+  return indicators.map((indicator) => {
+    let query: { numerator?: string; denominator?: string } = {};
+    if (
+      indicator.numerator?.type === "ANALYTICS" &&
+      Object.keys(indicator.numerator.dataDimensions).length > 0
+    ) {
+      const params = makeDHIS2Query(
+        indicator.numerator,
+        globalFilters,
+        overrides
+      );
+      if (params) {
+        query = {
+          ...query,
+          numerator: `analytics.json?${params}`,
+        };
+      }
+    } else if (
+      indicator.numerator?.type === "SQL_VIEW" &&
+      Object.keys(indicator.numerator.dataDimensions).length > 0
+    ) {
+      let currentParams = "";
+      const allParams = fromPairs(
+        getSearchParams(indicator.numerator.query).map((re) => [
+          `var=${re}`,
+          "NULL",
+        ])
+      );
+      const params = makeSQLViewsQueries(
+        indicator.numerator.expressions,
+        globalFilters,
+        allParams
+      );
+      if (params) {
+        currentParams = `?${params}&paging=false`;
+      }
+      query = {
+        ...query,
+        numerator: `sqlViews/${
           Object.keys(indicator.numerator.dataDimensions)[0]
         }/data.json${currentParams}`,
-      },
-    };
-  }
-  if (
-    indicator.denominator?.type === "ANALYTICS" &&
-    Object.keys(indicator.denominator.dataDimensions).length > 0
-  ) {
-    const params = makeDHIS2Query(indicator.denominator, globalFilters);
-    if (params) {
-      queries = {
-        ...queries,
-        denominator: {
-          resource: `analytics.json?${params}`,
-        },
       };
     }
-  } else if (
-    indicator.denominator?.type === "SQL_VIEW" &&
-    Object.keys(indicator.denominator.dataDimensions).length > 0
-  ) {
-    let currentParams = "";
-    const params = makeSQLViewsQueries(
-      indicator.denominator.expressions,
-      globalFilters
-    );
-    if (params) {
-      currentParams = `?${params}`;
-    }
-    queries = {
-      denominator: {
-        resource: `sqlViews/${
+    if (
+      indicator.denominator?.type === "ANALYTICS" &&
+      Object.keys(indicator.denominator.dataDimensions).length > 0
+    ) {
+      const params = makeDHIS2Query(indicator.denominator, globalFilters);
+      if (params) {
+        query = {
+          ...query,
+          denominator: `analytics.json?${params}`,
+        };
+      }
+    } else if (
+      indicator.denominator?.type === "SQL_VIEW" &&
+      Object.keys(indicator.denominator.dataDimensions).length > 0
+    ) {
+      let currentParams = "";
+      const allParams = fromPairs(
+        getSearchParams(indicator.denominator.query).map((re) => [
+          `var=${re}`,
+          "NULL",
+        ])
+      );
+      const params = makeSQLViewsQueries(
+        indicator.denominator.expressions,
+        globalFilters,
+        allParams
+      );
+      if (params) {
+        currentParams = `?${params}&paging=false`;
+      }
+      query = {
+        ...query,
+        denominator: `sqlViews/${
           Object.keys(indicator.denominator.dataDimensions)[0]
         }/data.json${currentParams}`,
-      },
-    };
-  }
-  return queries;
+      };
+    }
+    return { query, indicator };
+  });
 };
 
 const generateKeys = (
-  indicator?: IIndicator,
+  indicators: IIndicator[] = [],
   globalFilters: { [key: string]: any } = {}
 ) => {
-  const numKeys = Object.keys(indicator?.numerator?.dataDimensions || {});
-  const denKeys = Object.keys(indicator?.denominator?.dataDimensions || {});
-  const numExpressions = Object.entries(
-    indicator?.numerator?.expressions || {}
-  ).map(([e, value]) => {
-    return value.value;
+  const all = indicators.flatMap((indicator) => {
+    const numKeys = Object.keys(indicator?.numerator?.dataDimensions || {});
+    const denKeys = Object.keys(indicator?.denominator?.dataDimensions || {});
+    const numExpressions = Object.entries(
+      indicator?.numerator?.expressions || {}
+    ).map(([e, value]) => {
+      return value.value;
+    });
+    const denExpressions = Object.entries(
+      indicator?.denominator?.expressions || {}
+    ).map(([e, value]) => {
+      return value.value;
+    });
+    return uniq([
+      ...numKeys,
+      ...denKeys,
+      ...numExpressions,
+      ...denExpressions,
+    ]).flatMap((id) => {
+      return globalFilters[id] || [id];
+    });
   });
-  const denExpressions = Object.entries(
-    indicator?.denominator?.expressions || {}
-  ).map(([e, value]) => {
-    return value.value;
-  });
-
-  const all = uniq([
-    ...numKeys,
-    ...denKeys,
-    ...numExpressions,
-    ...denExpressions,
-  ]).flatMap((id) => {
-    return globalFilters[id] || [id];
-  });
-  return all;
+  return uniq(all);
 };
 
 export const useVisualization = (
   visualization: IVisualization,
-  indicator?: IIndicator,
-  dataSource?: IDataSource,
+  indicators: IIndicator[] = [],
+  dataSources: IDataSource[] = [],
   refreshInterval?: string,
   globalFilters?: { [key: string]: any }
 ) => {
@@ -1026,155 +1121,399 @@ export const useVisualization = (
   if (refreshInterval && refreshInterval !== "off") {
     currentInterval = Number(refreshInterval) * 1000;
   }
-  const otherKeys = generateKeys(indicator, globalFilters);
+  let processed: any[] = [];
+  const otherKeys = generateKeys(indicators, globalFilters);
   const overrides = visualization.overrides || {};
+  const dhis2Indicators = indicators.flatMap((indicator) => {
+    const ds = dataSources.find(
+      (dataSource) =>
+        dataSource.id === indicator.dataSource && dataSource.type === "DHIS2"
+    );
+    if (ds) {
+      return { ...indicator, realDataSource: ds };
+    }
+    return [];
+  });
+
+  const elasticsearchIndicators = indicators.filter((indicator) => {
+    const ds = dataSources.find(
+      (dataSource) => dataSource.id === indicator.dataSource
+    );
+    return ds?.type === "ELASTICSEARCH";
+  });
+  const apiIndicators = indicators.filter((indicator) => {
+    const ds = dataSources.find(
+      (dataSource) => dataSource.id === indicator.dataSource
+    );
+    return ds?.type === "API";
+  });
   return useQuery<any, Error>(
     [
       "visualizations",
-      indicator?.id,
+      ...indicators.map(({ id }) => id),
       ...otherKeys,
       ...Object.values(overrides),
     ],
-    async () => {
-      if (indicator && dataSource && dataSource.isCurrentDHIS2) {
-        const queries = generateDHIS2Query(indicator, globalFilters, overrides);
-        const data = await engine.query(queries);
-        let processed: any[] = [];
-        let metadata = {};
-        if (data.numerator && data.denominator) {
-          const numerator: any = data.numerator;
-          const denominator: any = data.denominator;
-
-          let denRows = [];
-          let numRows = [];
-          let denHeaders: any[] = [];
-
-          if (numerator && numerator.listGrid) {
-            const { rows } = numerator.listGrid;
-            numRows = rows;
-          } else if (numerator) {
-            const {
-              rows,
-              metaData: { items },
-            } = numerator;
-            numRows = rows;
-            metadata = items;
+    async ({ signal }) => {
+      if (
+        dhis2Indicators.length > 0 &&
+        !isEmpty(globalFilters) &&
+        dataSources.length > 0
+      ) {
+        const queries = generateDHIS2Query(
+          dhis2Indicators,
+          globalFilters,
+          overrides
+        );
+        for (const { query, indicator } of queries) {
+          let allQueries: Promise<any>[] = [];
+          let dhis2Queries = {};
+          if (query.numerator) {
+            if (indicator.realDataSource?.isCurrentDHIS2) {
+              dhis2Queries = {
+                ...dhis2Queries,
+                numerator: {
+                  resource: query.numerator,
+                },
+              };
+            } else {
+              allQueries = [
+                ...allQueries,
+                axios.get(
+                  `${indicator.realDataSource?.authentication.url || ""}/api/${
+                    query.numerator
+                  }`,
+                  {
+                    auth: {
+                      username:
+                        indicator.realDataSource?.authentication.username || "",
+                      password:
+                        indicator.realDataSource?.authentication.password || "",
+                    },
+                  }
+                ),
+              ];
+            }
           }
-          if (denominator && denominator.listGrid) {
-            const { headers, rows } = denominator.listGrid;
-            denRows = rows;
-            denHeaders = headers;
-          } else if (denominator) {
-            const {
-              headers,
-              rows,
-              metaData: { items },
-            } = denominator;
-            denRows = rows;
-            denHeaders = headers;
-            metadata = { ...metadata, ...items };
+          if (query.denominator) {
+            if (indicator.realDataSource?.isCurrentDHIS2) {
+              dhis2Queries = {
+                ...dhis2Queries,
+                denominator: {
+                  resource: query.denominator,
+                },
+              };
+            } else {
+              allQueries = [
+                ...allQueries,
+                axios.get(
+                  `${indicator.realDataSource?.authentication.url || ""}/api/${
+                    query.denominator
+                  }`,
+                  {
+                    auth: {
+                      username:
+                        indicator.realDataSource?.authentication.username || "",
+                      password:
+                        indicator.realDataSource?.authentication.password || "",
+                    },
+                  }
+                ),
+              ];
+            }
           }
-          const numerators = fromPairs<number>(
-            numRows.map((r: string[]) => [
-              r.slice(0, -1).join(""),
-              Number(r[r.length - 1]),
-            ])
-          );
-          processed = denRows.map((r: string[]) => {
-            const currentDenKey = r.slice(0, -1).join("");
-            const currentDenValue = Number(r[r.length - 1]);
-            return fromPairs(
-              denHeaders.map((h: any, i: number) => {
-                if (i === denHeaders.length - 1) {
-                  const currentNum = numerators[currentDenKey] || 0;
-                  return [h.name, (currentNum * 100) / currentDenValue];
-                }
-                return [h.name, r[i]];
-              })
+
+          let numerator = undefined;
+          let denominator = undefined;
+
+          if (Object.keys(dhis2Queries).length > 0) {
+            const response: any = await engine.query(dhis2Queries);
+
+            numerator = response.numerator;
+            denominator = response.denominator;
+          } else if (allQueries.length > 0) {
+            console.log("This is wrong");
+            const [{ data: num }, { data: den }] = await Promise.all(
+              allQueries
             );
-          });
-        } else if (data.numerator) {
-          const numerator: any = data.numerator;
-          if (numerator && numerator.listGrid) {
-            const { headers, rows } = numerator.listGrid;
-            processed = rows.map((row: string[]) => {
-              return fromPairs(
-                headers.map((h: any, i: number) => [h.name, row[i]])
-              );
-            });
-          } else if (numerator) {
-            const {
-              headers,
-              rows,
-              metaData: { items },
-            } = numerator;
-            processed = rows.map((row: string[]) => {
-              return fromPairs(
-                headers.map((h: any, i: number) => [h.name, row[i]])
-              );
-            });
-            metadata = items;
+            numerator = num;
+            denominator = den;
           }
-        }
-        updateVisualizationData({
-          visualizationId: visualization.id,
-          data: processed,
-        });
-        updateVisualizationMetadata({
-          visualizationId: visualization.id,
-          data: metadata,
-        });
-      } else if (dataSource?.type === "ELASTICSEARCH") {
-        if (indicator && indicator.query) {
-          const queryString = JSON.parse(
-            indicator.query
-              .replaceAll("${ou}", globalFilters?.["mclvD0Z9mfT"])
-              .replaceAll("${pe}", globalFilters?.["m5D13FqKZwN"])
-              .replaceAll("${le}", globalFilters?.["GQhi6pRnTKF"])
-              .replaceAll("${gp}", globalFilters?.["of2WvtwqbHR"])
-          );
-          const { data } = await axios.post(
-            dataSource.authentication.url,
-            queryString
-          );
+
+          let metadata = {};
+          if (numerator && denominator) {
+            let denRows = [];
+            let numRows = [];
+            let denHeaders: any[] = [];
+            let numHeaders: any[] = [];
+
+            if (numerator && numerator.listGrid) {
+              const { rows, headers } = numerator.listGrid;
+              numRows = rows;
+              numHeaders = headers;
+            } else if (numerator) {
+              const {
+                rows,
+                headers,
+                metaData: { items },
+              } = numerator;
+              numRows = rows;
+              numHeaders = headers;
+              metadata = items;
+            }
+            if (denominator && denominator.listGrid) {
+              const { headers, rows } = denominator.listGrid;
+              denRows = rows;
+              denHeaders = headers;
+            } else if (denominator) {
+              const {
+                headers,
+                rows,
+                metaData: { items },
+              } = denominator;
+              denRows = rows;
+              denHeaders = headers;
+              metadata = { ...metadata, ...items };
+            }
+
+            const numerators = numRows.map((rows: string[]) => {
+              return fromPairs(
+                rows.map((r: string, index: number) => [
+                  numHeaders[index].name,
+                  r,
+                ])
+              );
+            });
+
+            const denominators = denRows.map((rows: string[]) => {
+              return fromPairs(
+                rows.map((r: string, index: number) => [
+                  denHeaders[index].name,
+                  r,
+                ])
+              );
+            });
+
+            processed = [
+              ...processed,
+              ...numerators.map((numerator: { [key: string]: string }) => {
+                const { value: v1, total: t1, ...others } = numerator;
+                const columns = Object.values(others).sort().join("");
+
+                const denominator = denominators.find(
+                  (row: { [key: string]: string }) => {
+                    const { value, total, ...someOthers } = row;
+                    return (
+                      columns === Object.values(someOthers).sort().join("")
+                    );
+                  }
+                );
+
+                if (denominator) {
+                  const { value: v1, total: t1 } = numerator;
+                  const { value: v2, total: t2 } = denominator;
+
+                  if (indicator.custom && v1 && v2) {
+                    const expression = indicator.factor
+                      .replaceAll("x", v1)
+                      .replaceAll("y", v2);
+                    return {
+                      ...numerator,
+                      value: evaluate(expression),
+                    };
+                  }
+
+                  if (v1 && v2 && indicator.factor !== "1") {
+                    const computed = Number(v1) / Number(v2);
+                    return {
+                      ...numerator,
+                      value: evaluate(`${computed}${indicator.factor}`),
+                    };
+                  }
+
+                  if (v1 && v2) {
+                    const computed = Number(v1) / Number(v2);
+                    return {
+                      ...numerator,
+                      value: computed,
+                    };
+                  }
+
+                  if (indicator.custom && t1 && t2) {
+                    const expression = indicator.factor
+                      .replaceAll("x", t1)
+                      .replaceAll("y", t2);
+                    return {
+                      ...numerator,
+                      value: evaluate(expression),
+                    };
+                  }
+
+                  if (t1 && t2 && indicator.factor !== "1") {
+                    const computed = Number(t1) / Number(t2);
+                    return {
+                      ...numerator,
+                      value: evaluate(`${computed}${indicator.factor}`),
+                    };
+                  }
+                  if (t1 && t2) {
+                    const computed = Number(t1) / Number(t2);
+                    return {
+                      ...numerator,
+                      value: computed,
+                    };
+                  }
+                }
+                return { ...numerator, value: 0 };
+              }),
+            ];
+          } else if (numerator) {
+            if (numerator && numerator.listGrid) {
+              const { headers, rows } = numerator.listGrid;
+              if (rows.length > 0) {
+                let foundRows = rows.map((row: string[]) => {
+                  return fromPairs(
+                    headers.map((h: any, i: number) => {
+                      if (indicator.factor !== "1") {
+                        return [
+                          h.name,
+                          evaluate(`${row[i]}${indicator.factor}`),
+                        ];
+                      }
+                      return [h.name, row[i]];
+                    })
+                  );
+                });
+
+                if (
+                  ["AHxO7yowduX", "a19pSPoyUl9"].indexOf(visualization.id) !==
+                    -1 &&
+                  ["ejqSEwfG07O", "FOgNEFzg210"].indexOf(indicator.id) !== -1
+                ) {
+                  const firstValue = foundRows[0].value || foundRows[0].total;
+                  foundRows = [
+                    "daugmmgzAkU",
+                    "C1IRVkhB3MW",
+                    "L48zD78K9AI",
+                    "zPaWaUOubgL",
+                    "J9wUCeShAjk",
+                  ].map((c1) => {
+                    return {
+                      c1,
+                      c2: "Target",
+                      value: Number(Number(firstValue / 5).toFixed(0)),
+                    };
+                  });
+                }
+                processed = [...processed, ...foundRows];
+              } else {
+                processed = [
+                  ...processed,
+                  fromPairs(headers.map((h: any, i: number) => [h.name, 0])),
+                ];
+              }
+            } else if (numerator) {
+              const {
+                headers,
+                rows,
+                metaData: { items },
+              } = numerator;
+              if (rows.length > 0) {
+                processed = [
+                  ...processed,
+                  ...rows.map((row: string[]) => {
+                    return fromPairs(
+                      headers.map((h: any, i: number) => [h.name, row[i]])
+                    );
+                  }),
+                ];
+              } else {
+                processed = [
+                  ...processed,
+                  fromPairs(headers.map((h: any, i: number) => [h.name, 0])),
+                ];
+              }
+              metadata = items;
+            }
+          }
           updateVisualizationData({
             visualizationId: visualization.id,
-            data: traverse(data, queryString),
+            data: processed,
           });
-        }
-      } else if (dataSource?.type === "API") {
-        const { data } = await axios.get(dataSource.authentication.url);
-        let numerator: any = undefined;
-        let denominator: any = undefined;
-
-        if (indicator?.numerator?.accessor) {
-          numerator = data[indicator?.numerator?.accessor];
-        } else if (indicator?.numerator?.name) {
-          numerator = data;
-        }
-
-        if (indicator?.denominator?.accessor) {
-          denominator = data[indicator?.denominator?.accessor];
-        } else if (indicator?.denominator?.name) {
-          denominator = data;
-        }
-
-        if (numerator && denominator) {
-          console.log("Are we here some how");
-        } else if (numerator) {
-          updateVisualizationData({
+          updateVisualizationMetadata({
             visualizationId: visualization.id,
-            data: numerator,
+            data: metadata,
           });
         }
+      } else if (
+        elasticsearchIndicators.length > 0 &&
+        !isEmpty(globalFilters) &&
+        dataSources &&
+        dataSources.length > 0
+      ) {
+        // if (indicator && indicator.query) {
+        //   const queryString = JSON.parse(
+        //     indicator.query
+        //       .replaceAll("${ou}", globalFilters?.["mclvD0Z9mfT"])
+        //       .replaceAll("${pe}", globalFilters?.["m5D13FqKZwN"])
+        //       .replaceAll("${le}", globalFilters?.["GQhi6pRnTKF"])
+        //       .replaceAll("${gp}", globalFilters?.["of2WvtwqbHR"])
+        //   );
+        //   const { data } = await axios.post(
+        //     dataSource.authentication.url,
+        //     queryString
+        //   );
+        //   processed = traverse(data, queryString);
+        //   updateVisualizationData({
+        //     visualizationId: visualization.id,
+        //     data: processed,
+        //   });
+        // }
+      } else if (
+        apiIndicators.length > 0 &&
+        !isEmpty(globalFilters) &&
+        dataSources &&
+        dataSources.length > 0
+      ) {
+        // const { data } = await axios.get(dataSource.authentication.url);
+        // let numerator: any = undefined;
+        // let denominator: any = undefined;
+        // if (indicator?.numerator?.accessor) {
+        //   numerator = data[indicator?.numerator?.accessor];
+        // } else if (indicator?.numerator?.name) {
+        //   numerator = data;
+        // }
+        // if (indicator?.denominator?.accessor) {
+        //   denominator = data[indicator?.denominator?.accessor];
+        // } else if (indicator?.denominator?.name) {
+        //   denominator = data;
+        // }
+        // if (numerator && denominator) {
+        // } else if (numerator) {
+        //   processed = numerator;
+        //   updateVisualizationData({
+        //     visualizationId: visualization.id,
+        //     data: numerator,
+        //   });
+        // }
       }
-      return true;
+      return processed;
     },
-    { refetchInterval: currentInterval }
+    {
+      refetchInterval: currentInterval,
+      refetchIntervalInBackground: true,
+      refetchOnWindowFocus: true,
+    }
   );
 };
 
-export const useMaps = (levels: string[], parents: string[]) => {
+export const useMaps = (
+  levels: string[],
+  parents: string[],
+  data: any[],
+  thresholds: Threshold[],
+  otherKeys: string[]
+) => {
   const engine = useDataEngine();
   const parent = parents
     .map((p) => {
@@ -1210,17 +1549,29 @@ export const useMaps = (levels: string[], parents: string[]) => {
   ]);
 
   query = { ...query, ...fromPairs(levelsQuery) };
+  return useQuery<any, Error>(
+    ["maps", ...levels, ...parents, ...otherKeys],
+    async () => {
+      const { geojson, ...otherLevels }: any = await engine.query(query);
+      return processMap(geojson, otherLevels, data, thresholds);
+    },
+    { refetchInterval: 7 }
+  );
+};
 
-  return useQuery<any, Error>(["maps", ...levels, ...parents], async () => {
-    const { geojson, ...otherLevels }: any = await engine.query(query);
-    const mapCenter = center(geojson).geometry.coordinates;
-    const organisationUnits = Object.values(otherLevels).flatMap(
-      ({ organisationUnits }: any) => organisationUnits
-    );
-    return {
-      geojson,
-      mapCenter,
-      organisationUnits,
-    };
+export const saveDocument = async (
+  index: string,
+  systemId: string,
+  document: { [key: string]: any }
+) => {
+  const { data } = await api.post(`wal/index?index=${index}`, {
+    ...document,
+    systemId,
   });
+  return data;
+};
+
+export const deleteDocument = async (index: string, id: string) => {
+  const { data } = await api.post(`wal/delete?index=${index}&id=${id}`);
+  return data;
 };

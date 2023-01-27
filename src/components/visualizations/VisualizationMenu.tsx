@@ -1,7 +1,12 @@
 import { useStore } from "effector-react";
 import { $dashboard, $store } from "../../Store";
 
-import { EditIcon, ExternalLinkIcon, HamburgerIcon } from "@chakra-ui/icons";
+import {
+  DeleteIcon,
+  EditIcon,
+  ExternalLinkIcon,
+  HamburgerIcon,
+} from "@chakra-ui/icons";
 import {
   IconButton,
   Menu,
@@ -23,13 +28,12 @@ import {
 import { FaGlobeAfrica } from "react-icons/fa";
 
 import { useNavigate, useSearch } from "@tanstack/react-location";
-import { changeVisualizationType, setCurrentSection } from "../../Events";
 import {
-  FormGenerics,
-  IDashboard,
-  ISection,
-  IVisualization,
-} from "../../interfaces";
+  changeVisualizationType,
+  deleteSection,
+  setCurrentSection,
+} from "../../Events";
+import { LocationGenerics, ISection } from "../../interfaces";
 import Visualization from "./Visualization";
 
 type VisualizationMenuProps = {
@@ -39,7 +43,7 @@ type VisualizationMenuProps = {
 const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
   const store = useStore($store);
   const navigate = useNavigate();
-  const search = useSearch<FormGenerics>();
+  const search = useSearch<LocationGenerics>();
   const { isOpen: isFull, onOpen: onFull, onClose: onUnFull } = useDisclosure();
   const dashboard = useStore($dashboard);
   const displayFull = () => {
@@ -53,11 +57,13 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
           _hover={{ bg: "none" }}
           _expanded={{ bg: "none" }}
           _focus={{ boxShadow: "none" }}
-          bg="none"
+          bgColor="none"
           as={IconButton}
-          icon={<HamburgerIcon />}
+          icon={<HamburgerIcon h="2.7vh" />}
+          h="2.7vh"
+          variant="ghost"
         />
-        <MenuList>
+        <MenuList zIndex={100000}>
           {store.isAdmin && (
             <MenuItem
               fontSize="18px"
@@ -129,6 +135,16 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
           >
             View as Single Value
           </MenuItem>
+
+          {store.isAdmin && (
+            <MenuItem
+              fontSize="18px"
+              onClick={() => deleteSection(section.id)}
+              icon={<DeleteIcon color="red" />}
+            >
+              Delete
+            </MenuItem>
+          )}
         </MenuList>
       </Menu>
       <Modal isOpen={isFull} onClose={onUnFull} size="full">

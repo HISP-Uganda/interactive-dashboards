@@ -1,10 +1,15 @@
 import { Stack } from "@chakra-ui/react";
 import { useState } from "react";
+import { useStore } from "effector-react";
 import { IndicatorProps } from "../../interfaces";
+import { OrganizatioUnitTree } from "@dhis2/analytics";
+import { $store } from "../../Store";
+import OUTree from "../OUTree";
 import { globalIds } from "../../utils/utils";
 import GlobalAndFilter from "./GlobalAndFilter";
 
 const OrgUnitTree = ({ denNum, onChange }: IndicatorProps) => {
+  const store = useStore($store);
   const [dimension, setDimension] = useState<"filter" | "dimension">("filter");
   const selected = Object.entries(denNum?.dataDimensions || {})
     .filter(([k, { what }]) => what === "ou")

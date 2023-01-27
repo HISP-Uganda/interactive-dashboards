@@ -1,4 +1,3 @@
-import { useStore } from "effector-react";
 import { useEffect, useState } from "react";
 
 import {
@@ -7,19 +6,17 @@ import {
   CircularProgressLabel,
   Stack,
   Text,
-  Tooltip,
 } from "@chakra-ui/react";
-import { IVisualization } from "../../interfaces";
-import { $visualizationData, $visualizationMetadata } from "../../Store";
+import { ChartProps } from "../../interfaces";
 import { processSingleValue } from "../processors";
 
-type SingleValueProps = {
-  visualization: IVisualization;
-  layoutProperties?: { [key: string]: any };
-  dataProperties?: { [key: string]: any };
-};
-
-const ProgressBar = ({ bg, completed }: { bg: string; completed: number }) => {
+const ProgressBar = ({
+  bgColor,
+  completed,
+}: {
+  bgColor: string;
+  completed: number;
+}) => {
   return (
     <Box
       height="20px"
@@ -31,7 +28,7 @@ const ProgressBar = ({ bg, completed }: { bg: string; completed: number }) => {
       <Box
         height="100%"
         width={`${completed > 100 ? "100" : completed}%`}
-        bg={bg}
+        bgColor={bgColor}
         borderRadius="inherit"
         textAlign="right"
       >
@@ -50,19 +47,14 @@ const SingleValue = ({
   visualization,
   dataProperties,
   layoutProperties,
-}: SingleValueProps) => {
-  const visualizationData = useStore($visualizationData);
-  const metadata = useStore($visualizationMetadata);
+  data,
+}: ChartProps) => {
   const [color, setColor] = useState<string>("");
-  const data = visualizationData[visualization.id]
-    ? visualizationData[visualization.id]
-    : [];
   const value = processSingleValue(data);
-
   const colorSearch = dataProperties?.["data.thresholds"]?.find(
     ({ max, min }: any) => {
       if (max && min) {
-        return Number(value) >= Number(min) && Number(value) <= Number(max);
+        return Number(value) >= Number(min) && Number(value) < Number(max);
       } else if (min) {
         return Number(value) >= Number(min);
       } else if (max) {
@@ -73,86 +65,95 @@ const SingleValue = ({
 
   const prefix = dataProperties?.["data.prefix"];
   const suffix = dataProperties?.["data.suffix"];
-  const valueformat = dataProperties?.["data.valueformat"];
   const target = dataProperties?.["data.target"];
   const targetGraph = dataProperties?.["data.targetgraph"];
-  const direction = dataProperties?.["data.direction"] || "column-reverse";
-  const titleFontSize = dataProperties?.["data.title.fontsize"] || "1.7vh";
-  const titleCase = dataProperties?.["data.title.case"] || "uppercase";
+  const direction = dataProperties?.["data.direction"] || "column";
+  const titleFontSize = dataProperties?.["data.title.fontSize"] || "2.0";
+  const titleFontWeight = dataProperties?.["data.title.fontWeight"] || 300;
+  const titleCase = dataProperties?.["data.title.case"] || "";
   const titleColor = dataProperties?.["data.title.color"] || "black";
+  const singleValueBackground = "none";
+  // const singleValueBackground = dataProperties?.["data.backgroundColor"] || "";
+  const singleValueBorder = dataProperties?.["data.border"] || 0;
+  const fontWeight = dataProperties?.["data.format.fontWeight"] || 400;
+  const fontSize = dataProperties?.["data.format.fontSize"] || 2;
   const alignment = dataProperties?.["data.alignment"] || "column";
+
+  const spacing =
+    dataProperties?.["data.format.spacing"] ||
+    ["row", "row-reverse"].indexOf(alignment) !== -1
+      ? 10
+      : 0;
+
+  const format = {
+    style: dataProperties?.["data.format.style"] || "decimal",
+    notation: dataProperties?.["data.format.notation"] || "standard",
+    maximumFractionDigits:
+      dataProperties?.["data.format.maximumFractionDigits"] || 0,
+  };
+
   useEffect(() => {
     if (colorSearch) {
-      setColor(colorSearch.color);
+      setColor(() => colorSearch.color);
     } else if (dataProperties?.["data.thresholds"]) {
-      setColor(dataProperties?.["data.thresholds"][0].color);
+      setColor(() => dataProperties?.["data.thresholds"][0].color);
     } else {
-      setColor("");
+      setColor(() => "");
     }
   }, [dataProperties]);
+
+  const numberFormatter = Intl.NumberFormat("en-US", format);
 
   return (
     <Stack
       alignItems="center"
+      justifyItems="center"
       alignContent="center"
       justifyContent="center"
-      justifyItems="center"
       direction={alignment}
+      backgroundColor={singleValueBackground}
+      border={`${singleValueBorder}px`}
+      borderRadius="3px"
+      // padding="4px"
       textAlign="center"
-      // flex={1}
-      // w="100%"
-      // h="100%"
-      spacing={
-        alignment === "row" || alignment === "row-reverse" ? "10px" : "5px"
-      }
+      flex={1}
+      spacing={`${spacing}px`}
+      h="100%"
     >
       {visualization.name && (
-        <Tooltip label={visualization.name} hasArrow placement="top">
-          <Text
-            textTransform="uppercase"
-            fontWeight="medium"
-            fontSize={titleFontSize}
-            color={titleColor}
-            whiteSpace={
-              alignment === "row" || alignment === "row-reverse"
-                ? "nowrap"
-                : "normal"
-            }
-            noOfLines={
-              alignment === "row" || alignment === "row-reverse" ? undefined : 1
-            }
-          >
-            {visualization.name}
-          </Text>
-        </Tooltip>
+        <Text
+          textTransform={titleCase}
+          fontWeight={titleFontWeight}
+          fontSize={`${titleFontSize}vh`}
+          color={titleColor}
+          whiteSpace="normal"
+        >
+          {visualization.name}
+        </Text>
       )}
       <Stack
-        w="100%"
         direction={direction}
         alignItems="center"
         alignContent="center"
         justifyContent="center"
         justifyItems="center"
-        flex={1}
-        h="100%"
+        spacing={`${spacing}px`}
       >
         {targetGraph === "circular" && target ? (
-          <CircularProgress
-            value={(processSingleValue(data) * 100) / Number(target)}
-          >
+          <CircularProgress value={(value * 100) / Number(target)}>
             <CircularProgressLabel>
-              {((processSingleValue(data) * 100) / Number(target)).toFixed(0)}%
+              {((value * 100) / Number(target)).toFixed(0)}%
             </CircularProgressLabel>
           </CircularProgress>
         ) : targetGraph === "progress" && target ? (
           <ProgressBar
-            completed={(processSingleValue(data) * 100) / Number(target)}
-            bg="green"
+            completed={(value * 100) / Number(target)}
+            bgColor="green"
           />
         ) : null}
-        <Text fontSize={"2.5vh"} color={color} fontWeight="bold">
+        <Text fontSize={`${fontSize}vh`} color={color} fontWeight={fontWeight}>
           {prefix}
-          {processSingleValue(data)}
+          {numberFormatter.format(value)}
           {suffix}
         </Text>
       </Stack>

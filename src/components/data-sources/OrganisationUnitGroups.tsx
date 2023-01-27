@@ -25,7 +25,7 @@ import { useStore } from "effector-react";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
 import { useOrganisationUnitGroups } from "../../Queries";
-import { $store, $paginations } from "../../Store";
+import { $paginations } from "../../Store";
 import { globalIds } from "../../utils/utils";
 import GlobalAndFilter from "./GlobalAndFilter";
 
@@ -158,7 +158,7 @@ const OrganizationUnitGroups = ({ denNum, onChange }: IndicatorProps) => {
               _hover={{
                 bg: "yellow.400",
               }}
-              bg="yellow.300"
+              bgColor="yellow.300"
             >
               <Text>Previous</Text>
             </PaginationPrevious>
@@ -166,7 +166,7 @@ const OrganizationUnitGroups = ({ denNum, onChange }: IndicatorProps) => {
               _hover={{
                 bg: "yellow.400",
               }}
-              bg="yellow.300"
+              bgColor="yellow.300"
             >
               <Text>Next</Text>
             </PaginationNext>

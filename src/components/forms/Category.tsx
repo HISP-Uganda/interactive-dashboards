@@ -1,31 +1,30 @@
 import {
+  Box,
   Button,
   FormControl,
   FormErrorMessage,
   FormLabel,
   Input,
-  Stack,
-  Box,
-  Textarea,
   Spacer,
+  Stack,
+  Textarea,
 } from "@chakra-ui/react";
 import { useEffect } from "react";
-import { useDataEngine } from "@dhis2/app-runtime";
 import { useForm } from "react-hook-form";
 import { useQueryClient } from "react-query";
 
+import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { setCategory, setShowSider } from "../../Events";
-import { FormGenerics, ICategory } from "../../interfaces";
-import { $category, createCategory } from "../../Store";
-import { useNavigate, useSearch } from "@tanstack/react-location";
+import { ICategory } from "../../interfaces";
+import { saveDocument } from "../../Queries";
+import { $category, $store, createCategory } from "../../Store";
 
 const Category = () => {
-  const search = useSearch<FormGenerics>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const engine = useDataEngine();
   const category = useStore($category);
+  const store = useStore($store);
   const {
     handleSubmit,
     register,
@@ -33,32 +32,15 @@ const Category = () => {
   } = useForm<ICategory, any>({ defaultValues: category });
 
   const add = async (values: ICategory) => {
-    let mutation: any = {
-      type: "create",
-      resource: `dataStore/i-categories/${values.id}`,
-      data: values,
-    };
-
-    if (search.edit) {
-      mutation = {
-        type: "update",
-        resource: `dataStore/i-categories`,
-        data: values,
-        id: values.id,
-      };
-    }
-    await engine.mutate(mutation);
+    await saveDocument("i-categories", store.systemId, values);
     await queryClient.invalidateQueries(["categories"]);
   };
   async function onSubmit(values: any) {
     await add(values);
     navigate({ to: "/categories" });
   }
-  useEffect(() => {
-    setShowSider(true);
-  }, []);
   return (
-    <Box flex={1} p="10px">
+    <Box flex={1} p="20px" bgColor="white">
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing="20px">
           <FormControl isInvalid={!!errors.id}>

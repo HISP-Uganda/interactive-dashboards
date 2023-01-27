@@ -15,10 +15,14 @@ const ColorPalette = ({ visualization, attribute }: ColorPalletProps) => {
   const ref = React.useRef(null);
   useOnClickOutside(ref, onClose);
   return (
-    <Stack position="relative">
-      <Text bg={visualization.properties?.[attribute] || ""} onClick={onToggle}>
-        &nbsp;
-      </Text>
+    <Stack position="relative" bgColor="gray.400" p="5px">
+      <Text
+        // width="36px"
+        height="24px"
+        borderRadius="2px"
+        bgColor={visualization.properties?.[attribute] || "black"}
+        onClick={onToggle}
+      ></Text>
       {isOpen && (
         <Box bottom={0} top={7} zIndex={1000} position="absolute">
           <SwatchesPicker

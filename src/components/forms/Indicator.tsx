@@ -8,62 +8,55 @@ import {
   Text,
   Textarea,
 } from "@chakra-ui/react";
-import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { useQueryClient } from "react-query";
 import {
   changeIndicatorAttribute,
   changeNumeratorDimension,
   changeUseIndicators,
   setIndicator,
-  setShowSider,
 } from "../../Events";
-import { FormGenerics } from "../../interfaces";
+import { LocationGenerics } from "../../interfaces";
+import { saveDocument } from "../../Queries";
 import {
   $dataSourceType,
   $hasDHIS2,
   $indicator,
+  $store,
   createIndicator,
 } from "../../Store";
+import { generalPadding, otherHeight } from "../constants";
 import { displayDataSourceType } from "../data-sources";
 import NamespaceSelect from "../NamespaceSelect";
 
-import "jsoneditor-react/es/editor.min.css";
-
 const Indicator = () => {
-  const search = useSearch<FormGenerics>();
+  const search = useSearch<LocationGenerics>();
   const indicator = useStore($indicator);
+  const store = useStore($store);
   const hasDHIS2 = useStore($hasDHIS2);
   const dataSourceType = useStore($dataSourceType);
   const [loading, setLoading] = useState<boolean>(false);
-  const engine = useDataEngine();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const add = async () => {
     setLoading(true);
-    let mutation: any = {
-      type: "create",
-      resource: `dataStore/i-visualization-queries/${indicator.id}`,
-      data: indicator,
-    };
-    if (search.edit) {
-      mutation = {
-        type: "update",
-        resource: `dataStore/i-visualization-queries`,
-        id: indicator.id,
-        data: indicator,
-      };
-    }
-    await engine.mutate(mutation);
+    await saveDocument("i-visualization-queries", store.systemId, indicator);
     await queryClient.invalidateQueries(["visualization-queries"]);
     setLoading(false);
     navigate({ to: "/indicators" });
   };
 
   return (
-    <Box flex={1} p="20px">
+    <Box
+      p={`${generalPadding}px`}
+      bgColor="white"
+      flex={1}
+      h={otherHeight}
+      maxH={otherHeight}
+      w="100%"
+    >
       <Stack spacing="20px">
         <Stack>
           <Text>Data Source</Text>
@@ -113,11 +106,23 @@ const Indicator = () => {
                 }
               />
             </Stack>
+
+            <Checkbox
+              isChecked={indicator.custom}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                changeIndicatorAttribute({
+                  attribute: "custom",
+                  value: e.target.checked,
+                })
+              }
+            >
+              Custom calculations (x is numerator and y is denominator)
+            </Checkbox>
             <Stack>
-              <Text>Factor Expression</Text>
-              <Input
+              <Text>Expression</Text>
+              <Textarea
                 value={indicator.factor}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
                   changeIndicatorAttribute({
                     attribute: "factor",
                     value: e.target.value,

@@ -36,7 +36,7 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
   const [dimension, setDimension] = useState<"filter" | "dimension">(
     "dimension"
   );
-  const [useGlobal, setUseGlobal] = useState<boolean>(true);
+  const [useGlobal, setUseGlobal] = useState<boolean>(false);
   const [q, setQ] = useState<string>("");
   const paginations = useStore($paginations);
 
@@ -59,10 +59,21 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
       currentPage: 1,
     },
   });
+
+  const selectedProgramIndicators = Object.entries(
+    denNum?.dataDimensions || {}
+  ).flatMap(([i, { what }]) => {
+    if (what === "i") {
+      return i;
+    }
+    return [];
+  });
+
   const { isLoading, isSuccess, isError, error, data } = useProgramIndicators(
     currentPage,
     pageSize,
-    q
+    q,
+    selectedProgramIndicators
   );
 
   const handlePageChange = (nextPage: number) => {
@@ -138,7 +149,7 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
                         });
                       }
                     }}
-                    checked={!!denNum?.dataDimensions?.[record.id]}
+                    isChecked={!!denNum?.dataDimensions?.[record.id]}
                   />
                 </Td>
                 <Td>{record.id}</Td>
@@ -165,7 +176,7 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
               _hover={{
                 bg: "yellow.400",
               }}
-              bg="yellow.300"
+              bgColor="yellow.300"
             >
               <Text>Previous</Text>
             </PaginationPrevious>
@@ -173,7 +184,7 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
               _hover={{
                 bg: "yellow.400",
               }}
-              bg="yellow.300"
+              bgColor="yellow.300"
             >
               <Text>Next</Text>
             </PaginationNext>

@@ -1,29 +1,22 @@
-import { useStore } from "effector-react";
-import Plot from "react-plotly.js";
-import { IVisualization } from "../../interfaces";
-import { $visualizationData, $visualizationMetadata } from "../../Store";
-import { processGraphs } from "../processors";
 import {
   Table,
-  Thead,
-  Tbody,
-  Tfoot,
-  Tr,
-  Th,
-  Td,
   TableCaption,
   TableContainer,
+  Tbody,
+  Td,
+  Tfoot,
+  Th,
+  Thead,
+  Tr,
 } from "@chakra-ui/react";
+import { ChartProps } from "../../interfaces";
 
-type TableProps = {
-  visualization: IVisualization;
+interface TableProps extends ChartProps {
   category?: string;
   series?: string;
-  layoutProperties?: { [key: string]: any };
-  dataProperties?: { [key: string]: any };
-};
+}
 
-const Tables = ({ visualization, category, series }: TableProps) => {
+const Tables = ({}: TableProps) => {
   return (
     <TableContainer>
       <Table variant="striped" colorScheme="teal">

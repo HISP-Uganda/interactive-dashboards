@@ -1,4 +1,5 @@
 import { uniq, update } from "lodash";
+import { allMetadata } from "../utils/utils";
 export const processSingleValue = (data: any[]): any => {
   if (data.length > 0) {
     const values = Object.values(data[0]);
@@ -22,73 +23,91 @@ export const processGraphs = (
 ) => {
   let chartData: any = [];
   let availableProperties: { [key: string]: any } = {};
+  let allSeries = [];
   update(availableProperties, "data.orientation", () => "v");
   Object.entries(dataProperties).forEach(([property, value]) => {
     availableProperties = update(availableProperties, property, () => value);
   });
   if (data && data.length > 0 && category) {
     const x = uniq(data.map((num: any) => num[category]));
+    const columns = x
+      .map((c: any) => {
+        return { id: c, name: metadata?.[c]?.name || allMetadata[c] || c };
+      })
+      .sort((a, b) => {
+        if (a.name < b.name) {
+          return -1;
+        }
+        if (a.name > b.name) {
+          return 1;
+        }
+        return 0;
+      });
+
+    const realColumns = columns.map(({ name }) => name);
     if (series) {
-      const allSeries = uniq(data.map((num: any) => num[series]));
+      allSeries = uniq(data.map((num: any) => num[series]));
+
       chartData = allSeries.map((se: any) => {
         return {
           x:
             availableProperties?.data?.orientation === "v"
-              ? x.map((c: any) => metadata?.[c]?.name || c)
-              : x.map((c: any) => {
+              ? realColumns
+              : columns.map(({ id }) => {
                   const r = data.find(
-                    (num: any) => num[series] === se && num[category] === c
+                    (num: any) => num[series] === se && num[category] === id
                   );
                   return r?.count || r?.value || r?.total;
                 }),
           y:
             availableProperties?.data?.orientation === "v"
-              ? x.map((c: any) => {
+              ? columns.map(({ id }) => {
                   const r = data.find(
-                    (num: any) => num[series] === se && num[category] === c
+                    (num: any) => num[series] === se && num[category] === id
                   );
                   return r?.count || r?.value || r?.total;
                 })
-              : x.map((c: any) => metadata?.[c]?.name || c),
+              : realColumns,
           name: metadata?.[se]?.name || se,
           type: availableProperties?.data?.[se] || type,
           ...availableProperties.data,
           textposition: "auto",
           texttemplate:
             availableProperties?.data?.orientation === "v"
-              ? "%{y:.2s}"
-              : "%{x:.2s}",
+              ? "%{y:.0f}"
+              : "%{x:.0f}",
         };
       });
     } else {
+      allSeries = [];
       chartData = [
         {
           x:
             availableProperties?.data?.orientation === "v"
-              ? x.map((c: any) => metadata?.[c]?.name || c)
-              : x.map((c: any) => {
-                  const r = data.find((num: any) => num[category] === c);
+              ? realColumns
+              : columns.map(({ id }) => {
+                  const r = data.find((num: any) => num[category] === id);
                   return r?.count || r?.value || r?.total;
                 }),
           y:
             availableProperties?.data?.orientation === "v"
-              ? x.map((c: any) => {
-                  const r = data.find((num: any) => num[category] === c);
+              ? columns.map(({ id }) => {
+                  const r = data.find((num: any) => num[category] === id);
                   return r?.count || r?.value || r?.total;
                 })
-              : x.map((c: any) => metadata?.[c]?.name || c),
+              : realColumns,
           type,
           ...availableProperties.data,
           textposition: "auto",
           texttemplate:
             availableProperties?.data?.orientation === "v"
-              ? "%{y:.2s}"
-              : "%{x:.2s}",
+              ? "%{y:.0f}"
+              : "%{x:.0f}",
         },
       ];
     }
   }
-  return chartData;
+  return { chartData, allSeries };
 };
 
 export const processPieChart = (
@@ -100,8 +119,9 @@ export const processPieChart = (
   let chartData: any = [];
   if (data && data.length > 0 && labels && values) {
     const x = data.map((num: any) => {
-      const label = num[labels];
-      return metadata?.[num[labels]]?.name || num[labels];
+      return (
+        metadata?.[num[labels]]?.name || allMetadata[labels] || num[labels]
+      );
     });
     const y = data.map((num: any) => num[values]);
     chartData = [
@@ -112,7 +132,7 @@ export const processPieChart = (
         textinfo: "label+percent+name",
         hoverinfo: "label+percent+name",
         textposition: "inside",
-        hole: 0.5,
+        hole: 0.1,
       },
     ];
   }

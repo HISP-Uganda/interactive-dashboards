@@ -26,7 +26,7 @@ const DHIS2 = ({ onChange, denNum, changeQuery }: IndicatorProps) => {
         <Tabs>
           <TabList>
             <Tab>Indicators</Tab>
-            {!indicator.useInBuildIndicators && <Tab>Data Elements</Tab>}
+            <Tab>Data Elements</Tab>
             <Tab>Program Indicators</Tab>
             <Tab>Periods</Tab>
             <Tab>Organisation Units</Tab>
@@ -37,11 +37,9 @@ const DHIS2 = ({ onChange, denNum, changeQuery }: IndicatorProps) => {
             <TabPanel>
               <Indicators denNum={denNum} onChange={onChange} />
             </TabPanel>
-            {!indicator.useInBuildIndicators && (
               <TabPanel>
                 <DataElements denNum={denNum} onChange={onChange} />
               </TabPanel>
-            )}
             <TabPanel>
               <ProgramIndicators denNum={denNum} onChange={onChange} />
             </TabPanel>

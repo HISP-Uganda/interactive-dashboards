@@ -1,90 +1,60 @@
-import { ChevronDownIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import { DeleteIcon } from "@chakra-ui/icons";
 import {
   Button,
+  Flex,
+  Grid,
+  GridItem,
   IconButton,
   Input,
+  NumberDecrementStepper,
+  NumberIncrementStepper,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
   Radio,
   RadioGroup,
   Spacer,
   Spinner,
   Stack,
   Text,
-  NumberDecrementStepper,
-  NumberIncrementStepper,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
+  Textarea,
 } from "@chakra-ui/react";
-import { useNavigate, useSearch } from "@tanstack/react-location";
-import { GroupBase, Select, SingleValue } from "chakra-react-select";
+import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { ChangeEvent, useEffect, useState } from "react";
-import Marquee from "react-fast-marquee";
-import { MdKeyboardBackspace } from "react-icons/md";
+import { BiDuplicate } from "react-icons/bi";
 import {
-  addSection,
   addVisualization2Section,
   changeSectionAttribute,
   changeVisualizationAttribute,
   changeVisualizationOverride,
   changeVisualizationProperties,
-  setDashboards,
+  deleteSectionVisualization,
+  duplicateVisualization,
   setShowSider,
 } from "../Events";
-import { FormGenerics, IVisualization, Option } from "../interfaces";
+import { IVisualization, Option } from "../interfaces";
 import { useVisualizationData } from "../Queries";
-import { $dashboard, $dashboards, $indicators, $section } from "../Store";
+import { $dimensions, $indicators, $section, $store } from "../Store";
+import { generateUid } from "../utils/uid";
 import { chartTypes } from "../utils/utils";
 import ColorPalette from "./ColorPalette";
-import Carousel from "./visualizations/Carousel";
-import Visualization from "./visualizations/Visualization";
+import { headerHeight } from "./constants";
+import SectionImages from "./SectionImages";
+import SectionVisualization from "./SectionVisualization";
 import VisualizationProperties from "./visualizations/VisualizationProperties";
 
-const fontSizes: Option[] = [
-  {
-    label: "0.5vh",
-    value: "0.5vh",
-  },
-  {
-    label: "1.0vh",
-    value: "1.0vh",
-  },
-  {
-    label: "1.5vh",
-    value: "1.5vh",
-  },
-  {
-    label: "2.0vh",
-    value: "2.0vh",
-  },
-  {
-    label: "2.5vh",
-    value: "2.5vh",
-  },
-  {
-    label: "3.0vh",
-    value: "3.0vh",
-  },
-  {
-    label: "3.5vh",
-    value: "3.5vh",
-  },
-  {
-    label: "4.0vh",
-    value: "4.0vh",
-  },
-  {
-    label: "4.5vh",
-    value: "4.5vh",
-  },
-  {
-    label: "5.0vh",
-    value: "5.0vh",
-  },
-  {
-    label: "5.5vh",
-    value: "5.5vh",
-  },
+const alignmentOptions: Option[] = [
+  { label: "flex-start", value: "flex-start" },
+  { label: "flex-end", value: "flex-end" },
+  { label: "center", value: "center" },
+  { label: "space-between", value: "space-between" },
+  { label: "space-around", value: "space-around" },
+  { label: "space-evenly", value: "space-evenly" },
+  { label: "stretch", value: "stretch" },
+  { label: "start", value: "start" },
+  { label: "end", value: "end" },
+  { label: "baseline", value: "baseline" },
 ];
 
 const VisualizationTypes = ({
@@ -116,13 +86,16 @@ const VisualizationQuery = ({
   visualization: IVisualization;
 }) => {
   const indicators = useStore($indicators);
-  const { isLoading, isSuccess, isError, error } = useVisualizationData();
+  const { systemId } = useStore($store);
+  const { isLoading, isSuccess, isError, error } =
+    useVisualizationData(systemId);
   return (
     <Stack>
       <Text>Visualization Query</Text>
       {isLoading && <Spinner />}
       {isSuccess && (
-        <Select<Option, false, GroupBase<Option>>
+        <Select<Option, true, GroupBase<Option>>
+          isMulti
           value={indicators
             .map((i) => {
               const current: Option = {
@@ -131,11 +104,15 @@ const VisualizationQuery = ({
               };
               return current;
             })
-            .filter((d: Option) => visualization.indicator === d.value)}
-          onChange={(e: SingleValue<Option>) => {
+            .filter(
+              (d: Option) =>
+                String(visualization.indicator).split(",").indexOf(d.value) !==
+                -1
+            )}
+          onChange={(e) => {
             changeVisualizationAttribute({
               attribute: "indicator",
-              value: e?.value,
+              value: e.map((ex) => ex.value).join(","),
               visualization: visualization.id,
             });
           }}
@@ -263,236 +240,235 @@ const VisualizationOverride = ({
 };
 
 const Section = () => {
-  const search = useSearch<FormGenerics>();
-  const navigate = useNavigate();
   const section = useStore($section);
-  const dashboard = useStore($dashboard);
-  const dashboards = useStore($dashboards);
   const [active, setActive] = useState<string>("title");
-  const onApply = () => {
-    addSection(section);
-    setDashboards(
-      dashboards.map((dash) => {
-        if (dash.id === dashboard.id) {
-          const isOld = dashboard.sections.find((s) => s.id === section.id);
-          let sections = dashboard.sections.map((s) => {
-            if (section.id === s.id) {
-              return section;
-            }
-            return s;
-          });
-          if (!isOld) {
-            sections = [...sections, section];
-          }
-          return { ...dashboard, sections };
-        }
-        return dash;
-      })
-    );
-    navigate({
-      to: `/dashboards/${dashboard.id}`,
-      search,
-    });
-  };
+  const { otherHeight, sectionHeight } = useStore($dimensions);
 
   useEffect(() => {
     setShowSider(false);
   }, []);
 
-  const toggle = (id: string) => {
-    if (active === id) {
-      setActive("");
-    } else {
-      setActive(id);
-    }
-  };
   return (
-    <Stack p="5px">
-      <Stack direction="row" h="48px">
-        <Stack direction="row" alignItems="center" justifyItems="center">
-          <IconButton
-            bg="none"
-            _hover={{ bg: "none" }}
-            aria-label="Search database"
-            icon={<MdKeyboardBackspace />}
-            onClick={() => {
-              navigate({
-                to: `/dashboards/${dashboard.id}`,
-                search,
-              });
-            }}
-          />
-          <Stack direction="row" spacing="2px" fontSize="16px">
-            <Text>{dashboard.name}</Text>
-            <Text>/</Text>
-            <Text>{section.id}</Text>
-            <Text>/</Text>
-            <Text>Edit Section</Text>
-          </Stack>
-        </Stack>
-        <Spacer />
-        <Button
-          size="sm"
-          onClick={() => {
-            navigate({
-              to: `/dashboards/${dashboard.id}`,
-              search,
-            });
-          }}
+    <Grid
+      templateColumns="1fr 30%"
+      gap="5px"
+      h={otherHeight}
+      maxH={otherHeight}
+    >
+      <GridItem bgColor="white" h={otherHeight} maxH={otherHeight} w="100%">
+        <SectionVisualization {...section} />
+      </GridItem>
+      <Grid
+        templateRows={`${headerHeight * 3}px 1fr`}
+        gap="5px"
+        h={otherHeight}
+        maxH={otherHeight}
+      >
+        <Flex
+          gap="5px"
+          flexWrap="wrap"
+          bgColor="white"
+          p="5px"
+          alignContent="flex-start"
         >
-          Discard
-        </Button>
-        <Button size="sm" onClick={() => onApply()}>
-          Apply
-        </Button>
-      </Stack>
-      <Stack direction="row" spacing="20px" flex={1}>
-        <Stack w="75%">
-          {section.title && <Text textAlign="center">{section.title}</Text>}
-          {section.display === "carousel" ? (
-            <Carousel {...section} />
-          ) : section.display === "marquee" ? (
-            <Marquee>
-              {section.visualizations.map((visualization) => (
-                <Visualization
-                  section={section}
-                  key={visualization.id}
-                  visualization={visualization}
-                />
-              ))}
-            </Marquee>
-          ) : (
-            <Stack direction={section.direction}>
-              {section.visualizations.map((visualization) => (
-                <Visualization
-                  section={section}
-                  key={visualization.id}
-                  visualization={visualization}
-                />
-              ))}
+          <Button
+            size="sm"
+            onClick={() => setActive(() => "title")}
+            variant="outline"
+            colorScheme={active === "title" ? "teal" : "gray"}
+          >
+            Section options
+          </Button>
+          {section.visualizations.map((visualization) => (
+            <Button
+              size="sm"
+              variant="outline"
+              key={visualization.id}
+              colorScheme={active === visualization.id ? "teal" : "gray"}
+              onClick={() => setActive(() => visualization.id)}
+            >
+              {visualization.name || visualization.id}
+            </Button>
+          ))}
+          <Button
+            size="sm"
+            onClick={() => {
+              const id = generateUid();
+              addVisualization2Section(id);
+              setActive(id);
+            }}
+          >
+            Add Visualization
+          </Button>
+        </Flex>
+        <Stack overflow="auto" flex={1}>
+          {active === "title" && (
+            <Stack p="10px" spacing="20px" bgColor="white" flex={1}>
+              <Text>Title</Text>
+              <Input
+                value={section.title}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  changeSectionAttribute({
+                    attribute: "title",
+                    value: e.target.value,
+                  })
+                }
+              />
+
+              <Text>Row Span</Text>
+              <NumberInput
+                value={section.rowSpan}
+                max={12}
+                min={1}
+                onChange={(value1: string, value2: number) =>
+                  changeSectionAttribute({
+                    attribute: "rowSpan",
+                    value: value2,
+                  })
+                }
+              >
+                <NumberInputField />
+                <NumberInputStepper>
+                  <NumberIncrementStepper />
+                  <NumberDecrementStepper />
+                </NumberInputStepper>
+              </NumberInput>
+
+              <Text>Column Span</Text>
+              <NumberInput
+                value={section.colSpan}
+                max={24}
+                min={1}
+                onChange={(value1: string, value2: number) =>
+                  changeSectionAttribute({
+                    attribute: "colSpan",
+                    value: value2,
+                  })
+                }
+              >
+                <NumberInputField />
+                <NumberInputStepper>
+                  <NumberIncrementStepper />
+                  <NumberDecrementStepper />
+                </NumberInputStepper>
+              </NumberInput>
+
+              <Text>Height(when on small devices)</Text>
+              <Input
+                value={section.height}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  changeSectionAttribute({
+                    attribute: "height",
+                    value: e.target.value,
+                  })
+                }
+              />
+              <Text>Arrangement</Text>
+              <RadioGroup
+                onChange={(e: string) =>
+                  changeSectionAttribute({
+                    attribute: "direction",
+                    value: e,
+                  })
+                }
+                value={section.direction}
+              >
+                <Stack direction="row">
+                  <Radio value="row">Horizontal</Radio>
+                  <Radio value="column">Vertical</Radio>
+                </Stack>
+              </RadioGroup>
+
+              <Text>Content Alignment</Text>
+              <Select<Option, false, GroupBase<Option>>
+                value={alignmentOptions.find(
+                  (d: Option) => d.value === section.justifyContent
+                )}
+                onChange={(e) =>
+                  changeSectionAttribute({
+                    attribute: "justifyContent",
+                    value: e?.value,
+                  })
+                }
+                options={alignmentOptions}
+                isClearable
+              />
+              <Text>Display Style</Text>
+              <RadioGroup
+                value={section.display}
+                onChange={(e: string) =>
+                  changeSectionAttribute({
+                    attribute: "display",
+                    value: e,
+                  })
+                }
+              >
+                <Stack direction="row">
+                  <Radio value="normal">Normal</Radio>
+                  <Radio value="carousel">Carousel</Radio>
+                  <Radio value="marquee">Marquee</Radio>
+                  <Radio value="grid">Grid</Radio>
+                  <Radio value="tab">Tabs</Radio>
+                </Stack>
+              </RadioGroup>
+              <Text>Carousel Over</Text>
+              <RadioGroup
+                value={section.carouselOver}
+                onChange={(e: string) =>
+                  changeSectionAttribute({
+                    attribute: "carouselOver",
+                    value: e,
+                  })
+                }
+              >
+                <Stack direction="row">
+                  <Radio value="items">Items</Radio>
+                  <Radio value="groups">Groups</Radio>
+                </Stack>
+              </RadioGroup>
+              <SectionImages />
             </Stack>
           )}
-        </Stack>
-        <Stack w="25%" spacing="20px">
-          <Stack h="calc(100vh - 200px)" overflow="auto">
-            <Stack spacing="20px">
-              <Stack
-                direction="row"
-                onClick={() => toggle("title")}
-                cursor="pointer"
-                fontSize="xl"
-              >
-                <Text>Section options</Text>
-                <Spacer />
-                {active === "title" ? (
-                  <ChevronDownIcon />
-                ) : (
-                  <ChevronRightIcon />
-                )}
-              </Stack>
-
-              {active === "title" && (
-                <Stack pl="10px" spacing="20px">
-                  <Text>Title</Text>
-                  <Input
-                    value={section.title}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      changeSectionAttribute({
-                        attribute: "title",
-                        value: e.target.value,
-                      })
-                    }
-                  />
-
-                  <Text>Row Span</Text>
-                  <NumberInput
-                    value={section.rowSpan}
-                    max={12}
-                    min={1}
-                    onChange={(value1: string, value2: number) =>
-                      changeSectionAttribute({
-                        attribute: "rowSpan",
-                        value: value2,
-                      })
-                    }
-                  >
-                    <NumberInputField />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-
-                  <Text>Column Span</Text>
-                  <NumberInput
-                    value={section.colSpan}
-                    max={24}
-                    min={1}
-                    onChange={(value1: string, value2: number) =>
-                      changeSectionAttribute({
-                        attribute: "colSpan",
-                        value: value2,
-                      })
-                    }
-                  >
-                    <NumberInputField />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-                  <Text>Arrangement</Text>
-                  <RadioGroup
-                    onChange={(e: string) =>
-                      changeSectionAttribute({
-                        attribute: "direction",
-                        value: e,
-                      })
-                    }
-                    value={section.direction}
-                  >
-                    <Stack direction="row">
-                      <Radio value="row">Horizontal</Radio>
-                      <Radio value="column">Vertical</Radio>
-                    </Stack>
-                  </RadioGroup>
-
-                  <Text>Display Style</Text>
-                  <RadioGroup
-                    value={section.display}
-                    onChange={(e: string) =>
-                      changeSectionAttribute({
-                        attribute: "display",
-                        value: e,
-                      })
-                    }
-                  >
-                    <Stack direction="row">
-                      <Radio value="normal">Normal</Radio>
-                      <Radio value="carousel">Carousel</Radio>
-                      <Radio value="marquee">Marquee</Radio>
-                    </Stack>
-                  </RadioGroup>
-                </Stack>
-              )}
-            </Stack>
-            {section.visualizations.map((visualization: IVisualization) => (
-              <Stack key={visualization.id}>
+          {section.visualizations.map(
+            (visualization) =>
+              visualization.id === active && (
                 <Stack
-                  direction="row"
-                  onClick={() => toggle(visualization.id)}
-                  cursor="pointer"
-                  fontSize="xl"
+                  key={visualization.id}
+                  bgColor="white"
+                  overflow="auto"
+                  flex={1}
                 >
-                  <Text>{visualization.name}</Text>
-                  <Spacer />
-                  {active === visualization.id ? (
-                    <ChevronDownIcon />
-                  ) : (
-                    <ChevronRightIcon />
-                  )}
-                </Stack>
-                {active === visualization.id && (
+                  <Stack direction="row" fontSize="xl" p="10px" spacing="0">
+                    <Text>{`${visualization.name}(${visualization.id})`}</Text>
+                    <Spacer />
+                    <IconButton
+                      variant="ghost"
+                      onClick={() => {
+                        const id = generateUid();
+                        duplicateVisualization({ ...visualization, id });
+                        setActive(() => id);
+                      }}
+                      icon={<BiDuplicate color="green" size="24px" />}
+                      aria-label="Down"
+                    />
+                    <IconButton
+                      variant="ghost"
+                      onClick={() => {
+                        deleteSectionVisualization(visualization.id);
+                        if (section.visualizations.length > 1) {
+                          const viz =
+                            section.visualizations[
+                              section.visualizations.length - 2
+                            ];
+                          setActive(() => viz.id);
+                        } else {
+                          setActive(() => "title");
+                        }
+                      }}
+                      icon={<DeleteIcon color="red" />}
+                      aria-label="Down"
+                    />
+                  </Stack>
                   <Stack pl="10px" spacing="20px">
                     <Text>Title</Text>
                     <Input
@@ -506,49 +482,77 @@ const Section = () => {
                       }
                     />
                     <Text>Title font size</Text>
-                    <Select<Option, false, GroupBase<Option>>
-                      value={fontSizes.find(
-                        (pt) =>
-                          pt.value ===
-                          visualization.properties?.["data.title.fontsize"]
-                      )}
-                      onChange={(e) =>
+                    <NumberInput
+                      value={
+                        visualization.properties["data.title.fontSize"] || 2
+                      }
+                      max={10}
+                      min={1}
+                      step={0.1}
+                      onChange={(value1: string, value2: number) =>
                         changeVisualizationProperties({
-                          visualization: visualization.id,
-                          attribute: "data.title.fontsize",
-                          value: e?.value,
+                          visualization: visualization?.id,
+                          attribute: "data.title.fontSize",
+                          value: value2,
                         })
                       }
-                      options={fontSizes}
-                      isClearable
-                    />
+                    >
+                      <NumberInputField />
+                      <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                      </NumberInputStepper>
+                    </NumberInput>
+                    <Text>Title font weight</Text>
+                    <NumberInput
+                      value={
+                        visualization.properties["data.title.fontWeight"] || 250
+                      }
+                      max={1000}
+                      min={100}
+                      step={50}
+                      onChange={(value1: string, value2: number) =>
+                        changeVisualizationProperties({
+                          visualization: visualization.id,
+                          attribute: "data.title.fontWeight",
+                          value: value2,
+                        })
+                      }
+                    >
+                      <NumberInputField />
+                      <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                      </NumberInputStepper>
+                    </NumberInput>
+
                     <Text>Title font color</Text>
                     <ColorPalette
                       visualization={visualization}
                       attribute="data.title.color"
                     />
                     <VisualizationQuery visualization={visualization} />
+                    <Text>Expression</Text>
+                    <Textarea
+                      value={visualization.expression}
+                      onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                        changeVisualizationAttribute({
+                          attribute: "expression",
+                          value: e.target.value,
+                          visualization: visualization.id,
+                        })
+                      }
+                    />
                     <VisualizationOverride visualization={visualization} />
                     <VisualizationTypes visualization={visualization} />
                     <VisualizationProperties visualization={visualization} />
                   </Stack>
-                )}
-              </Stack>
-            ))}
-          </Stack>
-          <Button
-            onClick={() => {
-              addVisualization2Section();
-              setActive(
-                section.visualizations[section.visualizations.length - 1]?.id
-              );
-            }}
-          >
-            Add Visualization
-          </Button>
+                </Stack>
+              )
+          )}
         </Stack>
-      </Stack>
-    </Stack>
+      </Grid>
+    </Grid>
   );
 };
 
