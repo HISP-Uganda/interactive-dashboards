@@ -1,15 +1,10 @@
-import {
-  Table,
-  TableCaption,
-  TableContainer,
-  Tbody,
-  Td,
-  Tfoot,
-  Th,
-  Thead,
-  Tr,
-} from "@chakra-ui/react";
+import { Box, Stack, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useElementSize } from "usehooks-ts";
+import { db } from "../../db";
 import { ChartProps } from "../../interfaces";
+import { useStore } from "effector-react";
+import { $store } from "../../Store";
 
 interface TableProps extends ChartProps {
   category?: string;
@@ -17,43 +12,44 @@ interface TableProps extends ChartProps {
 }
 
 const Tables = ({}: TableProps) => {
+  const store = useStore($store);
+  const dataElements = useLiveQuery(async () => {
+    const elements = await db.dataElements
+      .where("keyResultAreaCode")
+      .anyOf(store.themes)
+      .toArray();
+    return elements;
+  }, [store.themes]);
+  const [squareRef, { width, height }] = useElementSize();
   return (
-    <TableContainer>
-      <Table variant="striped" colorScheme="teal">
-        <TableCaption>Imperial to metric conversion factors</TableCaption>
-        <Thead>
-          <Tr>
-            <Th>To convert</Th>
-            <Th>into</Th>
-            <Th isNumeric>multiply by</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          <Tr>
-            <Td>inches</Td>
-            <Td>millimetres (mm)</Td>
-            <Td isNumeric>25.4</Td>
-          </Tr>
-          <Tr>
-            <Td>feet</Td>
-            <Td>centimetres (cm)</Td>
-            <Td isNumeric>30.48</Td>
-          </Tr>
-          <Tr>
-            <Td>yards</Td>
-            <Td>metres (m)</Td>
-            <Td isNumeric>0.91444</Td>
-          </Tr>
-        </Tbody>
-        <Tfoot>
-          <Tr>
-            <Th>To convert</Th>
-            <Th>into</Th>
-            <Th isNumeric>multiply by</Th>
-          </Tr>
-        </Tfoot>
-      </Table>
-    </TableContainer>
+    <Stack w="100%" p="10px" h="100%">
+      <Box h="100%" w="100%" ref={squareRef}>
+        <Box
+          position="relative"
+          overflow="auto"
+          whiteSpace="nowrap"
+          h={`${height}`}
+          w="100%"
+        >
+          <Table variant="striped" colorScheme="teal" w="100%">
+            <Thead>
+              <Tr>
+                <Th>
+                  To convert {height}--{width}
+                </Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {dataElements?.map(({ name, id }) => (
+                <Tr key={id}>
+                  <Td>{name}</Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </Box>
+      </Box>
+    </Stack>
   );
 };
 

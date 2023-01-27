@@ -128,6 +128,7 @@ export interface DataNode {
   key: string;
   isLeaf?: boolean;
   level?: string;
+  pId: string;
   children?: DataNode[];
 }
 
@@ -149,7 +150,7 @@ export type PickerProps = {
 export interface IStore {
   showSider: boolean;
   showFooter: boolean;
-  organisations: React.Key[];
+  organisations: string[];
   periods: Item[];
   groups: string[];
   levels: string[];
@@ -170,6 +171,7 @@ export interface IStore {
   isNotDesktop: boolean;
   isFullScreen: boolean;
   refresh: boolean;
+  themes: string[];
 }
 
 export type IndicatorProps = {

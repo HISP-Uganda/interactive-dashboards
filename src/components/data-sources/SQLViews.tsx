@@ -8,7 +8,7 @@ const SQLViews = ({ denNum, onChange, changeQuery }: IndicatorProps) => {
   return (
     <>
       {isLoading && <Progress />}
-      {isSuccess && (
+      {isSuccess && data && (
         <Stack>
           <Text>SQL View</Text>
           <Select<Option, false, GroupBase<Option>>

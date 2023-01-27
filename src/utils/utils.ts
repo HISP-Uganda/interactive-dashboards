@@ -658,7 +658,7 @@ export const processMap = (
           value: value
             ? Intl.NumberFormat("en-US", {
                 style: "percent",
-                notation: "standard",
+                // notation: "standard",
                 maximumFractionDigits: 2,
               }).format(value / 100)
             : "No Data",
