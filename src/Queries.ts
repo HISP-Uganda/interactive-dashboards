@@ -270,8 +270,8 @@ export const useInitials = () => {
   };
   return useQuery<any, Error>(["initial"], async ({ signal }) => {
     const organisations = await db.organisations.toArray();
-    const groups = await db.groups.toArray();
-    const levels = await db.levels.toArray();
+    const dbGroups = await db.groups.toArray();
+    const dbLevels = await db.levels.toArray();
     // const dataSets = await db.dataSets.toArray();
 
     const systemQuery = {
@@ -284,49 +284,49 @@ export const useInitials = () => {
       systemInfo: { systemId, systemName, instanceBaseUrl },
     }: any = await engine.query(systemQuery);
 
-    if (
-      organisations.length === 0 ||
-      groups.length === 0 ||
-      levels.length === 0
-    ) {
-      const {
-        me: { organisationUnits, authorities },
-        levels: { organisationUnitLevels },
-        dataSets: { dataSets },
-      }: any = await engine.query(ouQuery);
-      setSystemId(systemId);
-      setSystemName(systemName);
-      // setDataSets(dataSets);
-      setInstanceBaseUrl(instanceBaseUrl);
-      const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
-      changeAdministration(isAdmin);
-      const facilities: string[] = organisationUnits.map(
-        (unit: any) => unit.id
-      );
-      setOrganisations(facilities);
-      const maxLevel = organisationUnitLevels[0].level;
-      setMaxLevel(maxLevel);
-      const levels = organisationUnits.map(({ value }: any) => Number(value));
-      const minSublevel: number | null | undefined = max(levels);
-      if (minSublevel && minSublevel + 1 <= maxLevel) {
-        setMinSublevel(minSublevel + 1);
-      } else {
-        setMinSublevel(maxLevel);
-      }
-      const availableUnits = organisationUnits.map((unit: any) => {
-        return {
-          id: unit.id,
-          pId: unit.pId || "",
-          value: unit.id,
-          title: unit.name,
-          isLeaf: unit.leaf,
-        };
-      });
-      if (organisations && organisations.length === 0) {
-        await db.organisations.bulkPut(availableUnits);
-      }
-      // await db.dataSets.bulkPut(dataSets);
+    const {
+      me: { organisationUnits, authorities },
+      levels: { organisationUnitLevels },
+      groups: { organisationUnitGroups },
+      dataSets: { dataSets },
+    }: any = await engine.query(ouQuery);
+    setSystemId(systemId);
+    setSystemName(systemName);
+    // setDataSets(dataSets);
+    setInstanceBaseUrl(instanceBaseUrl);
+    const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
+    changeAdministration(isAdmin);
+    const facilities: string[] = organisationUnits.map((unit: any) => unit.id);
+    setOrganisations(facilities);
+    const maxLevel = organisationUnitLevels[0].level;
+    setMaxLevel(maxLevel);
+    const levels = organisationUnits.map(({ value }: any) => Number(value));
+    const minSublevel: number | null | undefined = max(levels);
+    if (minSublevel && minSublevel + 1 <= maxLevel) {
+      setMinSublevel(minSublevel + 1);
+    } else {
+      setMinSublevel(maxLevel);
     }
+    const availableUnits = organisationUnits.map((unit: any) => {
+      return {
+        id: unit.id,
+        pId: unit.pId || "",
+        value: unit.id,
+        title: unit.name,
+        isLeaf: unit.leaf,
+      };
+    });
+    if (organisations.length === 0) {
+      await db.organisations.bulkPut(availableUnits);
+    }
+
+    if (dbLevels.length === 0) {
+      await db.levels.bulkPut(organisationUnitLevels);
+    }
+    if (dbGroups.length === 0) {
+      await db.groups.bulkPut(organisationUnitGroups);
+    }
+    // await db.dataSets.bulkPut(dataSets);
     const settings = await loadResource(
       "i-dashboard-settings",
       systemId,
@@ -474,7 +474,7 @@ export const useVisualizationData = (systemId: string) => {
 };
 
 export const useVisualizationDatum = (id: string, systemId: string) => {
-  return useQuery<void, Error>(
+  return useQuery<boolean, Error>(
     ["i-visualization-queries", id],
     async ({ signal }) => {
       try {
@@ -489,14 +489,16 @@ export const useVisualizationDatum = (id: string, systemId: string) => {
           id,
           signal
         );
-        if (!indicator) {
+        if (isEmpty(indicator)) {
           indicator = createIndicator(id);
         }
         setDataSources(dataSources);
         setIndicator(indicator);
       } catch (error) {
+        console.log("Are we here");
         console.error(error);
       }
+      return true;
     }
   );
 };
@@ -828,6 +830,8 @@ const makeDHIS2Query = (
   const ouFilters = findDimension(data.dataDimensions, "filter", "ou");
   const iDimensions = findDimension(data.dataDimensions, "dimension", "i");
   const iFilters = findDimension(data.dataDimensions, "filter", "i");
+  const deDimensions = findDimension(data.dataDimensions, "dimension", "de");
+  const deFilters = findDimension(data.dataDimensions, "filter", "de");
   const peDimensions = findDimension(data.dataDimensions, "dimension", "pe");
   const peFilters = findDimension(data.dataDimensions, "filter", "pe");
   const ouLevelFilter = findDimension(data.dataDimensions, "filter", "oul");
@@ -916,6 +920,16 @@ const makeDHIS2Query = (
     globalFilters[iDimensions] && globalFilters[iDimensions].length > 0
       ? globalFilters[iDimensions].join(";")
       : iDimensions;
+
+  let finalDeFilters =
+    globalFilters[deFilters] && globalFilters[deFilters].length > 0
+      ? globalFilters[deFilters].join(";")
+      : deFilters;
+  let finalDeDimensions =
+    globalFilters[deDimensions] && globalFilters[deDimensions].length > 0
+      ? globalFilters[deDimensions].join(";")
+      : deDimensions;
+
   let finalPeFilters =
     globalFilters[peFilters] && globalFilters[peFilters].length > 0
       ? globalFilters[peFilters].join(";")
@@ -934,9 +948,15 @@ const makeDHIS2Query = (
   if (overrides.dx && overrides.dx === "filter") {
     finalIFilters = finalIFilters || finalIDimensions;
     finalIDimensions = "";
+
+    finalDeFilters = finalDeFilters || finalDeDimensions;
+    finalDeDimensions = "";
   } else if (overrides.dx && overrides.dx === "dimension") {
     finalIDimensions = finalIFilters || finalIDimensions;
     finalIFilters = "";
+
+    finalDeDimensions = finalDeFilters || finalDeDimensions;
+    finalDeFilters = "";
   }
 
   if (overrides.pe && overrides.pe === "filter") {
@@ -956,7 +976,10 @@ const makeDHIS2Query = (
     joinItems(
       [
         [finalOuFilters, "ou"],
-        [finalIFilters, "dx"],
+        [
+          [finalIFilters, finalDeFilters].filter((value) => !!value).join(";"),
+          "dx",
+        ],
         [finalPeFilters, "pe"],
       ],
       "filter"
@@ -964,7 +987,12 @@ const makeDHIS2Query = (
     joinItems(
       [
         [finalOuDimensions, "ou"],
-        [finalIDimensions, "dx"],
+        [
+          [finalIDimensions, finalDeDimensions]
+            .filter((value) => !!value)
+            .join(";"),
+          "dx",
+        ],
         [finalPeDimensions, "pe"],
       ],
       "dimension"
@@ -1046,7 +1074,7 @@ const generateDHIS2Query = (
       if (params) {
         query = {
           ...query,
-          numerator: `analytics.json?${params}`,
+          numerator: `analytics.json?${params}&dimension=Duw5yep8Vae:Px8Lqkxy2si;HKtncMjp06U`,
         };
       }
     } else if (
@@ -1083,7 +1111,7 @@ const generateDHIS2Query = (
       if (params) {
         query = {
           ...query,
-          denominator: `analytics.json?${params}`,
+          denominator: `analytics.json?${params}&dimension=Duw5yep8Vae:Px8Lqkxy2si;HKtncMjp06U`,
         };
       }
     } else if (

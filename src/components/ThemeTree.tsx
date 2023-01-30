@@ -10,7 +10,7 @@ import { DataNode } from "../interfaces";
 import { useTheme } from "../Queries";
 import { useStore } from "effector-react";
 import { $store } from "../Store";
-import { setThemes } from "../Events";
+import { setThemes, setDataElements } from "../Events";
 
 function TreeObject() {
   const treeData = useLiveQuery(() => db.themes.toArray());
@@ -142,8 +142,22 @@ function TreeObject() {
         });
       }
     }
+    const themes = allChecked.map((v) => String(v));
     setCheckedKeys(checkedKeysValue);
-    setThemes(allChecked.map((v) => String(v)));
+    setThemes(themes);
+
+    const elements = await db.dataElements
+      .where("keyResultAreaCode")
+      .anyOf(themes)
+      .or("theme")
+      .anyOf(store.themes)
+      .or("subKeyResultAreaCode")
+      .anyOf(store.themes)
+      .or("interventionCode")
+      .anyOf(store.themes)
+      .toArray();
+    console.log(elements);
+    setDataElements(elements);
   };
 
   const onSelect = (selectedKeysValue: React.Key[], info: any) => {

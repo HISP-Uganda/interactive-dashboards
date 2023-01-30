@@ -17,7 +17,7 @@ const OrgUnitTree = ({ denNum, onChange }: IndicatorProps) => {
       return key;
     });
   const [useGlobal, setUseGlobal] = useState<boolean>(
-    selected.indexOf("mclvD0Z9mfT") !== -1
+    () => selected.indexOf("GQhi6pRnTKF") !== -1
   );
   return (
     <Stack spacing="20px">

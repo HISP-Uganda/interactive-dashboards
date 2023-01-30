@@ -10,6 +10,7 @@ import {
   Item,
   IVisualization,
   Option,
+  IDataElement,
 } from "./interfaces";
 
 export const loadDefaults = domain.createEvent<{
@@ -177,6 +178,7 @@ export const setCheckedKeys = domain.createEvent<
 >();
 
 export const setLevels = domain.createEvent<string[]>();
+export const setDataElements = domain.createEvent<IDataElement[]>();
 export const setGroups = domain.createEvent<string[]>();
 export const setThemes = domain.createEvent<string[]>();
 export const setShowFooter = domain.createEvent<boolean>();

@@ -14,7 +14,7 @@ const Periods = ({ denNum, onChange }: IndicatorProps) => {
       return key;
     });
   const [useGlobal, setUseGlobal] = useState<boolean>(
-    selected.indexOf("m5D13FqKZwN") !== -1
+    () => selected.indexOf("GQhi6pRnTKF") !== -1
   );
   return (
     <Stack spacing="20px">

@@ -1,10 +1,13 @@
 import { Box, Stack, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useElementSize } from "usehooks-ts";
+import { useEffect } from "react";
 import { db } from "../../db";
 import { ChartProps } from "../../interfaces";
 import { useStore } from "effector-react";
 import { $store } from "../../Store";
+import { setDataElements } from "../../Events";
+import { fromPairs } from "lodash";
 
 interface TableProps extends ChartProps {
   category?: string;
@@ -12,28 +15,44 @@ interface TableProps extends ChartProps {
 }
 
 const computeFinancialYears = (year: number) => {
-  // FY2020
-  return [0, 1, 2, 3, 4].map((val) => {
+  return [0, 1, 2, 3, 4, 5].map((val) => {
     return { value: `${year + val}July`, key: `FY${year + val}` };
   });
 };
 
-const Tables = ({}: TableProps) => {
+const Tables = ({
+  visualization,
+  category,
+  series,
+  layoutProperties,
+  dataProperties,
+  section,
+  data,
+}: TableProps) => {
   const store = useStore($store);
-  const dataElements = useLiveQuery(async () => {
-    const elements = await db.dataElements
-      .where("keyResultAreaCode")
-      .anyOf(store.themes)
-      .or("theme")
-      .anyOf(store.themes)
-      .or("subKeyResultAreaCode")
-      .anyOf(store.themes)
-      .or("interventionCode")
-      .anyOf(store.themes)
-      .toArray();
-    return elements;
-  }, [store.themes]);
+  // const dataElements = useLiveQuery(async () => {
+  //   const elements = await db.dataElements
+  //     .where("keyResultAreaCode")
+  //     .anyOf(store.themes)
+  //     .or("theme")
+  //     .anyOf(store.themes)
+  //     .or("subKeyResultAreaCode")
+  //     .anyOf(store.themes)
+  //     .or("interventionCode")
+  //     .anyOf(store.themes)
+  //     .toArray();
+  //   return elements;
+  // }, [store.themes]);
   const [squareRef, { width, height }] = useElementSize();
+
+  // useEffect(() => {
+  //   setDataElements(dataElements ? dataElements : []);
+  // }, [store.dataElements]);
+
+  const processed: { [key: string]: string } = fromPairs(
+    data.map((d: any) => [`${d.dx}${d.pe}${d.Duw5yep8Vae}`, d.value])
+  );
+
   return (
     <Stack w="100%" p="10px" h="100%">
       <Box h="100%" w="100%" ref={squareRef}>
@@ -44,7 +63,7 @@ const Tables = ({}: TableProps) => {
           h={`${height}`}
           w="100%"
         >
-          <Table variant="striped" colorScheme="teal" w="100%">
+          <Table variant="striped" colorScheme="orange" w="100%">
             <Thead>
               <Tr>
                 {/* <Th rowSpan={2}>Key Result Area</Th>
@@ -52,7 +71,7 @@ const Tables = ({}: TableProps) => {
                 <Th rowSpan={2}>Intervention</Th> */}
                 <Th rowSpan={2}>Indicator</Th>
                 <Th rowSpan={2}>Baseline</Th>
-                {computeFinancialYears(2019).map((fy) => (
+                {computeFinancialYears(2020).map((fy) => (
                   <Th colSpan={2} key={fy.value}>
                     {fy.key}
                   </Th>
@@ -61,7 +80,7 @@ const Tables = ({}: TableProps) => {
                 <Th rowSpan={2}>Overall Performance</Th>
               </Tr>
               <Tr>
-                {computeFinancialYears(2019).map((fy) => (
+                {computeFinancialYears(2020).map((fy) => (
                   <>
                     <Th>Target</Th>
                     <Th>Actual</Th>
@@ -70,7 +89,7 @@ const Tables = ({}: TableProps) => {
               </Tr>
             </Thead>
             <Tbody>
-              {dataElements?.map(
+              {store.dataElements.map(
                 ({
                   name,
                   id,
@@ -87,10 +106,14 @@ const Tables = ({}: TableProps) => {
                     <Td>{intervention}</Td> */}
                     <Td>{name}</Td>
                     <Td>0</Td>
-                    {computeFinancialYears(2019).map((fy) => (
+                    {computeFinancialYears(2020).map((fy) => (
                       <>
-                        <Td key={fy.value}>0</Td>
-                        <Td key={fy.key}>0</Td>
+                        <Td key={fy.value}>
+                          {processed[`${id}${fy.value}Px8Lqkxy2si`]}
+                        </Td>
+                        <Td key={fy.key}>
+                          {processed[`${id}${fy.value}HKtncMjp06U`]}
+                        </Td>
                       </>
                     ))}
                     <Td></Td>

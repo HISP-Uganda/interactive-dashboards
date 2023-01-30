@@ -61,6 +61,7 @@ const GlobalAndFilter = ({
           onChange={(e: ChangeEvent<HTMLInputElement>) => {
             e.persist();
             setUseGlobal(() => e.target.checked);
+            console.log(type);
             Object.entries(denNum?.dataDimensions || {})
               .filter(([k, { what }]) => what === type)
               .forEach(([key]) => {

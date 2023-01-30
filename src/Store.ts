@@ -74,6 +74,7 @@ import {
   duplicateVisualization,
   setRefresh,
   setThemes,
+  setDataElements,
 } from "./Events";
 import {
   ICategory,
@@ -192,7 +193,7 @@ export const $paginations = domain
 export const $store = domain
   .createStore<IStore>({
     showSider: false,
-    periods: [{ id: "LAST_12_MONTHS", name: "Last 12 months" }],
+    periods: [{ id: "LAST_5_FINANCIAL_YEARS", name: "Last 5 financial years" }],
     organisations: [],
     levels: [],
     groups: [],
@@ -215,6 +216,7 @@ export const $store = domain
     isFullScreen: false,
     refresh: true,
     themes: [],
+    dataElements: [],
   })
   .on(setOrganisations, (state, organisations) => {
     return { ...state, organisations };
@@ -297,6 +299,10 @@ export const $store = domain
   })
   .on(setThemes, (state, themes) => {
     return { ...state, themes };
+  })
+  .on(setDataElements, (state, dataElements) => {
+    console.log(dataElements);
+    return { ...state, dataElements };
   });
 
 export const $dataSource = domain
@@ -498,6 +504,8 @@ export const $indicator = domain
               ([i, d]) => d.what !== what
             )
           );
+
+          console.log(working);
           return {
             ...state,
             numerator: {
@@ -509,6 +517,11 @@ export const $indicator = domain
             },
           };
         }
+
+        console.log({
+          ...state.numerator.dataDimensions,
+          [id]: { what, type, label },
+        });
         return {
           ...state,
           numerator: {
@@ -571,7 +584,10 @@ export const $indicator = domain
   .on(changeUseIndicators, (state, useInBuildIndicators) => {
     return { ...state, useInBuildIndicators };
   })
-  .on(setIndicator, (_, indicator) => indicator);
+  .on(setIndicator, (_, indicator) => {
+    console.log(indicator);
+    return indicator;
+  });
 
 export const $section = domain
   .createStore<ISection>(createSection())
@@ -888,6 +904,12 @@ export const $globalFilters = combine(
     }
     if (dashboard.targetCategoryCombo && target.length > 0) {
       return { ...filters, OOhWJ4gfZy1: target };
+    }
+    if (store.dataElements.length > 0) {
+      filters = {
+        ...filters,
+        h9oh0VhweQM: store.dataElements.map((de) => de.id),
+      };
     }
     return filters;
   }
