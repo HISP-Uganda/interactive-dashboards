@@ -40,6 +40,7 @@
     "@turf/turf": "^6.5.0",
     "@types/react-textfit": "^1.1.0",
     "antd": "^5.1.6",
+    "array-to-tree": "^3.3.2",
     "axios": "^1.2.4",
     "chakra-react-select": "^3.1.2",
     "cors": "^2.8.5",

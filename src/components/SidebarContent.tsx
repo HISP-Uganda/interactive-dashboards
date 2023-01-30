@@ -16,11 +16,11 @@ const SidebarContent = ({ ...rest }: SidebarProps) => {
         textTransform="uppercase"
         textAlign="left"
         // p="2"
-        color="blue.600"
+        color="yellow.500"
       >
         Thematic Areas
       </Text>
-      <Divider borderColor="blue.500" />
+      <Divider borderColor="yellow.500" />
       {store.isAdmin ? (
         store.currentPage === "dashboard" ? (
           <DashboardList />

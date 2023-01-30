@@ -284,7 +284,7 @@ const Section = () => {
               size="sm"
               variant="outline"
               key={visualization.id}
-              colorScheme={active === visualization.id ? "teal" : "gray"}
+              colorScheme={active === visualization.id ? "teal" : "yellow"}
               onClick={() => setActive(() => visualization.id)}
             >
               {visualization.name || visualization.id}
