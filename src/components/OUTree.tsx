@@ -1,32 +1,37 @@
 import { Stack, Text } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
-import { TreeSelect } from "antd";
+import { TreeSelect, Tree } from "antd";
 import { GroupBase, Select } from "chakra-react-select";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useStore } from "effector-react";
 import { flatten } from "lodash";
-import React from "react";
+import React, { useState } from "react";
 import { db } from "../db";
 import { setGroups, setLevels } from "../Events";
 import { DataNode, Option } from "../interfaces";
 import { $store } from "../Store";
+import arrayToTree from "array-to-tree";
 
 const OUTree = ({
-  groups,
-  levels,
   value,
   onChange,
 }: {
-  units: DataNode[];
-  levels: Option[];
-  groups: Option[];
-  value: string | string[] | undefined;
-  onChange: (value: string | string[] | undefined) => void;
+  value: string[];
+  onChange: (value: string[]) => void;
 }) => {
   const store = useStore($store);
   const engine = useDataEngine();
   const organisations = useLiveQuery(() => db.organisations.toArray());
-  const expanded = useLiveQuery(() => db.expanded.toArray());
+  const levels = useLiveQuery(() => db.levels.toArray());
+  const groups = useLiveQuery(() => db.groups.toArray());
+  const expandedKeys = useLiveQuery(() => db.expandedKeys.get("1"));
+  const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
+
+  const [checkedKeys, setCheckedKeys] = useState<
+    { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[]
+  >(() => {
+    return { checked: value, halfChecked: [] };
+  });
 
   const onLoadData = async ({ id, children }: any) => {
     if (children) {
@@ -72,17 +77,28 @@ const OUTree = ({
       console.log(e);
     }
   };
-  const onTreeExpand = async (expandedKeys: React.Key[]) => {
-    await db.expanded.clear();
-    await db.expanded.bulkPut(
-      expandedKeys.map((val) => {
-        return { id: String(val), name: String(val) };
-      })
-    );
+  const onExpand = async (expandedKeysValue: React.Key[]) => {
+    await db.expandedKeys.put({ id: "1", name: expandedKeysValue.join(",") });
+    setAutoExpandParent(false);
+  };
+
+  const onCheck = async (
+    checkedKeysValue:
+      | { checked: React.Key[]; halfChecked: React.Key[] }
+      | React.Key[]
+  ) => {
+    let allChecked = [];
+    if (Array.isArray(checkedKeysValue)) {
+      allChecked = checkedKeysValue;
+    } else {
+      allChecked = checkedKeysValue.checked;
+    }
+    setCheckedKeys(checkedKeysValue);
+    onChange(allChecked.map((val) => String(value)));
   };
   return (
     <Stack bgColor="white" spacing="20px">
-      <TreeSelect<string | string[] | undefined>
+      {/* <TreeSelect<string | string[] | undefined>
         size="large"
         allowClear={true}
         treeDataSimpleMode
@@ -97,13 +113,36 @@ const OUTree = ({
         onChange={onChange}
         loadData={onLoadData}
         treeData={organisations}
+      /> */}
+
+      <Tree
+        checkable
+        onExpand={onExpand}
+        checkStrictly
+        expandedKeys={expandedKeys?.name.split(",") || []}
+        autoExpandParent={autoExpandParent}
+        onCheck={onCheck}
+        checkedKeys={checkedKeys}
+        // onSelect={onSelect}
+        // selectedKeys={selectedKeys}
+        loadData={onLoadData}
+        style={{
+          maxHeight: "500px",
+          overflow: "auto",
+          fontSize: "18px",
+        }}
+        treeData={
+          organisations
+            ? arrayToTree(organisations, { parentProperty: "pId" })
+            : []
+        }
       />
       <Stack zIndex={300}>
         <Text>Level</Text>
         <Select<Option, true, GroupBase<Option>>
           isMulti
           options={levels}
-          value={levels.filter(
+          value={levels?.filter(
             (d: Option) => store.levels.indexOf(d.value) !== -1
           )}
           onChange={(e) => {
@@ -116,7 +155,7 @@ const OUTree = ({
         <Select<Option, true, GroupBase<Option>>
           isMulti
           options={groups}
-          value={groups.filter(
+          value={groups?.filter(
             (d: Option) => store.groups.indexOf(d.value) !== -1
           )}
           onChange={(e) => {

@@ -1,36 +1,14 @@
 import Dexie, { Table } from "dexie";
-import { DataNode } from "./interfaces";
-
-export interface IOrgUnit {
-  id?: string;
-  pId: string;
-  value: string;
-  title: string;
-  isLeaf: boolean;
-}
-
-export interface IDataElement {
-  id: string;
-  code: string;
-  name: string;
-  intervention: string;
-  interventionCode: string;
-  subKeyResultArea: string;
-  subKeyResultAreaCode: string;
-  keyResultArea: string;
-  keyResultAreaCode: string;
-}
-
-export interface IExpanded {
-  id: string;
-  name: string;
-}
-
+import { DataNode, IExpanded, IDataElement, Option } from "./interfaces";
 export class CQIDexie extends Dexie {
-  organisations!: Table<IOrgUnit>;
+  organisations!: Table<DataNode>;
   themes!: Table<DataNode>;
   expanded!: Table<IExpanded>;
+  expandedKeys!: Table<IExpanded>;
   dataElements!: Table<IDataElement>;
+  levels!: Table<Option>;
+  groups!: Table<Option>;
+  dataSets!: Table<Option>;
 
   constructor() {
     super("idvt");
@@ -38,8 +16,12 @@ export class CQIDexie extends Dexie {
       organisations: "++id,value,pId,title",
       themes: "++id,value,pId,title,key",
       expanded: "++id,name",
+      expandedKeys: "++id,name",
       dataElements:
-        "++id,code,interventionCode,subKeyResultAreaCode,keyResultAreaCode",
+        "++id,code,interventionCode,subKeyResultAreaCode,keyResultAreaCode,theme",
+      levels: "++value,label",
+      groups: "++value,label",
+      dataSets: "++value,label",
     });
   }
 }

@@ -234,3 +234,21 @@ export interface Threshold {
   max: string;
   color: string;
 }
+
+export interface IDataElement {
+  id: string;
+  code: string;
+  name: string;
+  intervention: string;
+  interventionCode: string;
+  subKeyResultArea: string;
+  subKeyResultAreaCode: string;
+  keyResultArea: string;
+  keyResultAreaCode: string;
+  theme: string;
+}
+
+export interface IExpanded {
+  id: string;
+  name: string;
+}

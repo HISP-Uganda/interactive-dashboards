@@ -1,9 +1,10 @@
-import { Spinner } from "@chakra-ui/react";
+import { Spinner, Stack } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { groupBy } from "lodash";
 import { useDashboards } from "../Queries";
 import { $categoryOptions, $globalFilters, $store } from "../Store";
 import NavItem from "./NavItem";
+import ThemeTree from "./ThemeTree";
 
 export default function DashboardList() {
   const store = useStore($store);
@@ -14,19 +15,23 @@ export default function DashboardList() {
   return (
     <>
       {isLoading && <Spinner />}
-      {isSuccess &&
-        categoryOptions
-          .map((category) => {
-            const groupedDashboards = groupBy(data, "category");
-            return {
-              ...category,
-              dashboards: groupedDashboards[category.value] || [],
-            };
-          })
-          .filter(({ dashboards }) => dashboards.length > 0)
-          .map((value) => {
-            return <NavItem option={value} key={value.value} />;
-          })}
+      {isSuccess && (
+        <Stack spacing="40px" p="5px">
+          {categoryOptions
+            .map((category) => {
+              const groupedDashboards = groupBy(data, "category");
+              return {
+                ...category,
+                dashboards: groupedDashboards[category.value] || [],
+              };
+            })
+            .filter(({ dashboards }) => dashboards.length > 0)
+            .map((value) => {
+              return <NavItem option={value} key={value.value} />;
+            })}
+          <ThemeTree />
+        </Stack>
+      )}
 
       {isError && <pre>{JSON.stringify(error)}</pre>}
     </>
