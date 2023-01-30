@@ -22,7 +22,7 @@ const options = {
   // target: "https://tests.dhis2.stephocay.com/sia", // target host
   // target: "https://eidsr.health.go.ug", // target host
   // target: "https://epivac.health.go.ug", // target host
-  target: "https://dev.ndpme.go.ug/ndpdb", // target host
+  target: "https://train.ndpme.go.ug", // target host
   onProxyReq,
   onProxyRes,
   changeOrigin: true, // needed for virtual hosted sites
