@@ -172,6 +172,7 @@ export interface IStore {
   isFullScreen: boolean;
   refresh: boolean;
   themes: string[];
+  dataElements: IDataElement[];
 }
 
 export type IndicatorProps = {

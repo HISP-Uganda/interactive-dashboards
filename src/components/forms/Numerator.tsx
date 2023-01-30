@@ -184,6 +184,7 @@ const Numerator = () => {
         <Spacer />
         <Button
           onClick={async () => {
+            console.log(indicator);
             await saveDocument(
               "i-visualization-queries",
               store.systemId,

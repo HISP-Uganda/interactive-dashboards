@@ -46,9 +46,7 @@ import {
   createSection,
 } from "../Store";
 import AutoRefreshPicker from "./AutoRefreshPicker";
-import DashboardCategorization from "./forms/DashboardCategorization";
 import OUTreeSelect from "./OUTreeSelect";
-import PeriodPicker from "./PeriodPicker";
 
 const DashboardMenu = () => {
   const search = useSearch<LocationGenerics>();
@@ -183,10 +181,10 @@ const DashboardMenu = () => {
               onChange={(value) => setOrganisations(value)}
             />
 
-            <PeriodPicker
+            {/* <PeriodPicker
               selectedPeriods={store.periods}
               onChange={onChangePeriods}
-            />
+            /> */}
           </Stack>
         }
         name="buttonName"

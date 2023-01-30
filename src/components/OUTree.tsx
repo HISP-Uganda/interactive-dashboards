@@ -1,6 +1,7 @@
 import { Stack, Text } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
-import { TreeSelect, Tree } from "antd";
+import { Tree } from "antd";
+import arrayToTree from "array-to-tree";
 import { GroupBase, Select } from "chakra-react-select";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useStore } from "effector-react";
@@ -8,9 +9,8 @@ import { flatten } from "lodash";
 import React, { useState } from "react";
 import { db } from "../db";
 import { setGroups, setLevels } from "../Events";
-import { DataNode, Option } from "../interfaces";
+import { Option } from "../interfaces";
 import { $store } from "../Store";
-import arrayToTree from "array-to-tree";
 
 const OUTree = ({
   value,
@@ -98,23 +98,6 @@ const OUTree = ({
   };
   return (
     <Stack bgColor="white" spacing="20px">
-      {/* <TreeSelect<string | string[] | undefined>
-        size="large"
-        allowClear={true}
-        treeDataSimpleMode
-        multiple={true}
-        style={{ width: "100%" }}
-        value={value}
-        listHeight={700}
-        dropdownStyle={{ overflow: "auto" }}
-        treeExpandedKeys={expanded?.map(({ id }) => id)}
-        onTreeExpand={onTreeExpand}
-        placeholder="Please select organisation unit"
-        onChange={onChange}
-        loadData={onLoadData}
-        treeData={organisations}
-      /> */}
-
       <Tree
         checkable
         onExpand={onExpand}
@@ -123,8 +106,6 @@ const OUTree = ({
         autoExpandParent={autoExpandParent}
         onCheck={onCheck}
         checkedKeys={checkedKeys}
-        // onSelect={onSelect}
-        // selectedKeys={selectedKeys}
         loadData={onLoadData}
         style={{
           maxHeight: "500px",

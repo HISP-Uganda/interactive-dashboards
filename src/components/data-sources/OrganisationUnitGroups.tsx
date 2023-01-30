@@ -34,10 +34,16 @@ const INNER_LIMIT = 4;
 
 const OrganizationUnitGroups = ({ denNum, onChange }: IndicatorProps) => {
   const paginations = useStore($paginations);
-
   const [dimension, setDimension] = useState<"filter" | "dimension">("filter");
   const [q, setQ] = useState<string>("");
-  const [useGlobal, setUseGlobal] = useState<boolean>(false);
+  const selected = Object.entries(denNum?.dataDimensions || {})
+    .filter(([k, { what }]) => what === "oug")
+    .map(([key]) => {
+      return key;
+    });
+  const [useGlobal, setUseGlobal] = useState<boolean>(
+    () => selected.indexOf("GQhi6pRnTKF") !== -1
+  );
 
   const {
     pages,
@@ -71,6 +77,7 @@ const OrganizationUnitGroups = ({ denNum, onChange }: IndicatorProps) => {
         setDimension={setDimension}
         useGlobal={useGlobal}
         setUseGlobal={setUseGlobal}
+        hasGlobalFilter={true}
         type="oug"
         onChange={onChange}
         id={globalIds[3].value}

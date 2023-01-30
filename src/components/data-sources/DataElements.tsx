@@ -37,8 +37,16 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
   const [dimension, setDimension] = useState<"filter" | "dimension">(
     "dimension"
   );
+
+  const selected = Object.entries(denNum?.dataDimensions || {})
+    .filter(([k, { what }]) => what === "de")
+    .map(([key]) => {
+      return key;
+    });
   const [q, setQ] = useState<string>("");
-  const [useGlobal, setUseGlobal] = useState<boolean>(false);
+  const [useGlobal, setUseGlobal] = useState<boolean>(
+    () => selected.indexOf("GQhi6pRnTKF") !== -1
+  );
   const {
     pages,
     pagesCount,

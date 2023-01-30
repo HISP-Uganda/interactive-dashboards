@@ -36,7 +36,14 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
   const [dimension, setDimension] = useState<"filter" | "dimension">(
     "dimension"
   );
-  const [useGlobal, setUseGlobal] = useState<boolean>(false);
+  const selected = Object.entries(denNum?.dataDimensions || {})
+    .filter(([k, { what }]) => what === "pi")
+    .map(([key]) => {
+      return key;
+    });
+  const [useGlobal, setUseGlobal] = useState<boolean>(
+    () => selected.indexOf("GQhi6pRnTKF") !== -1
+  );
   const [q, setQ] = useState<string>("");
   const paginations = useStore($paginations);
 
