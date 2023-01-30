@@ -40,7 +40,8 @@ export default function ({
     levelIsGlobal !== -1 || levels.length === 0 ? store.levels : levels,
     ouIsGlobal !== -1 ? store.organisations.map((k) => String(k)) : ous,
     data,
-    thresholds
+    thresholds,
+    []
   );
   return (
     <>
@@ -182,7 +183,7 @@ export default function ({
           </Stack>
         </Stack>
       )}
-      {isError && <pre>{JSON.stringify(error)}</pre>}
+      {isError && <Text>No data/Error occurred</Text>}
     </>
   );
 }

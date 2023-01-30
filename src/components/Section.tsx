@@ -126,7 +126,7 @@ const VisualizationQuery = ({
           isClearable
         />
       )}
-      {isError && <pre>{JSON.stringify(error, null, 2)}</pre>}
+      {isError && <Text>No data/Error occurred</Text>}
     </Stack>
   );
 };

@@ -1,4 +1,4 @@
-import { Spinner, Stack } from "@chakra-ui/react";
+import { Spinner, Stack, Text } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { TreeSelect, Tree } from "antd";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -150,13 +150,12 @@ function TreeObject() {
       .where("keyResultAreaCode")
       .anyOf(themes)
       .or("theme")
-      .anyOf(store.themes)
+      .anyOf(themes)
       .or("subKeyResultAreaCode")
-      .anyOf(store.themes)
+      .anyOf(themes)
       .or("interventionCode")
-      .anyOf(store.themes)
+      .anyOf(themes)
       .toArray();
-    console.log(elements);
     setDataElements(elements);
   };
 
@@ -196,7 +195,7 @@ export default function ThemeTree() {
     <Stack>
       {isLoading && <Spinner />}
       {isSuccess && <TreeObject />}
-      {isError && <pre>{JSON.stringify(error, null, 2)}</pre>}
+      {isError && <Text>No data/Error occurred</Text>}
     </Stack>
   );
 }

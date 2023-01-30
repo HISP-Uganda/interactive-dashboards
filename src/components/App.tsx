@@ -8,6 +8,7 @@ import {
   Spinner,
   Stack,
   useMediaQuery,
+  Text,
 } from "@chakra-ui/react";
 import {
   createHashHistory,
@@ -272,8 +273,16 @@ const App = () => {
                   alignContent="center"
                   justifyContent="center"
                   justifyItems="center"
+                  direction="row"
+                  spacing="20px"
                 >
                   <MOHLogo height={otherHeaders} width={sideWidth} />
+                  <Stack spacing={0}>
+                    <Text textTransform="uppercase" fontWeight="bold">
+                      Office of the President
+                    </Text>
+                    <Text>The Republic of Uganda</Text>
+                  </Stack>
                 </Stack>
                 <GridItem>
                   <SidebarContent />
