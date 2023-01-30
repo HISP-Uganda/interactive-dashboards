@@ -40,7 +40,7 @@ const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
       return key;
     });
   const [useGlobal, setUseGlobal] = useState<boolean>(
-    selected.indexOf("GQhi6pRnTKF") !== -1
+    () => selected.indexOf("GQhi6pRnTKF") !== -1
   );
   const [q, setQ] = useState<string>("");
   const paginations = useStore($paginations);

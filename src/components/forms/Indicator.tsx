@@ -149,12 +149,13 @@ const Indicator = () => {
             {dataSourceType !== "ELASTICSEARCH" && (
               <Stack direction="row" spacing="50px">
                 <Button
-                  onClick={() =>
+                  onClick={() => {
+                    console.log(indicator);
                     navigate({
                       to: `/indicators/${indicator.id}/numerator`,
                       search,
-                    })
-                  }
+                    });
+                  }}
                 >
                   Numerator
                 </Button>

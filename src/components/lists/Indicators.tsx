@@ -97,6 +97,7 @@ const Indicators = () => {
         <Button
           onClick={() => {
             const indicator = createIndicator();
+            setIndicator(indicator);
             navigate({ to: `/indicators/${indicator.id}` });
           }}
           colorScheme="blue"
@@ -179,14 +180,15 @@ const Indicators = () => {
               currentPage={currentPage}
               setNextPage={setCurrentPage}
               total={
-                data &&
-                data.filter((d) => {
-                  return (
-                    d &&
-                    (d.name?.toLowerCase().includes(q.toLowerCase()) ||
-                      d.id.includes(q))
-                  );
-                }).length
+                (data &&
+                  data.filter((d) => {
+                    return (
+                      d &&
+                      (d.name?.toLowerCase().includes(q.toLowerCase()) ||
+                        d.id.includes(q))
+                    );
+                  }).length) ||
+                0
               }
             />
           </Stack>
