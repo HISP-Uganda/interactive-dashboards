@@ -1,9 +1,10 @@
 import { Spinner, Stack } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
-import { TreeSelect } from "antd";
+import { TreeSelect, Tree } from "antd";
 import { useLiveQuery } from "dexie-react-hooks";
 import { uniqBy } from "lodash";
-import React from "react";
+import React, { useState } from "react";
+import arrayToTree from "array-to-tree";
 import { db } from "../db";
 import { DataNode } from "../interfaces";
 import { useTheme } from "../Queries";
@@ -13,8 +14,14 @@ import { setThemes } from "../Events";
 
 function TreeObject() {
   const treeData = useLiveQuery(() => db.themes.toArray());
+  const expanded = useLiveQuery(() => db.expanded.get("1"));
   const engine = useDataEngine();
   const store = useStore($store);
+  const [checkedKeys, setCheckedKeys] = useState<
+    { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[]
+  >([]);
+  const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
+  const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
   const onLoadData = async ({ key, children }: any) => {
     if (children) {
       return;
@@ -66,6 +73,7 @@ function TreeObject() {
                   subKeyResultAreaCode: code1,
                   keyResultArea: name,
                   keyResultAreaCode: code,
+                  theme: key,
                 };
               }
             );
@@ -105,17 +113,65 @@ function TreeObject() {
     });
     await db.themes.bulkPut(uniqBy(finalOptions, "id"));
   };
+  const onExpand = async (expandedKeysValue: React.Key[]) => {
+    await db.expanded.put({ id: "1", name: expandedKeysValue.join(",") });
+    setAutoExpandParent(false);
+  };
+
+  const onCheck = async (
+    checkedKeysValue:
+      | { checked: React.Key[]; halfChecked: React.Key[] }
+      | React.Key[]
+  ) => {
+    let allChecked = [];
+    if (Array.isArray(checkedKeysValue)) {
+      allChecked = checkedKeysValue;
+    } else {
+      allChecked = checkedKeysValue.checked;
+    }
+    const realExpanded = expanded?.name.split(",") || [];
+    for (const checkedValue of allChecked) {
+      if (
+        realExpanded.indexOf(String(checkedValue)) === -1 &&
+        String(checkedValue).length === 2
+      ) {
+        await onLoadData({ key: checkedValue });
+        await db.expanded.put({
+          id: "1",
+          name: [...realExpanded, checkedValue].join(","),
+        });
+      }
+    }
+    setCheckedKeys(checkedKeysValue);
+    setThemes(allChecked.map((v) => String(v)));
+  };
+
+  const onSelect = (selectedKeysValue: React.Key[], info: any) => {
+    console.log("onSelect", info);
+    setSelectedKeys(selectedKeysValue);
+  };
+
   return (
-    <TreeSelect
-      value={store.themes}
-      multiple={true}
-      listHeight={700}
-      treeDataSimpleMode
+    <Tree
+      checkable
+      onExpand={onExpand}
+      checkStrictly
+      expandedKeys={expanded?.name.split(",") || []}
+      autoExpandParent={autoExpandParent}
+      onCheck={onCheck}
+      checkedKeys={checkedKeys}
+      onSelect={onSelect}
+      selectedKeys={selectedKeys}
       loadData={onLoadData}
-      treeData={treeData}
-      dropdownStyle={{}}
-      size="large"
-      onChange={(value) => setThemes(value)}
+      style={{
+        backgroundColor: "#ebf8ff",
+        maxHeight: "500px",
+        overflow: "auto",
+        fontSize: "18px",
+      }}
+      treeData={
+        treeData ? arrayToTree(treeData, { parentProperty: "pId" }) : []
+      }
     />
   );
 }

@@ -11,11 +11,24 @@ interface TableProps extends ChartProps {
   series?: string;
 }
 
+const computeFinancialYears = (year: number) => {
+  // FY2020
+  return [0, 1, 2, 3, 4].map((val) => {
+    return { value: `${year + val}July`, key: `FY${year + val}` };
+  });
+};
+
 const Tables = ({}: TableProps) => {
   const store = useStore($store);
   const dataElements = useLiveQuery(async () => {
     const elements = await db.dataElements
       .where("keyResultAreaCode")
+      .anyOf(store.themes)
+      .or("theme")
+      .anyOf(store.themes)
+      .or("subKeyResultAreaCode")
+      .anyOf(store.themes)
+      .or("interventionCode")
       .anyOf(store.themes)
       .toArray();
     return elements;
@@ -34,17 +47,57 @@ const Tables = ({}: TableProps) => {
           <Table variant="striped" colorScheme="teal" w="100%">
             <Thead>
               <Tr>
-                <Th>
-                  To convert {height}--{width}
-                </Th>
+                {/* <Th rowSpan={2}>Key Result Area</Th>
+                <Th rowSpan={2}>Sub Key Result Area</Th>
+                <Th rowSpan={2}>Intervention</Th> */}
+                <Th rowSpan={2}>Indicator</Th>
+                <Th rowSpan={2}>Baseline</Th>
+                {computeFinancialYears(2019).map((fy) => (
+                  <Th colSpan={2} key={fy.value}>
+                    {fy.key}
+                  </Th>
+                ))}
+                <Th rowSpan={2}>Scores</Th>
+                <Th rowSpan={2}>Overall Performance</Th>
+              </Tr>
+              <Tr>
+                {computeFinancialYears(2019).map((fy) => (
+                  <>
+                    <Th>Target</Th>
+                    <Th>Actual</Th>
+                  </>
+                ))}
               </Tr>
             </Thead>
             <Tbody>
-              {dataElements?.map(({ name, id }) => (
-                <Tr key={id}>
-                  <Td>{name}</Td>
-                </Tr>
-              ))}
+              {dataElements?.map(
+                ({
+                  name,
+                  id,
+                  intervention,
+                  keyResultArea,
+                  subKeyResultArea,
+                }) => (
+                  // <Tr key={id}>
+                  //   <Td>{name}</Td>
+                  // </Tr>
+                  <Tr key={id}>
+                    {/* <Td>{keyResultArea}</Td>
+                    <Td>{subKeyResultArea}</Td>
+                    <Td>{intervention}</Td> */}
+                    <Td>{name}</Td>
+                    <Td>0</Td>
+                    {computeFinancialYears(2019).map((fy) => (
+                      <>
+                        <Td key={fy.value}>0</Td>
+                        <Td key={fy.key}>0</Td>
+                      </>
+                    ))}
+                    <Td></Td>
+                    <Td></Td>
+                  </Tr>
+                )
+              )}
             </Tbody>
           </Table>
         </Box>

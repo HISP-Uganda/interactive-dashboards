@@ -49,7 +49,6 @@ import AutoRefreshPicker from "./AutoRefreshPicker";
 import DashboardCategorization from "./forms/DashboardCategorization";
 import OUTreeSelect from "./OUTreeSelect";
 import PeriodPicker from "./PeriodPicker";
-import ThemeTree from "./ThemeTree";
 
 const DashboardMenu = () => {
   const search = useSearch<LocationGenerics>();
@@ -177,17 +176,11 @@ const DashboardMenu = () => {
             overflow="auto"
             h="calc(100vh - 170px)"
           >
-            <Text>Theme</Text>
-            <ThemeTree />
-            <DashboardCategorization dataSet={dashboard.dataSet} />
+            {/* <DashboardCategorization dataSet={dashboard.dataSet} /> */}
             <Text>Organisation</Text>
             <OUTreeSelect
               value={store.organisations}
-              onChange={(value) => {
-                if (Array.isArray(value)) {
-                  setOrganisations(value);
-                }
-              }}
+              onChange={(value) => setOrganisations(value)}
             />
 
             <PeriodPicker

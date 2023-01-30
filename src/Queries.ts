@@ -31,6 +31,7 @@ import {
   setVisualizationQueries,
   updateVisualizationData,
   updateVisualizationMetadata,
+  setOrganisations,
 } from "./Events";
 import {
   DataNode,
@@ -172,57 +173,71 @@ const loadResource = async (
   return await getIndex(namespace, systemId, otherQueries, signal);
 };
 
-export const useOrganisationUnits = () => {
-  const engine = useDataEngine();
-  const ouQuery = {
-    me: {
-      resource: "me.json",
-      params: {
-        fields: "organisationUnits[id,name,level,leaf]",
-      },
-    },
-    levels: {
-      resource: "organisationUnitLevels.json",
-      params: {
-        fields: "id,level~rename(value),name~rename(label)",
-      },
-    },
-    groups: {
-      resource: "organisationUnitGroups.json",
-      params: {
-        fields: "id~rename(value),name~rename(label)",
-      },
-    },
-  };
+// export const useOrganisationUnits = () => {
+//   const engine = useDataEngine();
+//   const ouQuery = {
+//     me: {
+//       resource: "me.json",
+//       params: {
+//         fields: "organisationUnits[id,name,level,leaf]",
+//       },
+//     },
+//     levels: {
+//       resource: "organisationUnitLevels.json",
+//       params: {
+//         fields: "id,level~rename(value),name~rename(label)",
+//       },
+//     },
+//     groups: {
+//       resource: "organisationUnitGroups.json",
+//       params: {
+//         fields: "id~rename(value),name~rename(label)",
+//       },
+//     },
+//   };
 
-  return useQuery<
-    { units: DataNode[]; levels: Option[]; groups: Option[] },
-    Error
-  >(["organisation-units"], async () => {
-    const {
-      me: { organisationUnits },
-      levels: { organisationUnitLevels },
-      groups: { organisationUnitGroups },
-    }: any = await engine.query(ouQuery);
-    const units: DataNode[] = organisationUnits.map((o: any) => {
-      return {
-        pId: "",
-        key: o.id,
-        title: o.name,
-        level: o.level,
-        isLeaf: o.leaf,
-      };
-    });
+//   return useQuery<boolean, Error>(["organisation-units"], async () => {
+//     const organisations = await db.organisations.toArray();
+//     const groups = await db.groups.toArray();
+//     const levels = await db.levels.toArray();
 
-    return {
-      units,
-      levels: organisationUnitLevels.map((x: any) => {
-        return { ...x, value: String(x.value) };
-      }),
-      groups: organisationUnitGroups,
-    };
-  });
-};
+//     if (
+//       organisations.length === 0 ||
+//       groups.length === 0 ||
+//       levels.length === 0
+//     ) {
+//       const {
+//         me: { organisationUnits },
+//         levels: { organisationUnitLevels },
+//         groups: { organisationUnitGroups },
+//       }: any = await engine.query(ouQuery);
+//       const units: DataNode[] = organisationUnits.map((o: any) => {
+//         return {
+//           id: o.id,
+//           pId: "",
+//           key: o.id,
+//           title: o.name,
+//           level: o.level,
+//           isLeaf: o.leaf,
+//         };
+//       });
+//       await db.organisations.bulkPut(units);
+//       await db.groups.bulkPut(organisationUnitGroups);
+//       await db.levels.bulkPut(
+//         organisationUnitLevels.map((x: any) => {
+//           return { ...x, value: String(x.value) };
+//         })
+//       );
+//     }
+
+//     return true;
+// return {
+//   units,
+// levels: ,
+//   groups: organisationUnitGroups,
+// };
+//   });
+// };
 
 export const useInitials = () => {
   const engine = useDataEngine();
@@ -233,46 +248,65 @@ export const useInitials = () => {
         fields: "organisationUnits[id,name,leaf,level],authorities",
       },
     },
+    levels: {
+      resource: "organisationUnitLevels.json",
+      params: {
+        order: "level:DESC",
+        fields: "id,level~rename(value),name~rename(label)",
+      },
+    },
+    groups: {
+      resource: "organisationUnitGroups.json",
+      params: {
+        fields: "id~rename(value),name~rename(label)",
+      },
+    },
     dataSets: {
       resource: "dataSets.json",
       params: {
         fields: "id~rename(value),name~rename(label)",
       },
     },
-    levels: {
-      resource: "organisationUnitLevels.json",
-      params: {
-        fields: "level",
-        order: "level:DESC",
-        pageSize: 1,
-      },
-    },
-    systemInfo: {
-      resource: "system/info",
-    },
   };
   return useQuery<any, Error>(["initial"], async ({ signal }) => {
     const organisations = await db.organisations.toArray();
-    try {
+    const groups = await db.groups.toArray();
+    const levels = await db.levels.toArray();
+    // const dataSets = await db.dataSets.toArray();
+
+    const systemQuery = {
+      systemInfo: {
+        resource: "system/info",
+      },
+    };
+
+    const {
+      systemInfo: { systemId, systemName, instanceBaseUrl },
+    }: any = await engine.query(systemQuery);
+
+    if (
+      organisations.length === 0 ||
+      groups.length === 0 ||
+      levels.length === 0
+    ) {
       const {
-        systemInfo: { systemId, systemName, instanceBaseUrl },
         me: { organisationUnits, authorities },
         levels: { organisationUnitLevels },
         dataSets: { dataSets },
       }: any = await engine.query(ouQuery);
       setSystemId(systemId);
       setSystemName(systemName);
-      setDataSets(dataSets);
+      // setDataSets(dataSets);
       setInstanceBaseUrl(instanceBaseUrl);
       const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
       changeAdministration(isAdmin);
       const facilities: string[] = organisationUnits.map(
         (unit: any) => unit.id
       );
+      setOrganisations(facilities);
       const maxLevel = organisationUnitLevels[0].level;
       setMaxLevel(maxLevel);
-      const levels = organisationUnits.map(({ level }: any) => Number(level));
-      const minLevel: number | null | undefined = min(levels);
+      const levels = organisationUnits.map(({ value }: any) => Number(value));
       const minSublevel: number | null | undefined = max(levels);
       if (minSublevel && minSublevel + 1 <= maxLevel) {
         setMinSublevel(minSublevel + 1);
@@ -288,31 +322,23 @@ export const useInitials = () => {
           isLeaf: unit.leaf,
         };
       });
-      if (organisations.length === 0) {
-        await db.organisations.bulkAdd(availableUnits);
+      if (organisations && organisations.length === 0) {
+        await db.organisations.bulkPut(availableUnits);
       }
-      onChangeOrganisations({
-        levels: [minLevel === 1 ? "3" : `${minLevel ? minLevel + 1 : 4}`],
-        organisations: facilities,
-        groups: [],
-        expandedKeys: [],
-        checkedKeys: facilities,
-      });
-      const settings = await loadResource(
-        "i-dashboard-settings",
-        systemId,
-        [],
-        signal
-      );
-      const defaultDashboard = settings.find(
-        (s: any) => s.id === systemId && s.default
-      );
-      if (defaultDashboard) {
-        changeSelectedDashboard(defaultDashboard.default);
-        setDefaultDashboard(defaultDashboard.default);
-      }
-    } catch (error) {
-      console.error(error);
+      // await db.dataSets.bulkPut(dataSets);
+    }
+    const settings = await loadResource(
+      "i-dashboard-settings",
+      systemId,
+      [],
+      signal
+    );
+    const defaultDashboard = settings.find(
+      (s: any) => s.id === systemId && s.default
+    );
+    if (defaultDashboard) {
+      changeSelectedDashboard(defaultDashboard.default);
+      setDefaultDashboard(defaultDashboard.default);
     }
     return true;
   });
