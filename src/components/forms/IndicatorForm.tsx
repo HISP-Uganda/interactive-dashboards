@@ -1,4 +1,4 @@
-import { Spinner, Stack } from "@chakra-ui/react";
+import { Spinner, Stack, Text } from "@chakra-ui/react";
 import { useMatch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { LocationGenerics } from "../../interfaces";
@@ -31,7 +31,7 @@ export default function IndicatorForm() {
     >
       {isLoading && <Spinner />}
       {isSuccess && <Indicator />}
-      {isError && <pre>{JSON.stringify(error)}</pre>}
+      {isError && <Text>No data/Error occurred</Text>}
     </Stack>
   );
 }

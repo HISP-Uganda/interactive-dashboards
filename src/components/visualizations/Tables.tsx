@@ -1,13 +1,9 @@
 import { Box, Stack, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
-import { useLiveQuery } from "dexie-react-hooks";
-import { useElementSize } from "usehooks-ts";
-import { useEffect } from "react";
-import { db } from "../../db";
-import { ChartProps } from "../../interfaces";
 import { useStore } from "effector-react";
-import { $store } from "../../Store";
-import { setDataElements } from "../../Events";
 import { fromPairs } from "lodash";
+import { useElementSize } from "usehooks-ts";
+import { ChartProps } from "../../interfaces";
+import { $store } from "../../Store";
 
 interface TableProps extends ChartProps {
   category?: string;
@@ -15,7 +11,7 @@ interface TableProps extends ChartProps {
 }
 
 const computeFinancialYears = (year: number) => {
-  return [0, 1, 2, 3, 4, 5].map((val) => {
+  return [0, 1, 2].map((val) => {
     return { value: `${year + val}July`, key: `FY${year + val}` };
   });
 };
@@ -30,24 +26,8 @@ const Tables = ({
   data,
 }: TableProps) => {
   const store = useStore($store);
-  // const dataElements = useLiveQuery(async () => {
-  //   const elements = await db.dataElements
-  //     .where("keyResultAreaCode")
-  //     .anyOf(store.themes)
-  //     .or("theme")
-  //     .anyOf(store.themes)
-  //     .or("subKeyResultAreaCode")
-  //     .anyOf(store.themes)
-  //     .or("interventionCode")
-  //     .anyOf(store.themes)
-  //     .toArray();
-  //   return elements;
-  // }, [store.themes]);
-  const [squareRef, { width, height }] = useElementSize();
 
-  // useEffect(() => {
-  //   setDataElements(dataElements ? dataElements : []);
-  // }, [store.dataElements]);
+  const [squareRef, { width, height }] = useElementSize();
 
   const processed: { [key: string]: string } = fromPairs(
     data.map((d: any) => [`${d.dx}${d.pe}${d.Duw5yep8Vae}`, d.value])
@@ -70,9 +50,9 @@ const Tables = ({
                 <Th rowSpan={2}>Sub Key Result Area</Th>
                 <Th rowSpan={2}>Intervention</Th> */}
                 <Th rowSpan={2}>Indicator</Th>
-                <Th rowSpan={2}>Baseline</Th>
+                {/* <Th rowSpan={2}>Baseline</Th> */}
                 {computeFinancialYears(2020).map((fy) => (
-                  <Th colSpan={2} key={fy.value}>
+                  <Th colSpan={3} key={fy.value} textAlign="center">
                     {fy.key}
                   </Th>
                 ))}
@@ -82,6 +62,7 @@ const Tables = ({
               <Tr>
                 {computeFinancialYears(2020).map((fy) => (
                   <>
+                    <Th>Baseline</Th>
                     <Th>Target</Th>
                     <Th>Actual</Th>
                   </>
@@ -105,13 +86,13 @@ const Tables = ({
                     <Td>{subKeyResultArea}</Td>
                     <Td>{intervention}</Td> */}
                     <Td>{name}</Td>
-                    <Td>0</Td>
                     {computeFinancialYears(2020).map((fy) => (
                       <>
-                        <Td key={fy.value}>
+                        <Td>{processed[`${id}${fy.value}bqIaasqpTas`]}</Td>
+                        <Td key={fy.value} textAlign="center">
                           {processed[`${id}${fy.value}Px8Lqkxy2si`]}
                         </Td>
-                        <Td key={fy.key}>
+                        <Td key={fy.key} textAlign="center">
                           {processed[`${id}${fy.value}HKtncMjp06U`]}
                         </Td>
                       </>

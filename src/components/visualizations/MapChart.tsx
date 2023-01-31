@@ -1,4 +1,4 @@
-import { Spinner, Stack } from "@chakra-ui/react";
+import { Spinner, Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { max, orderBy } from "lodash";
 import Plot from "react-plotly.js";
@@ -128,7 +128,7 @@ const MapChart = ({
           </Stack>
         </Stack>
       )}
-      {isError && <pre>{JSON.stringify(error)}</pre>}
+      {isError && <Text>No data/Error occurred</Text>}
     </>
   );
 };

@@ -301,7 +301,6 @@ export const $store = domain
     return { ...state, themes };
   })
   .on(setDataElements, (state, dataElements) => {
-    console.log(dataElements);
     return { ...state, dataElements };
   });
 
@@ -505,7 +504,6 @@ export const $indicator = domain
             )
           );
 
-          console.log(working);
           return {
             ...state,
             numerator: {
@@ -517,11 +515,6 @@ export const $indicator = domain
             },
           };
         }
-
-        console.log({
-          ...state.numerator.dataDimensions,
-          [id]: { what, type, label },
-        });
         return {
           ...state,
           numerator: {

@@ -11,6 +11,7 @@ import {
   Th,
   Thead,
   Tr,
+  Text,
 } from "@chakra-ui/react";
 import { Link, useNavigate } from "@tanstack/react-location";
 import { useQueryClient } from "@tanstack/react-query";
@@ -193,7 +194,7 @@ const Indicators = () => {
             />
           </Stack>
         )}
-        {isError && <pre>{JSON.stringify(error, null, 2)}</pre>}
+        {isError && <Text>No data/Error occurred</Text>}
       </Stack>
     </Stack>
   );

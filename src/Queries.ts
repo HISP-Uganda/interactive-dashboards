@@ -1074,7 +1074,7 @@ const generateDHIS2Query = (
       if (params) {
         query = {
           ...query,
-          numerator: `analytics.json?${params}&dimension=Duw5yep8Vae:Px8Lqkxy2si;HKtncMjp06U`,
+          numerator: `analytics.json?${params}&dimension=Duw5yep8Vae:Px8Lqkxy2si;HKtncMjp06U;bqIaasqpTas`,
         };
       }
     } else if (
@@ -1111,7 +1111,7 @@ const generateDHIS2Query = (
       if (params) {
         query = {
           ...query,
-          denominator: `analytics.json?${params}&dimension=Duw5yep8Vae:Px8Lqkxy2si;HKtncMjp06U`,
+          denominator: `analytics.json?${params}&dimension=Duw5yep8Vae:Px8Lqkxy2si;HKtncMjp06U;bqIaasqpTas`,
         };
       }
     } else if (

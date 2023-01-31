@@ -1,4 +1,4 @@
-import { Spinner, Stack } from "@chakra-ui/react";
+import { Spinner, Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { groupBy } from "lodash";
 import { useDashboards } from "../Queries";
@@ -33,7 +33,7 @@ export default function DashboardList() {
         </Stack>
       )}
 
-      {isError && <pre>{JSON.stringify(error)}</pre>}
+      {isError && <Text>No data/Error occurred</Text>}
     </>
   );
 }
