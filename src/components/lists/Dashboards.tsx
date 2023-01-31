@@ -11,6 +11,7 @@ import {
   Th,
   Thead,
   Tr,
+  Text,
 } from "@chakra-ui/react";
 import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
@@ -82,7 +83,7 @@ const Dashboards = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {data.map((dashboard: IDashboard) => (
+              {data?.map((dashboard: IDashboard) => (
                 <Tr
                   key={dashboard.id}
                   cursor="pointer"
@@ -124,7 +125,7 @@ const Dashboards = () => {
             </Tbody>
           </Table>
         )}
-        {isError && <pre>{JSON.stringify(error, null, 2)}</pre>}
+        {isError && <Text>No data/Error occurred</Text>}
       </Stack>
     </Stack>
   );

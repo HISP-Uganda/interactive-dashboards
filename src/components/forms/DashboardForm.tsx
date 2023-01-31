@@ -27,7 +27,7 @@ export default function DashboardForm() {
     >
       {isLoading && <Spinner />}
       {isSuccess && <Dashboard />}
-      {isError && <pre>{JSON.stringify(error)}</pre>}
+      {isError && <Text>No data/Error occurred</Text>}
     </Stack>
   );
 }

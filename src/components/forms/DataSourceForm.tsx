@@ -1,4 +1,4 @@
-import { Spinner, Stack } from "@chakra-ui/react";
+import { Spinner, Stack, Text } from "@chakra-ui/react";
 import { useMatch } from "@tanstack/react-location";
 import { LocationGenerics } from "../../interfaces";
 import { useDataSource } from "../../Queries";
@@ -25,7 +25,7 @@ export default function DataSourceForm() {
     >
       {isLoading && <Spinner />}
       {isSuccess && <DataSource />}
-      {isError && <pre>{JSON.stringify(error)}</pre>}
+      {isError && <Text>No data/Error occurred</Text>}
     </Stack>
   );
 }

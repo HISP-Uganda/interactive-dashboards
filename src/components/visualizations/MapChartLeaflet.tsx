@@ -96,7 +96,7 @@ const MapChartLeaflet = ({
           </Stack>
         </Stack>
       )}
-      {isError && <pre>{JSON.stringify(error)}</pre>}
+      {isError && <Text>No data/Error occurred</Text>}
     </>
   );
 };

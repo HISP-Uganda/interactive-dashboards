@@ -26,7 +26,7 @@ export default function CategoryForm() {
     >
       {isLoading && <Spinner />}
       {isSuccess && <Category />}
-      {isError && <pre>{JSON.stringify(error)}</pre>}
+      {isError && <Text>No data/Error occurred</Text>}
     </Stack>
   );
 }

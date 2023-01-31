@@ -276,7 +276,7 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
         <>
           {isLoading && <Spinner />}
           {isSuccess && getVisualization(visualization, data, section)}
-          {isError && <Text>Error occurred</Text>}
+          {isError && <Text>No data/Error occurred</Text>}
         </>
       )}
     </Stack>

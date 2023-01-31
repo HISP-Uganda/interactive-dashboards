@@ -12,6 +12,7 @@ import {
   Th,
   Thead,
   Tr,
+  Text,
 } from "@chakra-ui/react";
 import { Link, useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
@@ -107,7 +108,7 @@ const Categories = () => {
             </Tbody>
           </Table>
         )}
-        {isError && <pre>{JSON.stringify(error, null, 2)}</pre>}
+        {isError && <Text>No data/Error occurred</Text>}
       </Stack>
     </Stack>
   );
