@@ -47,6 +47,7 @@ import {
 } from "../Store";
 import AutoRefreshPicker from "./AutoRefreshPicker";
 import OUTreeSelect from "./OUTreeSelect";
+import OUTree from "./OUTree";
 
 const DashboardMenu = () => {
   const search = useSearch<LocationGenerics>();
@@ -176,7 +177,7 @@ const DashboardMenu = () => {
           >
             {/* <DashboardCategorization dataSet={dashboard.dataSet} /> */}
             <Text>Organisation</Text>
-            <OUTreeSelect
+            <OUTree
               value={store.organisations}
               onChange={(value) => setOrganisations(value)}
             />

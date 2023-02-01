@@ -253,3 +253,10 @@ export interface IExpanded {
   id: string;
   name: string;
 }
+
+export interface SystemInfo {
+  id: string;
+  systemId: string;
+  systemName: string;
+  instanceBaseUrl: string;
+}
