@@ -1,5 +1,11 @@
 import Dexie, { Table } from "dexie";
-import { DataNode, IExpanded, IDataElement, Option } from "./interfaces";
+import {
+  DataNode,
+  IExpanded,
+  IDataElement,
+  Option,
+  SystemInfo,
+} from "./interfaces";
 export class CQIDexie extends Dexie {
   organisations!: Table<DataNode>;
   themes!: Table<DataNode>;
@@ -9,10 +15,11 @@ export class CQIDexie extends Dexie {
   levels!: Table<Option>;
   groups!: Table<Option>;
   dataSets!: Table<Option>;
+  systemInfo!: Table<SystemInfo>;
 
   constructor() {
     super("idvt");
-    this.version(1).stores({
+    this.version(2).stores({
       organisations: "++id,value,pId,title",
       themes: "++id,value,pId,title,key",
       expanded: "++id,name",
@@ -22,6 +29,7 @@ export class CQIDexie extends Dexie {
       levels: "++value,label",
       groups: "++value,label",
       dataSets: "++value,label",
+      systemInfo: "++id,systemId,systemName",
     });
   }
 }

@@ -26,7 +26,6 @@ const OUTree = ({
   const groups = useLiveQuery(() => db.groups.toArray());
   const expandedKeys = useLiveQuery(() => db.expandedKeys.get("1"));
   const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
-
   const [checkedKeys, setCheckedKeys] = useState<
     { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[]
   >(() => {
@@ -59,6 +58,7 @@ const OUTree = ({
               pId: id,
               value: child.id,
               title: child.name,
+              key: child.id,
               isLeaf: child.leaf,
             };
           })
@@ -94,56 +94,62 @@ const OUTree = ({
       allChecked = checkedKeysValue.checked;
     }
     setCheckedKeys(checkedKeysValue);
-    onChange(allChecked.map((val) => String(value)));
+    onChange(allChecked.map((val) => String(val)));
   };
   return (
     <Stack bgColor="white" spacing="20px">
-      <Tree
-        checkable
-        onExpand={onExpand}
-        checkStrictly
-        expandedKeys={expandedKeys?.name.split(",") || []}
-        autoExpandParent={autoExpandParent}
-        onCheck={onCheck}
-        checkedKeys={checkedKeys}
-        loadData={onLoadData}
-        style={{
-          maxHeight: "500px",
-          overflow: "auto",
-          fontSize: "18px",
-        }}
-        treeData={
-          organisations
-            ? arrayToTree(organisations, { parentProperty: "pId" })
-            : []
-        }
-      />
-      <Stack zIndex={300}>
-        <Text>Level</Text>
-        <Select<Option, true, GroupBase<Option>>
-          isMulti
-          options={levels}
-          value={levels?.filter(
-            (d: Option) => store.levels.indexOf(d.value) !== -1
-          )}
-          onChange={(e) => {
-            setLevels(e.map((ex) => ex.value));
-          }}
-        />
-      </Stack>
-      <Stack zIndex={200}>
-        <Text>Group</Text>
-        <Select<Option, true, GroupBase<Option>>
-          isMulti
-          options={groups}
-          value={groups?.filter(
-            (d: Option) => store.groups.indexOf(d.value) !== -1
-          )}
-          onChange={(e) => {
-            setGroups(e.map((ex) => ex.value));
-          }}
-        />
-      </Stack>
+      {organisations !== undefined && (
+        <>
+          <Tree
+            checkable
+            onExpand={onExpand}
+            checkStrictly
+            expandedKeys={
+              expandedKeys !== undefined ? expandedKeys.name.split(",") : []
+            }
+            autoExpandParent={autoExpandParent}
+            onCheck={onCheck}
+            checkedKeys={checkedKeys}
+            loadData={onLoadData}
+            style={{
+              maxHeight: "500px",
+              overflow: "auto",
+              fontSize: "18px",
+            }}
+            treeData={arrayToTree(organisations, { parentProperty: "pId" })}
+          />
+        </>
+      )}
+      {levels !== undefined && (
+        <Stack zIndex={300}>
+          <Text>Level</Text>
+          <Select<Option, true, GroupBase<Option>>
+            isMulti
+            options={levels}
+            value={levels.filter(
+              (d: Option) => store.levels.indexOf(String(d.value)) !== -1
+            )}
+            onChange={(e) => {
+              setLevels(e.map((ex) => ex.value));
+            }}
+          />
+        </Stack>
+      )}
+      {groups !== undefined && (
+        <Stack zIndex={200}>
+          <Text>Group</Text>
+          <Select<Option, true, GroupBase<Option>>
+            isMulti
+            options={groups}
+            value={groups.filter(
+              (d: Option) => store.groups.indexOf(d.value) !== -1
+            )}
+            onChange={(e) => {
+              setGroups(e.map((ex) => ex.value));
+            }}
+          />
+        </Stack>
+      )}
     </Stack>
   );
 };
