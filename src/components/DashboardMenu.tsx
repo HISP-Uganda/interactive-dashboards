@@ -162,7 +162,8 @@ const DashboardMenu = () => {
       )}
       {store.isAdmin && !isNotDesktop && <AutoRefreshPicker />}
       <DropdownButton
-        primary
+        // 
+        
         component={
           <Stack
             w="600px"
@@ -187,8 +188,10 @@ const DashboardMenu = () => {
             /> */}
           </Stack>
         }
+        style={{backgroundColor: "yellow"}}
         name="buttonName"
         value="buttonValue"
+        className="nrm"
       >
         Filter
       </DropdownButton>
