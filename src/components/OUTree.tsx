@@ -141,6 +141,7 @@ const OUTree = ({
           <Select<Option, true, GroupBase<Option>>
             isMulti
             options={groups}
+            hideSelectedOptions
             value={groups.filter(
               (d: Option) => store.groups.indexOf(d.value) !== -1
             )}
