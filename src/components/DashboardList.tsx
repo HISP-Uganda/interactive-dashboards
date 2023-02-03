@@ -5,6 +5,7 @@ import { useDashboards } from "../Queries";
 import { $categoryOptions, $globalFilters, $store } from "../Store";
 import NavItem from "./NavItem";
 import ThemeTree from "./ThemeTree";
+import DashboardTree from "./DashboardTree";
 
 export default function DashboardList() {
   const store = useStore($store);
@@ -16,21 +17,21 @@ export default function DashboardList() {
     <>
       {isLoading && <Spinner />}
       {isSuccess && (
-        <Stack spacing="40px" p="5px">
-          {categoryOptions
-            .map((category) => {
-              const groupedDashboards = groupBy(data, "category");
-              return {
-                ...category,
-                dashboards: groupedDashboards[category.value] || [],
-              };
-            })
-            .filter(({ dashboards }) => dashboards.length > 0)
-            .map((value) => {
-              return <NavItem option={value} key={value.value} />;
-            })}
-          <ThemeTree />
-        </Stack>
+        // <Stack spacing="40px" p="5px">
+        //   {categoryOptions
+        //     .map((category) => {
+        //       const groupedDashboards = groupBy(data, "category");
+        //       return {
+        //         ...category,
+        //         dashboards: groupedDashboards[category.value] || [],
+        //       };
+        //     })
+        //     .filter(({ dashboards }) => dashboards.length > 0)
+        //     .map((value) => {
+        //       return <NavItem option={value} key={value.value} />;
+        //     })}
+        // </Stack>
+        <DashboardTree dashboards={data || []} />
       )}
 
       {isError && <Text>No data/Error occurred</Text>}

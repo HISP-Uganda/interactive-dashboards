@@ -176,6 +176,7 @@ function TreeObject() {
       onSelect={onSelect}
       selectedKeys={selectedKeys}
       loadData={onLoadData}
+      blockNode
       style={{
         backgroundColor: "#ebf8ff",
         maxHeight: "500px",

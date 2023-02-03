@@ -1,5 +1,7 @@
 import { MakeGenerics } from "@tanstack/react-location";
 import { OptionBase } from "chakra-react-select";
+import type { DataNode as IDataNode } from "antd/es/tree";
+
 import { Event } from "effector";
 
 export interface Image {
@@ -117,17 +119,19 @@ export interface IDashboard extends INamed {
   bg: string;
   targetCategoryCombo: string;
   targetCategoryOptionCombos: any[];
+  hasChildren?: boolean;
+  resource: "";
 }
 export interface Pagination {
   total: number;
   page: number;
   pageSize: number;
 }
-export interface DataNode {
-  title: string;
-  key: string;
-  isLeaf?: boolean;
-  level?: string;
+export interface DataNode extends IDataNode {
+  // title: string;
+  // key: string;
+  // isLeaf?: boolean;
+  // level?: string;
   pId: string;
   children?: DataNode[];
 }
