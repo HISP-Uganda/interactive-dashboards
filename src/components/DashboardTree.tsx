@@ -1,13 +1,24 @@
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { Tree } from "antd";
+import {
+  CarryOutOutlined,
+  CheckOutlined,
+  FormOutlined,
+} from "@ant-design/icons";
 import { EventDataNode } from "antd/es/tree";
 import arrayToTree from "array-to-tree";
 import { useLiveQuery } from "dexie-react-hooks";
 import React, { useState } from "react";
 import { db } from "../db";
 import { DataNode, LocationGenerics } from "../interfaces";
-import { setDataElements, updateVisualizationData } from "../Events";
+import {
+  setDataElements,
+  updateVisualizationData,
+  setRows,
+  setOriginalColumns,
+  setColumns,
+} from "../Events";
 import { uniq } from "lodash";
 
 export default function DashboardTree() {
@@ -22,7 +33,7 @@ export default function DashboardTree() {
 
   const loadData = async (node: EventDataNode<DataNode>) => {
     if (node.children) {
-      return;
+      return node.children;
     }
     if (node.nodeSource) {
       const query = {
@@ -51,7 +62,9 @@ export default function DashboardTree() {
         return calculated;
       });
       await db.dashboards.bulkPut(options);
+      return options;
     }
+    return [];
   };
 
   const onSelect = async (
@@ -65,11 +78,30 @@ export default function DashboardTree() {
     }
   ) => {
     if (info.node.pId === "") {
-      navigate({
-        to: `/dashboards/${info.node.key}`,
-        search,
-      });
+      const children = await loadData(info.node);
+      setOriginalColumns([
+        { id: "title", title: "Indicator" },
+        { id: "totalIndicators", title: "# Indicators" },
+      ]);
+      setColumns([
+        { id: "a", title: "A" },
+        { id: "b", title: "MA" },
+        { id: "c", title: "NA" },
+      ]);
+
       const elements = await db.dataElements.toArray();
+
+      setRows(
+        children.map((c: any) => {
+          const filteredElements = elements.filter(
+            (e) =>
+              e.interventionCode === c.key ||
+              e.themeCode === c.key ||
+              e.programCode === c.key
+          );
+          return { ...c, totalIndicators: filteredElements.length };
+        })
+      );
       updateVisualizationData({
         visualizationId: "keyResultAreas",
         data: [
@@ -90,6 +122,10 @@ export default function DashboardTree() {
       });
       setDataElements(elements);
       setCheckedKeys({ checked: [], halfChecked: [] });
+      navigate({
+        to: `/dashboards/${info.node.key}`,
+        search,
+      });
     }
   };
   const onCheck = async (
@@ -144,13 +180,15 @@ export default function DashboardTree() {
     <Tree
       checkable
       checkStrictly
+      showLine
+      icon={<CarryOutOutlined />}
       onSelect={onSelect}
       loadData={loadData}
       autoExpandParent={autoExpandParent}
       onCheck={onCheck}
       checkedKeys={checkedKeys}
       style={{
-        backgroundColor: "#ebf8ff",
+        backgroundColor: "#F7FAFC",
         maxHeight: "800px",
         overflow: "auto",
         fontSize: "18px",

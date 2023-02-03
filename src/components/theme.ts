@@ -9,6 +9,17 @@ const theme = extendTheme({
         },
       },
     },
+    Table: {
+      parts: ["th", "td"],
+      baseStyle: {
+        th: {
+          borderColor: "gray.300",
+        },
+        td: {
+          borderColor: "gray.300",
+        },
+      },
+    },
   },
   styles: {
     global: {

@@ -78,6 +78,9 @@ import {
   setHasChildren,
   setNodeSource,
   setVersion,
+  setRows,
+  setColumns,
+  setOriginalColumns,
 } from "./Events";
 import {
   ICategory,
@@ -221,6 +224,9 @@ export const $store = domain
     themes: [],
     dataElements: [],
     version: "",
+    rows: [],
+    columns: [],
+    originalColumns: [],
   })
   .on(setOrganisations, (state, organisations) => {
     return { ...state, organisations };
@@ -309,6 +315,15 @@ export const $store = domain
   })
   .on(setVersion, (state, version) => {
     return { ...state, version };
+  })
+  .on(setRows, (state, rows) => {
+    return { ...state, rows };
+  })
+  .on(setColumns, (state, columns) => {
+    return { ...state, columns };
+  })
+  .on(setOriginalColumns, (state, originalColumns) => {
+    return { ...state, originalColumns };
   });
 
 export const $dataSource = domain

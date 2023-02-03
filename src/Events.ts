@@ -11,6 +11,8 @@ import {
   IVisualization,
   Option,
   IDataElement,
+  IRow,
+  IColumn,
 } from "./interfaces";
 
 export const loadDefaults = domain.createEvent<{
@@ -180,6 +182,9 @@ export const setNodeSource = domain.createEvent<
 >();
 export const setVersion = domain.createEvent<string>();
 export const setAvailableCategories = domain.createEvent<any[]>();
+export const setRows = domain.createEvent<IRow[]>();
+export const setColumns = domain.createEvent<IColumn[]>();
+export const setOriginalColumns = domain.createEvent<IColumn[]>();
 export const setAvailableCategoryOptionCombos = domain.createEvent<any[]>();
 export const setTargetCategoryOptionCombos = domain.createEvent<any[]>();
 export const setSystemId = domain.createEvent<string>();

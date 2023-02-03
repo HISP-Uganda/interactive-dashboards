@@ -120,11 +120,11 @@ const DashboardMenu = () => {
       p="5px"
     >
       <Text
-        fontSize="2.1vh"
+        fontSize="2.5vh"
         fontWeight="700"
-        color="blue.600"
+        // color="blue.600"
         noOfLines={1}
-      >{`${dashboard.name} Dashboard`}</Text>
+      >{`${dashboard.name}`}</Text>
       <Spacer />
       {store.isAdmin && !isNotDesktop && (
         <>

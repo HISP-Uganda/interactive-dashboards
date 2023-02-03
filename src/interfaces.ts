@@ -9,6 +9,16 @@ export interface Image {
   src: string;
   alignment: string;
 }
+
+export interface IColumn {
+  title: string;
+  id: string;
+}
+
+export interface IRow {
+  title: string;
+  id: string;
+}
 export interface DataValueAttribute {
   attribute: "name" | "description" | "type" | "query" | "accessor";
   value: any;
@@ -181,6 +191,9 @@ export interface IStore {
   refresh: boolean;
   themes: string[];
   dataElements: IDataElement[];
+  rows: any[];
+  columns: IColumn[];
+  originalColumns: IColumn[];
   version: string;
 }
 

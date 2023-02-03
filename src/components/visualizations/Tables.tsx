@@ -118,18 +118,30 @@ const Tables = ({
           h={`${height}`}
           w="100%"
         >
-          <Table variant="simple" colorScheme="orange" w="100%" size="sm">
+          <Table variant="unstyled" w="100%" border="1px solid black">
             <Thead>
               <Tr>
-                <Th rowSpan={2} {...otherRows(0, 0)}>
-                  Indicator
-                </Th>
+                {store.originalColumns.map(({ title, id }, col) => (
+                  <Th
+                    borderColor="yellow.300"
+                    borderStyle="solid"
+                    borderWidth="thin"
+                    key={id}
+                    rowSpan={2}
+                    {...otherRows(0, col)}
+                  >
+                    {title}
+                  </Th>
+                ))}
                 {computeFinancialYears(2020).map((fy, index) => (
                   <Th
-                    colSpan={3}
+                    colSpan={store.columns.length}
                     key={fy.value}
                     {...otherRows(0, index + 1)}
                     textAlign="center"
+                    borderColor="yellow.300"
+                    borderStyle="solid"
+                    borderWidth="thin"
                   >
                     {fy.key}
                   </Th>
@@ -137,39 +149,51 @@ const Tables = ({
               </Tr>
               <Tr>
                 {computeFinancialYears(2020)
-                  .flatMap(() => [
-                    { key: generateUid(), value: "Baseline" },
-                    { key: generateUid(), value: "Target" },
-                    { key: generateUid(), value: "Actual" },
-                  ])
-                  .map(({ key, value }, index) => (
-                    <Th key={key} {...otherRows(1, index + 1)}>
-                      {value}
+                  .flatMap(() => store.columns)
+                  .map(({ id, title }, index) => (
+                    <Th
+                      borderColor="yellow.300"
+                      borderStyle="solid"
+                      borderWidth="thin"
+                      key={id}
+                      {...otherRows(1, index + 1)}
+                    >
+                      {title}
                     </Th>
                   ))}
               </Tr>
             </Thead>
             <Tbody>
-              {store.dataElements.map(({ name, id }) => (
-                <Tr key={id}>
-                  <Td>{name}</Td>
+              {store.rows.map((row) => (
+                <Tr key={row.id}>
+                  {store.originalColumns.map(({ title, id }, col) => (
+                    <Td
+                      borderColor="yellow.300"
+                      borderStyle="solid"
+                      borderWidth="thin"
+                      key={`${id}${row.id}`}
+                    >
+                      {row[id]}
+                    </Td>
+                  ))}
                   {computeFinancialYears(2020)
-                    .flatMap((fy) => [
-                      {
-                        key: generateUid(),
-                        value: processed[`${id}${fy.value}bqIaasqpTas`],
-                      },
-                      {
-                        key: generateUid(),
-                        value: processed[`${id}${fy.value}Px8Lqkxy2si`],
-                      },
-                      {
-                        key: generateUid(),
-                        value: processed[`${id}${fy.value}HKtncMjp06U`],
-                      },
-                    ])
+                    .flatMap((fy) =>
+                      store.columns.map(({ id: cId }) => {
+                        return {
+                          key: `${row.id}${fy.value}${cId}`,
+                          value: processed[`${row.id}${fy.value}${cId}`],
+                        };
+                      })
+                    )
                     .map(({ key, value }) => (
-                      <Td key={`${id}${key}`}>{value}</Td>
+                      <Td
+                        borderColor="yellow.300"
+                        borderStyle="solid"
+                        borderWidth="thin"
+                        key={key}
+                      >
+                        {value}
+                      </Td>
                     ))}
                 </Tr>
               ))}
