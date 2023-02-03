@@ -32,6 +32,7 @@ import {
   updateVisualizationData,
   updateVisualizationMetadata,
   setOrganisations,
+  setLevels,
 } from "./Events";
 import {
   DataNode,
@@ -78,8 +79,7 @@ export const queryDataSource = async (
         const { results }: any = await engine.query(query);
         return results;
       } catch (error) {
-        console.log(error);
-        return {};
+        return null;
       }
     }
   }
@@ -120,24 +120,28 @@ export const getIndex = async (
     },
     ...otherQueries,
   ];
-  let {
-    data: {
-      hits: { hits },
-    },
-  }: any = await api.post(
-    "wal/search",
-    {
-      index: namespace,
-      size: 1000,
-      query: {
-        bool: {
-          must,
+  try {
+    let {
+      data: {
+        hits: { hits },
+      },
+    }: any = await api.post(
+      "wal/search",
+      {
+        index: namespace,
+        size: 1000,
+        query: {
+          bool: {
+            must,
+          },
         },
       },
-    },
-    { signal }
-  );
-  return hits.map(({ _source }: any) => _source);
+      { signal }
+    );
+    return hits.map(({ _source }: any) => _source);
+  } catch (error) {
+    return [];
+  }
 };
 
 export const getOneRecord = async (
@@ -160,7 +164,7 @@ export const getOneRecord = async (
     );
     return _source;
   } catch (error) {
-    return {};
+    return null;
   }
 };
 
@@ -172,72 +176,6 @@ const loadResource = async (
 ) => {
   return await getIndex(namespace, systemId, otherQueries, signal);
 };
-
-// export const useOrganisationUnits = () => {
-//   const engine = useDataEngine();
-//   const ouQuery = {
-//     me: {
-//       resource: "me.json",
-//       params: {
-//         fields: "organisationUnits[id,name,level,leaf]",
-//       },
-//     },
-//     levels: {
-//       resource: "organisationUnitLevels.json",
-//       params: {
-//         fields: "id,level~rename(value),name~rename(label)",
-//       },
-//     },
-//     groups: {
-//       resource: "organisationUnitGroups.json",
-//       params: {
-//         fields: "id~rename(value),name~rename(label)",
-//       },
-//     },
-//   };
-
-//   return useQuery<boolean, Error>(["organisation-units"], async () => {
-//     const organisations = await db.organisations.toArray();
-//     const groups = await db.groups.toArray();
-//     const levels = await db.levels.toArray();
-
-//     if (
-//       organisations.length === 0 ||
-//       groups.length === 0 ||
-//       levels.length === 0
-//     ) {
-//       const {
-//         me: { organisationUnits },
-//         levels: { organisationUnitLevels },
-//         groups: { organisationUnitGroups },
-//       }: any = await engine.query(ouQuery);
-//       const units: DataNode[] = organisationUnits.map((o: any) => {
-//         return {
-//           id: o.id,
-//           pId: "",
-//           key: o.id,
-//           title: o.name,
-//           level: o.level,
-//           isLeaf: o.leaf,
-//         };
-//       });
-//       await db.organisations.bulkPut(units);
-//       await db.groups.bulkPut(organisationUnitGroups);
-//       await db.levels.bulkPut(
-//         organisationUnitLevels.map((x: any) => {
-//           return { ...x, value: String(x.value) };
-//         })
-//       );
-//     }
-
-//     return true;
-// return {
-//   units,
-// levels: ,
-//   groups: organisationUnitGroups,
-// };
-//   });
-// };
 
 export const useInitials = () => {
   const engine = useDataEngine();
@@ -267,81 +205,79 @@ export const useInitials = () => {
         fields: "id~rename(value),name~rename(label)",
       },
     },
+    systemInfo: {
+      resource: "system/info",
+    },
   };
-  return useQuery<any, Error>(["initial"], async ({ signal }) => {
-    const organisations = await db.organisations.toArray();
-    const dbGroups = await db.groups.toArray();
-    const dbLevels = await db.levels.toArray();
-    // const dataSets = await db.dataSets.toArray();
+  return useQuery<any, Error>(
+    ["initial"],
+    async ({ signal }) => {
+      const systemInfo = await db.systemInfo.get("1");
+      // if (!systemInfo) {
+      const {
+        systemInfo: { systemId, systemName, instanceBaseUrl },
+        me: { organisationUnits, authorities },
+        levels: { organisationUnitLevels },
+        groups: { organisationUnitGroups },
+        dataSets: { dataSets },
+      }: any = await engine.query(ouQuery);
 
-    const systemQuery = {
-      systemInfo: {
-        resource: "system/info",
-      },
-    };
-
-    const {
-      systemInfo: { systemId, systemName, instanceBaseUrl },
-    }: any = await engine.query(systemQuery);
-
-    const {
-      me: { organisationUnits, authorities },
-      levels: { organisationUnitLevels },
-      groups: { organisationUnitGroups },
-      dataSets: { dataSets },
-    }: any = await engine.query(ouQuery);
-    setSystemId(systemId);
-    setSystemName(systemName);
-    // setDataSets(dataSets);
-    setInstanceBaseUrl(instanceBaseUrl);
-    const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
-    changeAdministration(isAdmin);
-    const facilities: string[] = organisationUnits.map((unit: any) => unit.id);
-    setOrganisations(facilities);
-    const maxLevel = organisationUnitLevels[0].level;
-    setMaxLevel(maxLevel);
-    const levels = organisationUnits.map(({ value }: any) => Number(value));
-    const minSublevel: number | null | undefined = max(levels);
-    if (minSublevel && minSublevel + 1 <= maxLevel) {
-      setMinSublevel(minSublevel + 1);
-    } else {
-      setMinSublevel(maxLevel);
-    }
-    const availableUnits = organisationUnits.map((unit: any) => {
-      return {
-        id: unit.id,
-        pId: unit.pId || "",
-        value: unit.id,
-        title: unit.name,
-        isLeaf: unit.leaf,
-      };
-    });
-    if (organisations.length === 0) {
+      const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
+      const facilities: string[] = organisationUnits.map(
+        (unit: any) => unit.id
+      );
+      const maxLevel = organisationUnitLevels[0].value;
+      const levels = organisationUnitLevels.map(({ value }: any) => value);
+      const minLevel: number | null | undefined = min(levels);
+      const minSublevel: number | null | undefined = max(levels);
+      const availableUnits = organisationUnits.map((unit: any) => {
+        return {
+          id: unit.id,
+          pId: unit.pId || "",
+          value: unit.id,
+          title: unit.name,
+          key: unit.id,
+          isLeaf: unit.leaf,
+        };
+      });
+      const settings = await loadResource(
+        "i-dashboard-settings",
+        systemId,
+        [],
+        signal
+      );
+      const defaultDashboard = settings.find(
+        (s: any) => s.id === systemId && s.default
+      );
+      if (defaultDashboard) {
+        changeSelectedDashboard(defaultDashboard.default);
+        setDefaultDashboard(defaultDashboard.default);
+      }
+      if (minSublevel && minSublevel + 1 <= maxLevel) {
+        setMinSublevel(minSublevel + 1);
+      } else {
+        setMinSublevel(maxLevel);
+      }
+      setSystemId(systemId);
+      setSystemName(systemName);
+      setDataSets(dataSets);
+      setInstanceBaseUrl(instanceBaseUrl);
+      setOrganisations(facilities);
+      setMaxLevel(maxLevel);
+      changeAdministration(isAdmin);
+      setLevels([minLevel === 1 ? "3" : `${minLevel ? minLevel + 1 : 4}`]);
+      await db.systemInfo.bulkPut([
+        { id: "1", systemId, systemName, instanceBaseUrl },
+      ]);
       await db.organisations.bulkPut(availableUnits);
-    }
-
-    if (dbLevels.length === 0) {
       await db.levels.bulkPut(organisationUnitLevels);
-    }
-    if (dbGroups.length === 0) {
       await db.groups.bulkPut(organisationUnitGroups);
-    }
-    // await db.dataSets.bulkPut(dataSets);
-    const settings = await loadResource(
-      "i-dashboard-settings",
-      systemId,
-      [],
-      signal
-    );
-    const defaultDashboard = settings.find(
-      (s: any) => s.id === systemId && s.default
-    );
-    if (defaultDashboard) {
-      changeSelectedDashboard(defaultDashboard.default);
-      setDefaultDashboard(defaultDashboard.default);
-    }
-    return true;
-  });
+      await db.dataSets.bulkPut(dataSets);
+      // }
+      return true;
+    },
+    {}
+  );
 };
 
 export const useDataSources = (systemId: string) => {
@@ -393,7 +329,7 @@ export const useDashboard = (
         id,
         signal
       );
-      if (!dashboard) {
+      if (isEmpty(dashboard)) {
         dashboard = createDashboard(id);
       } else if (dashboard.targetCategoryCombo) {
         const {
