@@ -48,6 +48,7 @@ import {
 import AutoRefreshPicker from "./AutoRefreshPicker";
 import OUTreeSelect from "./OUTreeSelect";
 import OUTree from "./OUTree";
+import { SettingsIcon } from "@chakra-ui/icons";
 
 const DashboardMenu = () => {
   const search = useSearch<LocationGenerics>();
@@ -193,6 +194,40 @@ const DashboardMenu = () => {
       >
         Filter
       </DropdownButton>
+
+      {store.isAdmin && !isNotDesktop && (
+        <DropdownButton
+          primary
+          component={
+            <Stack
+              w="600px"
+              p="15px"
+              mt="7px"
+              bg="white"
+              boxShadow="2xl"
+              // borderTopRadius="lg"
+              overflow="auto"
+              h="calc(100vh - 170px)"
+            >
+              {/* <DashboardCategorization dataSet={dashboard.dataSet} /> */}
+              <Text>Organisation</Text>
+              <OUTree
+                value={store.organisations}
+                onChange={(value) => setOrganisations(value)}
+              />
+
+              {/* <PeriodPicker
+              selectedPeriods={store.periods}
+              onChange={onChangePeriods}
+            /> */}
+            </Stack>
+          }
+          name="buttonName"
+          value="buttonValue"
+        >
+          Settings
+        </DropdownButton>
+      )}
 
       <Modal isOpen={isOpen} onClose={onClose} size="2xl">
         <ModalOverlay />

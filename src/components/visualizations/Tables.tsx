@@ -1,9 +1,21 @@
-import { Box, Stack, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
+import {
+  Box,
+  Stack,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+  Text,
+} from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { fromPairs } from "lodash";
 import { useElementSize } from "usehooks-ts";
-import { ChartProps } from "../../interfaces";
+import { GroupBase, Select } from "chakra-react-select";
+import { ChartProps, Option } from "../../interfaces";
 import { $store } from "../../Store";
+import { generateUid } from "../../utils/uid";
 
 interface TableProps extends ChartProps {
   category?: string;
@@ -39,69 +51,58 @@ const Tables = ({
         <Box
           position="relative"
           overflow="auto"
-          whiteSpace="nowrap"
+          // whiteSpace="nowrap"
           h={`${height}`}
           w="100%"
         >
           <Table variant="striped" colorScheme="orange" w="100%">
             <Thead>
               <Tr>
-                {/* <Th rowSpan={2}>Key Result Area</Th>
-                <Th rowSpan={2}>Sub Key Result Area</Th>
-                <Th rowSpan={2}>Intervention</Th> */}
-                <Th rowSpan={2}>Indicator</Th>
-                {/* <Th rowSpan={2}>Baseline</Th> */}
+                <Th rowSpan={2} maxW="400px" w="400px">
+                  Indicator
+                </Th>
                 {computeFinancialYears(2020).map((fy) => (
                   <Th colSpan={3} key={fy.value} textAlign="center">
                     {fy.key}
                   </Th>
                 ))}
-                <Th rowSpan={2}>Scores</Th>
-                <Th rowSpan={2}>Overall Performance</Th>
               </Tr>
               <Tr>
-                {computeFinancialYears(2020).map((fy) => (
-                  <>
-                    <Th>Baseline</Th>
-                    <Th>Target</Th>
-                    <Th>Actual</Th>
-                  </>
-                ))}
+                {computeFinancialYears(2020)
+                  .flatMap(() => [
+                    { key: generateUid(), value: "Baseline" },
+                    { key: generateUid(), value: "Target" },
+                    { key: generateUid(), value: "Actual" },
+                  ])
+                  .map(({ key, value }) => (
+                    <Th key={key}>{value}</Th>
+                  ))}
               </Tr>
             </Thead>
             <Tbody>
-              {store.dataElements.map(
-                ({
-                  name,
-                  id,
-                  intervention,
-                  keyResultArea,
-                  subKeyResultArea,
-                }) => (
-                  // <Tr key={id}>
-                  //   <Td>{name}</Td>
-                  // </Tr>
-                  <Tr key={id}>
-                    {/* <Td>{keyResultArea}</Td>
-                    <Td>{subKeyResultArea}</Td>
-                    <Td>{intervention}</Td> */}
-                    <Td>{name}</Td>
-                    {computeFinancialYears(2020).map((fy) => (
-                      <>
-                        <Td>{processed[`${id}${fy.value}bqIaasqpTas`]}</Td>
-                        <Td key={fy.value} textAlign="center">
-                          {processed[`${id}${fy.value}Px8Lqkxy2si`]}
-                        </Td>
-                        <Td key={fy.key} textAlign="center">
-                          {processed[`${id}${fy.value}HKtncMjp06U`]}
-                        </Td>
-                      </>
+              {store.dataElements.map(({ name, id }) => (
+                <Tr key={id}>
+                  <Td>{name}</Td>
+                  {computeFinancialYears(2020)
+                    .flatMap((fy) => [
+                      {
+                        key: generateUid(),
+                        value: processed[`${id}${fy.value}bqIaasqpTas`],
+                      },
+                      {
+                        key: generateUid(),
+                        value: processed[`${id}${fy.value}Px8Lqkxy2si`],
+                      },
+                      {
+                        key: generateUid(),
+                        value: processed[`${id}${fy.value}HKtncMjp06U`],
+                      },
+                    ])
+                    .map(({ key, value }) => (
+                      <Td key={`${id}${key}`}>{value}</Td>
                     ))}
-                    <Td></Td>
-                    <Td></Td>
-                  </Tr>
-                )
-              )}
+                </Tr>
+              ))}
             </Tbody>
           </Table>
         </Box>
