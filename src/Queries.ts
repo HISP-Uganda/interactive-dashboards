@@ -3,6 +3,7 @@ import axios, { AxiosRequestConfig } from "axios";
 import { fromPairs, isEmpty, max, min, uniq } from "lodash";
 import { evaluate } from "mathjs";
 import { useQuery } from "@tanstack/react-query";
+
 import {
   addPagination,
   changeAdministration,
