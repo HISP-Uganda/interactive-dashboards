@@ -208,6 +208,11 @@ export const useInitials = () => {
     systemInfo: {
       resource: "system/info",
     },
+
+    dataElementGroupSets: {
+      resource:
+        "dataElementGroupSets.json?filter=attributeValues.attribute.id:eq:MeGs34GOrPw&fields=dataElementGroups[id,name,code,dataElements[id,code,name,dataElementGroups[id,groupSets[id,attributeValues[value,attribute[id,name]]]]]],id,code,name,attributeValues[attribute[id,name],value]",
+    },
   };
   return useQuery<any, Error>(
     ["initial"],
@@ -220,8 +225,56 @@ export const useInitials = () => {
         levels: { organisationUnitLevels },
         groups: { organisationUnitGroups },
         dataSets: { dataSets },
+        dataElementGroupSets: { dataElementGroupSets },
       }: any = await engine.query(ouQuery);
-
+      console.log(dataElementGroupSets);
+      const processedGroupSets = dataElementGroupSets.flatMap(
+        ({ dataElementGroups, attributeValues }: any) => {
+          const themeAttribute = attributeValues.find(
+            (a: any) => a.attribute.id === "MeGs34GOrPw"
+          );
+          return dataElementGroups.flatMap(
+            ({ code: degCode, name: degName, dataElements }: any) => {
+              return dataElements.map(
+                ({ id, name, code, dataElementGroups }: any) => {
+                  let programCode = "";
+                  const program = dataElementGroups.find(
+                    ({ id }: any) => id === "OsfAXDfjEHp"
+                  );
+                  if (program) {
+                    const groupSet = program.groupSets.find(
+                      ({ id }: any) => id === "PeN6InXuGmD"
+                    );
+                    if (groupSet) {
+                      const attribute = groupSet.attributeValues.find(
+                        ({ attribute }: any) => attribute.id === "UBWSASWdyfi"
+                      );
+                      if (attribute) {
+                        programCode = attribute.value;
+                      }
+                    }
+                  }
+                  return {
+                    id,
+                    name,
+                    code,
+                    intervention: degName,
+                    interventionCode: degCode,
+                    subKeyResultArea: name,
+                    subKeyResultAreaCode: code,
+                    keyResultArea: name,
+                    keyResultAreaCode: code,
+                    themeCode: themeAttribute?.value || "",
+                    theme: "",
+                    program: "",
+                    programCode,
+                  };
+                }
+              );
+            }
+          );
+        }
+      );
       const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
       const facilities: string[] = organisationUnits.map(
         (unit: any) => unit.id
@@ -266,6 +319,33 @@ export const useInitials = () => {
       setMaxLevel(maxLevel);
       changeAdministration(isAdmin);
       setLevels([minLevel === 1 ? "3" : `${minLevel ? minLevel + 1 : 4}`]);
+      updateVisualizationData({
+        visualizationId: "keyResultAreas",
+        data: [
+          {
+            value: uniq(processedGroupSets.map((e: any) => e.keyResultAreaCode))
+              .length,
+          },
+        ],
+      });
+      updateVisualizationData({
+        visualizationId: "indicators",
+        data: [{ value: processedGroupSets.length }],
+      });
+      updateVisualizationData({
+        visualizationId: "interventions",
+        data: [
+          {
+            value: uniq(processedGroupSets.map((e: any) => e.interventionCode))
+              .length,
+          },
+        ],
+      });
+      updateVisualizationData({
+        visualizationId: "outputs",
+        data: [{ value: 0 }],
+      });
+
       await db.systemInfo.bulkPut([
         { id: "1", systemId, systemName, instanceBaseUrl },
       ]);
@@ -273,6 +353,7 @@ export const useInitials = () => {
       await db.levels.bulkPut(organisationUnitLevels);
       await db.groups.bulkPut(organisationUnitGroups);
       await db.dataSets.bulkPut(dataSets);
+      await db.dataElements.bulkPut(processedGroupSets);
       // }
       return true;
     },
@@ -308,7 +389,23 @@ export const useDataSource = (id: string) => {
 export const useDashboards = (systemId: string) => {
   return useQuery<IDashboard[], Error>(["i-dashboards"], async ({ signal }) => {
     try {
-      return await getIndex("i-dashboards", systemId, [], signal);
+      const dashboards = await getIndex("i-dashboards", systemId, [], signal);
+      const processed = dashboards.map((d: any) => {
+        const node: DataNode = {
+          isLeaf: !d.hasChildren,
+          id: d.id,
+          pId: "",
+          key: d.id,
+          style: { margin: "5px" },
+          title: d.name || "",
+          checkable: false,
+          nodeSource: d.nodeSource,
+          hasChildren: d.hasChildren,
+        };
+        return node;
+      });
+      db.dashboards.bulkPut(processed);
+      return dashboards;
     } catch (error) {
       console.error(error);
       return [];

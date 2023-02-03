@@ -120,7 +120,7 @@ export interface IDashboard extends INamed {
   targetCategoryCombo: string;
   targetCategoryOptionCombos: any[];
   hasChildren?: boolean;
-  resource: "";
+  nodeSource?: { resource: string; fields?: string };
 }
 export interface Pagination {
   total: number;
@@ -132,8 +132,12 @@ export interface DataNode extends IDataNode {
   // key: string;
   // isLeaf?: boolean;
   // level?: string;
+  id?: string;
+  value?: string;
   pId: string;
   children?: DataNode[];
+  nodeSource?: { resource: string; fields?: string };
+  hasChildren?: boolean;
 }
 
 export interface Option extends OptionBase {
@@ -177,6 +181,7 @@ export interface IStore {
   refresh: boolean;
   themes: string[];
   dataElements: IDataElement[];
+  version: string;
 }
 
 export type IndicatorProps = {
@@ -251,6 +256,9 @@ export interface IDataElement {
   keyResultArea: string;
   keyResultAreaCode: string;
   theme: string;
+  themeCode: string;
+  programCode: string;
+  program: string;
 }
 
 export interface IExpanded {

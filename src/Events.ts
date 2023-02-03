@@ -169,6 +169,16 @@ export const assignDataSet = domain.createEvent<string>();
 export const setCategorization = domain.createEvent<{
   [key: string]: any[];
 }>();
+
+export const setHasChildren = domain.createEvent<boolean | undefined>();
+export const setNodeSource = domain.createEvent<
+  | {
+      resource: string;
+      fields?: string;
+    }
+  | undefined
+>();
+export const setVersion = domain.createEvent<string>();
 export const setAvailableCategories = domain.createEvent<any[]>();
 export const setAvailableCategoryOptionCombos = domain.createEvent<any[]>();
 export const setTargetCategoryOptionCombos = domain.createEvent<any[]>();
