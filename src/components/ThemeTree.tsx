@@ -1,16 +1,16 @@
 import { Spinner, Stack, Text } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
-import { TreeSelect, Tree } from "antd";
+import { Tree } from "antd";
+import arrayToTree from "array-to-tree";
 import { useLiveQuery } from "dexie-react-hooks";
+import { useStore } from "effector-react";
 import { uniqBy } from "lodash";
 import React, { useState } from "react";
-import arrayToTree from "array-to-tree";
 import { db } from "../db";
+import { setDataElements, setThemes } from "../Events";
 import { DataNode } from "../interfaces";
 import { useTheme } from "../Queries";
-import { useStore } from "effector-react";
 import { $store } from "../Store";
-import { setThemes, setDataElements } from "../Events";
 
 function TreeObject() {
   const treeData = useLiveQuery(() => db.themes.toArray());
@@ -176,7 +176,6 @@ function TreeObject() {
       onSelect={onSelect}
       selectedKeys={selectedKeys}
       loadData={onLoadData}
-      blockNode
       style={{
         backgroundColor: "#ebf8ff",
         maxHeight: "500px",

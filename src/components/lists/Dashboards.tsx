@@ -22,12 +22,14 @@ import {
   setCurrentDashboard,
   setDashboards,
   setRefresh,
+  setDataElements,
 } from "../../Events";
 import { IDashboard } from "../../interfaces";
 import { useDashboards } from "../../Queries";
 import { $dashboards, $store, createDashboard } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import { generalPadding, otherHeight } from "../constants";
+import { db } from "../../db";
 
 const Dashboards = () => {
   const navigate = useNavigate();
@@ -87,7 +89,7 @@ const Dashboards = () => {
                 <Tr
                   key={dashboard.id}
                   cursor="pointer"
-                  onClick={() => {
+                  onClick={async () => {
                     setCurrentDashboard(dashboard);
                     changeSelectedDashboard(dashboard.id);
                     changeSelectedCategory(dashboard.category || "");
@@ -102,6 +104,8 @@ const Dashboards = () => {
                         levels: store.levels.join("-"),
                       },
                     });
+                    const elements = await db.dataElements.toArray();
+                    setDataElements(elements);
                   }}
                 >
                   <Td>{dashboard.name}</Td>

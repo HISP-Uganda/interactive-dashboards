@@ -31,7 +31,7 @@ export default function DashboardList() {
         //       return <NavItem option={value} key={value.value} />;
         //     })}
         // </Stack>
-        <DashboardTree dashboards={data || []} />
+        <DashboardTree />
       )}
 
       {isError && <Text>No data/Error occurred</Text>}

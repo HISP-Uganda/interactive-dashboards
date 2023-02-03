@@ -16,6 +16,7 @@ import {
   Textarea,
   useDisclosure,
   useMediaQuery,
+  useToast,
 } from "@chakra-ui/react";
 import { DropdownButton } from "@dhis2/ui";
 import { useNavigate, useSearch } from "@tanstack/react-location";
@@ -34,6 +35,9 @@ import {
   setDefaultDashboard,
   setOrganisations,
   setRefresh,
+  setHasChildren,
+  setNodeSource,
+  setVersion,
 } from "../Events";
 import { IDashboard, Item, LocationGenerics, Option } from "../interfaces";
 import { saveDocument } from "../Queries";
@@ -46,12 +50,14 @@ import {
   createSection,
 } from "../Store";
 import AutoRefreshPicker from "./AutoRefreshPicker";
-import OUTreeSelect from "./OUTreeSelect";
 import OUTree from "./OUTree";
-import { SettingsIcon } from "@chakra-ui/icons";
+import { db } from "../db";
+import { generateUid } from "../utils/uid";
 
 const DashboardMenu = () => {
   const search = useSearch<LocationGenerics>();
+  const toast = useToast();
+
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
   const dashboards = useStore($dashboards);
@@ -94,6 +100,14 @@ const DashboardMenu = () => {
     changePeriods(periods);
   };
 
+  const changeNodeSource = (value: string, field: "resource" | "fields") => {
+    setNodeSource({
+      resource: dashboard.nodeSource?.resource || "",
+      fields: dashboard.nodeSource?.fields,
+      [field]: value,
+    });
+  };
+
   return (
     <Stack
       direction="row"
@@ -112,26 +126,6 @@ const DashboardMenu = () => {
         noOfLines={1}
       >{`${dashboard.name} Dashboard`}</Text>
       <Spacer />
-      {store.isAdmin && !isNotDesktop && (
-        <Stack
-          direction="row"
-          alignContent="center"
-          alignItems="center"
-          w="250px"
-        >
-          <Text>Category</Text>
-          <Box flex={1}>
-            <Select<Option, false, GroupBase<Option>>
-              options={dataSets}
-              value={dataSets.find(
-                (d: Option) => d.value === dashboard.dataSet
-              )}
-              onChange={(e) => assignDataSet(e?.value || "")}
-              size="sm"
-            />
-          </Box>
-        </Stack>
-      )}
       {store.isAdmin && !isNotDesktop && (
         <>
           <Button
@@ -172,7 +166,6 @@ const DashboardMenu = () => {
             mt="7px"
             bg="white"
             boxShadow="2xl"
-            // borderTopRadius="lg"
             overflow="auto"
             h="calc(100vh - 170px)"
           >
@@ -200,26 +193,83 @@ const DashboardMenu = () => {
           primary
           component={
             <Stack
-              w="600px"
+              w="400px"
               p="15px"
               mt="7px"
               bg="white"
               boxShadow="2xl"
+              spacing="20px"
               // borderTopRadius="lg"
               overflow="auto"
-              h="calc(100vh - 170px)"
             >
-              {/* <DashboardCategorization dataSet={dashboard.dataSet} /> */}
-              <Text>Organisation</Text>
-              <OUTree
-                value={store.organisations}
-                onChange={(value) => setOrganisations(value)}
-              />
-
-              {/* <PeriodPicker
-              selectedPeriods={store.periods}
-              onChange={onChangePeriods}
-            /> */}
+              <Stack>
+                <Text>Category</Text>
+                <Box flex={1}>
+                  <Select<Option, false, GroupBase<Option>>
+                    options={dataSets}
+                    value={dataSets.find(
+                      (d: Option) => d.value === dashboard.dataSet
+                    )}
+                    onChange={(e) => assignDataSet(e?.value || "")}
+                    size="sm"
+                  />
+                </Box>
+              </Stack>
+              <Checkbox
+                onChange={async (e: ChangeEvent<HTMLInputElement>) => {
+                  e.persist();
+                  setHasChildren(e.target.checked);
+                }}
+                isChecked={dashboard.hasChildren}
+              >
+                Has Children
+              </Checkbox>
+              <Stack>
+                <Text>Node Source</Text>
+                <Input
+                  value={dashboard.nodeSource?.resource || ""}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    changeNodeSource(e.target.value, "resource")
+                  }
+                />
+              </Stack>
+              <Stack>
+                <Text>Fields</Text>
+                <Input
+                  value={dashboard.nodeSource?.fields || ""}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    changeNodeSource(e.target.value, "fields")
+                  }
+                />
+              </Stack>
+              <Button
+                onClick={async () => {
+                  console.log(dashboard.nodeSource);
+                  await db.dashboards.bulkPut([
+                    {
+                      isLeaf: !dashboard.hasChildren,
+                      pId: "",
+                      key: dashboard.id,
+                      style: { margin: "5px" },
+                      title: dashboard.name || "",
+                      checkable: false,
+                      nodeSource: dashboard.nodeSource,
+                      hasChildren: dashboard.hasChildren,
+                    },
+                  ]);
+                  setVersion(generateUid());
+                  await updateDashboard(dashboard);
+                  toast({
+                    title: "Dashboard.",
+                    description: "Dashboard saved successfully",
+                    status: "success",
+                    duration: 9000,
+                    isClosable: true,
+                  });
+                }}
+              >
+                Update
+              </Button>
             </Stack>
           }
           name="buttonName"
