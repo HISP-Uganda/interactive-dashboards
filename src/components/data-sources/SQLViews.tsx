@@ -30,7 +30,8 @@ const SQLViews = ({ denNum, onChange, changeQuery }: IndicatorProps) => {
               onChange({
                 id: e?.value || "",
                 type: "dimension",
-                what: "v",
+                resource: "v",
+                dimension: "",
                 replace: true,
               });
               if (changeQuery) {

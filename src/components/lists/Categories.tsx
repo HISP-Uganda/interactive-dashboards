@@ -70,7 +70,7 @@ const Categories = () => {
       >
         {isLoading && <Spinner />}
         {isSuccess && (
-          <Table variant="simple" w="100%">
+          <Table variant="striped" w="100%">
             <Thead>
               <Tr>
                 <Th>Name</Th>

@@ -11,6 +11,10 @@ import {
   IVisualization,
   Option,
   IDataElement,
+  IRow,
+  IColumn,
+  IndicatorProps,
+  Dimension,
 } from "./interfaces";
 
 export const loadDefaults = domain.createEvent<{
@@ -72,23 +76,9 @@ export const changeNumeratorAttribute =
 export const changeDenominatorAttribute =
   domain.createEvent<DataValueAttribute>();
 
-export const changeNumeratorDimension = domain.createEvent<{
-  id: string;
-  what: string;
-  type: string;
-  remove?: boolean;
-  replace?: boolean;
-  label?: string;
-}>();
+export const changeNumeratorDimension = domain.createEvent<Dimension>();
 
-export const changeDenominatorDimension = domain.createEvent<{
-  id: string;
-  what: string;
-  type: string;
-  remove?: boolean;
-  replace?: boolean;
-  label?: string;
-}>();
+export const changeDenominatorDimension = domain.createEvent<Dimension>();
 
 export const changeUseIndicators = domain.createEvent<boolean>();
 export const setVisualizationQueries = domain.createEvent<IIndicator[]>();
@@ -171,15 +161,17 @@ export const setCategorization = domain.createEvent<{
 }>();
 
 export const setHasChildren = domain.createEvent<boolean | undefined>();
-export const setNodeSource = domain.createEvent<
-  | {
-      resource: string;
-      fields?: string;
-    }
-  | undefined
->();
+export const setNodeSource = domain.createEvent<{
+  field: string;
+  value: string;
+}>();
 export const setVersion = domain.createEvent<string>();
 export const setAvailableCategories = domain.createEvent<any[]>();
+export const setRows = domain.createEvent<any[]>();
+export const setColumns = domain.createEvent<any[]>();
+export const setOriginalColumns = domain.createEvent<any[]>();
+export const setSections = domain.createEvent<ISection[]>();
+export const setVisualizations = domain.createEvent<IVisualization[]>();
 export const setAvailableCategoryOptionCombos = domain.createEvent<any[]>();
 export const setTargetCategoryOptionCombos = domain.createEvent<any[]>();
 export const setSystemId = domain.createEvent<string>();
@@ -199,3 +191,6 @@ export const setMaxLevel = domain.createEvent<number>();
 export const setIsNotDesktop = domain.createEvent<boolean>();
 export const setIsFullScreen = domain.createEvent<boolean>();
 export const setRefresh = domain.createEvent<boolean>();
+
+export const setDataElementGroups = domain.createEvent<string[]>();
+export const setDataElementGroupSets = domain.createEvent<string[]>();

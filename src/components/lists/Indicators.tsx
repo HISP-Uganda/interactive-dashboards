@@ -116,7 +116,7 @@ const Indicators = () => {
         {isLoading && <Spinner />}
         {isSuccess && (
           <Stack spacing="10px" w="100%">
-            <Table variant="simple">
+            <Table variant="striped">
               <Thead>
                 <Tr>
                   <Th>Name</Th>

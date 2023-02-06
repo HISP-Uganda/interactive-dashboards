@@ -28,21 +28,21 @@ import { useIndicators } from "../../Queries";
 import { $paginations } from "../../Store";
 import { globalIds } from "../../utils/utils";
 import GlobalAndFilter from "./GlobalAndFilter";
+import GlobalSearchFilter from "./GlobalSearchFilter";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
 const Indicators = ({ denNum, onChange }: IndicatorProps) => {
-  const [dimension, setDimension] = useState<"filter" | "dimension">(
-    "dimension"
-  );
+  const [type, setType] = useState<"filter" | "dimension">("dimension");
+
   const selected = Object.entries(denNum?.dataDimensions || {})
-    .filter(([k, { what }]) => what === "i")
+    .filter(([k, { resource }]) => resource === "i")
     .map(([key]) => {
       return key;
     });
   const [useGlobal, setUseGlobal] = useState<boolean>(
-    () => selected.indexOf("GQhi6pRnTKF") !== -1
+    () => selected.indexOf("JRDOr08JWSW") !== -1
   );
   const [q, setQ] = useState<string>("");
   const paginations = useStore($paginations);
@@ -69,8 +69,8 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
 
   const selectedIndicators = Object.entries(
     denNum?.dataDimensions || {}
-  ).flatMap(([i, { what }]) => {
-    if (what === "i") {
+  ).flatMap(([i, { resource }]) => {
+    if (resource === "i") {
       return i;
     }
     return [];
@@ -89,23 +89,19 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
 
   return (
     <Stack spacing="30px">
-      <GlobalAndFilter
+      <GlobalSearchFilter
         denNum={denNum}
-        dimension={dimension}
-        setDimension={setDimension}
+        dimension="dx"
+        setType={setType}
         useGlobal={useGlobal}
         setUseGlobal={setUseGlobal}
-        hasGlobalFilter={true}
-        type="i"
+        resource="i"
+        type={type}
         onChange={onChange}
+        setQ={setQ}
+        q={q}
         id={globalIds[2].value}
       />
-      {!useGlobal && (
-        <Input
-          value={q}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setQ(e.target.value)}
-        />
-      )}
       {isLoading && (
         <Flex w="100%" alignItems="center" justifyContent="center">
           <Spinner />
@@ -139,14 +135,16 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
                       if (e.target.checked) {
                         onChange({
                           id: record.id,
-                          type: dimension,
-                          what: "i",
+                          type,
+                          dimension: "dx",
+                          resource: "i",
                         });
                       } else {
                         onChange({
                           id: record.id,
-                          type: dimension,
-                          what: "i",
+                          type,
+                          dimension: "dx",
+                          resource: "i",
                           remove: true,
                         });
                       }

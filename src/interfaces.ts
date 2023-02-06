@@ -9,8 +9,24 @@ export interface Image {
   src: string;
   alignment: string;
 }
+
+export interface IColumn {
+  title: string;
+  id: string;
+}
+
+export interface IRow {
+  title: string;
+  id: string;
+}
 export interface DataValueAttribute {
-  attribute: "name" | "description" | "type" | "query" | "accessor";
+  attribute:
+    | "name"
+    | "description"
+    | "dimension"
+    | "query"
+    | "accessor"
+    | "resource";
   value: any;
 }
 export interface INamed {
@@ -34,14 +50,20 @@ export interface IDataSource extends INamed {
   authentication: Authentication;
   isCurrentDHIS2: boolean;
 }
-
+export type Dimension = {
+  id: string;
+  dimension: string;
+  remove?: boolean;
+  replace?: boolean;
+  label?: string;
+  prefix?: string;
+  suffix?: string;
+  type: string;
+  resource: string;
+};
 export interface ICategory extends INamed {}
 export interface IDimension {
-  [key: string]: {
-    type: string;
-    what: string;
-    label?: string;
-  };
+  [key: string]: Dimension;
 }
 export interface IData extends INamed {
   query?: string;
@@ -71,6 +93,7 @@ export interface IVisualization extends INamed {
   group: string;
   expression?: string;
   showTitle?: boolean;
+  bg: string;
 }
 export interface ISection {
   id: string;
@@ -96,6 +119,7 @@ export interface ISection {
   isBottomSection: boolean;
   bg: string;
   height: string;
+  headerBg: string;
 }
 
 export interface IFilter {}
@@ -120,7 +144,12 @@ export interface IDashboard extends INamed {
   targetCategoryCombo: string;
   targetCategoryOptionCombos: any[];
   hasChildren?: boolean;
-  nodeSource?: { resource: string; fields?: string };
+  nodeSource: Partial<{
+    resource: string;
+    fields: string;
+    search: string;
+    subSearch: string;
+  }>;
 }
 export interface Pagination {
   total: number;
@@ -136,7 +165,12 @@ export interface DataNode extends IDataNode {
   value?: string;
   pId: string;
   children?: DataNode[];
-  nodeSource?: { resource: string; fields?: string };
+  nodeSource: Partial<{
+    resource: string;
+    fields: string;
+    search: string;
+    subSearch: string;
+  }>;
   hasChildren?: boolean;
 }
 
@@ -181,19 +215,17 @@ export interface IStore {
   refresh: boolean;
   themes: string[];
   dataElements: IDataElement[];
+  rows: any[];
+  columns: any[];
+  originalColumns: any[];
   version: string;
+  dataElementGroups: string[];
+  dataElementGroupSets: string[];
 }
 
 export type IndicatorProps = {
   denNum?: IData;
-  onChange: Event<{
-    id: string;
-    what: string;
-    type: string;
-    remove?: boolean;
-    replace?: boolean;
-    label?: string;
-  }>;
+  onChange: Event<Dimension>;
   dataSourceType?: string;
   changeQuery?: Event<DataValueAttribute>;
 };
@@ -259,6 +291,10 @@ export interface IDataElement {
   themeCode: string;
   programCode: string;
   program: string;
+  degsId: string;
+  degsName: string;
+  degsCode: string;
+  degId: string;
 }
 
 export interface IExpanded {
@@ -272,3 +308,5 @@ export interface SystemInfo {
   systemName: string;
   instanceBaseUrl: string;
 }
+
+export interface DexieStore {}

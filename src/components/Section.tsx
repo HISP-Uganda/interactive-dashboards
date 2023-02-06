@@ -21,7 +21,7 @@ import {
 } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState, DragEvent, useRef } from "react";
 import { BiDuplicate } from "react-icons/bi";
 import {
   addVisualization2Section,
@@ -32,6 +32,7 @@ import {
   deleteSectionVisualization,
   duplicateVisualization,
   setShowSider,
+  setVisualizations,
 } from "../Events";
 import { IVisualization, Option } from "../interfaces";
 import { useVisualizationData } from "../Queries";
@@ -248,6 +249,36 @@ const Section = () => {
     setShowSider(false);
   }, []);
 
+  const dragItem = useRef<number | undefined | null>();
+  const dragOverItem = useRef<number | null>();
+  const dragStart = (e: DragEvent<HTMLButtonElement>, position: number) => {
+    dragItem.current = position;
+    console.log(position);
+  };
+
+  const dragEnter = (e: DragEvent<HTMLButtonElement>, position: number) => {
+    dragOverItem.current = position;
+    console.log(position);
+  };
+
+  const drop = (e: DragEvent<HTMLButtonElement>) => {
+    const copyListItems = [...section.visualizations];
+
+    if (
+      dragItem.current !== null &&
+      dragItem.current !== undefined &&
+      dragOverItem.current !== null &&
+      dragOverItem.current !== undefined
+    ) {
+      const dragItemContent = copyListItems[dragItem.current];
+      copyListItems.splice(dragItem.current, 1);
+      copyListItems.splice(dragOverItem.current, 0, dragItemContent);
+      dragItem.current = null;
+      dragOverItem.current = null;
+      setVisualizations(copyListItems);
+    }
+  };
+
   return (
     <Grid
       templateColumns="1fr 30%"
@@ -279,8 +310,13 @@ const Section = () => {
           >
             Section options
           </Button>
-          {section.visualizations.map((visualization) => (
+          {section.visualizations.map((visualization, index) => (
             <Button
+              draggable
+              onDragStart={(e) => dragStart(e, index)}
+              onDragEnter={(e) => dragEnter(e, index)}
+              onDragOver={(e) => e.preventDefault()}
+              onDragEnd={drop}
               size="sm"
               variant="outline"
               key={visualization.id}
@@ -434,7 +470,7 @@ const Section = () => {
               visualization.id === active && (
                 <Stack
                   key={visualization.id}
-                  bgColor="white"
+                  bgColor={visualization.bg}
                   overflow="auto"
                   flex={1}
                 >

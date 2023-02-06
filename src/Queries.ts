@@ -1,8 +1,9 @@
 import { useDataEngine } from "@dhis2/app-runtime";
 import axios, { AxiosRequestConfig } from "axios";
-import { fromPairs, isEmpty, max, min, uniq } from "lodash";
+import { fromPairs, isEmpty, max, min, uniq, groupBy } from "lodash";
 import { evaluate } from "mathjs";
 import { useQuery } from "@tanstack/react-query";
+
 import {
   addPagination,
   changeAdministration,
@@ -33,6 +34,9 @@ import {
   updateVisualizationMetadata,
   setOrganisations,
   setLevels,
+  setDataElementGroupSets,
+  setDataElementGroups,
+  setDataElements,
 } from "./Events";
 import {
   DataNode,
@@ -227,14 +231,24 @@ export const useInitials = () => {
         dataSets: { dataSets },
         dataElementGroupSets: { dataElementGroupSets },
       }: any = await engine.query(ouQuery);
-      console.log(dataElementGroupSets);
       const processedGroupSets = dataElementGroupSets.flatMap(
-        ({ dataElementGroups, attributeValues }: any) => {
+        ({
+          dataElementGroups,
+          attributeValues,
+          id: degsId,
+          code: degsCode,
+          name: degsName,
+        }: any) => {
           const themeAttribute = attributeValues.find(
             (a: any) => a.attribute.id === "MeGs34GOrPw"
           );
           return dataElementGroups.flatMap(
-            ({ code: degCode, name: degName, dataElements }: any) => {
+            ({
+              code: degCode,
+              name: degName,
+              dataElements,
+              id: degId,
+            }: any) => {
               return dataElements.map(
                 ({ id, name, code, dataElementGroups }: any) => {
                   let programCode = "";
@@ -262,12 +276,16 @@ export const useInitials = () => {
                     interventionCode: degCode,
                     subKeyResultArea: name,
                     subKeyResultAreaCode: code,
+                    degId,
                     keyResultArea: name,
                     keyResultAreaCode: code,
                     themeCode: themeAttribute?.value || "",
                     theme: "",
                     program: "",
                     programCode,
+                    degsId,
+                    degsName,
+                    degsCode,
                   };
                 }
               );
@@ -462,6 +480,25 @@ export const useDashboard = (
       changeSelectedDashboard(dashboard.id);
       changeSelectedCategory(dashboard.category || "");
       setVisualizationQueries(queries);
+
+      if (
+        dashboard.nodeSource &&
+        dashboard.nodeSource.search &&
+        dashboard.nodeSource.search === "deg"
+      ) {
+        const data = await db.dataElements.toArray();
+        const dataElementGroups = uniq(data.map(({ degId }) => degId));
+        setDataElementGroups(dataElementGroups);
+      }
+      if (
+        dashboard.nodeSource &&
+        dashboard.nodeSource.search &&
+        dashboard.nodeSource.search === "degs"
+      ) {
+        const data = await db.dataElements.toArray();
+        const dataElementGroupSets = uniq(data.map(({ degsId }) => degsId));
+        setDataElementGroupSets(dataElementGroupSets);
+      }
     }
     return true;
   });
@@ -537,7 +574,6 @@ export const useVisualizationDatum = (id: string, systemId: string) => {
 };
 
 export const useDataSet = (dataSetId: string) => {
-  console.log(dataSetId);
   const engine = useDataEngine();
   const namespaceQuery = {
     dataSet: {
@@ -574,6 +610,25 @@ export const useDataSet = (dataSetId: string) => {
   );
 };
 
+export const useDimensions = () => {
+  const engine = useDataEngine();
+  const namespaceQuery = {
+    dimensions: {
+      resource: `dimensions.json`,
+      params: {
+        fields: "id,name,items[id,name]",
+        paging: "false",
+      },
+    },
+  };
+  return useQuery<any[], Error>(["dimensions"], async () => {
+    const {
+      dimensions: { dimensions },
+    }: any = await engine.query(namespaceQuery);
+    return dimensions;
+  });
+};
+
 export const useDataElements = (page: number, pageSize: number, q = "") => {
   const engine = useDataEngine();
   let params: { [key: string]: any } = {
@@ -606,6 +661,86 @@ export const useDataElements = (page: number, pageSize: number, q = "") => {
       }: any = await engine.query(namespaceQuery);
       addPagination({ totalDataElements });
       return dataElements;
+    }
+  );
+};
+
+export const useDataElementGroups = (
+  page: number,
+  pageSize: number,
+  q = ""
+) => {
+  const engine = useDataEngine();
+  let params: { [key: string]: any } = {
+    page,
+    pageSize,
+    fields: "id,name",
+    order: "name:ASC",
+  };
+
+  if (q) {
+    params = {
+      ...params,
+      filter: `identifiable:token:${q}`,
+    };
+  }
+  const namespaceQuery = {
+    elements: {
+      resource: "dataElementGroups.json",
+      params,
+    },
+  };
+  return useQuery<{ id: string; name: string }[], Error>(
+    ["data-element-groups", page, pageSize, q],
+    async () => {
+      const {
+        elements: {
+          dataElementGroups,
+          pager: { total: totalDataElementGroups },
+        },
+      }: any = await engine.query(namespaceQuery);
+      addPagination({ totalDataElementGroups });
+      return dataElementGroups;
+    }
+  );
+};
+
+export const useDataElementGroupSets = (
+  page: number,
+  pageSize: number,
+  q = ""
+) => {
+  const engine = useDataEngine();
+  let params: { [key: string]: any } = {
+    page,
+    pageSize,
+    fields: "id,name",
+    order: "name:ASC",
+  };
+
+  if (q) {
+    params = {
+      ...params,
+      filter: `identifiable:token:${q}`,
+    };
+  }
+  const namespaceQuery = {
+    elements: {
+      resource: "dataElementGroupSets.json",
+      params,
+    },
+  };
+  return useQuery<{ id: string; name: string }[], Error>(
+    ["data-element-group-sets", page, pageSize, q],
+    async () => {
+      const {
+        elements: {
+          dataElementGroupSets,
+          pager: { total: totalDataElementGroupSets },
+        },
+      }: any = await engine.query(namespaceQuery);
+      addPagination({ totalDataElementGroupSets });
+      return dataElementGroupSets;
     }
   );
 };
@@ -750,6 +885,41 @@ export const useOrganisationUnitGroups = (
   );
 };
 
+export const useOrganisationUnitGroupSets = (
+  page: number,
+  pageSize: number,
+  q = ""
+) => {
+  const engine = useDataEngine();
+  let params: { [key: string]: any } = {
+    page,
+    pageSize,
+    fields: "id,name",
+  };
+  if (q) {
+    params = { ...params, filter: `identifiable:token:${q}` };
+  }
+  const query = {
+    elements: {
+      resource: "organisationUnitGroupSets.json",
+      params,
+    },
+  };
+  return useQuery<{ id: string; name: string }[], Error>(
+    ["organisation-unit-group-sets", page, pageSize],
+    async () => {
+      const {
+        elements: {
+          organisationUnitGroupSets,
+          pager: { total: totalOrganisationUnitGroupSets },
+        },
+      }: any = await engine.query(query);
+      addPagination({ totalOrganisationUnitGroupSets });
+      return organisationUnitGroupSets;
+    }
+  );
+};
+
 export const useOrganisationUnitLevels = (
   page: number,
   pageSize: number,
@@ -785,23 +955,34 @@ export const useOrganisationUnitLevels = (
   );
 };
 
-const findDimension = (dimension: IDimension, t: string, w: string) => {
-  return Object.entries(dimension)
-    .filter(([key, { what, type }]) => type === t && what === w)
-    .map(([key]) => key)
-    .join(";");
+const prefixes: { [key: string]: string } = {
+  deg: "DE_GROUP-",
 };
-
-const findDimension2 = (
+const findDimension = (
   dimension: IDimension,
-  t: string,
-  w: string,
-  joiner: string
+  globalFilters: { [key: string]: any } = {}
 ) => {
-  return Object.entries(dimension)
-    .filter(([key, { what, type }]) => type === t && what === w)
-    .map(([key]) => `${joiner}${key}`)
-    .join(";");
+  return Object.entries(dimension).map(
+    ([key, { resource, type, dimension, prefix }]) => {
+      const globalValue = globalFilters[key];
+      if (globalValue) {
+        return {
+          resource,
+          type,
+          dimension,
+          value: globalValue
+            .map((a: any) => `${prefixes[resource] || ""}${a}`)
+            .join(";"),
+        };
+      }
+      return {
+        resource,
+        type,
+        dimension,
+        value: prefix ? `${prefixes[resource] || ""}${key}` : key,
+      };
+    }
+  );
 };
 
 export const findLevelsAndOus = (indicator: IIndicator | undefined) => {
@@ -812,10 +993,10 @@ export const findLevelsAndOus = (indicator: IIndicator | undefined) => {
     const numExpressions = indicator.numerator?.expressions || {};
     const ous = uniq([
       ...Object.entries(denDimensions)
-        .filter(([key, { what }]) => what === "ou")
+        .filter(([key, { resource }]) => resource === "ou")
         .map(([key]) => key),
       ...Object.entries(numDimensions)
-        .filter(([_, { what }]) => what === "ou")
+        .filter(([_, { resource }]) => resource === "ou")
         .map(([key]) => key),
       ...Object.entries(denExpressions)
         .filter(([key]) => key === "ou")
@@ -826,10 +1007,10 @@ export const findLevelsAndOus = (indicator: IIndicator | undefined) => {
     ]);
     const levels = uniq([
       ...Object.entries(denDimensions)
-        .filter(([key, { what }]) => what === "oul")
+        .filter(([key, { resource }]) => resource === "oul")
         .map(([key]) => key),
       ...Object.entries(numDimensions)
-        .filter(([_, { what }]) => what === "oul")
+        .filter(([_, { resource }]) => resource === "oul")
         .map(([key]) => key),
       ...Object.entries(denExpressions)
         .filter(([key]) => key === "oul")
@@ -859,180 +1040,239 @@ const makeDHIS2Query = (
   globalFilters: { [key: string]: any } = {},
   overrides: { [key: string]: any } = {}
 ) => {
-  const ouDimensions = findDimension(data.dataDimensions, "dimension", "ou");
-  const ouFilters = findDimension(data.dataDimensions, "filter", "ou");
-  const iDimensions = findDimension(data.dataDimensions, "dimension", "i");
-  const iFilters = findDimension(data.dataDimensions, "filter", "i");
-  const deDimensions = findDimension(data.dataDimensions, "dimension", "de");
-  const deFilters = findDimension(data.dataDimensions, "filter", "de");
-  const peDimensions = findDimension(data.dataDimensions, "dimension", "pe");
-  const peFilters = findDimension(data.dataDimensions, "filter", "pe");
-  const ouLevelFilter = findDimension(data.dataDimensions, "filter", "oul");
-  const ouLevelDimension = findDimension(
-    data.dataDimensions,
-    "dimension",
-    "oul"
-  );
-  const ouGroupFilter = findDimension(data.dataDimensions, "filter", "oug");
-  const ouGroupDimension = findDimension(
-    data.dataDimensions,
-    "dimension",
-    "oug"
-  );
+  const allDimensions = findDimension(data.dataDimensions, globalFilters);
 
-  let ouGroupFilters = "";
+  // const ouDimensions = findDimension(data.dataDimensions, "dimension", "ou");
+  // const ouFilters = findDimension(data.dataDimensions, "filter", "ou");
+  // const iDimensions = findDimension(data.dataDimensions, "dimension", "i");
+  // const iFilters = findDimension(data.dataDimensions, "filter", "i");
+  // const deDimensions = findDimension(data.dataDimensions, "dimension", "de");
+  // const deFilters = findDimension(data.dataDimensions, "filter", "de");
+  // const peDimensions = findDimension(data.dataDimensions, "dimension", "pe");
+  // const peFilters = findDimension(data.dataDimensions, "filter", "pe");
+  // const ouLevelFilter = findDimension(data.dataDimensions, "filter", "oul");
 
-  if (ouGroupFilter) {
-    ouGroupFilters =
-      globalFilters[ouGroupFilter]
-        ?.map((v: string) => `OU_GROUP-${v}`)
-        .join(";") ||
-      ouGroupFilter
-        .split(";")
-        .map((v) => `OU_GROUP-${v}`)
-        .join(";");
-  }
+  // const ouLevelDimension = findDimension(
+  //   data.dataDimensions,
+  //   "dimension",
+  //   "oul"
+  // );
+  // const ouGroupFilter = findDimension(data.dataDimensions, "filter", "oug");
+  // const ouGroupDimension = findDimension(
+  //   data.dataDimensions,
+  //   "dimension",
+  //   "oug"
+  // );
 
-  let ouGroupDimensions = "";
-  if (ouGroupDimension) {
-    ouGroupDimensions =
-      globalFilters[ouGroupDimension]
-        ?.map((v: string) => `OU_GROUP-${v}`)
-        .join(";") ||
-      ouGroupDimension
-        .split(";")
-        .map((v) => `OU_GROUP-${v}`)
-        .join(";");
-  }
+  // const degDimension = findDimension(data.dataDimensions, "dimension", "deg");
+  // const degFilter = findDimension(data.dataDimensions, "filter", "deg");
 
-  let ouLevelFilters = "";
-  if (ouLevelFilter) {
-    ouLevelFilters =
-      globalFilters[ouLevelFilter]
-        ?.map((v: string) => `LEVEL-${v}`)
-        .join(";") ||
-      ouLevelFilter
-        .split(";")
-        .map((v) => `LEVEL-${v}`)
-        .join(";");
-  }
-  let ouLevelDimensions = "";
+  // const degsDimension = findDimension(data.dataDimensions, "dimension", "degs");
+  // const degsFilter = findDimension(data.dataDimensions, "filter", "degs");
 
-  if (ouLevelDimension) {
-    ouLevelDimensions =
-      globalFilters[ouLevelDimension]
-        ?.map((v: string) => `LEVEL-${v}`)
-        .join(";") ||
-      ouLevelDimension
-        .split(";")
-        .map((v) => `LEVEL-${v}`)
-        .join(";");
-  }
-  const unitsFilter =
-    globalFilters[ouFilters] && globalFilters[ouFilters].length > 0
-      ? globalFilters[ouFilters].join(";")
-      : ouFilters;
+  // let ouGroupFilters = "";
 
-  const unitsDimension =
-    globalFilters[ouDimensions] && globalFilters[ouDimensions].length > 0
-      ? globalFilters[ouDimensions].join(";")
-      : ouDimensions;
+  // if (ouGroupFilter) {
+  //   ouGroupFilters =
+  //     globalFilters[ouGroupFilter]
+  //       ?.map((v: string) => `OU_GROUP-${v}`)
+  //       .join(";") ||
+  //     ouGroupFilter
+  //       .split(";")
+  //       .map((v) => `OU_GROUP-${v}`)
+  //       .join(";");
+  // }
 
-  let finalOuFilters = [unitsFilter, ouLevelFilters, ouGroupFilters]
-    .filter((v: string) => !!v)
-    .join(";");
-  let finalOuDimensions = [unitsDimension, ouLevelDimensions, ouGroupDimensions]
-    .filter((v: string) => !!v)
-    .join(";");
+  // let ouGroupDimensions = "";
+  // if (ouGroupDimension) {
+  //   ouGroupDimensions =
+  //     globalFilters[ouGroupDimension]
+  //       ?.map((v: string) => `OU_GROUP-${v}`)
+  //       .join(";") ||
+  //     ouGroupDimension
+  //       .split(";")
+  //       .map((v) => `OU_GROUP-${v}`)
+  //       .join(";");
+  // }
 
-  let finalIFilters =
-    globalFilters[iFilters] && globalFilters[iFilters].length > 0
-      ? globalFilters[iFilters].join(";")
-      : iFilters;
-  let finalIDimensions =
-    globalFilters[iDimensions] && globalFilters[iDimensions].length > 0
-      ? globalFilters[iDimensions].join(";")
-      : iDimensions;
+  // let ouLevelFilters = "";
+  // if (ouLevelFilter) {
+  //   ouLevelFilters =
+  //     globalFilters[ouLevelFilter]
+  //       ?.map((v: string) => `LEVEL-${v}`)
+  //       .join(";") ||
+  //     ouLevelFilter
+  //       .split(";")
+  //       .map((v) => `LEVEL-${v}`)
+  //       .join(";");
+  // }
+  // let ouLevelDimensions = "";
 
-  let finalDeFilters =
-    globalFilters[deFilters] && globalFilters[deFilters].length > 0
-      ? globalFilters[deFilters].join(";")
-      : deFilters;
-  let finalDeDimensions =
-    globalFilters[deDimensions] && globalFilters[deDimensions].length > 0
-      ? globalFilters[deDimensions].join(";")
-      : deDimensions;
+  // if (ouLevelDimension) {
+  //   ouLevelDimensions =
+  //     globalFilters[ouLevelDimension]
+  //       ?.map((v: string) => `LEVEL-${v}`)
+  //       .join(";") ||
+  //     ouLevelDimension
+  //       .split(";")
+  //       .map((v) => `LEVEL-${v}`)
+  //       .join(";");
+  // }
 
-  let finalPeFilters =
-    globalFilters[peFilters] && globalFilters[peFilters].length > 0
-      ? globalFilters[peFilters].join(";")
-      : peFilters;
-  let finalPeDimensions =
-    globalFilters[peDimensions] && globalFilters[peDimensions].length > 0
-      ? globalFilters[peDimensions].join(";")
-      : peDimensions;
-  if (overrides.ou && overrides.ou === "filter") {
-    finalOuFilters = finalOuFilters || finalOuDimensions;
-    finalOuDimensions = "";
-  } else if (overrides.ou && overrides.ou === "dimension") {
-    finalOuDimensions = finalOuFilters || finalOuDimensions;
-    finalOuFilters = "";
-  }
-  if (overrides.dx && overrides.dx === "filter") {
-    finalIFilters = finalIFilters || finalIDimensions;
-    finalIDimensions = "";
+  // let degDimensions = "";
 
-    finalDeFilters = finalDeFilters || finalDeDimensions;
-    finalDeDimensions = "";
-  } else if (overrides.dx && overrides.dx === "dimension") {
-    finalIDimensions = finalIFilters || finalIDimensions;
-    finalIFilters = "";
+  // if (degDimension) {
+  //   degDimensions =
+  //     globalFilters[degDimensions]?.map((v: string) => `DEG-${v}`).join(";") ||
+  //     degDimensions
+  //       .split(";")
+  //       .map((v) => `DEG-${v}`)
+  //       .join(";");
+  // }
 
-    finalDeDimensions = finalDeFilters || finalDeDimensions;
-    finalDeFilters = "";
-  }
+  // let degFilters = "";
 
-  if (overrides.pe && overrides.pe === "filter") {
-    finalPeFilters = finalPeFilters || finalPeDimensions;
-    finalPeDimensions = "";
-  } else if (overrides.pe && overrides.pe === "dimension") {
-    finalPeDimensions = finalPeFilters || finalPeDimensions;
-    finalPeFilters = "";
-  }
+  // if (degFilter) {
+  //   degFilters =
+  //     globalFilters[degFilter]?.map((v: string) => `DEG-${v}`).join(";") ||
+  //     degFilter
+  //       .split(";")
+  //       .map((v) => `DEG-${v}`)
+  //       .join(";");
+  // }
 
-  if (finalOuFilters && finalOuDimensions) {
-    finalOuDimensions = `${finalOuFilters};${finalOuDimensions}`;
-    finalOuFilters = "";
-  }
+  // const unitsFilter =
+  //   globalFilters[ouFilters] && globalFilters[ouFilters].length > 0
+  //     ? globalFilters[ouFilters].join(";")
+  //     : ouFilters;
 
-  const dd = [
-    joinItems(
-      [
-        [finalOuFilters, "ou"],
-        [
-          [finalIFilters, finalDeFilters].filter((value) => !!value).join(";"),
-          "dx",
-        ],
-        [finalPeFilters, "pe"],
-      ],
-      "filter"
-    ),
-    joinItems(
-      [
-        [finalOuDimensions, "ou"],
-        [
-          [finalIDimensions, finalDeDimensions]
-            .filter((value) => !!value)
-            .join(";"),
-          "dx",
-        ],
-        [finalPeDimensions, "pe"],
-      ],
-      "dimension"
-    ),
-  ].join("&");
+  // const unitsDimension =
+  //   globalFilters[ouDimensions] && globalFilters[ouDimensions].length > 0
+  //     ? globalFilters[ouDimensions].join(";")
+  //     : ouDimensions;
 
-  return dd;
+  // let finalOuFilters = [unitsFilter, ouLevelFilters, ouGroupFilters]
+  //   .filter((v: string) => !!v)
+  //   .join(";");
+  // let finalOuDimensions = [unitsDimension, ouLevelDimensions, ouGroupDimensions]
+  //   .filter((v: string) => !!v)
+  //   .join(";");
+
+  // let finalIFilters =
+  //   globalFilters[iFilters] && globalFilters[iFilters].length > 0
+  //     ? globalFilters[iFilters].join(";")
+  //     : iFilters;
+  // let finalIDimensions =
+  //   globalFilters[iDimensions] && globalFilters[iDimensions].length > 0
+  //     ? globalFilters[iDimensions].join(";")
+  //     : iDimensions;
+
+  // let finalDegsFilters =
+  //   globalFilters[degsFilter] && globalFilters[degsFilter].length > 0
+  //     ? globalFilters[degsFilter].join(";")
+  //     : degsFilter;
+  // let finalDegsDimensions =
+  //   globalFilters[degsDimension] && globalFilters[degsDimension].length > 0
+  //     ? globalFilters[degsDimension].join(";")
+  //     : degsDimension;
+
+  // let finalDeFilters =
+  //   globalFilters[deFilters] && globalFilters[deFilters].length > 0
+  //     ? globalFilters[deFilters].join(";")
+  //     : deFilters;
+  // let finalDeDimensions =
+  //   globalFilters[deDimensions] && globalFilters[deDimensions].length > 0
+  //     ? globalFilters[deDimensions].join(";")
+  //     : deDimensions;
+
+  // let finalPeFilters =
+  //   globalFilters[peFilters] && globalFilters[peFilters].length > 0
+  //     ? globalFilters[peFilters].join(";")
+  //     : peFilters;
+  // let finalPeDimensions =
+  //   globalFilters[peDimensions] && globalFilters[peDimensions].length > 0
+  //     ? globalFilters[peDimensions].join(";")
+  //     : peDimensions;
+  // if (overrides.ou && overrides.ou === "filter") {
+  //   finalOuFilters = finalOuFilters || finalOuDimensions;
+  //   finalOuDimensions = "";
+  // } else if (overrides.ou && overrides.ou === "dimension") {
+  //   finalOuDimensions = finalOuFilters || finalOuDimensions;
+  //   finalOuFilters = "";
+  // }
+  // if (overrides.dx && overrides.dx === "filter") {
+  //   finalIFilters = finalIFilters || finalIDimensions;
+  //   finalIDimensions = "";
+  //   finalDeFilters = finalDeFilters || finalDeDimensions;
+  //   finalDeDimensions = "";
+  // } else if (overrides.dx && overrides.dx === "dimension") {
+  //   finalIDimensions = finalIFilters || finalIDimensions;
+  //   finalIFilters = "";
+
+  //   finalDeDimensions = finalDeFilters || finalDeDimensions;
+  //   finalDeFilters = "";
+  // }
+
+  // if (overrides.pe && overrides.pe === "filter") {
+  //   finalPeFilters = finalPeFilters || finalPeDimensions;
+  //   finalPeDimensions = "";
+  // } else if (overrides.pe && overrides.pe === "dimension") {
+  //   finalPeDimensions = finalPeFilters || finalPeDimensions;
+  //   finalPeFilters = "";
+  // }
+
+  // if (finalOuFilters && finalOuDimensions) {
+  //   finalOuDimensions = `${finalOuFilters};${finalOuDimensions}`;
+  //   finalOuFilters = "";
+  // }
+
+  // let dd = [
+  //   joinItems(
+  //     [
+  //       [finalOuFilters, "ou"],
+  //       [
+  //         [finalIFilters, finalDeFilters, degFilters]
+  //           .filter((value) => !!value)
+  //           .join(";"),
+  //         "dx",
+  //       ],
+  //       [finalPeFilters, "pe"],
+  //     ],
+  //     "filter"
+  //   ),
+  //   joinItems(
+  //     [
+  //       [finalOuDimensions, "ou"],
+  //       [
+  //         [finalIDimensions, finalDeDimensions, degDimensions]
+  //           .filter((value) => !!value)
+  //           .join(";"),
+  //         "dx",
+  //       ],
+  //       [finalPeDimensions, "pe"],
+  //     ],
+  //     "dimension"
+  //   ),
+  // ];
+  // if (degsDimension) {
+  //   dd = [...dd, `dimension=${degsDimension}`];
+  // }
+  // if (degsFilter) {
+  //   dd = [...dd, `filter=${degsDimension}`];
+  // }
+  // return dd.join("&");
+  return Object.entries(
+    groupBy(allDimensions, (v) => `${v.type}${v.dimension}`)
+  )
+    .flatMap(([x, y]) => {
+      const first = y[0];
+      const finalValues = y.map(({ value }) => value).join(";");
+      if (first.dimension === "") {
+        return y.map(({ value }) => `${first.type}=${value}`);
+      }
+      return [`${first.type}=${first.dimension}:${finalValues}`];
+    })
+    .join("&");
 };
 
 const hasGlobal = (globalFilters: { [key: string]: any }, value: string) => {
@@ -1107,7 +1347,7 @@ const generateDHIS2Query = (
       if (params) {
         query = {
           ...query,
-          numerator: `analytics.json?${params}&dimension=Duw5yep8Vae:Px8Lqkxy2si;HKtncMjp06U;bqIaasqpTas`,
+          numerator: `analytics.json?${params}`,
         };
       }
     } else if (

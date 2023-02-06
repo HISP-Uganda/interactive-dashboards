@@ -265,6 +265,7 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
       h="100%"
       w="100%"
       flex={1}
+      bg={visualization.bg}
     >
       {visualization.expression &&
         getVisualization(
