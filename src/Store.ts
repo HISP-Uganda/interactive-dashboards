@@ -75,6 +75,9 @@ import {
   setRefresh,
   setThemes,
   setDataElements,
+  setHasChildren,
+  setNodeSource,
+  setVersion,
 } from "./Events";
 import {
   ICategory,
@@ -217,6 +220,7 @@ export const $store = domain
     refresh: true,
     themes: [],
     dataElements: [],
+    version: "",
   })
   .on(setOrganisations, (state, organisations) => {
     return { ...state, organisations };
@@ -302,6 +306,9 @@ export const $store = domain
   })
   .on(setDataElements, (state, dataElements) => {
     return { ...state, dataElements };
+  })
+  .on(setVersion, (state, version) => {
+    return { ...state, version };
   });
 
 export const $dataSource = domain
@@ -413,6 +420,12 @@ export const $dashboard = domain
   )
   .on(setTargetCategoryOptionCombos, (state, targetCategoryOptionCombos) => {
     return { ...state, targetCategoryOptionCombos };
+  })
+  .on(setHasChildren, (state, hasChildren) => {
+    return { ...state, hasChildren };
+  })
+  .on(setNodeSource, (state, nodeSource) => {
+    return { ...state, nodeSource };
   });
 
 export const $indicator = domain

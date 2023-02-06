@@ -16,6 +16,7 @@ export class CQIDexie extends Dexie {
   groups!: Table<Option>;
   dataSets!: Table<Option>;
   systemInfo!: Table<SystemInfo>;
+  dashboards!: Table<DataNode>;
 
   constructor() {
     super("idvt");
@@ -25,11 +26,12 @@ export class CQIDexie extends Dexie {
       expanded: "++id,name",
       expandedKeys: "++id,name",
       dataElements:
-        "++id,code,interventionCode,subKeyResultAreaCode,keyResultAreaCode,theme",
+        "++id,code,interventionCode,subKeyResultAreaCode,keyResultAreaCode,themeCode,programCode",
       levels: "++value,label",
       groups: "++value,label",
       dataSets: "++value,label",
       systemInfo: "++id,systemId,systemName",
+      dashboards: "++key,value,pId,title,id",
     });
   }
 }
