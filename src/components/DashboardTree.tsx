@@ -36,7 +36,7 @@ export default function DashboardTree() {
       return node.children;
     }
     if (node.nodeSource) {
-      const query = {
+      const query: any = {
         data: {
           resource: node.nodeSource.resource,
           params: node.nodeSource.fields
@@ -58,6 +58,7 @@ export default function DashboardTree() {
           checkable: true,
           hasChildren: false,
           selectable: false,
+          nodeSource: {},
         };
         return calculated;
       });
@@ -99,7 +100,12 @@ export default function DashboardTree() {
               e.themeCode === c.key ||
               e.programCode === c.key
           );
-          return { ...c, totalIndicators: filteredElements.length };
+          return {
+            ...c,
+            child: false,
+            totalIndicators: filteredElements.length,
+            elements: filteredElements.map(({ id }) => id),
+          };
         })
       );
       updateVisualizationData({
@@ -152,6 +158,16 @@ export default function DashboardTree() {
         .anyOf(realCheckedNodes)
         .toArray();
       setDataElements(elements);
+      setOriginalColumns([{ id: "name", title: "Indicator", w: "600px" }]);
+      setRows(
+        elements.map((e) => {
+          return { ...e, child: true };
+        })
+      );
+      setColumns([
+        { id: "HKtncMjp06U", title: "Actual" },
+        { id: "Px8Lqkxy2si", title: "Target" },
+      ]);
       updateVisualizationData({
         visualizationId: "keyResultAreas",
         data: [

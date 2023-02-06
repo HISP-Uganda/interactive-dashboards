@@ -28,21 +28,22 @@ import { useOrganisationUnitGroups } from "../../Queries";
 import { $paginations } from "../../Store";
 import { globalIds } from "../../utils/utils";
 import GlobalAndFilter from "./GlobalAndFilter";
+import GlobalSearchFilter from "./GlobalSearchFilter";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
 const OrganizationUnitGroups = ({ denNum, onChange }: IndicatorProps) => {
   const paginations = useStore($paginations);
-  const [dimension, setDimension] = useState<"filter" | "dimension">("filter");
+  const [type, setType] = useState<"filter" | "dimension">("dimension");
   const [q, setQ] = useState<string>("");
   const selected = Object.entries(denNum?.dataDimensions || {})
-    .filter(([k, { what }]) => what === "oug")
+    .filter(([k, { resource }]) => resource === "oug")
     .map(([key]) => {
       return key;
     });
   const [useGlobal, setUseGlobal] = useState<boolean>(
-    () => selected.indexOf("GQhi6pRnTKF") !== -1
+    () => selected.indexOf("of2WvtwqbHR") !== -1
   );
 
   const {
@@ -71,23 +72,20 @@ const OrganizationUnitGroups = ({ denNum, onChange }: IndicatorProps) => {
   };
   return (
     <Stack spacing="30px">
-      <GlobalAndFilter
+      <GlobalSearchFilter
         denNum={denNum}
-        dimension={dimension}
-        setDimension={setDimension}
+        dimension="ou"
+        setType={setType}
         useGlobal={useGlobal}
         setUseGlobal={setUseGlobal}
-        hasGlobalFilter={true}
-        type="oug"
+        resource="oug"
+        type={type}
         onChange={onChange}
+        setQ={setQ}
+        prefix="OU_GROUP-"
+        q={q}
         id={globalIds[3].value}
       />
-      {!useGlobal && (
-        <Input
-          value={q}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setQ(e.target.value)}
-        />
-      )}
       {isLoading && (
         <Flex w="100%" alignItems="center" justifyContent="center">
           <Spinner />
@@ -112,7 +110,7 @@ const OrganizationUnitGroups = ({ denNum, onChange }: IndicatorProps) => {
               </Th>
             </Tr>
           </Thead>
-          <Tbody py={10}>
+          <Tbody>
             {data.map((record: any) => (
               <Tr key={record.id}>
                 <Td>
@@ -121,14 +119,18 @@ const OrganizationUnitGroups = ({ denNum, onChange }: IndicatorProps) => {
                       if (e.target.checked) {
                         onChange({
                           id: record.id,
-                          type: dimension,
-                          what: "oug",
+                          type,
+                          dimension: "ou",
+                          resource: "oug",
+                          prefix: "OU_GROUP-",
                         });
                       } else {
                         onChange({
                           id: record.id,
-                          type: dimension,
-                          what: "oug",
+                          type,
+                          dimension: "ou",
+                          resource: "oug",
+                          prefix: "OU_GROUP-",
                           remove: true,
                         });
                       }

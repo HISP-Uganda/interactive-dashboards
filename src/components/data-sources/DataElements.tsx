@@ -28,24 +28,24 @@ import { useDataElements } from "../../Queries";
 import { $paginations } from "../../Store";
 import { globalIds } from "../../utils/utils";
 import GlobalAndFilter from "./GlobalAndFilter";
+import GlobalSearchFilter from "./GlobalSearchFilter";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
 const DataElements = ({ onChange, denNum }: IndicatorProps) => {
   const paginations = useStore($paginations);
-  const [dimension, setDimension] = useState<"filter" | "dimension">(
-    "dimension"
-  );
+  const [type, setType] = useState<"filter" | "dimension">("dimension");
 
   const selected = Object.entries(denNum?.dataDimensions || {})
-    .filter(([k, { what }]) => what === "de")
+    .filter(([k, { resource }]) => resource === "de")
     .map(([key]) => {
       return key;
     });
+  console.log(selected);
   const [q, setQ] = useState<string>("");
   const [useGlobal, setUseGlobal] = useState<boolean>(
-    () => selected.indexOf("GQhi6pRnTKF") !== -1
+    () => selected.indexOf("h9oh0VhweQM") !== -1
   );
   const {
     pages,
@@ -77,24 +77,20 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
   };
 
   return (
-    <Stack spacing="30px">
-      <GlobalAndFilter
+    <Stack spacing="5px">
+      <GlobalSearchFilter
         denNum={denNum}
-        dimension={dimension}
-        setDimension={setDimension}
+        dimension="dx"
+        resource="de"
+        setType={setType}
         useGlobal={useGlobal}
         setUseGlobal={setUseGlobal}
-        hasGlobalFilter={true}
-        id={globalIds[6].value}
-        type="de"
+        type={type}
         onChange={onChange}
+        setQ={setQ}
+        q={q}
+        id={globalIds[6].value}
       />
-      {!useGlobal && (
-        <Input
-          value={q}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setQ(e.target.value)}
-        />
-      )}
       {isLoading && (
         <Flex w="100%" alignItems="center" justifyContent="center">
           <Spinner />
@@ -119,7 +115,7 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
               </Th>
             </Tr>
           </Thead>
-          <Tbody py={10}>
+          <Tbody>
             {data?.map((record: any) => (
               <Tr key={record.id}>
                 <Td>
@@ -128,14 +124,16 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
                       if (e.target.checked) {
                         onChange({
                           id: record.id,
-                          type: dimension,
-                          what: "de",
+                          type,
+                          dimension: "dx",
+                          resource: "de",
                         });
                       } else {
                         onChange({
                           id: record.id,
-                          type: dimension,
-                          what: "de",
+                          type,
+                          dimension: "dx",
+                          resource: "de",
                           remove: true,
                         });
                       }
