@@ -1,17 +1,18 @@
-import { Spinner, Stack } from "@chakra-ui/react";
+import { Stack, Text } from "@chakra-ui/react";
 import { useMatch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { LocationGenerics } from "../../interfaces";
 import { useDashboard } from "../../Queries";
 import { $store } from "../../Store";
 import Dashboard from "./Dashboard";
+import LoadingIndicator from "../LoadingIndicator";
 
 export default function DashboardForm() {
   const store = useStore($store);
   const {
     params: { dashboardId },
   } = useMatch<LocationGenerics>();
-  const { isLoading, isSuccess, isError, error, isFetching } = useDashboard(
+  const { isLoading, isSuccess, isError, error } = useDashboard(
     dashboardId,
     store.systemId,
     store.refresh
@@ -25,9 +26,9 @@ export default function DashboardForm() {
       h="100%"
       w="100%"
     >
-      {(isLoading || isFetching) && <Spinner />}
+      {isLoading && <LoadingIndicator />}
       {isSuccess && <Dashboard />}
-      {isError && <pre>{JSON.stringify(error)}</pre>}
+      {isError && <Text>No data/Error occurred</Text>}
     </Stack>
   );
 }

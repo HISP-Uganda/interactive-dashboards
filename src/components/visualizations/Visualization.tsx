@@ -1,4 +1,4 @@
-import { Spinner, Stack, Text } from "@chakra-ui/react";
+import {Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { fromPairs } from "lodash";
 import { ISection, IVisualization } from "../../interfaces";
@@ -28,6 +28,7 @@ import SingleValue from "./SingleValue";
 import SunburstChart from "./SunburstChart";
 import Tables from "./Tables";
 import TreeMaps from "./TreeMaps";
+import LoadingIndicator from "../LoadingIndicator";
 
 type VisualizationProps = {
   visualization: IVisualization;
@@ -265,6 +266,7 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
       h="100%"
       w="100%"
       flex={1}
+      bg={visualization.bg}
     >
       {visualization.expression &&
         getVisualization(
@@ -274,9 +276,9 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
         )}
       {!visualization.expression && (
         <>
-          {isLoading && <Spinner />}
+          {isLoading && <LoadingIndicator />}
           {isSuccess && getVisualization(visualization, data, section)}
-          {isError && <Text>Error occurred</Text>}
+          {isError && <Text>No data/Error occurred</Text>}
         </>
       )}
     </Stack>

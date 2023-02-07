@@ -21,7 +21,8 @@ const options = {
   // target: "https://hmis-repo.health.go.ug/repo", // target host
   // target: "https://tests.dhis2.stephocay.com/sia", // target host
   // target: "https://eidsr.health.go.ug", // target host
-  target: "https://epivac.health.go.ug", // target host
+  // target: "https://epivac.health.go.ug", // target host
+  target: "https://train.ndpme.go.ug/ndpdb", // target host
   onProxyReq,
   onProxyRes,
   changeOrigin: true, // needed for virtual hosted sites
@@ -36,11 +37,7 @@ const app = express();
 app.use(
   cors({
     credentials: true,
-    origin: [
-      "http://localhost:3000",
-      "http://172.16.200.117:3000",
-      "http://172.16.200.109:3000",
-    ],
+    origin: ["http://localhost:3000"],
   })
 );
 app.use("/", exampleProxy);

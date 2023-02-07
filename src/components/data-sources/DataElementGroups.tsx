@@ -10,8 +10,6 @@ import {
   Checkbox,
   Flex,
   Heading,
-  Input,
-  Spinner,
   Stack,
   Table,
   Tbody,
@@ -24,30 +22,28 @@ import {
 import { useStore } from "effector-react";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
-import { useIndicators } from "../../Queries";
+import { useDataElementGroups } from "../../Queries";
 import { $paginations } from "../../Store";
 import { globalIds } from "../../utils/utils";
-import GlobalAndFilter from "./GlobalAndFilter";
 import GlobalSearchFilter from "./GlobalSearchFilter";
 import LoadingIndicator from "../LoadingIndicator";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
-const Indicators = ({ denNum, onChange }: IndicatorProps) => {
+const DataElementGroups = ({ onChange, denNum }: IndicatorProps) => {
+  const paginations = useStore($paginations);
   const [type, setType] = useState<"filter" | "dimension">("dimension");
 
   const selected = Object.entries(denNum?.dataDimensions || {})
-    .filter(([k, { resource }]) => resource === "i")
+    .filter(([k, { resource }]) => resource === "deg")
     .map(([key]) => {
       return key;
     });
-  const [useGlobal, setUseGlobal] = useState<boolean>(
-    () => selected.indexOf("JRDOr08JWSW") !== -1
-  );
   const [q, setQ] = useState<string>("");
-  const paginations = useStore($paginations);
-
+  const [useGlobal, setUseGlobal] = useState<boolean>(
+    () => selected.indexOf("JsPfHe1QkJe") !== -1
+  );
   const {
     pages,
     pagesCount,
@@ -57,7 +53,7 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
     pageSize,
     setPageSize,
   } = usePagination({
-    total: paginations.totalIndicators,
+    total: paginations.totalDataElementGroups,
     limits: {
       outer: OUTER_LIMIT,
       inner: INNER_LIMIT,
@@ -67,21 +63,10 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
       currentPage: 1,
     },
   });
-
-  const selectedIndicators = Object.entries(
-    denNum?.dataDimensions || {}
-  ).flatMap(([i, { resource }]) => {
-    if (resource === "i") {
-      return i;
-    }
-    return [];
-  });
-
-  const { isLoading, isSuccess, isError, error, data } = useIndicators(
+  const { isLoading, isSuccess, isError, error, data } = useDataElementGroups(
     currentPage,
     pageSize,
-    q,
-    selectedIndicators
+    q
   );
 
   const handlePageChange = (nextPage: number) => {
@@ -89,26 +74,27 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
   };
 
   return (
-    <Stack spacing="30px">
+    <Stack spacing="5px">
       <GlobalSearchFilter
         denNum={denNum}
         dimension="dx"
         setType={setType}
         useGlobal={useGlobal}
         setUseGlobal={setUseGlobal}
-        resource="i"
+        resource="deg"
         type={type}
         onChange={onChange}
         setQ={setQ}
         q={q}
-        id={globalIds[2].value}
+        prefix="DE_GROUP-"
+        id={globalIds[12].value}
       />
       {isLoading && (
         <Flex w="100%" alignItems="center" justifyContent="center">
           <LoadingIndicator />
         </Flex>
       )}
-      {isSuccess && data && !useGlobal && (
+      {isSuccess && !useGlobal && (
         <Table variant="striped" colorScheme="gray" textTransform="none">
           <Thead>
             <Tr py={1}>
@@ -127,8 +113,8 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
               </Th>
             </Tr>
           </Thead>
-          <Tbody py={10}>
-            {data.map((record: any) => (
+          <Tbody>
+            {data?.map((record: any) => (
               <Tr key={record.id}>
                 <Td>
                   <Checkbox
@@ -138,19 +124,21 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
                           id: record.id,
                           type,
                           dimension: "dx",
-                          resource: "i",
+                          resource: "deg",
+                          prefix: "DE_GROUP-",
                         });
                       } else {
                         onChange({
                           id: record.id,
                           type,
                           dimension: "dx",
-                          resource: "i",
+                          resource: "deg",
+                          prefix: "DE_GROUP-",
                           remove: true,
                         });
                       }
                     }}
-                    isChecked={!!denNum?.dataDimensions?.[record.id]}
+                    checked={!!denNum?.dataDimensions?.[record.id]}
                   />
                 </Td>
                 <Td>{record.id}</Td>
@@ -197,4 +185,4 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
   );
 };
 
-export default Indicators;
+export default DataElementGroups;

@@ -10,8 +10,6 @@ import {
   Checkbox,
   Flex,
   Heading,
-  Input,
-  Spinner,
   Stack,
   Table,
   Tbody,
@@ -24,29 +22,27 @@ import {
 import { useStore } from "effector-react";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
-import { useIndicators } from "../../Queries";
+import { useOrganisationUnitGroupSets } from "../../Queries";
 import { $paginations } from "../../Store";
 import { globalIds } from "../../utils/utils";
-import GlobalAndFilter from "./GlobalAndFilter";
 import GlobalSearchFilter from "./GlobalSearchFilter";
 import LoadingIndicator from "../LoadingIndicator";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
-const Indicators = ({ denNum, onChange }: IndicatorProps) => {
+const OrganizationUnitGroupSets = ({ denNum, onChange }: IndicatorProps) => {
+  const paginations = useStore($paginations);
   const [type, setType] = useState<"filter" | "dimension">("dimension");
-
+  const [q, setQ] = useState<string>("");
   const selected = Object.entries(denNum?.dataDimensions || {})
-    .filter(([k, { resource }]) => resource === "i")
+    .filter(([k, { resource }]) => resource === "ougs")
     .map(([key]) => {
       return key;
     });
   const [useGlobal, setUseGlobal] = useState<boolean>(
-    () => selected.indexOf("JRDOr08JWSW") !== -1
+    () => selected.indexOf("GQhi6pRnTKF") !== -1
   );
-  const [q, setQ] = useState<string>("");
-  const paginations = useStore($paginations);
 
   const {
     pages,
@@ -57,7 +53,7 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
     pageSize,
     setPageSize,
   } = usePagination({
-    total: paginations.totalIndicators,
+    total: paginations.totalOrganisationUnitGroupSets,
     limits: {
       outer: OUTER_LIMIT,
       inner: INNER_LIMIT,
@@ -67,41 +63,25 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
       currentPage: 1,
     },
   });
-
-  const selectedIndicators = Object.entries(
-    denNum?.dataDimensions || {}
-  ).flatMap(([i, { resource }]) => {
-    if (resource === "i") {
-      return i;
-    }
-    return [];
-  });
-
-  const { isLoading, isSuccess, isError, error, data } = useIndicators(
-    currentPage,
-    pageSize,
-    q,
-    selectedIndicators
-  );
-
+  const { isLoading, isSuccess, isError, error, data } =
+    useOrganisationUnitGroupSets(currentPage, pageSize, q);
   const handlePageChange = (nextPage: number) => {
     setCurrentPage(nextPage);
   };
-
   return (
     <Stack spacing="30px">
       <GlobalSearchFilter
         denNum={denNum}
-        dimension="dx"
+        dimension=""
         setType={setType}
         useGlobal={useGlobal}
         setUseGlobal={setUseGlobal}
-        resource="i"
+        resource="ougs"
         type={type}
         onChange={onChange}
         setQ={setQ}
         q={q}
-        id={globalIds[2].value}
+        id={globalIds[3].value}
       />
       {isLoading && (
         <Flex w="100%" alignItems="center" justifyContent="center">
@@ -137,20 +117,20 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
                         onChange({
                           id: record.id,
                           type,
-                          dimension: "dx",
-                          resource: "i",
+                          dimension: "",
+                          resource: "ougs",
                         });
                       } else {
                         onChange({
                           id: record.id,
                           type,
-                          dimension: "dx",
-                          resource: "i",
+                          dimension: "",
+                          resource: "ougs",
                           remove: true,
                         });
                       }
                     }}
-                    isChecked={!!denNum?.dataDimensions?.[record.id]}
+                    checked={!!denNum?.dataDimensions?.[record.id]}
                   />
                 </Td>
                 <Td>{record.id}</Td>
@@ -197,4 +177,4 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
   );
 };
 
-export default Indicators;
+export default OrganizationUnitGroupSets;

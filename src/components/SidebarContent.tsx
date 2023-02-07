@@ -9,18 +9,19 @@ const SidebarContent = ({ ...rest }: SidebarProps) => {
   const store = useStore($store);
 
   return (
-    <Stack {...rest} bgColor="blue.50" h="100%">
+    <Stack {...rest} bgColor="gray.50" h="100%" >
       <Text
         fontSize="xl"
         fontWeight="bold"
         textTransform="uppercase"
         textAlign="left"
-        // p="2"
-        color="blue.600"
+        pl="3"
+        pt="2"
+        color="yellow.500"
       >
-        Thematic Areas
+        Dashboard Menu
       </Text>
-      <Divider borderColor="blue.500" />
+      <Divider borderColor="gray.600" />
       {store.isAdmin ? (
         store.currentPage === "dashboard" ? (
           <DashboardList />

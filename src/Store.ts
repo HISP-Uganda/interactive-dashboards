@@ -73,6 +73,18 @@ import {
   setIsFullScreen,
   duplicateVisualization,
   setRefresh,
+  setThemes,
+  setDataElements,
+  setHasChildren,
+  setNodeSource,
+  setVersion,
+  setRows,
+  setColumns,
+  setOriginalColumns,
+  setSections,
+  setVisualizations,
+  setDataElementGroups,
+  setDataElementGroupSets,
 } from "./Events";
 import {
   ICategory,
@@ -102,6 +114,7 @@ export const createSection = (id = generateUid()): ISection => {
     isBottomSection: false,
     bg: "white",
     height: "100%",
+    headerBg: "",
   };
 };
 
@@ -169,6 +182,7 @@ export const createDashboard = (id = generateUid()): IDashboard => {
     bg: "gray.300",
     targetCategoryCombo: "",
     targetCategoryOptionCombos: [],
+    nodeSource: {},
   };
 };
 
@@ -180,6 +194,9 @@ export const $paginations = domain
     totalProgramIndicators: 0,
     totalOrganisationUnitLevels: 0,
     totalOrganisationUnitGroups: 0,
+    totalOrganisationUnitGroupSets: 0,
+    totalDataElementGroups: 0,
+    totalDataElementGroupSets: 0,
   })
   .on(addPagination, (state, pagination) => {
     return {
@@ -188,10 +205,12 @@ export const $paginations = domain
     };
   });
 
+export const $filters = domain.createStore<{ [key: string]: any }>({});
+
 export const $store = domain
   .createStore<IStore>({
     showSider: false,
-    periods: [{ id: "LAST_12_MONTHS", name: "Last 12 months" }],
+    periods: [{ id: "LAST_5_FINANCIAL_YEARS", name: "Last 5 financial years" }],
     organisations: [],
     levels: [],
     groups: [],
@@ -213,6 +232,14 @@ export const $store = domain
     isNotDesktop: false,
     isFullScreen: false,
     refresh: true,
+    themes: [],
+    dataElements: [],
+    version: "",
+    rows: [],
+    columns: [],
+    originalColumns: [],
+    dataElementGroups: [],
+    dataElementGroupSets: [],
   })
   .on(setOrganisations, (state, organisations) => {
     return { ...state, organisations };
@@ -292,6 +319,30 @@ export const $store = domain
   })
   .on(setRefresh, (state, refresh) => {
     return { ...state, refresh };
+  })
+  .on(setThemes, (state, themes) => {
+    return { ...state, themes };
+  })
+  .on(setDataElements, (state, dataElements) => {
+    return { ...state, dataElements };
+  })
+  .on(setVersion, (state, version) => {
+    return { ...state, version };
+  })
+  .on(setRows, (state, rows) => {
+    return { ...state, rows };
+  })
+  .on(setColumns, (state, columns) => {
+    return { ...state, columns };
+  })
+  .on(setOriginalColumns, (state, originalColumns) => {
+    return { ...state, originalColumns };
+  })
+  .on(setDataElementGroups, (state, dataElementGroups) => {
+    return { ...state, dataElementGroups };
+  })
+  .on(setDataElementGroupSets, (state, dataElementGroupSets) => {
+    return { ...state, dataElementGroupSets };
   });
 
 export const $dataSource = domain
@@ -403,6 +454,16 @@ export const $dashboard = domain
   )
   .on(setTargetCategoryOptionCombos, (state, targetCategoryOptionCombos) => {
     return { ...state, targetCategoryOptionCombos };
+  })
+  .on(setHasChildren, (state, hasChildren) => {
+    return { ...state, hasChildren };
+  })
+  .on(setNodeSource, (state, { field, value }) => {
+    const nodeSource = state.nodeSource || {};
+    return { ...state, nodeSource: { ...nodeSource, [field]: value } };
+  })
+  .on(setSections, (state, sections) => {
+    return { ...state, sections };
   });
 
 export const $indicator = domain
@@ -474,7 +535,7 @@ export const $indicator = domain
   })
   .on(
     changeNumeratorDimension,
-    (state, { id, what, type, replace, remove, label = "" }) => {
+    (state, { id, dimension, type, resource, replace, remove, label = "" }) => {
       if (state.numerator) {
         if (remove) {
           const { [id]: removed, ...others } = state.numerator.dataDimensions;
@@ -490,16 +551,17 @@ export const $indicator = domain
         if (replace) {
           const working = fromPairs(
             Object.entries(state.numerator.dataDimensions).filter(
-              ([i, d]) => d.what !== what
+              ([i, d]) => d.resource !== resource
             )
           );
+
           return {
             ...state,
             numerator: {
               ...state.numerator,
               dataDimensions: {
                 ...working,
-                [id]: { what, type, label },
+                [id]: { id, resource, type, dimension, label },
               },
             },
           };
@@ -510,7 +572,7 @@ export const $indicator = domain
             ...state.numerator,
             dataDimensions: {
               ...state.numerator.dataDimensions,
-              [id]: { what, type, label },
+              [id]: { id, resource, type, dimension, label },
             },
           },
         };
@@ -519,7 +581,7 @@ export const $indicator = domain
   )
   .on(
     changeDenominatorDimension,
-    (state, { id, what, type, replace, remove, label = "" }) => {
+    (state, { id, dimension, resource, type, replace, remove, label = "" }) => {
       if (state.denominator) {
         if (remove) {
           const { [id]: removed, ...rest } = state.denominator.dataDimensions;
@@ -535,7 +597,7 @@ export const $indicator = domain
         if (replace) {
           const working = fromPairs(
             Object.entries(state.denominator.dataDimensions).filter(
-              ([_, d]) => d.what !== what
+              ([_, d]) => d.resource !== resource
             )
           );
           return {
@@ -544,7 +606,7 @@ export const $indicator = domain
               ...state.denominator,
               dataDimensions: {
                 ...working,
-                [id]: { what, type, label },
+                [id]: { id, dimension, type, resource, label },
               },
             },
           };
@@ -556,7 +618,7 @@ export const $indicator = domain
             ...state.denominator,
             dataDimensions: {
               ...state.denominator.dataDimensions,
-              [id]: { what, type, label },
+              [id]: { id, type, dimension, resource, label },
             },
           },
         };
@@ -566,7 +628,10 @@ export const $indicator = domain
   .on(changeUseIndicators, (state, useInBuildIndicators) => {
     return { ...state, useInBuildIndicators };
   })
-  .on(setIndicator, (_, indicator) => indicator);
+  .on(setIndicator, (_, indicator) => {
+    console.log(indicator);
+    return indicator;
+  });
 
 export const $section = domain
   .createStore<ISection>(createSection())
@@ -582,6 +647,7 @@ export const $section = domain
       properties: {},
       overrides: {},
       group: "",
+      bg: "",
     };
     return {
       ...state,
@@ -650,7 +716,10 @@ export const $section = domain
       );
       return { ...state, visualizations };
     }
-  );
+  )
+  .on(setVisualizations, (state, visualizations) => {
+    return { ...state, visualizations };
+  });
 
 export const $dataSources = domain
   .createStore<IDataSource[]>([])
@@ -883,6 +952,26 @@ export const $globalFilters = combine(
     }
     if (dashboard.targetCategoryCombo && target.length > 0) {
       return { ...filters, OOhWJ4gfZy1: target };
+    }
+    if (store.dataElements.length > 0) {
+      filters = {
+        ...filters,
+        h9oh0VhweQM: store.dataElements.map((de) => de.id),
+      };
+    }
+
+    if (store.dataElementGroups.length > 0) {
+      filters = {
+        ...filters,
+        JsPfHe1QkJe: store.dataElementGroups,
+      };
+    }
+
+    if (store.dataElementGroupSets.length > 0) {
+      filters = {
+        ...filters,
+        HdiJ61vwqTX: store.dataElementGroupSets,
+      };
     }
     return filters;
   }

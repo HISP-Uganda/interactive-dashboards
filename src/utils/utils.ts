@@ -123,6 +123,16 @@ export const globalIds: Option[] = [
     value: "IK4jwzIuqNO",
     id: "paoc",
   },
+  {
+    label: "Data Element Group",
+    value: "JsPfHe1QkJe",
+    id: "deg",
+  },
+  {
+    label: "Data Element Group Set",
+    value: "HdiJ61vwqTX",
+    id: "degs",
+  },
 ];
 
 export const convertTime = (value: string) => {
@@ -172,8 +182,8 @@ export const getPeriodsBetweenDates = (
   return [];
 };
 
-export const nest: any = (items: any[], id = null, link = "parent") =>
-  items
+export const nest: any = (items: any[], id = null, link = "pId") => {
+  return items
     .filter((item) => item[link] === id)
     .map((item) => {
       const children = nest(items, item.key);
@@ -182,6 +192,7 @@ export const nest: any = (items: any[], id = null, link = "parent") =>
       }
       return { ...item };
     });
+};
 
 const iterate = (obj: { [key: string]: any }) => {
   Object.keys(obj).forEach((key) => {
@@ -658,7 +669,7 @@ export const processMap = (
           value: value
             ? Intl.NumberFormat("en-US", {
                 style: "percent",
-                notation: "standard",
+                // notation: "standard",
                 maximumFractionDigits: 2,
               }).format(value / 100)
             : "No Data",

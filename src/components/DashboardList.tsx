@@ -1,9 +1,9 @@
-import { Spinner } from "@chakra-ui/react";
+import { Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { groupBy } from "lodash";
 import { useDashboards } from "../Queries";
-import { $categoryOptions, $globalFilters, $store } from "../Store";
-import NavItem from "./NavItem";
+import { $categoryOptions, $store } from "../Store";
+import DashboardTree from "./DashboardTree";
+import LoadingIndicator from "./LoadingIndicator";
 
 export default function DashboardList() {
   const store = useStore($store);
@@ -11,24 +11,29 @@ export default function DashboardList() {
     store.systemId
   );
   const categoryOptions = useStore($categoryOptions);
+
   return (
     <>
-      {isLoading && <Spinner />}
-      {isSuccess &&
-        categoryOptions
-          .map((category) => {
-            const groupedDashboards = groupBy(data, "category");
-            return {
-              ...category,
-              dashboards: groupedDashboards[category.value] || [],
-            };
-          })
-          .filter(({ dashboards }) => dashboards.length > 0)
-          .map((value) => {
-            return <NavItem option={value} key={value.value} />;
-          })}
+      {isLoading && <LoadingIndicator />}
+      {isSuccess && (
+        // <Stack spacing="40px" p="5px">
+        //   {categoryOptions
+        //     .map((category) => {
+        //       const groupedDashboards = groupBy(data, "category");
+        //       return {
+        //         ...category,
+        //         dashboards: groupedDashboards[category.value] || [],
+        //       };
+        //     })
+        //     .filter(({ dashboards }) => dashboards.length > 0)
+        //     .map((value) => {
+        //       return <NavItem option={value} key={value.value} />;
+        //     })}
+        // </Stack>
+        <DashboardTree />
+      )}
 
-      {isError && <pre>{JSON.stringify(error)}</pre>}
+      {isError && <Text>No data/Error occurred</Text>}
     </>
   );
 }

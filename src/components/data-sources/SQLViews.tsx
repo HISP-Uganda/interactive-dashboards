@@ -8,7 +8,7 @@ const SQLViews = ({ denNum, onChange, changeQuery }: IndicatorProps) => {
   return (
     <>
       {isLoading && <Progress />}
-      {isSuccess && (
+      {isSuccess && data && (
         <Stack>
           <Text>SQL View</Text>
           <Select<Option, false, GroupBase<Option>>
@@ -30,7 +30,8 @@ const SQLViews = ({ denNum, onChange, changeQuery }: IndicatorProps) => {
               onChange({
                 id: e?.value || "",
                 type: "dimension",
-                what: "v",
+                resource: "v",
+                dimension: "",
                 replace: true,
               });
               if (changeQuery) {

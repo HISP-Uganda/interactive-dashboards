@@ -22,7 +22,8 @@ export default function ({ handle }: Props) {
   return (
     <Stack
       direction="row"
-      backgroundColor="white"
+      w="100%"
+      h="100%"
       onClick={(e: MouseEvent<HTMLElement>) => {
         if (e.detail === 2 && store.isAdmin) {
           setCurrentSection(dashboard.bottomSection);
@@ -33,14 +34,6 @@ export default function ({ handle }: Props) {
         }
       }}
     >
-      {(handle.active || !store.showSider) && (
-        <Image
-          src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/logo.png"
-          maxH={`${otherHeaders}px`}
-          maxW={`${sideWidth}px`}
-        />
-      )}
-
       <Stack
         flex={1}
         maxH={`${otherHeaders}px`}
@@ -53,12 +46,6 @@ export default function ({ handle }: Props) {
           <SectionVisualization {...dashboard.bottomSection} />
         )}
       </Stack>
-
-      <Image
-        src="https://tukuz.com/wp-content/uploads/2020/10/gavi-the-vaccine-alliance-logo-vector.png"
-        maxH={`${otherHeaders}px`}
-        maxW={`${sideWidth}px`}
-      />
     </Stack>
   );
 }

@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";

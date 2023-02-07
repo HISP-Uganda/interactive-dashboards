@@ -3,7 +3,6 @@ import {
   Button,
   Divider,
   Spacer,
-  Spinner,
   Stack,
   Table,
   Tbody,
@@ -11,6 +10,7 @@ import {
   Th,
   Thead,
   Tr,
+  Text,
 } from "@chakra-ui/react";
 import { useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
@@ -21,12 +21,15 @@ import {
   setCurrentDashboard,
   setDashboards,
   setRefresh,
+  setDataElements,
 } from "../../Events";
 import { IDashboard } from "../../interfaces";
 import { useDashboards } from "../../Queries";
 import { $dashboards, $store, createDashboard } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import { generalPadding, otherHeight } from "../constants";
+import { db } from "../../db";
+import LoadingIndicator from "../LoadingIndicator";
 
 const Dashboards = () => {
   const navigate = useNavigate();
@@ -68,9 +71,9 @@ const Dashboards = () => {
       </Stack>
       <Divider borderColor="blue.500" />
       <Stack alignContent="center" alignItems="center" flex={1}>
-        {isLoading && <Spinner />}
+        {isLoading && <LoadingIndicator />}
         {isSuccess && (
-          <Table variant="simple" w="100%">
+          <Table variant="striped" w="100%">
             <Thead>
               <Tr>
                 <Th>Name</Th>
@@ -82,11 +85,11 @@ const Dashboards = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {data.map((dashboard: IDashboard) => (
+              {data?.map((dashboard: IDashboard) => (
                 <Tr
                   key={dashboard.id}
                   cursor="pointer"
-                  onClick={() => {
+                  onClick={async () => {
                     setCurrentDashboard(dashboard);
                     changeSelectedDashboard(dashboard.id);
                     changeSelectedCategory(dashboard.category || "");
@@ -101,6 +104,8 @@ const Dashboards = () => {
                         levels: store.levels.join("-"),
                       },
                     });
+                    const elements = await db.dataElements.toArray();
+                    setDataElements(elements);
                   }}
                 >
                   <Td>{dashboard.name}</Td>
@@ -124,7 +129,7 @@ const Dashboards = () => {
             </Tbody>
           </Table>
         )}
-        {isError && <pre>{JSON.stringify(error, null, 2)}</pre>}
+        {isError && <Text>No data/Error occurred</Text>}
       </Stack>
     </Stack>
   );

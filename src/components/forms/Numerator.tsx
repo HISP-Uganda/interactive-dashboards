@@ -83,7 +83,7 @@ const Numerator = () => {
             )}
             onChange={(e) =>
               changeNumeratorAttribute({
-                attribute: "type",
+                attribute: "resource",
                 value: e?.value,
               })
             }
@@ -184,6 +184,7 @@ const Numerator = () => {
         <Spacer />
         <Button
           onClick={async () => {
+            console.log(indicator);
             await saveDocument(
               "i-visualization-queries",
               store.systemId,

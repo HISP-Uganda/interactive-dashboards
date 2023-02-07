@@ -7,28 +7,32 @@ import { $store } from "../../Store";
 import OUTree from "../OUTree";
 import { globalIds } from "../../utils/utils";
 import GlobalAndFilter from "./GlobalAndFilter";
+import GlobalSearchFilter from "./GlobalSearchFilter";
 
 const OrgUnitTree = ({ denNum, onChange }: IndicatorProps) => {
   const store = useStore($store);
-  const [dimension, setDimension] = useState<"filter" | "dimension">("filter");
+  const [type, setType] = useState<"filter" | "dimension">("dimension");
+  const [q, setQ] = useState<string>("");
   const selected = Object.entries(denNum?.dataDimensions || {})
-    .filter(([k, { what }]) => what === "ou")
+    .filter(([k, { resource }]) => resource === "ou")
     .map(([key, { label }]) => {
       return key;
     });
   const [useGlobal, setUseGlobal] = useState<boolean>(
-    selected.indexOf("mclvD0Z9mfT") !== -1
+    () => selected.indexOf("mclvD0Z9mfT") !== -1
   );
   return (
     <Stack spacing="20px">
-      <GlobalAndFilter
-        denNum={denNum}
-        dimension={dimension}
-        setDimension={setDimension}
+      <GlobalSearchFilter
+        dimension="ou"
+        setType={setType}
         useGlobal={useGlobal}
         setUseGlobal={setUseGlobal}
-        type="ou"
+        resource="ou"
+        type={type}
         onChange={onChange}
+        setQ={setQ}
+        q={q}
         id={globalIds[5].value}
       />
     </Stack>

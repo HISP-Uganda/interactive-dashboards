@@ -11,7 +11,7 @@ import {
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { ChangeEvent, useState } from "react";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   changeIndicatorAttribute,
   changeNumeratorDimension,
@@ -149,12 +149,13 @@ const Indicator = () => {
             {dataSourceType !== "ELASTICSEARCH" && (
               <Stack direction="row" spacing="50px">
                 <Button
-                  onClick={() =>
+                  onClick={() => {
+                    console.log(indicator);
                     navigate({
                       to: `/indicators/${indicator.id}/numerator`,
                       search,
-                    })
-                  }
+                    });
+                  }}
                 >
                   Numerator
                 </Button>
