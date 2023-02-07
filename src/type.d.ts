@@ -6,3 +6,5 @@ declare module "@dhis2/ui";
 declare module "jsoneditor-react";
 declare module "deep-update-object";
 declare module "@dhis2-ui/modal";
+declare module "lodash-move";
+declare module "react-spring-dnd";

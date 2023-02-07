@@ -1,6 +1,6 @@
 import { Box, Stack, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { fromPairs } from "lodash";
+import { fromPairs, groupBy, sum } from "lodash";
 import { useElementSize } from "usehooks-ts";
 import { ChartProps } from "../../interfaces";
 import { $store } from "../../Store";
@@ -108,6 +108,68 @@ const Tables = ({
     data.map((d: any) => [`${d.dx}${d.pe}${d.Duw5yep8Vae}`, d.value])
   );
 
+  console.log(processed);
+
+  const processData = (dataElements: string[], child: boolean = false) => {
+    if (child) {
+      return {};
+    } else {
+      const filtered = data.filter(
+        ({ dx }: any) => dataElements.indexOf(dx) !== -1
+      );
+      const groupedByPeriod = groupBy(filtered, "pe");
+      let returnValue: { [key: string]: number } = {};
+      Object.entries(groupedByPeriod).forEach(([period, des]) => {
+        const groupedByDx = Object.entries(groupBy(des, "dx")).map(
+          ([dx, group]) => {
+            const actualValue = group.find(
+              ({ Duw5yep8Vae }: any) => Duw5yep8Vae === "HKtncMjp06U"
+            );
+            const targetValue = group.find(
+              ({ Duw5yep8Vae }: any) => Duw5yep8Vae === "Px8Lqkxy2si"
+            );
+
+            if (actualValue && targetValue) {
+              return {
+                a: Number(actualValue) >= Number(targetValue) ? 1 : 0,
+                b: Number(actualValue) <= Number(targetValue) ? 1 : 0,
+                c: 0,
+              };
+            }
+
+            if (actualValue) {
+              return {
+                a: 1,
+                b: 0,
+                c: 0,
+              };
+            }
+
+            if (targetValue) {
+              return {
+                a: 0,
+                b: 0,
+                c: 1,
+              };
+            }
+            return {
+              a: 0,
+              b: 0,
+              c: 0,
+            };
+          }
+        );
+        const a = sum(groupedByDx.map(({ a }) => a));
+        const b = sum(groupedByDx.map(({ b }) => b));
+        const c = sum(groupedByDx.map(({ c }) => c));
+        returnValue = {
+          ...returnValue,
+          ...{ [`${period}a`]: a, [`${period}b`]: b, [`${period}c`]: c },
+        };
+      });
+      return returnValue;
+    }
+  };
   return (
     <Stack w="100%" p="10px" h="100%">
       <Box h="100%" w="100%" ref={squareRef}>
@@ -118,18 +180,31 @@ const Tables = ({
           h={`${height}`}
           w="100%"
         >
-          <Table variant="simple" colorScheme="orange" w="100%" size="sm">
+          <Table variant="unstyled" w="100%">
             <Thead>
               <Tr>
-                <Th rowSpan={2} {...otherRows(0, 0)}>
-                  Indicator
-                </Th>
+                {store.originalColumns.map(({ title, id, w }, col) => (
+                  <Th
+                    borderColor="yellow.300"
+                    borderStyle="solid"
+                    borderWidth="thin"
+                    key={id}
+                    rowSpan={2}
+                    {...otherRows(0, col)}
+                    w={w}
+                  >
+                    {title}
+                  </Th>
+                ))}
                 {computeFinancialYears(2020).map((fy, index) => (
                   <Th
-                    colSpan={3}
+                    colSpan={store.columns.length}
                     key={fy.value}
                     {...otherRows(0, index + 1)}
                     textAlign="center"
+                    borderColor="yellow.300"
+                    borderStyle="solid"
+                    borderWidth="thin"
                   >
                     {fy.key}
                   </Th>
@@ -137,42 +212,66 @@ const Tables = ({
               </Tr>
               <Tr>
                 {computeFinancialYears(2020)
-                  .flatMap(() => [
-                    { key: generateUid(), value: "Baseline" },
-                    { key: generateUid(), value: "Target" },
-                    { key: generateUid(), value: "Actual" },
-                  ])
-                  .map(({ key, value }, index) => (
-                    <Th key={key} {...otherRows(1, index + 1)}>
-                      {value}
+                  .flatMap((fy) =>
+                    store.columns.map((c) => {
+                      return { ...c, id: `${c.id}${fy.value}` };
+                    })
+                  )
+                  .map(({ id, title }, index) => (
+                    <Th
+                      borderColor="yellow.300"
+                      borderStyle="solid"
+                      borderWidth="thin"
+                      key={id}
+                      {...otherRows(1, index + 1)}
+                    >
+                      {title}
                     </Th>
                   ))}
               </Tr>
             </Thead>
             <Tbody>
-              {store.dataElements.map(({ name, id }) => (
-                <Tr key={id}>
-                  <Td>{name}</Td>
-                  {computeFinancialYears(2020)
-                    .flatMap((fy) => [
-                      {
-                        key: generateUid(),
-                        value: processed[`${id}${fy.value}bqIaasqpTas`],
-                      },
-                      {
-                        key: generateUid(),
-                        value: processed[`${id}${fy.value}Px8Lqkxy2si`],
-                      },
-                      {
-                        key: generateUid(),
-                        value: processed[`${id}${fy.value}HKtncMjp06U`],
-                      },
-                    ])
-                    .map(({ key, value }) => (
-                      <Td key={`${id}${key}`}>{value}</Td>
-                    ))}
-                </Tr>
-              ))}
+              {store.rows.map((row, bigIndex) => {
+                const pd = processData(row.elements, row.child);
+                return (
+                  <Tr key={row.id}>
+                    {store.originalColumns.map(
+                      ({ title, id, type, w }, col) => (
+                        <Td
+                          borderColor="yellow.300"
+                          borderStyle="solid"
+                          borderWidth="thin"
+                          key={`${id}${row.id}`}
+                          w={w}
+                        >
+                          {col === 0 ? `${bigIndex + 1}. ${row[id]}` : row[id]}
+                        </Td>
+                      )
+                    )}
+                    {computeFinancialYears(2020)
+                      .flatMap((fy) =>
+                        store.columns.map(({ id: cId }) => {
+                          return {
+                            key: `${row.id}${fy.value}${cId}`,
+                            value:
+                              pd[`${fy.value}${cId}`] ||
+                              processed[`${row.id}${fy.value}${cId}`],
+                          };
+                        })
+                      )
+                      .map(({ key, value }) => (
+                        <Td
+                          borderColor="yellow.300"
+                          borderStyle="solid"
+                          borderWidth="thin"
+                          key={key}
+                        >
+                          {value}
+                        </Td>
+                      ))}
+                  </Tr>
+                );
+              })}
             </Tbody>
           </Table>
         </Box>

@@ -20,13 +20,13 @@ export class CQIDexie extends Dexie {
 
   constructor() {
     super("idvt");
-    this.version(2).stores({
+    this.version(1).stores({
       organisations: "++id,value,pId,title",
       themes: "++id,value,pId,title,key",
       expanded: "++id,name",
       expandedKeys: "++id,name",
       dataElements:
-        "++id,code,interventionCode,subKeyResultAreaCode,keyResultAreaCode,themeCode,programCode",
+        "++id,code,interventionCode,subKeyResultAreaCode,keyResultAreaCode,themeCode,programCode,degId,degsId",
       levels: "++value,label",
       groups: "++value,label",
       dataSets: "++value,label",

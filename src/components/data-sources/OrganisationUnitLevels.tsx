@@ -28,14 +28,15 @@ import { useOrganisationUnitLevels } from "../../Queries";
 import { $paginations } from "../../Store";
 import { globalIds } from "../../utils/utils";
 import GlobalAndFilter from "./GlobalAndFilter";
+import GlobalSearchFilter from "./GlobalSearchFilter";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
 const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
-  const [dimension, setDimension] = useState<"filter" | "dimension">("filter");
+  const [type, setType] = useState<"filter" | "dimension">("dimension");
   const selected = Object.entries(denNum?.dataDimensions || {})
-    .filter(([k, { what }]) => what === "oul")
+    .filter(([k, { resource }]) => resource === "oul")
     .map(([key]) => {
       return key;
     });
@@ -73,22 +74,20 @@ const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
 
   return (
     <Stack spacing="30px">
-      <GlobalAndFilter
+      <GlobalSearchFilter
         denNum={denNum}
-        dimension={dimension}
-        setDimension={setDimension}
+        dimension="ou"
+        setType={setType}
         useGlobal={useGlobal}
         setUseGlobal={setUseGlobal}
-        type="oul"
+        resource="oul"
+        prefix="LEVEL-"
+        type={type}
         onChange={onChange}
+        setQ={setQ}
+        q={q}
         id={globalIds[4].value}
       />
-      {!useGlobal && (
-        <Input
-          value={q}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setQ(e.target.value)}
-        />
-      )}
       {isLoading && (
         <Flex w="100%" alignItems="center" justifyContent="center">
           <Spinner />
@@ -122,14 +121,18 @@ const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
                       if (e.target.checked) {
                         onChange({
                           id: record.id,
-                          type: dimension,
-                          what: "oul",
+                          type,
+                          dimension: "ou",
+                          resource: "oul",
+                          prefix: "LEVEL-",
                         });
                       } else {
                         onChange({
                           id: record.id,
-                          type: dimension,
-                          what: "oul",
+                          type,
+                          dimension: "ou",
+                          resource: "oul",
+                          prefix: "LEVEL-",
                           remove: true,
                         });
                       }

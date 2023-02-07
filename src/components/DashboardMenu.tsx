@@ -17,6 +17,8 @@ import {
   useDisclosure,
   useMediaQuery,
   useToast,
+  Radio,
+  RadioGroup,
 } from "@chakra-ui/react";
 import { DropdownButton } from "@dhis2/ui";
 import { useNavigate, useSearch } from "@tanstack/react-location";
@@ -53,6 +55,13 @@ import AutoRefreshPicker from "./AutoRefreshPicker";
 import OUTree from "./OUTree";
 import { db } from "../db";
 import { generateUid } from "../utils/uid";
+import PeriodPicker from "./PeriodPicker";
+
+const searchOptions: Option[] = [
+  { label: "Data Element", value: "de" },
+  { label: "Data Element Group", value: "deg" },
+  { label: "Data Element Group Set", value: "degs" },
+];
 
 const DashboardMenu = () => {
   const search = useSearch<LocationGenerics>();
@@ -100,12 +109,11 @@ const DashboardMenu = () => {
     changePeriods(periods);
   };
 
-  const changeNodeSource = (value: string, field: "resource" | "fields") => {
-    setNodeSource({
-      resource: dashboard.nodeSource?.resource || "",
-      fields: dashboard.nodeSource?.fields,
-      [field]: value,
-    });
+  const changeNodeSource = (
+    value: string,
+    field: "resource" | "fields" | "search" | "subSearch"
+  ) => {
+    setNodeSource({ value, field });
   };
 
   return (
@@ -120,11 +128,10 @@ const DashboardMenu = () => {
       p="5px"
     >
       <Text
-        fontSize="2.1vh"
+        fontSize="2.5vh"
         fontWeight="700"
-        color="yellow.500"
         noOfLines={1}
-      >{`${dashboard.name} Dashboard`}</Text>
+      >{`${dashboard.name}`}</Text>
       <Spacer />
       {store.isAdmin && !isNotDesktop && (
         <>
@@ -169,18 +176,18 @@ const DashboardMenu = () => {
             boxShadow="2xl"
             overflow="auto"
             h="calc(100vh - 170px)"
+            
           >
             {/* <DashboardCategorization dataSet={dashboard.dataSet} /> */}
-            <Text>Organisation</Text>
+            <Text fontSize="2xl" color="yellow.500">Votes</Text>
             <OUTree
               value={store.organisations}
               onChange={(value) => setOrganisations(value)}
             />
-
-            {/* <PeriodPicker
+            <PeriodPicker
               selectedPeriods={store.periods}
               onChange={onChangePeriods}
-            /> */}
+            />
           </Stack>
         }
         style={{backgroundColor: "yellow"}}
@@ -245,9 +252,36 @@ const DashboardMenu = () => {
                   }
                 />
               </Stack>
+              <Stack>
+                <Text>Search</Text>
+                <Select<Option, false, GroupBase<Option>>
+                  options={searchOptions}
+                  value={searchOptions.find(
+                    (d: Option) =>
+                      dashboard.nodeSource &&
+                      d.value === dashboard.nodeSource.search
+                  )}
+                  onChange={(e) => changeNodeSource(e?.value || "", "search")}
+                  menuPlacement="auto"
+                />
+              </Stack>
+              <Stack>
+                <Text>Sub-Search</Text>
+                <Select<Option, false, GroupBase<Option>>
+                  options={searchOptions}
+                  value={searchOptions.find(
+                    (d: Option) =>
+                      dashboard.nodeSource &&
+                      d.value === dashboard.nodeSource.subSearch
+                  )}
+                  onChange={(e) =>
+                    changeNodeSource(e?.value || "", "subSearch")
+                  }
+                  menuPlacement="top"
+                />
+              </Stack>
               <Button
                 onClick={async () => {
-                  console.log(dashboard.nodeSource);
                   await db.dashboards.bulkPut([
                     {
                       isLeaf: !dashboard.hasChildren,

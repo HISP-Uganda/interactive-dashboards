@@ -123,6 +123,16 @@ export const globalIds: Option[] = [
     value: "IK4jwzIuqNO",
     id: "paoc",
   },
+  {
+    label: "Data Element Group",
+    value: "JsPfHe1QkJe",
+    id: "deg",
+  },
+  {
+    label: "Data Element Group Set",
+    value: "HdiJ61vwqTX",
+    id: "degs",
+  },
 ];
 
 export const convertTime = (value: string) => {

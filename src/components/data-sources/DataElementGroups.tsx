@@ -10,7 +10,6 @@ import {
   Checkbox,
   Flex,
   Heading,
-  Input,
   Spinner,
   Stack,
   Table,
@@ -24,29 +23,27 @@ import {
 import { useStore } from "effector-react";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
-import { useProgramIndicators } from "../../Queries";
+import { useDataElementGroups } from "../../Queries";
 import { $paginations } from "../../Store";
 import { globalIds } from "../../utils/utils";
-import GlobalAndFilter from "./GlobalAndFilter";
 import GlobalSearchFilter from "./GlobalSearchFilter";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
-const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
+const DataElementGroups = ({ onChange, denNum }: IndicatorProps) => {
+  const paginations = useStore($paginations);
   const [type, setType] = useState<"filter" | "dimension">("dimension");
 
   const selected = Object.entries(denNum?.dataDimensions || {})
-    .filter(([k, { resource }]) => resource === "pi")
+    .filter(([k, { resource }]) => resource === "deg")
     .map(([key]) => {
       return key;
     });
-  const [useGlobal, setUseGlobal] = useState<boolean>(
-    () => selected.indexOf("Eep3rko7uh6") !== -1
-  );
   const [q, setQ] = useState<string>("");
-  const paginations = useStore($paginations);
-
+  const [useGlobal, setUseGlobal] = useState<boolean>(
+    () => selected.indexOf("JsPfHe1QkJe") !== -1
+  );
   const {
     pages,
     pagesCount,
@@ -56,7 +53,7 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
     pageSize,
     setPageSize,
   } = usePagination({
-    total: paginations.totalProgramIndicators,
+    total: paginations.totalDataElementGroups,
     limits: {
       outer: OUTER_LIMIT,
       inner: INNER_LIMIT,
@@ -66,21 +63,10 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
       currentPage: 1,
     },
   });
-
-  const selectedProgramIndicators = Object.entries(
-    denNum?.dataDimensions || {}
-  ).flatMap(([i, { resource }]) => {
-    if (resource === "pi") {
-      return i;
-    }
-    return [];
-  });
-
-  const { isLoading, isSuccess, isError, error, data } = useProgramIndicators(
+  const { isLoading, isSuccess, isError, error, data } = useDataElementGroups(
     currentPage,
     pageSize,
-    q,
-    selectedProgramIndicators
+    q
   );
 
   const handlePageChange = (nextPage: number) => {
@@ -88,26 +74,27 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
   };
 
   return (
-    <Stack spacing="30px">
+    <Stack spacing="5px">
       <GlobalSearchFilter
         denNum={denNum}
         dimension="dx"
         setType={setType}
         useGlobal={useGlobal}
         setUseGlobal={setUseGlobal}
-        resource="pi"
+        resource="deg"
         type={type}
         onChange={onChange}
         setQ={setQ}
         q={q}
-        id={globalIds[1].value}
+        prefix="DE_GROUP-"
+        id={globalIds[12].value}
       />
       {isLoading && (
         <Flex w="100%" alignItems="center" justifyContent="center">
           <Spinner />
         </Flex>
       )}
-      {isSuccess && data && (
+      {isSuccess && !useGlobal && (
         <Table variant="striped" colorScheme="gray" textTransform="none">
           <Thead>
             <Tr py={1}>
@@ -126,8 +113,8 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
               </Th>
             </Tr>
           </Thead>
-          <Tbody py={10}>
-            {data.map((record: any) => (
+          <Tbody>
+            {data?.map((record: any) => (
               <Tr key={record.id}>
                 <Td>
                   <Checkbox
@@ -137,19 +124,21 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
                           id: record.id,
                           type,
                           dimension: "dx",
-                          resource: "pi",
+                          resource: "deg",
+                          prefix: "DE_GROUP-",
                         });
                       } else {
                         onChange({
                           id: record.id,
                           type,
                           dimension: "dx",
-                          resource: "pi",
+                          resource: "deg",
+                          prefix: "DE_GROUP-",
                           remove: true,
                         });
                       }
                     }}
-                    isChecked={!!denNum?.dataDimensions?.[record.id]}
+                    checked={!!denNum?.dataDimensions?.[record.id]}
                   />
                 </Td>
                 <Td>{record.id}</Td>
@@ -196,4 +185,4 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
   );
 };
 
-export default ProgramIndicators;
+export default DataElementGroups;
