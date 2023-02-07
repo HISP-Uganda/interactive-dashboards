@@ -1,4 +1,15 @@
-import { Box, Stack, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
+import {
+  Box,
+  Stack,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+  Text,
+  SimpleGrid,
+} from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { fromPairs, groupBy, sum } from "lodash";
 import { useElementSize } from "usehooks-ts";
@@ -12,8 +23,11 @@ interface TableProps extends ChartProps {
 }
 
 const computeFinancialYears = (year: number) => {
-  return [0, 1, 2].map((val) => {
-    return { value: `${year + val}July`, key: `FY${year + val}` };
+  return [0, 1, 2, 3, 4].map((val) => {
+    return {
+      value: `${year + val}July`,
+      key: `${year + val}/${String(year + val + 1).slice(2)}`,
+    };
   });
 };
 
@@ -52,11 +66,11 @@ const otherRows = (row: number, column: number, bg: string = "white") => {
       minWidth: "400px",
       maxWidth: "400px",
       left: "0px",
-      top: "0px",
+      top: "60px",
       h: "50px",
       minH: "50px",
       maxH: "50px",
-      zIndex: 2000,
+      zIndex: 4000,
     } as any;
   }
   if (row === 0 && column > 0) {
@@ -66,7 +80,7 @@ const otherRows = (row: number, column: number, bg: string = "white") => {
       h: "20px",
       minH: "20px",
       maxH: "20px",
-      top: "0px",
+      top: "60px",
       zIndex: 2000,
     } as any;
   }
@@ -78,7 +92,7 @@ const otherRows = (row: number, column: number, bg: string = "white") => {
       h: "20px",
       minH: "20px",
       maxH: "20px",
-      top: "25px",
+      top: "100px",
       zIndex: 2000,
     } as any;
   }
@@ -107,8 +121,6 @@ const Tables = ({
   const processed: { [key: string]: string } = fromPairs(
     data.map((d: any) => [`${d.dx}${d.pe}${d.Duw5yep8Vae}`, d.value])
   );
-
-  console.log(processed);
 
   const processData = (dataElements: string[], child: boolean = false) => {
     if (child) {
@@ -180,17 +192,78 @@ const Tables = ({
           h={`${height}`}
           w="100%"
         >
-          <Table variant="unstyled" w="100%">
+          <SimpleGrid
+            columns={4}
+            gap="2px"
+            alignItems="center"
+            zIndex="1000000"
+            bg="white"
+            top="0"
+            position="sticky"
+          >
+            <Stack
+              h="50px"
+              fontSize="xl"
+              fontWeight="semi-bold"
+              bg="#398E3D"
+              alignItems="center"
+              alignContent="center"
+              justifyItems="center"
+              justifyContent="center"
+            >
+              <Text>Achieved (&gt;= 100% )</Text>
+            </Stack>
+            <Stack
+              h="50px"
+              fontSize="xl"
+              fontWeight="semi-bold"
+              bg="yellow.300"
+              alignItems="center"
+              alignContent="center"
+              justifyItems="center"
+              justifyContent="center"
+            >
+              <Text>Moderately achieved (75-99%)</Text>
+            </Stack>
+            <Stack
+              h="50px"
+              fontSize="xl"
+              fontWeight="semi-bold"
+              bg="red.400"
+              alignItems="center"
+              alignContent="center"
+              justifyItems="center"
+              justifyContent="center"
+            >
+              <Text>Not achieved (&lt;75%)</Text>
+            </Stack>
+            <Stack
+              h="50px"
+              fontSize="xl"
+              fontWeight="semi-bold"
+              bg="#AAAAAA"
+              alignItems="center"
+              alignContent="center"
+              justifyItems="center"
+              justifyContent="center"
+            >
+              <Text>No data</Text>
+            </Stack>
+          </SimpleGrid>
+          <Table variant="simple" w="100%">
             <Thead>
               <Tr>
                 {store.originalColumns.map(({ title, id, w }, col) => (
                   <Th
-                    borderColor="yellow.300"
+                    borderColor="#DDDDDD"
                     borderStyle="solid"
                     borderWidth="thin"
+                    color="black"
+                    fontSize="lg"
                     key={id}
                     rowSpan={2}
                     {...otherRows(0, col)}
+                    fontWeight="extrabold"
                     w={w}
                   >
                     {title}
@@ -201,9 +274,12 @@ const Tables = ({
                     colSpan={store.columns.length}
                     key={fy.value}
                     {...otherRows(0, index + 1)}
+                    fontWeight="extrabold"
                     textAlign="center"
-                    borderColor="yellow.300"
+                    borderColor="#DDDDDD"
+                    fontSize="md"
                     borderStyle="solid"
+                    color="black"
                     borderWidth="thin"
                   >
                     {fy.key}
@@ -219,9 +295,12 @@ const Tables = ({
                   )
                   .map(({ id, title }, index) => (
                     <Th
-                      borderColor="yellow.300"
+                      borderColor="#DDDDDD"
                       borderStyle="solid"
                       borderWidth="thin"
+                      fontWeight="bold"
+                      color="black"
+                      fontSize="sm"
                       key={id}
                       {...otherRows(1, index + 1)}
                     >
@@ -238,7 +317,7 @@ const Tables = ({
                     {store.originalColumns.map(
                       ({ title, id, type, w }, col) => (
                         <Td
-                          borderColor="yellow.300"
+                          borderColor="#DDDDDD"
                           borderStyle="solid"
                           borderWidth="thin"
                           key={`${id}${row.id}`}
@@ -251,20 +330,52 @@ const Tables = ({
                     {computeFinancialYears(2020)
                       .flatMap((fy) =>
                         store.columns.map(({ id: cId }) => {
+                          let bg = "";
+                          let color = "";
+                          const actual =
+                            processed[`${row.id}${fy.value}${cId}`];
+                          const target =
+                            processed[`${row.id}${fy.value}Px8Lqkxy2si`];
+
+                          if (cId === "HKtncMjp06U" && actual && target) {
+                            const percentage =
+                              (Number(actual) * 100) / Number(target);
+                            if (percentage >= 100) {
+                              bg = "#398E3D";
+                              // color = "white";
+                            } else if (percentage >= 75) {
+                              bg = "yellow.300";
+                              // color = "white";
+                            } else {
+                              bg = "red.400";
+                              // color = "white";
+                            }
+                          } else if (cId === "HKtncMjp06U" && !actual) {
+                            bg = "#AAAAAA";
+                          }
+                          if (cId === "Px8Lqkxy2si" && actual) {
+                          } else if (cId === "Px8Lqkxy2si") {
+                          }
                           return {
                             key: `${row.id}${fy.value}${cId}`,
                             value:
                               pd[`${fy.value}${cId}`] ||
                               processed[`${row.id}${fy.value}${cId}`],
+                            bg,
+                            color,
                           };
                         })
                       )
-                      .map(({ key, value }) => (
+                      .map(({ key, value, bg, color }) => (
                         <Td
-                          borderColor="yellow.300"
+                          borderColor="#DDDDDD"
                           borderStyle="solid"
                           borderWidth="thin"
                           key={key}
+                          bg={bg}
+                          color={color}
+                          // fontWeight="bold"
+                          textAlign="center"
                         >
                           {value}
                         </Td>
