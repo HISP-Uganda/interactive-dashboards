@@ -10,7 +10,6 @@ import {
   Checkbox,
   Flex,
   Heading,
-  Spinner,
   Stack,
   Table,
   Tbody,
@@ -27,6 +26,7 @@ import { useOrganisationUnitGroupSets } from "../../Queries";
 import { $paginations } from "../../Store";
 import { globalIds } from "../../utils/utils";
 import GlobalSearchFilter from "./GlobalSearchFilter";
+import LoadingIndicator from "../LoadingIndicator";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
@@ -85,7 +85,7 @@ const OrganizationUnitGroupSets = ({ denNum, onChange }: IndicatorProps) => {
       />
       {isLoading && (
         <Flex w="100%" alignItems="center" justifyContent="center">
-          <Spinner />
+          <LoadingIndicator />
         </Flex>
       )}
       {isSuccess && data && !useGlobal && (

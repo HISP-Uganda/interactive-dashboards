@@ -4,7 +4,6 @@ import {
   Button,
   Divider,
   Spacer,
-  Spinner,
   Stack,
   Table,
   Tbody,
@@ -21,6 +20,7 @@ import { deleteDocument, useDataSources } from "../../Queries";
 import { $store } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import { generalPadding, otherHeight } from "../constants";
+import LoadingIndicator from "../LoadingIndicator";
 const DataSources = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
@@ -67,7 +67,7 @@ const DataSources = () => {
         alignItems="center"
         flex={1}
       >
-        {isLoading && <Spinner />}
+        {isLoading && <LoadingIndicator />}
         {isSuccess && (
           <Table variant="striped" w="100%">
             <Thead>

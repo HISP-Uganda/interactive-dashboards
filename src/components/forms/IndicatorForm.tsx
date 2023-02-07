@@ -1,4 +1,4 @@
-import { Spinner, Stack, Text } from "@chakra-ui/react";
+import { Stack, Text } from "@chakra-ui/react";
 import { useMatch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { LocationGenerics } from "../../interfaces";
@@ -6,6 +6,7 @@ import { useVisualizationDatum } from "../../Queries";
 import { $store } from "../../Store";
 import { generalPadding, otherHeight } from "../constants";
 import Indicator from "./Indicator";
+import LoadingIndicator from "../LoadingIndicator";
 
 export default function IndicatorForm() {
   const {
@@ -29,7 +30,7 @@ export default function IndicatorForm() {
       alignItems="center"
       w="100%"
     >
-      {isLoading && <Spinner />}
+      {isLoading && <LoadingIndicator />}
       {isSuccess && <Indicator />}
       {isError && <Text>No data/Error occurred</Text>}
     </Stack>

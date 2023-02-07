@@ -36,7 +36,7 @@ const SectionVisualization = (section: ISection) => {
         }}
       >
         <Marquee
-          velocity={20}
+          velocity={100}
           direction="rtl"
           onFinish={() => {}}
           resetAfterTries={200}

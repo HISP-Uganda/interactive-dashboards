@@ -3,7 +3,6 @@ import {
   Button,
   Divider,
   Spacer,
-  Spinner,
   Stack,
   Table,
   Tbody,
@@ -30,6 +29,7 @@ import { $dashboards, $store, createDashboard } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import { generalPadding, otherHeight } from "../constants";
 import { db } from "../../db";
+import LoadingIndicator from "../LoadingIndicator";
 
 const Dashboards = () => {
   const navigate = useNavigate();
@@ -71,7 +71,7 @@ const Dashboards = () => {
       </Stack>
       <Divider borderColor="blue.500" />
       <Stack alignContent="center" alignItems="center" flex={1}>
-        {isLoading && <Spinner />}
+        {isLoading && <LoadingIndicator />}
         {isSuccess && (
           <Table variant="striped" w="100%">
             <Thead>

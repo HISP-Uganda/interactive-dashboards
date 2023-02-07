@@ -5,7 +5,6 @@ import {
   GridItem,
   IconButton,
   Image,
-  Spinner,
   Stack,
   useMediaQuery,
   Text,
@@ -57,6 +56,7 @@ import MOHLogo from "./MOHLogo";
 import MOHLogo2 from "./MOHLogo2";
 import SectionMenu from "./SectionMenu";
 import SidebarContent from "./SidebarContent";
+import LoadingIndicator from "./LoadingIndicator";
 
 const history = createHashHistory();
 const location = new ReactLocation<LocationGenerics>({
@@ -241,14 +241,14 @@ const App = () => {
           justifyContent="center"
           h="calc(100vh - 48px)"
         >
-          <Spinner />
+          <LoadingIndicator/>
         </Flex>
       )}
       {isSuccess && (
         <Router
           location={location}
           routes={routes}
-          defaultPendingElement={<Spinner />}
+          defaultPendingElement={<LoadingIndicator/>}
         >
           <Grid
             templateColumns={{ md: "auto", lg: dashboardColumns }}
@@ -257,6 +257,7 @@ const App = () => {
             p={`${padding}px`}
             w="100vw"
             maxW="100vw"
+            
           >
             {showSide && (
               <Grid
@@ -265,6 +266,7 @@ const App = () => {
                 gap={`${padding}px`}
                 h={dashboardHeight}
                 maxH={dashboardHeight}
+                bg="#FEE300"
               >
                 <Stack
                   h="100%"
@@ -277,11 +279,22 @@ const App = () => {
                   spacing="20px"
                 >
                   <MOHLogo height={otherHeaders} width={sideWidth} />
-                  <Stack spacing={0}>
-                    <Text textTransform="uppercase" fontWeight="bold">
+                  <Stack
+                    spacing={0}
+                    alignItems="center"
+                    alignContent="center"
+                    justifyContent="center"
+                    justifyItems="center"
+                  >
+                    <Text
+                      textTransform="uppercase"
+                      fontWeight="extrabold"
+                      fontSize="xl"
+                      
+                    >
                       Office of the President
                     </Text>
-                    <Text>The Republic of Uganda</Text>
+                    <Text fontWeight="semi-bold" color="red">The Republic of Uganda</Text>
                   </Stack>
                 </Stack>
                 <GridItem>
@@ -307,6 +320,7 @@ const App = () => {
                 h={handle.active ? "100vh" : dashboardHeight}
                 maxH={handle.active ? "100vh" : dashboardHeight}
                 bgColor={handle.active ? "gray.300" : ""}
+                bg="yellow.300"
               >
                 <GridItem
                   h="100%"

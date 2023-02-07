@@ -1,10 +1,11 @@
-import { Spinner, Stack, Text } from "@chakra-ui/react";
+import { Stack, Text } from "@chakra-ui/react";
 
 import { useMatch } from "@tanstack/react-location";
 import { LocationGenerics } from "../../interfaces";
 import { useCategory } from "../../Queries";
 import { generalPadding, otherHeight } from "../constants";
 import Category from "./Category";
+import LoadingIndicator from "../LoadingIndicator";
 export default function CategoryForm() {
   const {
     params: { categoryId },
@@ -24,7 +25,7 @@ export default function CategoryForm() {
       alignItems="center"
       w="100%"
     >
-      {isLoading && <Spinner />}
+      {isLoading && <LoadingIndicator />}
       {isSuccess && <Category />}
       {isError && <Text>No data/Error occurred</Text>}
     </Stack>

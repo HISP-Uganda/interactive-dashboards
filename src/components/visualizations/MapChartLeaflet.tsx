@@ -1,11 +1,12 @@
 import { useRef } from "react";
-import { Spinner, Stack, Text, useDimensions } from "@chakra-ui/react";
+import { Stack, Text, useDimensions } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { ChartProps, Threshold } from "../../interfaces";
 import { findLevelsAndOus, useMaps } from "../../Queries";
 import { $globalFilters, $indicators, $store } from "../../Store";
 import MapVisualization from "./MapVisualization";
 import VisualizationTitle from "./VisualizationTitle";
+import LoadingIndicator from "../LoadingIndicator";
 
 const MapChartLeaflet = ({
   visualization,
@@ -49,7 +50,7 @@ const MapChartLeaflet = ({
 
   return (
     <>
-      {isLoading && <Spinner />}
+      {isLoading && <LoadingIndicator />}
       {isSuccess && (
         <Stack w="100%" h="100%" spacing="0" flex={1}>
           {visualization.name && (

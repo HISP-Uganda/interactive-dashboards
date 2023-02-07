@@ -3,7 +3,6 @@ import {
   Button,
   Input,
   Spacer,
-  Spinner,
   Stack,
   Table,
   Tbody,
@@ -28,6 +27,7 @@ import { $store, createIndicator } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import { generalPadding, otherHeight } from "../constants";
 import PaginatedTable from "./PaginatedTable";
+import LoadingIndicator from "../LoadingIndicator";
 
 const Indicators = () => {
   const navigate = useNavigate();
@@ -113,7 +113,7 @@ const Indicators = () => {
         alignItems="center"
         flex={1}
       >
-        {isLoading && <Spinner />}
+        {isLoading && <LoadingIndicator />}
         {isSuccess && (
           <Stack spacing="10px" w="100%">
             <Table variant="striped">

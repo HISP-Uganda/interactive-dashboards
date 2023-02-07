@@ -1,8 +1,9 @@
-import { Spinner, Text } from "@chakra-ui/react";
+import { Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { useDashboards } from "../Queries";
 import { $categoryOptions, $store } from "../Store";
 import DashboardTree from "./DashboardTree";
+import LoadingIndicator from "./LoadingIndicator";
 
 export default function DashboardList() {
   const store = useStore($store);
@@ -13,7 +14,7 @@ export default function DashboardList() {
 
   return (
     <>
-      {isLoading && <Spinner />}
+      {isLoading && <LoadingIndicator />}
       {isSuccess && (
         // <Stack spacing="40px" p="5px">
         //   {categoryOptions

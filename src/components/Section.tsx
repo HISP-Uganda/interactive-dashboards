@@ -44,6 +44,7 @@ import { headerHeight } from "./constants";
 import SectionImages from "./SectionImages";
 import SectionVisualization from "./SectionVisualization";
 import VisualizationProperties from "./visualizations/VisualizationProperties";
+import LoadingIndicator from "./LoadingIndicator";
 
 const alignmentOptions: Option[] = [
   { label: "flex-start", value: "flex-start" },
@@ -93,7 +94,7 @@ const VisualizationQuery = ({
   return (
     <Stack>
       <Text>Visualization Query</Text>
-      {isLoading && <Spinner />}
+      {isLoading && <LoadingIndicator />}
       {isSuccess && (
         <Select<Option, true, GroupBase<Option>>
           isMulti

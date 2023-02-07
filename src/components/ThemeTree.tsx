@@ -11,6 +11,7 @@ import { setDataElements, setThemes } from "../Events";
 import { DataNode } from "../interfaces";
 import { useTheme } from "../Queries";
 import { $store } from "../Store";
+import LoadingIndicator from "./LoadingIndicator";
 
 function TreeObject() {
   const treeData = useLiveQuery(() => db.themes.toArray());
@@ -193,7 +194,7 @@ export default function ThemeTree() {
   const { isLoading, isError, isSuccess, error } = useTheme("CpVpEK1vno7");
   return (
     <Stack>
-      {isLoading && <Spinner />}
+      {isLoading && <LoadingIndicator />}
       {isSuccess && <TreeObject />}
       {isError && <Text>No data/Error occurred</Text>}
     </Stack>

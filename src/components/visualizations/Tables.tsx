@@ -275,7 +275,7 @@ const Tables = ({
           >
             <Stack
               h="50px"
-              fontSize="xl"
+              fontSize="2xl"
               fontWeight="semi-bold"
               bg="#398E3D"
               alignItems="center"
@@ -283,46 +283,46 @@ const Tables = ({
               justifyItems="center"
               justifyContent="center"
             >
-              <Text>Achieved (&gt;= 100% )</Text>
+              <Text color="white" fontWeight="extrabold">Achieved (&gt;= 100% )</Text>
             </Stack>
             <Stack
               h="50px"
-              fontSize="xl"
+              fontSize="2xl"
               fontWeight="semi-bold"
-              bg="yellow.300"
+              bg="#F1BD19"
               alignItems="center"
               alignContent="center"
               justifyItems="center"
               justifyContent="center"
             >
-              <Text>Moderately achieved (75-99%)</Text>
+              <Text color="white" fontWeight="extrabold">Moderately achieved (75-99%)</Text>
             </Stack>
             <Stack
               h="50px"
-              fontSize="xl"
+              fontSize="2xl"
               fontWeight="semi-bold"
-              bg="red.400"
+              bg="red.500"
               alignItems="center"
               alignContent="center"
               justifyItems="center"
               justifyContent="center"
             >
-              <Text>Not achieved (&lt;75%)</Text>
+              <Text color="white" fontWeight="extrabold">Not achieved (&lt;75%)</Text>
             </Stack>
             <Stack
               h="50px"
-              fontSize="xl"
+              fontSize="2xl"
               fontWeight="semi-bold"
-              bg="#AAAAAA"
+              bg="#CACBCC"
               alignItems="center"
               alignContent="center"
               justifyItems="center"
               justifyContent="center"
             >
-              <Text>No data</Text>
+              <Text fontWeight="extrabold">No data</Text>
             </Stack>
           </SimpleGrid>
-          <Table variant="simple" w="100%">
+          <Table  w="100%" colorScheme='teal'>
             <Thead>
               <Tr>
                 {store.originalColumns.map(({ title, id, w }, col) => (

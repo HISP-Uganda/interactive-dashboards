@@ -4,7 +4,6 @@ import {
   Button,
   Divider,
   Spacer,
-  Spinner,
   Stack,
   Table,
   Tbody,
@@ -21,6 +20,7 @@ import { deleteDocument, useCategories } from "../../Queries";
 import { $category, $store } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import { generalPadding, otherHeight } from "../constants";
+import LoadingIndicator from "../LoadingIndicator";
 
 const Categories = () => {
   const navigate = useNavigate();
@@ -68,7 +68,7 @@ const Categories = () => {
         alignItems="center"
         flex={1}
       >
-        {isLoading && <Spinner />}
+        {isLoading && <LoadingIndicator />}
         {isSuccess && (
           <Table variant="striped" w="100%">
             <Thead>

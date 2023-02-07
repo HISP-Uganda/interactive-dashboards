@@ -1,9 +1,10 @@
-import { Spinner, Stack, Text } from "@chakra-ui/react";
+import { Stack, Text } from "@chakra-ui/react";
 import { useMatch } from "@tanstack/react-location";
 import { LocationGenerics } from "../../interfaces";
 import { useDataSource } from "../../Queries";
 import { generalPadding, otherHeight } from "../constants";
 import DataSource from "./DataSource";
+import LoadingIndicator from "../LoadingIndicator";
 
 export default function DataSourceForm() {
   const {
@@ -23,7 +24,7 @@ export default function DataSourceForm() {
       alignItems="center"
       w="100%"
     >
-      {isLoading && <Spinner />}
+      {isLoading && <LoadingIndicator />}
       {isSuccess && <DataSource />}
       {isError && <Text>No data/Error occurred</Text>}
     </Stack>

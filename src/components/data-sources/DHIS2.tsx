@@ -6,7 +6,6 @@ import {
   TabPanels,
   Tabs,
   Text,
-  Spinner,
   Button,
   Flex,
 } from "@chakra-ui/react";
@@ -28,6 +27,7 @@ import { useElementSize } from "usehooks-ts";
 import OrganizationUnitGroupSets from "./OrganisationUnitGroupSets";
 import DataElementGroups from "./DataElementGroups";
 import DataElementGroupSets from "./DataElementGroupSets";
+import LoadingIndicator from "../LoadingIndicator";
 
 const DHIS2 = ({ onChange, denNum, changeQuery }: IndicatorProps) => {
   const { error, data, isError, isLoading, isSuccess } = useDimensions();
@@ -101,7 +101,7 @@ const DHIS2 = ({ onChange, denNum, changeQuery }: IndicatorProps) => {
 
   return (
     <Stack w="100%" h="100%">
-      {isLoading && <Spinner />}
+      {isLoading && <LoadingIndicator />}
       {isSuccess && denNum?.type === "ANALYTICS" && (
         <Stack w="100%" h="100%">
           <Flex

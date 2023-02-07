@@ -1,10 +1,11 @@
 // import { ResponsiveChoropleth } from "@nivo/geo";
-import { Spinner, Stack, Text } from "@chakra-ui/react";
+import { Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { ChartProps, Threshold } from "../../interfaces";
 import { findLevelsAndOus, useMaps } from "../../Queries";
 import { $indicators, $store } from "../../Store";
 import VisualizationTitle from "./VisualizationTitle";
+import LoadingIndicator from "../LoadingIndicator";
 
 export default function ({
   visualization,
@@ -45,7 +46,7 @@ export default function ({
   );
   return (
     <>
-      {isLoading && <Spinner />}
+      {isLoading && <LoadingIndicator />}
       {isSuccess && (
         <Stack w="100%" h="100%" spacing={0}>
           {visualization.name && (
