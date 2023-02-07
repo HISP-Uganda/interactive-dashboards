@@ -1,5 +1,4 @@
 import { useDataEngine } from "@dhis2/app-runtime";
-import "antd/dist/antd.css";
 import TreeSelect from "antd/lib/tree-select";
 import { flatten, uniqBy } from "lodash";
 import { useState } from "react";

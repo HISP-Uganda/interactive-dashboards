@@ -5,7 +5,6 @@ import { GroupBase, Select } from "chakra-react-select";
 import React, { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useDataEngine } from "@dhis2/app-runtime";
-import "antd/dist/antd.css";
 import { useStore } from "effector-react";
 import { flatMapDeep, isArray, max } from "lodash";
 import {
