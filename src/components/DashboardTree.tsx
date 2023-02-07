@@ -1,28 +1,27 @@
+import { CarryOutOutlined } from "@ant-design/icons";
 import { useDataEngine } from "@dhis2/app-runtime";
-import { useNavigate, useSearch } from "@tanstack/react-location";
+import { useMatch, useNavigate, useSearch } from "@tanstack/react-location";
 import { Tree } from "antd";
-import {
-  CarryOutOutlined,
-  CheckOutlined,
-  FormOutlined,
-} from "@ant-design/icons";
 import { EventDataNode } from "antd/es/tree";
 import arrayToTree from "array-to-tree";
 import { useLiveQuery } from "dexie-react-hooks";
+import { uniq } from "lodash";
 import React, { useState } from "react";
 import { db } from "../db";
-import { DataNode, LocationGenerics } from "../interfaces";
 import {
-  setDataElements,
-  updateVisualizationData,
-  setRows,
-  setOriginalColumns,
   setColumns,
+  setDataElements,
+  setOriginalColumns,
+  setRows,
+  updateVisualizationData,
 } from "../Events";
-import { uniq } from "lodash";
+import { DataNode, LocationGenerics } from "../interfaces";
 
 export default function DashboardTree() {
   const search = useSearch<LocationGenerics>();
+  const {
+    params: { dashboardId },
+  } = useMatch<LocationGenerics>();
   const navigate = useNavigate();
   const [autoExpandParent, setAutoExpandParent] = useState<boolean>(false);
   const [checkedKeys, setCheckedKeys] = useState<
@@ -128,6 +127,7 @@ export default function DashboardTree() {
       });
       setDataElements(elements);
       setCheckedKeys({ checked: [], halfChecked: [] });
+
       navigate({
         to: `/dashboards/${info.node.key}`,
         search,
