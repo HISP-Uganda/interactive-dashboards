@@ -130,7 +130,6 @@ const DashboardMenu = () => {
       <Text
         fontSize="2.5vh"
         fontWeight="700"
-        // color="blue.600"
         noOfLines={1}
       >{`${dashboard.name}`}</Text>
       <Spacer />
@@ -166,7 +165,8 @@ const DashboardMenu = () => {
       )}
       {store.isAdmin && !isNotDesktop && <AutoRefreshPicker />}
       <DropdownButton
-        primary
+        // 
+        
         component={
           <Stack
             w="600px"
@@ -176,9 +176,10 @@ const DashboardMenu = () => {
             boxShadow="2xl"
             overflow="auto"
             h="calc(100vh - 170px)"
+            
           >
             {/* <DashboardCategorization dataSet={dashboard.dataSet} /> */}
-            <Text>Organisation</Text>
+            <Text fontSize="2xl" color="yellow.500">Votes</Text>
             <OUTree
               value={store.organisations}
               onChange={(value) => setOrganisations(value)}
@@ -189,8 +190,10 @@ const DashboardMenu = () => {
             />
           </Stack>
         }
+        style={{backgroundColor: "yellow"}}
         name="buttonName"
         value="buttonValue"
+        className="nrm"
       >
         Filter
       </DropdownButton>
