@@ -1,10 +1,7 @@
-import { Spinner, Stack, Text } from "@chakra-ui/react";
+import { Spinner, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { groupBy } from "lodash";
 import { useDashboards } from "../Queries";
-import { $categoryOptions, $globalFilters, $store } from "../Store";
-import NavItem from "./NavItem";
-import ThemeTree from "./ThemeTree";
+import { $categoryOptions, $store } from "../Store";
 import DashboardTree from "./DashboardTree";
 
 export default function DashboardList() {
@@ -13,6 +10,7 @@ export default function DashboardList() {
     store.systemId
   );
   const categoryOptions = useStore($categoryOptions);
+
   return (
     <>
       {isLoading && <Spinner />}

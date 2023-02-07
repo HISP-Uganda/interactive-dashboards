@@ -172,6 +172,7 @@ export interface DataNode extends IDataNode {
     subSearch: string;
   }>;
   hasChildren?: boolean;
+  bg?: string;
 }
 
 export interface Option extends OptionBase {

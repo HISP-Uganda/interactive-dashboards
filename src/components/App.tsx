@@ -241,13 +241,7 @@ const App = () => {
           justifyContent="center"
           h="calc(100vh - 48px)"
         >
-          <Spinner 
-            thickness='5px'
-            speed='0.65s'
-            // emptyColor='white.200'
-            color='yellow.500'
-            size='xl'
-          />
+          <Spinner />
         </Flex>
       )}
       {isSuccess && (
@@ -266,12 +260,11 @@ const App = () => {
           >
             {showSide && (
               <Grid
-                templateRows={`${otherHeaders}px 1fr ${otherHeaders}px`}
+                templateRows={`${otherHeaders}px 1fr`}
                 pr={`${padding}px`}
                 gap={`${padding}px`}
                 h={dashboardHeight}
                 maxH={dashboardHeight}
-                // bg="yellow.300"
               >
                 <Stack
                   h="100%"
@@ -282,8 +275,6 @@ const App = () => {
                   justifyItems="center"
                   direction="row"
                   spacing="20px"
-                  //bg="yellow.300"
-                  
                 >
                   <MOHLogo height={otherHeaders} width={sideWidth} />
                   <Stack spacing={0}>
@@ -293,8 +284,7 @@ const App = () => {
                     <Text>The Republic of Uganda</Text>
                   </Stack>
                 </Stack>
-                
-                <GridItem >
+                <GridItem>
                   <SidebarContent />
                 </GridItem>
                 {/* <Stack
@@ -304,14 +294,7 @@ const App = () => {
                   alignContent="center"
                   justifyContent="center"
                   justifyItems="center"
-                  bg="tomato"
-
                 >
-                  <Image
-                    src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/logo.png"
-                    maxH={`${otherHeaders}px`}
-                    maxW={`${sideWidth}px`}
-                  />
                 </Stack> */}
               </Grid>
             )}
@@ -340,15 +323,6 @@ const App = () => {
                     w="100%"
                     spacing="40px"
                   >
-                    {/* {(handle.active || !showSide) && (
-                      <MOHLogo2>
-                        <Image
-                          src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/Coat_of_arms_of_Uganda.svg"
-                          maxH={`${otherHeaders}px`}
-                          maxW={`${sideWidth}px`}
-                        />
-                      </MOHLogo2>
-                    )} */}
                     {!handle.active && !store.showSider && (
                       <IconButton
                         bgColor="none"
