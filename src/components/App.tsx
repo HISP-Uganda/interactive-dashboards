@@ -260,7 +260,7 @@ const App = () => {
           >
             {showSide && (
               <Grid
-                templateRows={`${otherHeaders}px 1fr ${otherHeaders}px`}
+                templateRows={`${otherHeaders}px 1fr`}
                 pr={`${padding}px`}
                 gap={`${padding}px`}
                 h={dashboardHeight}
@@ -287,7 +287,7 @@ const App = () => {
                 <GridItem>
                   <SidebarContent />
                 </GridItem>
-                <Stack
+                {/* <Stack
                   h="100%"
                   w="100%"
                   alignItems="center"
@@ -295,12 +295,7 @@ const App = () => {
                   justifyContent="center"
                   justifyItems="center"
                 >
-                  {/* <Image
-                    src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/logo.png"
-                    maxH={`${otherHeaders}px`}
-                    maxW={`${sideWidth}px`}
-                  /> */}
-                </Stack>
+                </Stack> */}
               </Grid>
             )}
             <FullScreen handle={handle}>
@@ -328,15 +323,6 @@ const App = () => {
                     w="100%"
                     spacing="40px"
                   >
-                    {/* {(handle.active || !showSide) && (
-                      <MOHLogo2>
-                        <Image
-                          src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/Coat_of_arms_of_Uganda.svg"
-                          maxH={`${otherHeaders}px`}
-                          maxW={`${sideWidth}px`}
-                        />
-                      </MOHLogo2>
-                    )} */}
                     {!handle.active && !store.showSider && (
                       <IconButton
                         bgColor="none"

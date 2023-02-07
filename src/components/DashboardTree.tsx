@@ -45,6 +45,11 @@ export default function DashboardTree() {
       };
       const { data }: any = await engine.query(query);
 
+      if (data.dataElementGroupSets) {
+        data.options = data.dataElementGroupSets.flatMap(
+          ({ dataElementGroups }: any) => dataElementGroups
+        );
+      }
       const options = data.options.map((o: any) => {
         const calculated: DataNode = {
           isLeaf: true,

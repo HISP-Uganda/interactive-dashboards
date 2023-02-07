@@ -83,7 +83,7 @@ const Numerator = () => {
             )}
             onChange={(e) =>
               changeNumeratorAttribute({
-                attribute: "type",
+                attribute: "resource",
                 value: e?.value,
               })
             }

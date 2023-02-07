@@ -11,11 +11,13 @@ import {
   SimpleGrid,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { fromPairs, groupBy, sum } from "lodash";
+import { useEffect } from "react";
+import { fromPairs, groupBy, sum, orderBy } from "lodash";
 import { useElementSize } from "usehooks-ts";
 import { ChartProps } from "../../interfaces";
 import { $store } from "../../Store";
 import { generateUid } from "../../utils/uid";
+import { updateVisualizationData } from "../../Events";
 
 interface TableProps extends ChartProps {
   category?: string;
@@ -122,6 +124,65 @@ const Tables = ({
     data.map((d: any) => [`${d.dx}${d.pe}${d.Duw5yep8Vae}`, d.value])
   );
 
+  const processSummaries = () => {
+    const groupedByDx = Object.entries(groupBy(data, "dx")).map(
+      ([de, elements]) => {
+        const actualValue = orderBy(elements, ["pe"], ["desc"]).find(
+          ({ Duw5yep8Vae }: any) => Duw5yep8Vae === "HKtncMjp06U"
+        );
+        const targetValue = orderBy(elements, ["pe"], ["desc"]).find(
+          ({ Duw5yep8Vae }: any) => Duw5yep8Vae === "Px8Lqkxy2si"
+        );
+
+        if (actualValue && targetValue) {
+          return {
+            a: Number(actualValue.value) >= Number(targetValue.value) ? 1 : 0,
+            b: Number(actualValue.value) <= Number(targetValue.value) ? 1 : 0,
+            c: 0,
+          };
+        }
+
+        if (actualValue) {
+          return {
+            a: 1,
+            b: 0,
+            c: 0,
+          };
+        }
+
+        if (targetValue) {
+          return {
+            a: 0,
+            b: 0,
+            c: 1,
+          };
+        }
+        return {
+          a: 0,
+          b: 0,
+          c: 0,
+        };
+      }
+    );
+
+    const a = sum(groupedByDx.map(({ a }) => a));
+    const b = sum(groupedByDx.map(({ b }) => b));
+    const c = sum(groupedByDx.map(({ c }) => c));
+
+    updateVisualizationData({
+      visualizationId: "a",
+      data: [{ value: a }],
+    });
+    updateVisualizationData({
+      visualizationId: "b",
+      data: [{ value: b }],
+    });
+    updateVisualizationData({
+      visualizationId: "c",
+      data: [{ value: c }],
+    });
+  };
+
   const processData = (dataElements: string[], child: boolean = false) => {
     if (child) {
       return {};
@@ -143,8 +204,14 @@ const Tables = ({
 
             if (actualValue && targetValue) {
               return {
-                a: Number(actualValue) >= Number(targetValue) ? 1 : 0,
-                b: Number(actualValue) <= Number(targetValue) ? 1 : 0,
+                a:
+                  Number(actualValue.value) >= Number(targetValue.value)
+                    ? 1
+                    : 0,
+                b:
+                  Number(actualValue.value) <= Number(targetValue.value)
+                    ? 1
+                    : 0,
                 c: 0,
               };
             }
@@ -182,6 +249,11 @@ const Tables = ({
       return returnValue;
     }
   };
+
+  useEffect(() => {
+    processSummaries();
+  }, [data]);
+
   return (
     <Stack w="100%" p="10px" h="100%">
       <Box h="100%" w="100%" ref={squareRef}>
