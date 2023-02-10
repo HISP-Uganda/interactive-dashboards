@@ -210,7 +210,13 @@ export const $filters = domain.createStore<{ [key: string]: any }>({});
 export const $store = domain
   .createStore<IStore>({
     showSider: false,
-    periods: [{ id: "LAST_5_FINANCIAL_YEARS", name: "Last 5 financial years" }],
+    periods: [
+      { id: "2020July", name: "July 2020 - June 2021" },
+      { id: "2021July", name: "July 2021 - June 2022" },
+      { id: "2022July", name: "July 2022 - June 2023" },
+      { id: "2023July", name: "July 2023 - June 2024" },
+      { id: "2024July", name: "July 2024 - June 2025" },
+    ],
     organisations: [],
     levels: [],
     groups: [],
@@ -264,6 +270,7 @@ export const $store = domain
     }
   )
   .on(changePeriods, (state, periods) => {
+    console.log(periods);
     return { ...state, periods };
   })
   .on(changeSelectedCategory, (state, selectedCategory) => {

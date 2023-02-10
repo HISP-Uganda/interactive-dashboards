@@ -9,6 +9,8 @@ import {
 } from "@chakra-ui/react";
 import { ChartProps } from "../../interfaces";
 import { processSingleValue } from "../processors";
+import { useStore } from "effector-react";
+import { $visualizationData } from "../../Store";
 
 const ProgressBar = ({
   bgColor,
@@ -50,6 +52,8 @@ const SingleValue = ({
   data,
 }: ChartProps) => {
   const [color, setColor] = useState<string>("");
+  const [targetValue, setTargetValue] = useState<number | undefined | null>();
+  const visualizationData = useStore($visualizationData);
   const value = processSingleValue(data);
   const colorSearch = dataProperties?.["data.thresholds"]?.find(
     ({ max, min }: any) => {
@@ -102,6 +106,17 @@ const SingleValue = ({
     }
   }, [dataProperties]);
 
+  useEffect(() => {
+    if (target) {
+      const data = visualizationData[target];
+      if (data) {
+        setTargetValue(() => Number(data[0].value));
+      } else {
+        setTargetValue(() => Number(target));
+      }
+    }
+  }, [target, visualizationData]);
+
   const numberFormatter = Intl.NumberFormat("en-US", format);
 
   return (
@@ -139,15 +154,15 @@ const SingleValue = ({
         justifyItems="center"
         spacing={`${spacing}px`}
       >
-        {targetGraph === "circular" && target ? (
-          <CircularProgress value={(value * 100) / Number(target)}>
+        {targetGraph === "circular" && targetValue && target ? (
+          <CircularProgress value={(value * 100) / targetValue}>
             <CircularProgressLabel>
-              {((value * 100) / Number(target)).toFixed(0)}%
+              {((value * 100) / targetValue).toFixed(0)}%
             </CircularProgressLabel>
           </CircularProgress>
-        ) : targetGraph === "progress" && target ? (
+        ) : targetGraph === "progress" && targetValue && target ? (
           <ProgressBar
-            completed={(value * 100) / Number(target)}
+            completed={(value * 100) / targetValue}
             bgColor="green"
           />
         ) : null}

@@ -9,6 +9,7 @@ import {
   Tr,
   Text,
   SimpleGrid,
+  TableCaption,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { useEffect } from "react";
@@ -125,61 +126,60 @@ const Tables = ({
   );
 
   const processSummaries = () => {
-    const groupedByDx = Object.entries(groupBy(data, "dx")).map(
-      ([de, elements]) => {
-        const actualValue = orderBy(elements, ["pe"], ["desc"]).find(
-          ({ Duw5yep8Vae }: any) => Duw5yep8Vae === "HKtncMjp06U"
-        );
-        const targetValue = orderBy(elements, ["pe"], ["desc"]).find(
-          ({ Duw5yep8Vae }: any) => Duw5yep8Vae === "Px8Lqkxy2si"
-        );
-
-        if (actualValue && targetValue) {
-          return {
-            a: Number(actualValue.value) >= Number(targetValue.value) ? 1 : 0,
-            b: Number(actualValue.value) <= Number(targetValue.value) ? 1 : 0,
-            c: 0,
-          };
-        }
-
-        if (actualValue) {
-          return {
-            a: 1,
-            b: 0,
-            c: 0,
-          };
-        }
-
-        if (targetValue) {
-          return {
-            a: 0,
-            b: 0,
-            c: 1,
-          };
-        }
-        return {
-          a: 0,
-          b: 0,
-          c: 0,
-        };
+    const elements = store.rows.flatMap((row) => {
+      if (row.elements) {
+        return row.elements;
       }
-    );
+      return row.id;
+    });
 
-    const a = sum(groupedByDx.map(({ a }) => a));
-    const b = sum(groupedByDx.map(({ b }) => b));
-    const c = sum(groupedByDx.map(({ c }) => c));
+    const filtered = data.filter(({ dx }: any) => elements.indexOf(dx) !== -1);
+    const groupedByDx = groupBy(filtered, "dx");
+    const all = Object.entries(groupedByDx).map(([dx, dataElementData]) => {
+      return Object.entries(groupBy(dataElementData, "pe")).map(
+        ([pe, group]) => {
+          const actualValue = group.find(
+            ({ Duw5yep8Vae }: any) => Duw5yep8Vae === "HKtncMjp06U"
+          );
+          const targetValue = group.find(
+            ({ Duw5yep8Vae }: any) => Duw5yep8Vae === "Px8Lqkxy2si"
+          );
+
+          if (actualValue && targetValue) {
+            const percentage =
+              Number(actualValue.value) / Number(targetValue.value);
+
+            if (percentage >= 1) return "a";
+
+            if (percentage >= 0.75) return "ma";
+
+            return "na";
+          }
+
+          return "na";
+        }
+      );
+    });
+
+    const achieved = all.filter((a) => a.indexOf("a") !== -1);
+    const moderately = all.filter(
+      (a) => a.indexOf("a") === -1 && a.indexOf("ma") !== -1
+    );
+    const notAchieved = all.filter(
+      (a) => a.indexOf("a") === -1 && a.indexOf("ma") === -1
+    );
 
     updateVisualizationData({
       visualizationId: "a",
-      data: [{ value: a }],
+      data: [{ value: achieved.length }],
     });
     updateVisualizationData({
       visualizationId: "b",
-      data: [{ value: b }],
+      data: [{ value: moderately.length }],
     });
     updateVisualizationData({
       visualizationId: "c",
-      data: [{ value: c }],
+      data: [{ value: notAchieved.length }],
     });
   };
 
@@ -252,7 +252,7 @@ const Tables = ({
 
   useEffect(() => {
     processSummaries();
-  }, [data]);
+  }, [data, store.rows]);
 
   return (
     <Stack w="100%" p="10px" h="100%">
@@ -261,80 +261,96 @@ const Tables = ({
           position="relative"
           overflow="auto"
           // whiteSpace="nowrap"
-          h={`${height}`}
+          h={`${height}px`}
           w="100%"
         >
-          <SimpleGrid
-            columns={4}
-            gap="2px"
-            alignItems="center"
-            zIndex="1000000"
-            bg="white"
-            top="0"
-            position="sticky"
-          >
-            <Stack
+          <Table variant="unstyled" w="100%" bg="white" size="sm">
+            <TableCaption
+              placement="top"
+              bg="white"
+              p={0}
+              m={0}
               h="50px"
-              fontSize="2xl"
-              fontWeight="semi-bold"
-              bg="#398E3D"
-              alignItems="center"
-              alignContent="center"
-              justifyItems="center"
-              justifyContent="center"
+              top="0px"
+              position="sticky"
+              zIndex={100}
             >
-              <Text color="white" fontWeight="extrabold">Achieved (&gt;= 100% )</Text>
-            </Stack>
-            <Stack
-              h="50px"
-              fontSize="2xl"
-              fontWeight="semi-bold"
-              bg="#F1BD19"
-              alignItems="center"
-              alignContent="center"
-              justifyItems="center"
-              justifyContent="center"
-            >
-              <Text color="white" fontWeight="extrabold">Moderately achieved (75-99%)</Text>
-            </Stack>
-            <Stack
-              h="50px"
-              fontSize="2xl"
-              fontWeight="semi-bold"
-              bg="red.500"
-              alignItems="center"
-              alignContent="center"
-              justifyItems="center"
-              justifyContent="center"
-            >
-              <Text color="white" fontWeight="extrabold">Not achieved (&lt;75%)</Text>
-            </Stack>
-            <Stack
-              h="50px"
-              fontSize="2xl"
-              fontWeight="semi-bold"
-              bg="#CACBCC"
-              alignItems="center"
-              alignContent="center"
-              justifyItems="center"
-              justifyContent="center"
-            >
-              <Text fontWeight="extrabold">No data</Text>
-            </Stack>
-          </SimpleGrid>
-          <Table  w="100%" colorScheme='teal'>
+              <SimpleGrid
+                columns={4}
+                gap="2px"
+                alignItems="center"
+                zIndex="1000000"
+                bg="white"
+                top="0"
+                position="sticky"
+              >
+                <Stack
+                  h="50px"
+                  fontSize="xl"
+                  // fontWeight="semi-bold"
+                  color="black"
+                  // bg="#398E3D"
+                  bg="green"
+                  alignItems="center"
+                  alignContent="center"
+                  justifyItems="center"
+                  justifyContent="center"
+                >
+                  <Text>Achieved (&gt;= 100% )</Text>
+                </Stack>
+                <Stack
+                  h="50px"
+                  fontSize="xl"
+                  // fontWeight="semi-bold"
+                  color="black"
+                  bg="yellow"
+                  alignItems="center"
+                  alignContent="center"
+                  justifyItems="center"
+                  justifyContent="center"
+                >
+                  <Text>Moderately achieved (75-99%)</Text>
+                </Stack>
+                <Stack
+                  h="50px"
+                  fontSize="xl"
+                  // fontWeight="semi-bold"
+                  color="black"
+                  bg="red"
+                  alignItems="center"
+                  alignContent="center"
+                  justifyItems="center"
+                  justifyContent="center"
+                >
+                  <Text>Not achieved (&lt;75%)</Text>
+                </Stack>
+                <Stack
+                  h="50px"
+                  fontSize="xl"
+                  // fontWeight="semi-bold"
+                  color="black"
+                  bg="#AAAAAA"
+                  alignItems="center"
+                  alignContent="center"
+                  justifyItems="center"
+                  justifyContent="center"
+                >
+                  <Text>No data</Text>
+                </Stack>
+              </SimpleGrid>
+            </TableCaption>
             <Thead>
-              <Tr>
+              <Tr h="50px" top="50px" position="sticky" bg="white" zIndex={100}>
                 {store.originalColumns.map(({ title, id, w }, col) => (
                   <Th
                     borderColor="#DDDDDD"
                     borderStyle="solid"
                     borderWidth="thin"
                     color="black"
-                    fontSize="lg"
+                    // fontSize="lg"
                     key={id}
                     rowSpan={2}
-                    {...otherRows(0, col)}
+                    // {...otherRows(0, col)}
                     fontWeight="extrabold"
                     w={w}
                   >
@@ -345,27 +361,33 @@ const Tables = ({
                   <Th
                     colSpan={store.columns.length}
                     key={fy.value}
-                    {...otherRows(0, index + 1)}
-                    fontWeight="extrabold"
+                    // {...otherRows(0, index + 1)}
+                    // fontWeight="extrabold"
                     textAlign="center"
                     borderColor="#DDDDDD"
-                    fontSize="md"
                     borderStyle="solid"
-                    color="black"
                     borderWidth="thin"
+                    fontSize="md"
+                    color="black"
                   >
                     {fy.key}
                   </Th>
                 ))}
               </Tr>
-              <Tr>
+              <Tr
+                h="50px"
+                top="100px"
+                position="sticky"
+                zIndex={100}
+                bg="white"
+              >
                 {computeFinancialYears(2020)
                   .flatMap((fy) =>
                     store.columns.map((c) => {
-                      return { ...c, id: `${c.id}${fy.value}` };
+                      return { ...c, id: `${c.id}${fy.value}`, bg: c.bg || "" };
                     })
                   )
-                  .map(({ id, title }, index) => (
+                  .map(({ id, title, bg }, index) => (
                     <Th
                       borderColor="#DDDDDD"
                       borderStyle="solid"
@@ -373,8 +395,9 @@ const Tables = ({
                       fontWeight="bold"
                       color="black"
                       fontSize="sm"
+                      bg={bg}
                       key={id}
-                      {...otherRows(1, index + 1)}
+                      // {...otherRows(1, index + 1)}
                     >
                       {title}
                     </Th>
@@ -391,11 +414,15 @@ const Tables = ({
                         <Td
                           borderColor="#DDDDDD"
                           borderStyle="solid"
+                          fontWeight="bold"
                           borderWidth="thin"
                           key={`${id}${row.id}`}
                           w={w}
                         >
-                          {col === 0 ? `${bigIndex + 1}. ${row[id]}` : row[id]}
+                          {col === 0 &&
+                          store.selectedDashboard === "emIWijzLHR4"
+                            ? `${bigIndex + 1}. ${row[id]}`
+                            : row[id]}
                         </Td>
                       )
                     )}
@@ -403,7 +430,7 @@ const Tables = ({
                       .flatMap((fy) =>
                         store.columns.map(({ id: cId }) => {
                           let bg = "";
-                          let color = "";
+                          let color = "black";
                           const actual =
                             processed[`${row.id}${fy.value}${cId}`];
                           const target =
@@ -413,13 +440,13 @@ const Tables = ({
                             const percentage =
                               (Number(actual) * 100) / Number(target);
                             if (percentage >= 100) {
-                              bg = "#398E3D";
+                              bg = "green";
                               // color = "white";
                             } else if (percentage >= 75) {
-                              bg = "yellow.300";
+                              bg = "yellow";
                               // color = "white";
                             } else {
-                              bg = "red.400";
+                              bg = "red";
                               // color = "white";
                             }
                           } else if (cId === "HKtncMjp06U" && !actual) {
