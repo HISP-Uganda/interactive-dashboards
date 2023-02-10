@@ -4,10 +4,9 @@ import {
   Grid,
   GridItem,
   IconButton,
-  Image,
   Stack,
-  useMediaQuery,
   Text,
+  useMediaQuery,
 } from "@chakra-ui/react";
 import {
   createHashHistory,
@@ -52,11 +51,10 @@ import { decodeFromBinary, encodeToBinary } from "../utils/utils";
 import { otherHeaders, padding, sideWidth } from "./constants";
 import DashboardMenu from "./DashboardMenu";
 import Footer from "./Footer";
+import LoadingIndicator from "./LoadingIndicator";
 import MOHLogo from "./MOHLogo";
-import MOHLogo2 from "./MOHLogo2";
 import SectionMenu from "./SectionMenu";
 import SidebarContent from "./SidebarContent";
-import LoadingIndicator from "./LoadingIndicator";
 
 const history = createHashHistory();
 const location = new ReactLocation<LocationGenerics>({
@@ -241,14 +239,14 @@ const App = () => {
           justifyContent="center"
           h="calc(100vh - 48px)"
         >
-          <LoadingIndicator/>
+          <LoadingIndicator />
         </Flex>
       )}
       {isSuccess && (
         <Router
           location={location}
           routes={routes}
-          defaultPendingElement={<LoadingIndicator/>}
+          defaultPendingElement={<LoadingIndicator />}
         >
           <Grid
             templateColumns={{ md: "auto", lg: dashboardColumns }}
@@ -257,7 +255,6 @@ const App = () => {
             p={`${padding}px`}
             w="100vw"
             maxW="100vw"
-            
           >
             {showSide && (
               <Grid
@@ -271,30 +268,25 @@ const App = () => {
                 <Stack
                   h="100%"
                   w="100%"
-                  alignItems="center"
+                  // alignItems="center"
                   alignContent="center"
-                  justifyContent="center"
-                  justifyItems="center"
+                  // justifyContent="center"
+                  // justifyItems="center"
                   direction="row"
                   spacing="20px"
                 >
                   <MOHLogo height={otherHeaders} width={sideWidth} />
-                  <Stack
-                    spacing={0}
-                    alignItems="center"
-                    alignContent="center"
-                    justifyContent="center"
-                    justifyItems="center"
-                  >
+                  <Stack spacing={0}>
                     <Text
                       textTransform="uppercase"
                       fontWeight="extrabold"
                       fontSize="xl"
-                      
                     >
                       Office of the President
                     </Text>
-                    <Text fontWeight="semi-bold" color="red">The Republic of Uganda</Text>
+                    <Text fontWeight="semi-bold" color="black">
+                      The Republic of Uganda
+                    </Text>
                   </Stack>
                 </Stack>
                 <GridItem>

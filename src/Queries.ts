@@ -1,29 +1,30 @@
 import { useDataEngine } from "@dhis2/app-runtime";
-import axios, { AxiosRequestConfig } from "axios";
-import { fromPairs, isEmpty, max, min, uniq, groupBy } from "lodash";
-import { evaluate } from "mathjs";
 import { useQuery } from "@tanstack/react-query";
-
+import axios, { AxiosRequestConfig } from "axios";
+import { fromPairs, groupBy, isEmpty, max, min, uniq } from "lodash";
+import { evaluate } from "mathjs";
+import { db } from "./db";
 import {
   addPagination,
   changeAdministration,
   changeSelectedCategory,
   changeSelectedDashboard,
-  onChangeOrganisations,
-  setAvailableCategories,
-  setAvailableCategoryOptionCombos,
   setCategories,
   setCategory,
   setCurrentDashboard,
   setCurrentPage,
+  setDataElementGroups,
+  setDataElementGroupSets,
   setDataSets,
   setDataSource,
   setDataSources,
   setDefaultDashboard,
   setIndicator,
   setInstanceBaseUrl,
+  setLevels,
   setMaxLevel,
   setMinSublevel,
+  setOrganisations,
   setShowFooter,
   setShowSider,
   setSystemId,
@@ -32,11 +33,6 @@ import {
   setVisualizationQueries,
   updateVisualizationData,
   updateVisualizationMetadata,
-  setOrganisations,
-  setLevels,
-  setDataElementGroupSets,
-  setDataElementGroups,
-  setDataElements,
 } from "./Events";
 import {
   DataNode,
@@ -48,7 +44,6 @@ import {
   IExpressions,
   IIndicator,
   IVisualization,
-  Option,
   Threshold,
 } from "./interfaces";
 import {
@@ -58,7 +53,6 @@ import {
   createIndicator,
 } from "./Store";
 import { getSearchParams, processMap } from "./utils/utils";
-import { db } from "./db";
 
 export const api = axios.create({
   baseURL: "https://services.dhis2.hispuganda.org/",
@@ -414,7 +408,7 @@ export const useDashboards = (systemId: string) => {
           id: d.id,
           pId: "",
           key: d.id,
-          style: { margin: "5px" },
+          style: { margin: "5px", fontWeight: "bold" },
           title: d.name || "",
           checkable: false,
           nodeSource: d.nodeSource,
@@ -499,6 +493,19 @@ export const useDashboard = (
         const dataElementGroupSets = uniq(data.map(({ degsId }) => degsId));
         setDataElementGroupSets(dataElementGroupSets);
       }
+
+      const current = {
+        isLeaf: !dashboard.hasChildren,
+        id: dashboard.id,
+        pId: "",
+        key: dashboard.id,
+        style: { margin: "5px", bg: "yellow", fontWeight: "bold" },
+        title: dashboard.name || "",
+        checkable: false,
+        nodeSource: dashboard.nodeSource,
+        hasChildren: dashboard.hasChildren,
+      };
+      await db.dashboards.put(current);
     }
     return true;
   });
@@ -1041,226 +1048,6 @@ const makeDHIS2Query = (
   overrides: { [key: string]: any } = {}
 ) => {
   const allDimensions = findDimension(data.dataDimensions, globalFilters);
-
-  // const ouDimensions = findDimension(data.dataDimensions, "dimension", "ou");
-  // const ouFilters = findDimension(data.dataDimensions, "filter", "ou");
-  // const iDimensions = findDimension(data.dataDimensions, "dimension", "i");
-  // const iFilters = findDimension(data.dataDimensions, "filter", "i");
-  // const deDimensions = findDimension(data.dataDimensions, "dimension", "de");
-  // const deFilters = findDimension(data.dataDimensions, "filter", "de");
-  // const peDimensions = findDimension(data.dataDimensions, "dimension", "pe");
-  // const peFilters = findDimension(data.dataDimensions, "filter", "pe");
-  // const ouLevelFilter = findDimension(data.dataDimensions, "filter", "oul");
-
-  // const ouLevelDimension = findDimension(
-  //   data.dataDimensions,
-  //   "dimension",
-  //   "oul"
-  // );
-  // const ouGroupFilter = findDimension(data.dataDimensions, "filter", "oug");
-  // const ouGroupDimension = findDimension(
-  //   data.dataDimensions,
-  //   "dimension",
-  //   "oug"
-  // );
-
-  // const degDimension = findDimension(data.dataDimensions, "dimension", "deg");
-  // const degFilter = findDimension(data.dataDimensions, "filter", "deg");
-
-  // const degsDimension = findDimension(data.dataDimensions, "dimension", "degs");
-  // const degsFilter = findDimension(data.dataDimensions, "filter", "degs");
-
-  // let ouGroupFilters = "";
-
-  // if (ouGroupFilter) {
-  //   ouGroupFilters =
-  //     globalFilters[ouGroupFilter]
-  //       ?.map((v: string) => `OU_GROUP-${v}`)
-  //       .join(";") ||
-  //     ouGroupFilter
-  //       .split(";")
-  //       .map((v) => `OU_GROUP-${v}`)
-  //       .join(";");
-  // }
-
-  // let ouGroupDimensions = "";
-  // if (ouGroupDimension) {
-  //   ouGroupDimensions =
-  //     globalFilters[ouGroupDimension]
-  //       ?.map((v: string) => `OU_GROUP-${v}`)
-  //       .join(";") ||
-  //     ouGroupDimension
-  //       .split(";")
-  //       .map((v) => `OU_GROUP-${v}`)
-  //       .join(";");
-  // }
-
-  // let ouLevelFilters = "";
-  // if (ouLevelFilter) {
-  //   ouLevelFilters =
-  //     globalFilters[ouLevelFilter]
-  //       ?.map((v: string) => `LEVEL-${v}`)
-  //       .join(";") ||
-  //     ouLevelFilter
-  //       .split(";")
-  //       .map((v) => `LEVEL-${v}`)
-  //       .join(";");
-  // }
-  // let ouLevelDimensions = "";
-
-  // if (ouLevelDimension) {
-  //   ouLevelDimensions =
-  //     globalFilters[ouLevelDimension]
-  //       ?.map((v: string) => `LEVEL-${v}`)
-  //       .join(";") ||
-  //     ouLevelDimension
-  //       .split(";")
-  //       .map((v) => `LEVEL-${v}`)
-  //       .join(";");
-  // }
-
-  // let degDimensions = "";
-
-  // if (degDimension) {
-  //   degDimensions =
-  //     globalFilters[degDimensions]?.map((v: string) => `DEG-${v}`).join(";") ||
-  //     degDimensions
-  //       .split(";")
-  //       .map((v) => `DEG-${v}`)
-  //       .join(";");
-  // }
-
-  // let degFilters = "";
-
-  // if (degFilter) {
-  //   degFilters =
-  //     globalFilters[degFilter]?.map((v: string) => `DEG-${v}`).join(";") ||
-  //     degFilter
-  //       .split(";")
-  //       .map((v) => `DEG-${v}`)
-  //       .join(";");
-  // }
-
-  // const unitsFilter =
-  //   globalFilters[ouFilters] && globalFilters[ouFilters].length > 0
-  //     ? globalFilters[ouFilters].join(";")
-  //     : ouFilters;
-
-  // const unitsDimension =
-  //   globalFilters[ouDimensions] && globalFilters[ouDimensions].length > 0
-  //     ? globalFilters[ouDimensions].join(";")
-  //     : ouDimensions;
-
-  // let finalOuFilters = [unitsFilter, ouLevelFilters, ouGroupFilters]
-  //   .filter((v: string) => !!v)
-  //   .join(";");
-  // let finalOuDimensions = [unitsDimension, ouLevelDimensions, ouGroupDimensions]
-  //   .filter((v: string) => !!v)
-  //   .join(";");
-
-  // let finalIFilters =
-  //   globalFilters[iFilters] && globalFilters[iFilters].length > 0
-  //     ? globalFilters[iFilters].join(";")
-  //     : iFilters;
-  // let finalIDimensions =
-  //   globalFilters[iDimensions] && globalFilters[iDimensions].length > 0
-  //     ? globalFilters[iDimensions].join(";")
-  //     : iDimensions;
-
-  // let finalDegsFilters =
-  //   globalFilters[degsFilter] && globalFilters[degsFilter].length > 0
-  //     ? globalFilters[degsFilter].join(";")
-  //     : degsFilter;
-  // let finalDegsDimensions =
-  //   globalFilters[degsDimension] && globalFilters[degsDimension].length > 0
-  //     ? globalFilters[degsDimension].join(";")
-  //     : degsDimension;
-
-  // let finalDeFilters =
-  //   globalFilters[deFilters] && globalFilters[deFilters].length > 0
-  //     ? globalFilters[deFilters].join(";")
-  //     : deFilters;
-  // let finalDeDimensions =
-  //   globalFilters[deDimensions] && globalFilters[deDimensions].length > 0
-  //     ? globalFilters[deDimensions].join(";")
-  //     : deDimensions;
-
-  // let finalPeFilters =
-  //   globalFilters[peFilters] && globalFilters[peFilters].length > 0
-  //     ? globalFilters[peFilters].join(";")
-  //     : peFilters;
-  // let finalPeDimensions =
-  //   globalFilters[peDimensions] && globalFilters[peDimensions].length > 0
-  //     ? globalFilters[peDimensions].join(";")
-  //     : peDimensions;
-  // if (overrides.ou && overrides.ou === "filter") {
-  //   finalOuFilters = finalOuFilters || finalOuDimensions;
-  //   finalOuDimensions = "";
-  // } else if (overrides.ou && overrides.ou === "dimension") {
-  //   finalOuDimensions = finalOuFilters || finalOuDimensions;
-  //   finalOuFilters = "";
-  // }
-  // if (overrides.dx && overrides.dx === "filter") {
-  //   finalIFilters = finalIFilters || finalIDimensions;
-  //   finalIDimensions = "";
-  //   finalDeFilters = finalDeFilters || finalDeDimensions;
-  //   finalDeDimensions = "";
-  // } else if (overrides.dx && overrides.dx === "dimension") {
-  //   finalIDimensions = finalIFilters || finalIDimensions;
-  //   finalIFilters = "";
-
-  //   finalDeDimensions = finalDeFilters || finalDeDimensions;
-  //   finalDeFilters = "";
-  // }
-
-  // if (overrides.pe && overrides.pe === "filter") {
-  //   finalPeFilters = finalPeFilters || finalPeDimensions;
-  //   finalPeDimensions = "";
-  // } else if (overrides.pe && overrides.pe === "dimension") {
-  //   finalPeDimensions = finalPeFilters || finalPeDimensions;
-  //   finalPeFilters = "";
-  // }
-
-  // if (finalOuFilters && finalOuDimensions) {
-  //   finalOuDimensions = `${finalOuFilters};${finalOuDimensions}`;
-  //   finalOuFilters = "";
-  // }
-
-  // let dd = [
-  //   joinItems(
-  //     [
-  //       [finalOuFilters, "ou"],
-  //       [
-  //         [finalIFilters, finalDeFilters, degFilters]
-  //           .filter((value) => !!value)
-  //           .join(";"),
-  //         "dx",
-  //       ],
-  //       [finalPeFilters, "pe"],
-  //     ],
-  //     "filter"
-  //   ),
-  //   joinItems(
-  //     [
-  //       [finalOuDimensions, "ou"],
-  //       [
-  //         [finalIDimensions, finalDeDimensions, degDimensions]
-  //           .filter((value) => !!value)
-  //           .join(";"),
-  //         "dx",
-  //       ],
-  //       [finalPeDimensions, "pe"],
-  //     ],
-  //     "dimension"
-  //   ),
-  // ];
-  // if (degsDimension) {
-  //   dd = [...dd, `dimension=${degsDimension}`];
-  // }
-  // if (degsFilter) {
-  //   dd = [...dd, `filter=${degsDimension}`];
-  // }
-  // return dd.join("&");
   return Object.entries(
     groupBy(allDimensions, (v) => `${v.type}${v.dimension}`)
   )

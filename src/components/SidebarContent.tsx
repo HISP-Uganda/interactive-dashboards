@@ -9,15 +9,14 @@ const SidebarContent = ({ ...rest }: SidebarProps) => {
   const store = useStore($store);
 
   return (
-    <Stack {...rest} bgColor="gray.50" h="100%" >
+    <Stack {...rest} bgColor="gray.50" h="100%">
       <Text
         fontSize="xl"
         fontWeight="bold"
-        textTransform="uppercase"
         textAlign="left"
         pl="3"
         pt="2"
-        color="yellow.500"
+        color="black"
       >
         Dashboard Menu
       </Text>

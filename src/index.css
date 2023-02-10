@@ -4,3 +4,7 @@
 .button {
     background-color: rgb(230, 16, 16);
 }
+
+.ant-tree-node-selected{
+    background-color:#FEE300 !important
+}
