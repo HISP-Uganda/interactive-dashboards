@@ -1,4 +1,4 @@
-import {Stack, Text } from "@chakra-ui/react";
+import { Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { fromPairs } from "lodash";
 import { ISection, IVisualization } from "../../interfaces";

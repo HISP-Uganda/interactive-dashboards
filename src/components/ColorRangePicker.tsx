@@ -20,6 +20,7 @@ import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
 import { changeVisualizationProperties } from "../Events";
 import { IVisualization, Threshold } from "../interfaces";
 import { generateUid } from "../utils/uid";
+import { swatchColors } from "../utils/utils";
 
 export default function ({ visualization }: { visualization: IVisualization }) {
   const ref = useRef(null);
@@ -127,6 +128,7 @@ export default function ({ visualization }: { visualization: IVisualization }) {
                 >
                   {isOpen && id === hold.id && (
                     <SwatchesPicker
+                      colors={swatchColors}
                       key={hold.id}
                       color={hold.color}
                       onChangeComplete={(color) => {
