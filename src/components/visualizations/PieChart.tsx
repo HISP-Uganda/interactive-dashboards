@@ -2,9 +2,8 @@ import { Stack } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { update } from "lodash";
 import Plot from "react-plotly.js";
-
 import { ChartProps } from "../../interfaces";
-import { $visualizationData, $visualizationMetadata } from "../../Store";
+import { $visualizationMetadata } from "../../Store";
 import { exclusions } from "../../utils/utils";
 import { processPieChart } from "../processors";
 import VisualizationTitle from "./VisualizationTitle";

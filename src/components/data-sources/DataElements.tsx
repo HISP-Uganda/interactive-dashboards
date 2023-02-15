@@ -29,6 +29,7 @@ import { globalIds } from "../../utils/utils";
 import GlobalAndFilter from "./GlobalAndFilter";
 import GlobalSearchFilter from "./GlobalSearchFilter";
 import LoadingIndicator from "../LoadingIndicator";
+import { isEmpty } from "lodash";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
@@ -138,7 +139,7 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
                         });
                       }
                     }}
-                    checked={!!denNum?.dataDimensions?.[record.id]}
+                    isChecked={!isEmpty(denNum?.dataDimensions?.[record.id])}
                   />
                 </Td>
                 <Td>{record.id}</Td>

@@ -32,7 +32,7 @@ export const processGraphs = (
     const x = uniq(data.map((num: any) => num[category]));
     const columns = x
       .map((c: any) => {
-        return { id: c, name: metadata?.[c]?.name || allMetadata[c] || c };
+        return { id: c, name: allMetadata[c] || metadata?.[c]?.name || c };
       })
       .sort((a, b) => {
         if (a.name < b.name) {
