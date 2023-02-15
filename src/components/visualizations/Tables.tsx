@@ -436,18 +436,21 @@ const Tables = ({
                             bg = "green";
                             // color = "white";
                           } else if (realValue >= 75) {
-                            bg = "green.500";
-                            // color = "white";
-                          } else if (realValue >= 49) {
                             bg = "yellow";
                             // color = "white";
-                          } else if (realValue >= 25) {
-                            bg = "orange";
-                            // color = "white";
-                          } else if (realValue < 25) {
+                          } else if (realValue < 75) {
                             bg = "red";
-                            // color = "white";
                           }
+                          // else if (realValue >= 49) {
+                          //   bg = "yellow";
+                          //   // color = "white";
+                          // } else if (realValue >= 25) {
+                          //   bg = "orange";
+                          //   // color = "white";
+                          // } else if (realValue < 25) {
+                          //   bg = "red";
+                          //   // color = "white";
+                          // }
                         }
                         return {
                           key: `${row.id}${fy.value}`,

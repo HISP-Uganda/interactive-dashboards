@@ -1134,7 +1134,7 @@ const generateDHIS2Query = (
       if (params) {
         query = {
           ...query,
-          numerator: `analytics.json?${params}`,
+          numerator: `analytics.json?${params}&aggregationType=MAX`,
         };
       }
     } else if (
@@ -1171,7 +1171,7 @@ const generateDHIS2Query = (
       if (params) {
         query = {
           ...query,
-          denominator: `analytics.json?${params}&dimension=Duw5yep8Vae:Px8Lqkxy2si;HKtncMjp06U;bqIaasqpTas`,
+          denominator: `analytics.json?${params}`,
         };
       }
     } else if (

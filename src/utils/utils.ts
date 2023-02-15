@@ -626,47 +626,47 @@ export const allMetadata: { [key: string]: string } = {
   rKD38rD7HZ5: "Village Health Team",
   xYerKDKCefk: "default",
 
-  WdilrXx08R4: "DIR15",
+  WdilrXx08R4: "15",
 
-  Q18G7d3DPOg: "DIR10",
-  lYoAOhykYUW: "DIR21",
+  Q18G7d3DPOg: "10",
+  lYoAOhykYUW: "21",
 
-  HolY9bB9ndg: "DIR05",
+  HolY9bB9ndg: "05",
 
-  tWRpQ8HFWk4: "DIR18",
+  tWRpQ8HFWk4: "18",
 
-  Et0jLLFoPiQ: "DIR19",
+  Et0jLLFoPiQ: "19",
 
-  B04qyv8sHLZ: "DIR07",
+  B04qyv8sHLZ: "07",
 
-  um8prFWwCYU: "DIR01",
+  um8prFWwCYU: "01",
 
-  gjqIp8H7948: "DIR04",
+  gjqIp8H7948: "04",
 
-  QYISgIjXTJC: "DIR13",
+  QYISgIjXTJC: "13",
 
-  wRshJ7SJcHq: "DIR06",
+  wRshJ7SJcHq: "06",
 
-  FJ1pjZ5Edzf: "DIR11",
+  FJ1pjZ5Edzf: "11",
 
-  N7r57cuvssW: "DIR23",
+  N7r57cuvssW: "23",
 
-  wXeABLEj9Vj: "DIR03",
+  wXeABLEj9Vj: "03",
 
-  I8NkRKchMoU: "DIR22",
+  I8NkRKchMoU: "22",
 
-  nOnQwK1sDaN: "DIR17",
+  nOnQwK1sDaN: "17",
 
-  m3xNIoQ2esR: "DIR12",
+  m3xNIoQ2esR: "12",
 
-  PQxdLS3vke3: "DIR08",
+  PQxdLS3vke3: "08",
 
-  w6VmDxFste0: "DIR14",
+  w6VmDxFste0: "14",
 
-  h4lJWKnqnxx: "DIR16",
-  QgvBHBb5xcS: "DIR02",
-  UEDzAaR5GpB: "DIR09",
-  gypjprrtiKV: "DIR20",
+  h4lJWKnqnxx: "16",
+  QgvBHBb5xcS: "02",
+  UEDzAaR5GpB: "09",
+  gypjprrtiKV: "20",
 };
 
 export const processMap = (
