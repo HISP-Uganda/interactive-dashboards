@@ -7,6 +7,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
+import { Progress } from "antd";
 import { ChartProps } from "../../interfaces";
 import { processSingleValue } from "../processors";
 import { useStore } from "effector-react";
@@ -82,7 +83,11 @@ const SingleValue = ({
   const fontWeight = dataProperties?.["data.format.fontWeight"] || 400;
   const fontSize = dataProperties?.["data.format.fontSize"] || 2;
   const alignment = dataProperties?.["data.alignment"] || "column";
-
+  const bg = layoutProperties?.["layout.bg"] || "";
+  const radius = dataProperties?.["data.target.radius"] || 60;
+  const thickness = dataProperties?.["data.target.thickness"] || 10;
+  const targetColor = dataProperties?.["data.target.color"] || "blue";
+  const targetSpacing = dataProperties?.["data.target.spacing"] || 0;
   const spacing =
     dataProperties?.["data.format.spacing"] ||
     ["row", "row-reverse"].indexOf(alignment) !== -1
@@ -131,9 +136,11 @@ const SingleValue = ({
       borderRadius="3px"
       // padding="4px"
       textAlign="center"
+      bg={bg}
       flex={1}
       spacing={`${spacing}px`}
       h="100%"
+      w="100%"
     >
       {visualization.name && (
         <Text
@@ -152,19 +159,23 @@ const SingleValue = ({
         alignContent="center"
         justifyContent="center"
         justifyItems="center"
-        spacing={`${spacing}px`}
+        spacing={`${targetSpacing}px`}
       >
         {targetGraph === "circular" && targetValue && target ? (
-          <CircularProgress value={(value * 100) / targetValue}>
+          <CircularProgress
+            value={(value * 100) / targetValue}
+            size={`${radius}px`}
+            thickness={`${thickness}px`}
+            color={targetColor}
+          >
             <CircularProgressLabel>
               {((value * 100) / targetValue).toFixed(0)}%
             </CircularProgressLabel>
           </CircularProgress>
         ) : targetGraph === "progress" && targetValue && target ? (
-          <ProgressBar
-            completed={(value * 100) / targetValue}
-            bgColor="green"
-          />
+          <Box w="300px">
+            <Progress percent={50} status="active" strokeWidth={thickness} />
+          </Box>
         ) : null}
         <Text fontSize={`${fontSize}vh`} color={color} fontWeight={fontWeight}>
           {prefix}

@@ -200,8 +200,8 @@ export default function DashboardTree() {
       selectedKeys={selectedKeys}
       style={{
         backgroundColor: "#F7FAFC",
-        //   maxHeight: "800px",
-        //   overflow: "auto",
+        maxHeight: "800px",
+        overflow: "auto",
         //   fontSize: "18px",
       }}
       treeData={

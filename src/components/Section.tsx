@@ -45,6 +45,7 @@ import SectionImages from "./SectionImages";
 import SectionVisualization from "./SectionVisualization";
 import VisualizationProperties from "./visualizations/VisualizationProperties";
 import LoadingIndicator from "./LoadingIndicator";
+import SectionColorPalette from "./SectionColorPalette";
 
 const alignmentOptions: Option[] = [
   { label: "flex-start", value: "flex-start" },
@@ -400,6 +401,8 @@ const Section = () => {
                   })
                 }
               />
+              <Text>Background Colour</Text>
+              <SectionColorPalette section={section} />
               <Text>Arrangement</Text>
               <RadioGroup
                 onChange={(e: string) =>
@@ -471,7 +474,8 @@ const Section = () => {
               visualization.id === active && (
                 <Stack
                   key={visualization.id}
-                  bgColor={visualization.bg}
+                  // bgColor={visualization.bg}
+                  bgColor="white"
                   overflow="auto"
                   flex={1}
                 >
