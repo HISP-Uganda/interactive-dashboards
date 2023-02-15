@@ -20,47 +20,38 @@ const PieChartProperties = ({
   //     })
   //   : [];
   const processData = () => {
-    const all = Object.entries(
-      groupBy(visualizationData[visualization.id], "dx")
-    ).map(([dx, dataElementData]) => {
-      const achieved = dataElementData.find(
-        (a: any) => parseInt(a.value, 10) >= 100
-      );
-      if (achieved) {
-        return "a";
-      }
-      const above = dataElementData.find(
-        (a: any) => parseInt(a.value, 10) >= 75 && parseInt(a.value, 10) < 100
-      );
+    const columns = Object.keys(visualizationData[visualization.id][0]);
 
-      if (above) {
-        return "b";
-      }
+    if (columns.length === 2) {
+      const all: string[] = visualizationData[visualization.id].map(
+        (a: any) => {
+          const value = parseInt(a.value, 10);
 
-      const average = dataElementData.find(
-        (a: any) => parseInt(a.value, 10) >= 50 && parseInt(a.value, 10) < 75
-      );
-      console.log(average);
-      if (average) {
-        return "c";
-      }
-      const below = dataElementData.find(
-        (a: any) => parseInt(a.value, 10) >= 25 && parseInt(a.value, 10) < 50
+          if (value >= 100) {
+            return "a";
+          }
+
+          if (value >= 75) {
+            return "b";
+          }
+
+          return "c";
+        }
       );
 
-      if (below) {
-        return "d";
-      }
-      return "e";
-    });
-
-    return [
-      { indicator: "a", value: all.filter((v) => v === "a").length },
-      { indicator: "b", value: all.filter((v) => v === "b").length },
-      { indicator: "c", value: all.filter((v) => v === "c").length },
-      { indicator: "d", value: all.filter((v) => v === "d").length },
-      { indicator: "e", value: all.filter((v) => v === "e").length },
-    ];
+      return [
+        { indicator: "Achieved", value: all.filter((v) => v === "a").length },
+        {
+          indicator: "Moderately Achieved",
+          value: all.filter((v) => v === "b").length,
+        },
+        {
+          indicator: "Not Achieved",
+          value: all.filter((v) => v === "c").length,
+        },
+      ];
+    }
+    return [];
   };
 
   const columns = Object.keys(processData()[0]).map<Option>((o) => {

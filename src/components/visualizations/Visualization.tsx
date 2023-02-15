@@ -57,53 +57,36 @@ const getVisualization = (
   );
 
   const processData = () => {
-    const all = Object.entries(groupBy(data, "dx")).map(
-      ([dx, dataElementData]) => {
-        const achieved = dataElementData.find(
-          (a: any) => parseInt(a.value, 10) >= 100
-        );
-        if (achieved) {
+    const columns = Object.keys(data[0]);
+
+    if (columns.length === 2) {
+      const all: string[] = data.map((a: any) => {
+        const value = parseInt(a.value, 10);
+
+        if (value >= 100) {
           return "a";
         }
-        const above = dataElementData.find(
-          (a: any) => parseInt(a.value, 10) >= 75 && parseInt(a.value, 10) < 100
-        );
 
-        if (above) {
+        if (value >= 75) {
           return "b";
         }
 
-        const average = dataElementData.find(
-          (a: any) => parseInt(a.value, 10) >= 50 && parseInt(a.value, 10) < 75
-        );
+        return "c";
+      });
 
-        if (average) {
-          return "c";
-        }
-        const below = dataElementData.find(
-          (a: any) => parseInt(a.value, 10) >= 25 && parseInt(a.value, 10) < 50
-        );
-
-        if (below) {
-          return "d";
-        }
-        return "e";
-      }
-    );
-
-    return [
-      { indicator: "Achieved", value: all.filter((v) => v === "a").length },
-      {
-        indicator: "Above Average",
-        value: all.filter((v) => v === "b").length,
-      },
-      { indicator: "Average", value: all.filter((v) => v === "c").length },
-      {
-        indicator: "Below Average",
-        value: all.filter((v) => v === "d").length,
-      },
-      { indicator: "Not Achieved", value: all.filter((v) => v === "e").length },
-    ];
+      return [
+        { indicator: "Achieved", value: all.filter((v) => v === "a").length },
+        {
+          indicator: "Moderately Achieved",
+          value: all.filter((v) => v === "b").length,
+        },
+        {
+          indicator: "Not Achieved",
+          value: all.filter((v) => v === "c").length,
+        },
+      ];
+    }
+    return [];
   };
 
   const allTypes: any = {
