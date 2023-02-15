@@ -1,6 +1,6 @@
 import { Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { fromPairs } from "lodash";
+import { fromPairs, groupBy } from "lodash";
 import { ISection, IVisualization } from "../../interfaces";
 import { useVisualization } from "../../Queries";
 import {
@@ -55,6 +55,57 @@ const getVisualization = (
       ([key]) => !key.startsWith("layout") && !key.startsWith("data")
     )
   );
+
+  const processData = () => {
+    const all = Object.entries(groupBy(data, "dx")).map(
+      ([dx, dataElementData]) => {
+        const achieved = dataElementData.find(
+          (a: any) => parseInt(a.value, 10) >= 100
+        );
+        if (achieved) {
+          return "a";
+        }
+        const above = dataElementData.find(
+          (a: any) => parseInt(a.value, 10) >= 75 && parseInt(a.value, 10) < 100
+        );
+
+        if (above) {
+          return "b";
+        }
+
+        const average = dataElementData.find(
+          (a: any) => parseInt(a.value, 10) >= 50 && parseInt(a.value, 10) < 75
+        );
+
+        if (average) {
+          return "c";
+        }
+        const below = dataElementData.find(
+          (a: any) => parseInt(a.value, 10) >= 25 && parseInt(a.value, 10) < 50
+        );
+
+        if (below) {
+          return "d";
+        }
+        return "e";
+      }
+    );
+
+    return [
+      { indicator: "Achieved", value: all.filter((v) => v === "a").length },
+      {
+        indicator: "Above Average",
+        value: all.filter((v) => v === "b").length,
+      },
+      { indicator: "Average", value: all.filter((v) => v === "c").length },
+      {
+        indicator: "Below Average",
+        value: all.filter((v) => v === "d").length,
+      },
+      { indicator: "Not Achieved", value: all.filter((v) => v === "e").length },
+    ];
+  };
+
   const allTypes: any = {
     single: (
       <SingleValue
@@ -78,7 +129,7 @@ const getVisualization = (
     ),
     pie: (
       <PieChart
-        data={data}
+        data={processData()}
         section={section}
         visualization={visualization}
         {...otherProperties}
@@ -253,7 +304,7 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
     dashboard.refreshInterval,
     globalFilters
   );
-  deriveSingleValues(visualizationData, visualization.expression);
+  // deriveSingleValues(visualizationData, visualization.expression);
   return (
     <Stack
       alignContent="center"

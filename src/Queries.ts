@@ -688,7 +688,7 @@ export const useDataElementGroups = (
   if (q) {
     params = {
       ...params,
-      filter: `identifiable:token:${q}`,
+      filter: `name:ilike:${q}`,
     };
   }
   const namespaceQuery = {
@@ -986,7 +986,7 @@ const findDimension = (
         resource,
         type,
         dimension,
-        value: prefix ? `${prefixes[resource] || ""}${key}` : key,
+        value: `${prefixes[resource] || ""}${key}`,
       };
     }
   );
@@ -1356,7 +1356,6 @@ export const useVisualization = (
             numerator = response.numerator;
             denominator = response.denominator;
           } else if (allQueries.length > 0) {
-            console.log("This is wrong");
             const [{ data: num }, { data: den }] = await Promise.all(
               allQueries
             );

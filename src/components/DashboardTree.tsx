@@ -54,15 +54,25 @@ export default function DashboardTree() {
     setSelectedKeys(() => selectedKeys);
     if (info.node.pId === "") {
       const children = await loadData(info.node, engine);
-      setOriginalColumns([
-        { id: "title", title: labels[info.node.key] || "" },
-        { id: "totalIndicators", title: "# Indicators" },
-      ]);
-      setColumns([
-        { id: "a", title: "A", bg: "green" },
-        { id: "b", title: "MA", bg: "yellow" },
-        { id: "c", title: "NA", bg: "red" },
-      ]);
+
+      if (info.node.key === "dWAaPPBAEbL") {
+        setOriginalColumns([
+          { id: "title", title: labels[info.node.key] || "" },
+        ]);
+        setColumns([]);
+      } else {
+        setOriginalColumns([
+          { id: "title", title: labels[info.node.key] || "" },
+          { id: "totalIndicators", title: "# Indicators" },
+        ]);
+
+        setColumns([
+          { id: "a", title: "A", bg: "green" },
+          { id: "b", title: "MA", bg: "yellow" },
+          { id: "c", title: "NA", bg: "red" },
+        ]);
+      }
+
       const elements = await db.dataElements.toArray();
 
       setRows(
