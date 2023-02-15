@@ -21,6 +21,8 @@ export const loadData = async (node: EventDataNode<DataNode>, engine: any) => {
       data.options = data.dataElementGroupSets.flatMap(
         ({ dataElementGroups }: any) => dataElementGroups
       );
+    } else if (data.dataElements) {
+      data.options = data.dataElements;
     }
     const options = data.options.map((o: any) => {
       const calculated: DataNode = {
@@ -28,7 +30,7 @@ export const loadData = async (node: EventDataNode<DataNode>, engine: any) => {
         pId: String(node.key),
         key: o.code,
         style: { margin: "5px" },
-        id: o.code,
+        id: o.id || o.code,
         value: o.code,
         title: o.name,
         checkable: true,
