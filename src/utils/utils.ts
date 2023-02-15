@@ -421,6 +421,20 @@ export const updateValAtKey: any = (
 
 export const colors: Option[] = [
   {
+    label: "Color2",
+    value: [
+      "green",
+      "#38A169",
+      "yellow",
+      "orange",
+      "red",
+      "black",
+      "#8c564b",
+      "#7f7f7f",
+      "#bcbd22",
+    ].join(","),
+  },
+  {
     label: "Color1",
     value: [
       "#e377c2",
@@ -611,6 +625,48 @@ export const allMetadata: { [key: string]: string } = {
   mlwTknbcGP4: "VVM Color Change",
   rKD38rD7HZ5: "Village Health Team",
   xYerKDKCefk: "default",
+
+  WdilrXx08R4: "DIR15",
+
+  Q18G7d3DPOg: "DIR10",
+  lYoAOhykYUW: "DIR21",
+
+  HolY9bB9ndg: "DIR05",
+
+  tWRpQ8HFWk4: "DIR18",
+
+  Et0jLLFoPiQ: "DIR19",
+
+  B04qyv8sHLZ: "DIR07",
+
+  um8prFWwCYU: "DIR01",
+
+  gjqIp8H7948: "DIR04",
+
+  QYISgIjXTJC: "DIR13",
+
+  wRshJ7SJcHq: "DIR06",
+
+  FJ1pjZ5Edzf: "DIR11",
+
+  N7r57cuvssW: "DIR23",
+
+  wXeABLEj9Vj: "DIR03",
+
+  I8NkRKchMoU: "DIR22",
+
+  nOnQwK1sDaN: "DIR17",
+
+  m3xNIoQ2esR: "DIR12",
+
+  PQxdLS3vke3: "DIR08",
+
+  w6VmDxFste0: "DIR14",
+
+  h4lJWKnqnxx: "DIR16",
+  QgvBHBb5xcS: "DIR02",
+  UEDzAaR5GpB: "DIR09",
+  gypjprrtiKV: "DIR20",
 };
 
 export const processMap = (

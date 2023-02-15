@@ -60,54 +60,6 @@ export const innerColumns = (index: number) => {
   return {} as any;
 };
 
-const otherRows = (row: number, column: number, bg: string = "white") => {
-  if (row === 0 && column === 0) {
-    return {
-      position: "sticky",
-      backgroundColor: "white",
-      w: "400px",
-      minWidth: "400px",
-      maxWidth: "400px",
-      left: "0px",
-      top: "60px",
-      h: "50px",
-      minH: "50px",
-      maxH: "50px",
-      zIndex: 4000,
-    } as any;
-  }
-  if (row === 0 && column > 0) {
-    return {
-      position: "sticky",
-      backgroundColor: "white",
-      h: "20px",
-      minH: "20px",
-      maxH: "20px",
-      top: "60px",
-      zIndex: 2000,
-    } as any;
-  }
-
-  if (row === 1 && column > 0) {
-    return {
-      position: "sticky",
-      backgroundColor: "white",
-      h: "20px",
-      minH: "20px",
-      maxH: "20px",
-      top: "100px",
-      zIndex: 2000,
-    } as any;
-  }
-  return {
-    top: "0px",
-    position: "sticky",
-    bg,
-    // textAlign: "center",
-    zIndex: 1000,
-  } as any;
-};
-
 const Tables = ({
   visualization,
   category,
@@ -122,7 +74,10 @@ const Tables = ({
   const [squareRef, { width, height }] = useElementSize();
 
   const processed: { [key: string]: string } = fromPairs(
-    data.map((d: any) => [`${d.dx}${d.pe}${d.Duw5yep8Vae}`, d.value])
+    data.map((d: any) => [
+      `${d.dx || ""}${d.pe || ""}${d.Duw5yep8Vae || ""}`,
+      d.value,
+    ])
   );
 
   const processSummaries = () => {
@@ -148,11 +103,8 @@ const Tables = ({
           if (actualValue && targetValue) {
             const percentage =
               Number(actualValue.value) / Number(targetValue.value);
-
             if (percentage >= 1) return "a";
-
             if (percentage >= 0.75) return "ma";
-
             return "na";
           }
 
@@ -374,35 +326,42 @@ const Tables = ({
                   </Th>
                 ))}
               </Tr>
-              <Tr
-                h="50px"
-                top="100px"
-                position="sticky"
-                zIndex={100}
-                bg="white"
-              >
-                {computeFinancialYears(2020)
-                  .flatMap((fy) =>
-                    store.columns.map((c) => {
-                      return { ...c, id: `${c.id}${fy.value}`, bg: c.bg || "" };
-                    })
-                  )
-                  .map(({ id, title, bg }, index) => (
-                    <Th
-                      borderColor="#DDDDDD"
-                      borderStyle="solid"
-                      borderWidth="thin"
-                      fontWeight="bold"
-                      color="black"
-                      fontSize="sm"
-                      bg={bg}
-                      key={id}
-                      // {...otherRows(1, index + 1)}
-                    >
-                      {title}
-                    </Th>
-                  ))}
-              </Tr>
+
+              {store.columns.length > 0 && (
+                <Tr
+                  h="50px"
+                  top="100px"
+                  position="sticky"
+                  zIndex={100}
+                  bg="white"
+                >
+                  {computeFinancialYears(2020)
+                    .flatMap((fy) =>
+                      store.columns.map((c) => {
+                        return {
+                          ...c,
+                          id: `${c.id}${fy.value}`,
+                          bg: c.bg || "",
+                        };
+                      })
+                    )
+                    .map(({ id, title, bg }, index) => (
+                      <Th
+                        borderColor="#DDDDDD"
+                        borderStyle="solid"
+                        borderWidth="thin"
+                        fontWeight="bold"
+                        color="black"
+                        fontSize="sm"
+                        bg={bg}
+                        key={id}
+                        // {...otherRows(1, index + 1)}
+                      >
+                        {title}
+                      </Th>
+                    ))}
+                </Tr>
+              )}
             </Thead>
             <Tbody>
               {store.rows.map((row, bigIndex) => {
@@ -427,44 +386,76 @@ const Tables = ({
                       )
                     )}
                     {computeFinancialYears(2020)
-                      .flatMap((fy) =>
-                        store.columns.map(({ id: cId }) => {
-                          let bg = "";
-                          let color = "black";
-                          const actual =
-                            processed[`${row.id}${fy.value}${cId}`];
-                          const target =
-                            processed[`${row.id}${fy.value}Px8Lqkxy2si`];
+                      .flatMap((fy) => {
+                        if (store.columns.length > 0) {
+                          return store.columns.map(({ id: cId }) => {
+                            let bg = "";
+                            let color = "black";
+                            const actual =
+                              processed[`${row.id}${fy.value}${cId}`];
+                            const target =
+                              processed[`${row.id}${fy.value}Px8Lqkxy2si`];
 
-                          if (cId === "HKtncMjp06U" && actual && target) {
-                            const percentage =
-                              (Number(actual) * 100) / Number(target);
-                            if (percentage >= 100) {
-                              bg = "green";
-                              // color = "white";
-                            } else if (percentage >= 75) {
-                              bg = "yellow";
-                              // color = "white";
-                            } else {
-                              bg = "red";
-                              // color = "white";
+                            if (cId === "HKtncMjp06U" && actual && target) {
+                              const percentage =
+                                (Number(actual) * 100) / Number(target);
+                              if (percentage >= 100) {
+                                bg = "green";
+                                // color = "white";
+                              } else if (percentage >= 75) {
+                                bg = "yellow";
+                                // color = "white";
+                              } else {
+                                bg = "red";
+                                // color = "white";
+                              }
+                            } else if (cId === "HKtncMjp06U" && !actual) {
+                              bg = "#AAAAAA";
                             }
-                          } else if (cId === "HKtncMjp06U" && !actual) {
-                            bg = "#AAAAAA";
+                            if (cId === "Px8Lqkxy2si" && actual) {
+                            } else if (cId === "Px8Lqkxy2si") {
+                            }
+                            return {
+                              key: `${row.id}${fy.value}${cId}`,
+                              value:
+                                pd[`${fy.value}${cId}`] ||
+                                processed[`${row.id}${fy.value}${cId}`],
+                              bg,
+                              color,
+                            };
+                          });
+                        }
+
+                        const value = processed[`${row.id}${fy.value}`];
+
+                        let bg = "#AAAAAA";
+                        let color = "black";
+                        if (value) {
+                          const realValue = Number(value);
+                          if (realValue >= 100) {
+                            bg = "green";
+                            // color = "white";
+                          } else if (realValue >= 75) {
+                            bg = "green.500";
+                            // color = "white";
+                          } else if (realValue >= 49) {
+                            bg = "yellow";
+                            // color = "white";
+                          } else if (realValue >= 25) {
+                            bg = "orange";
+                            // color = "white";
+                          } else if (realValue < 25) {
+                            bg = "red";
+                            // color = "white";
                           }
-                          if (cId === "Px8Lqkxy2si" && actual) {
-                          } else if (cId === "Px8Lqkxy2si") {
-                          }
-                          return {
-                            key: `${row.id}${fy.value}${cId}`,
-                            value:
-                              pd[`${fy.value}${cId}`] ||
-                              processed[`${row.id}${fy.value}${cId}`],
-                            bg,
-                            color,
-                          };
-                        })
-                      )
+                        }
+                        return {
+                          key: `${row.id}${fy.value}`,
+                          value: value,
+                          bg,
+                          color,
+                        };
+                      })
                       .map(({ key, value, bg, color }) => (
                         <Td
                           borderColor="#DDDDDD"
