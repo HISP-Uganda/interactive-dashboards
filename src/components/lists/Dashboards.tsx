@@ -120,7 +120,6 @@ const Dashboards = () => {
                       id: dashboard.id,
                       pId: "",
                       key: dashboard.id,
-                      style: { margin: "5px" },
                       title: dashboard.name || "",
                       checkable: false,
                       nodeSource: dashboard.nodeSource,

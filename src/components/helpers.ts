@@ -29,7 +29,6 @@ export const loadData = async (node: EventDataNode<DataNode>, engine: any) => {
         isLeaf: true,
         pId: String(node.key),
         key: o.code,
-        style: { margin: "5px" },
         id: o.id || o.code,
         value: o.code,
         title: o.name,
