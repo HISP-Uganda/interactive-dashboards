@@ -165,8 +165,8 @@ const DashboardMenu = () => {
       )}
       {store.isAdmin && !isNotDesktop && <AutoRefreshPicker />}
       <DropdownButton
-        // 
-        
+        //
+
         component={
           <Stack
             w="600px"
@@ -176,10 +176,11 @@ const DashboardMenu = () => {
             boxShadow="2xl"
             overflow="auto"
             h="calc(100vh - 170px)"
-            
           >
             {/* <DashboardCategorization dataSet={dashboard.dataSet} /> */}
-            <Text fontSize="2xl" color="yellow.500">Votes</Text>
+            <Text fontSize="2xl" color="yellow.500">
+              Votes
+            </Text>
             <OUTree
               value={store.organisations}
               onChange={(value) => setOrganisations(value)}
@@ -190,7 +191,7 @@ const DashboardMenu = () => {
             />
           </Stack>
         }
-        style={{backgroundColor: "yellow"}}
+        style={{ backgroundColor: "yellow" }}
         name="buttonName"
         value="buttonValue"
         className="nrm"
@@ -287,7 +288,6 @@ const DashboardMenu = () => {
                       isLeaf: !dashboard.hasChildren,
                       pId: "",
                       key: dashboard.id,
-                      style: { margin: "5px" },
                       title: dashboard.name || "",
                       checkable: false,
                       nodeSource: dashboard.nodeSource,
