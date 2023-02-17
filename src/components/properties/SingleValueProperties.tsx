@@ -306,13 +306,13 @@ const SingleValueProperties = ({
       <Stack>
         <Text>Target Spacing</Text>
         <NumberInput
-          value={visualization.properties["data.target.spacing"] || 0}
+          value={visualization.properties["data.targetspacing"] || 0}
           min={0}
           step={1}
           onChange={(value1: string, value2: number) =>
             changeVisualizationProperties({
               visualization: visualization.id,
-              attribute: "data.target.spacing",
+              attribute: "data.targetspacing",
               value: value2,
             })
           }
@@ -329,20 +329,20 @@ const SingleValueProperties = ({
         <Text>Target Color</Text>
         <ColorPalette
           visualization={visualization}
-          attribute="data.target.color"
+          attribute="data.targetcolor"
         />
       </Stack>
 
       <Stack>
         <Text>Thickness</Text>
         <NumberInput
-          value={visualization.properties["data.target.thickness"] || 0}
+          value={visualization.properties["data.targetthickness"] || 0}
           min={0}
           step={1}
           onChange={(value1: string, value2: number) =>
             changeVisualizationProperties({
               visualization: visualization.id,
-              attribute: "data.target.thickness",
+              attribute: "data.targetthickness",
               value: value2,
             })
           }
@@ -358,13 +358,13 @@ const SingleValueProperties = ({
       <Stack>
         <Text>Radius</Text>
         <NumberInput
-          value={visualization.properties["data.target.radius"] || 0}
+          value={visualization.properties["data.targetradius"] || 0}
           min={30}
           step={1}
           onChange={(value1: string, value2: number) =>
             changeVisualizationProperties({
               visualization: visualization.id,
-              attribute: "data.target.radius",
+              attribute: "data.targetradius",
               value: value2,
             })
           }
