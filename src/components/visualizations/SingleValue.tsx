@@ -84,10 +84,10 @@ const SingleValue = ({
   const fontSize = dataProperties?.["data.format.fontSize"] || 2;
   const alignment = dataProperties?.["data.alignment"] || "column";
   const bg = layoutProperties?.["layout.bg"] || "";
-  const radius = dataProperties?.["data.target.radius"] || 60;
-  const thickness = dataProperties?.["data.target.thickness"] || 10;
-  const targetColor = dataProperties?.["data.target.color"] || "blue";
-  const targetSpacing = dataProperties?.["data.target.spacing"] || 0;
+  const radius = dataProperties?.["data.targetradius"] || 60;
+  const thickness = dataProperties?.["data.targetthickness"] || 10;
+  const targetColor = dataProperties?.["data.targetcolor"] || "blue";
+  const targetSpacing = dataProperties?.["data.targetspacing"] || 0;
   const spacing =
     dataProperties?.["data.format.spacing"] ||
     ["row", "row-reverse"].indexOf(alignment) !== -1
