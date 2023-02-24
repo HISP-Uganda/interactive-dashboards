@@ -1,6 +1,6 @@
 import { Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { fromPairs, groupBy } from "lodash";
+import { fromPairs, groupBy, isEmpty } from "lodash";
 import { ISection, IVisualization } from "../../interfaces";
 import { useVisualization } from "../../Queries";
 import {
@@ -57,34 +57,35 @@ const getVisualization = (
   );
 
   const processData = () => {
-    const columns = Object.keys(data[0]);
+    if (!isEmpty(data)) {
+      const columns = Object.keys(data[0]);
+      if (columns.length === 2) {
+        const all: string[] = data.map((a: any) => {
+          const value = parseInt(a.value, 10);
 
-    if (columns.length === 2) {
-      const all: string[] = data.map((a: any) => {
-        const value = parseInt(a.value, 10);
+          if (value >= 100) {
+            return "a";
+          }
 
-        if (value >= 100) {
-          return "a";
-        }
+          if (value >= 75) {
+            return "b";
+          }
 
-        if (value >= 75) {
-          return "b";
-        }
+          return "c";
+        });
 
-        return "c";
-      });
-
-      return [
-        { indicator: "Achieved", value: all.filter((v) => v === "a").length },
-        {
-          indicator: "Moderately Achieved",
-          value: all.filter((v) => v === "b").length,
-        },
-        {
-          indicator: "Not Achieved",
-          value: all.filter((v) => v === "c").length,
-        },
-      ];
+        return [
+          { indicator: "Achieved", value: all.filter((v) => v === "a").length },
+          {
+            indicator: "Moderately Achieved",
+            value: all.filter((v) => v === "b").length,
+          },
+          {
+            indicator: "Not Achieved",
+            value: all.filter((v) => v === "c").length,
+          },
+        ];
+      }
     }
     return [];
   };

@@ -1,36 +1,31 @@
-import {
-  Stack,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Text,
-  Button,
-  Flex,
-} from "@chakra-ui/react";
+import { Button, Flex, Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { useState } from "react";
+import { useElementSize } from "usehooks-ts";
 import { IndicatorProps } from "../../interfaces";
-import { $indicator } from "../../Store";
-import OrgUnitTree from "./OrgUnitTree";
+import { useDimensions } from "../../Queries";
+import { $currentDataSource, $hasDHIS2 } from "../../Store";
+import LoadingIndicator from "../LoadingIndicator";
+import DataElementGroups from "./DataElementGroups";
+import DataElementGroupSets from "./DataElementGroupSets";
 import DataElements from "./DataElements";
+import Dimension from "./Dimension";
 import Indicators from "./Indicators";
 import OrganizationUnitGroups from "./OrganisationUnitGroups";
+import OrganizationUnitGroupSets from "./OrganisationUnitGroupSets";
 import OrganizationUnitLevels from "./OrganisationUnitLevels";
+import OrgUnitTree from "./OrgUnitTree";
 import Periods from "./Periods";
 import ProgramIndicators from "./ProgramIndicators";
 import SQLViews from "./SQLViews";
-import { useDimensions } from "../../Queries";
-import Dimension from "./Dimension";
-import { useElementSize } from "usehooks-ts";
-import OrganizationUnitGroupSets from "./OrganisationUnitGroupSets";
-import DataElementGroups from "./DataElementGroups";
-import DataElementGroupSets from "./DataElementGroupSets";
-import LoadingIndicator from "../LoadingIndicator";
 
 const DHIS2 = ({ onChange, denNum, changeQuery }: IndicatorProps) => {
-  const { error, data, isError, isLoading, isSuccess } = useDimensions();
+  const hasDHIS2 = useStore($hasDHIS2);
+  const currentDataSource = useStore($currentDataSource);
+  const { error, data, isError, isLoading, isSuccess } = useDimensions(
+    hasDHIS2,
+    currentDataSource
+  );
   const [active, setActive] = useState<string>("");
 
   const list = [
@@ -148,64 +143,6 @@ const DHIS2 = ({ onChange, denNum, changeQuery }: IndicatorProps) => {
             )}
           </Stack>
         </Stack>
-        // <Tabs>
-        //   <TabList>
-        //     <Tab>Indicators</Tab>
-        //     <Tab>Elements</Tab>
-        //     <Tab>Element Groups</Tab>
-        //     <Tab>Element Group Sets</Tab>
-        //     <Tab>Program Indicators</Tab>
-        //     <Tab>Periods</Tab>
-        //     <Tab>Organisations</Tab>
-        //     <Tab>Organisation Groups</Tab>
-        //     <Tab>Organisation Group Sets</Tab>
-        //     <Tab>Organisation Levels</Tab>
-        //     {data?.map(({ id, name }: any) => (
-        //       <Tab key={id}>{name}</Tab>
-        //     ))}
-        //   </TabList>
-        //   <TabPanels>
-        //     <TabPanel>
-        //       <Indicators denNum={denNum} onChange={onChange} />
-        //     </TabPanel>
-        //     <TabPanel>
-        //       <DataElements denNum={denNum} onChange={onChange} />
-        //     </TabPanel>
-        //     <TabPanel>
-        //       <Text>Coming Soon</Text>
-        //     </TabPanel>
-        //     <TabPanel>
-        //       <Text>Coming Soon</Text>
-        //     </TabPanel>
-        //     <TabPanel>
-        //       <ProgramIndicators denNum={denNum} onChange={onChange} />
-        //     </TabPanel>
-        //     <TabPanel>
-        //       <Periods denNum={denNum} onChange={onChange} />
-        //     </TabPanel>
-        //     <TabPanel>
-        //       <OrgUnitTree denNum={denNum} onChange={onChange} />
-        //     </TabPanel>
-        //     <TabPanel>
-        //       <OrganizationUnitGroups denNum={denNum} onChange={onChange} />
-        //     </TabPanel>
-        //     <TabPanel>
-        //       <Text>Coming soon</Text>
-        //     </TabPanel>
-        //     <TabPanel>
-        //       <OrganizationUnitLevels denNum={denNum} onChange={onChange} />
-        //     </TabPanel>
-        //     {data?.map((item: any) => (
-        //       <TabPanel key={item.id}>
-        //         <Dimension
-        //           denNum={denNum}
-        //           onChange={onChange}
-        //           dimensionItem={item}
-        //         />
-        //       </TabPanel>
-        //     ))}
-        //   </TabPanels>
-        // </Tabs>
       )}
       {denNum?.type === "SQL_VIEW" && (
         <SQLViews

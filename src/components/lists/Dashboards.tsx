@@ -140,7 +140,7 @@ const Dashboards = () => {
                     const children = await loadData(node, engine);
                     setOriginalColumns([
                       { id: "title", title: "Indicator" },
-                      { id: "totalIndicators", title: "# Indicators" },
+                      { id: "totalIndicators", title: "Indicators" },
                     ]);
                     setColumns([
                       { id: "a", title: "A" },
