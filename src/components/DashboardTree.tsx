@@ -21,10 +21,10 @@ import { $store } from "../Store";
 import { loadData } from "./helpers";
 
 const labels: { [key: string]: string } = {
-  M0ACvr6Coqn: "Commitment",
-  dWAaPPBAEbL: "Directive",
-  emIWijzLHR4: "Theme",
-  iE5A3BBdv2z: "Program",
+  M0ACvr6Coqn: "Commitments",
+  dWAaPPBAEbL: "Directives",
+  emIWijzLHR4: "Themes",
+  iE5A3BBdv2z: "Programmes",
 };
 
 export default function DashboardTree() {
@@ -54,27 +54,16 @@ export default function DashboardTree() {
     setSelectedKeys(() => selectedKeys);
     if (info.node.pId === "") {
       const children = await loadData(info.node, engine);
-
-      if (info.node.key === "dWAaPPBAEbL") {
-        setOriginalColumns([
-          { id: "title", title: labels[info.node.key] || "" },
-        ]);
-        setColumns([]);
-      } else {
-        setOriginalColumns([
-          { id: "title", title: labels[info.node.key] || "" },
-          { id: "totalIndicators", title: "# Indicators" },
-        ]);
-
-        setColumns([
-          { id: "a", title: "A", bg: "green" },
-          { id: "b", title: "MA", bg: "yellow" },
-          { id: "c", title: "NA", bg: "red" },
-        ]);
-      }
-
+      setOriginalColumns([
+        { id: "title", title: labels[info.node.key] || "" },
+        { id: "totalIndicators", title: "Indicators" },
+      ]);
+      setColumns([
+        { id: "a", title: "A", bg: "green" },
+        { id: "b", title: "MA", bg: "yellow" },
+        { id: "c", title: "NA", bg: "red" },
+      ]);
       const elements = await db.dataElements.toArray();
-
       setRows(
         children.map((c: any) => {
           const filteredElements = elements.filter(
@@ -102,12 +91,20 @@ export default function DashboardTree() {
         data: [{ value: elements.length }],
       });
       updateVisualizationData({
+        visualizationId: "indicators",
+        data: [{ value: elements.length }],
+      });
+      updateVisualizationData({
         visualizationId: "interventions",
         data: [{ value: uniq(elements.map((e) => e.interventionCode)).length }],
       });
       updateVisualizationData({
         visualizationId: "outputs",
         data: [{ value: 0 }],
+      });
+      updateVisualizationData({
+        visualizationId: "directives",
+        data: [{ value: children.length }],
       });
       setDataElements(elements);
       setCheckedKeys({ checked: [], halfChecked: [] });
@@ -125,12 +122,15 @@ export default function DashboardTree() {
     info: any
   ) => {
     const { checkedNodes, node } = info;
-    const realCheckedNodes = checkedNodes.flatMap(({ pId, key }: any) => {
-      if (pId === node.pId) {
-        return key;
+    const realCheckedNodes: string[] = checkedNodes.flatMap(
+      ({ pId, key }: any) => {
+        if (pId === node.pId) {
+          return key;
+        }
+        return [];
       }
-      return [];
-    });
+    );
+
     setCheckedKeys({ checked: realCheckedNodes, halfChecked: [] });
     if (realCheckedNodes.length > 0) {
       const elements = await db.dataElements
@@ -142,7 +142,16 @@ export default function DashboardTree() {
         .anyOf(realCheckedNodes)
         .toArray();
       setDataElements(elements);
-      setOriginalColumns([{ id: "name", title: "Indicator", w: "600px" }]);
+
+      if (node.pId === "dWAaPPBAEbL") {
+        setOriginalColumns([
+          { id: "interventionCode", title: "Directives", w: "125px" },
+          // { id: "program", title: "Programme" },
+          { id: "name", title: "Indicators", w: "500px" },
+        ]);
+      } else {
+        setOriginalColumns([{ id: "name", title: "Indicator", w: "600px" }]);
+      }
       setRows(
         elements.map((e) => {
           return { ...e, child: true };
@@ -170,6 +179,10 @@ export default function DashboardTree() {
         visualizationId: "outputs",
         data: [{ value: 0 }],
       });
+      updateVisualizationData({
+        visualizationId: "directives",
+        data: [{ value: realCheckedNodes.length }],
+      });
       navigate({
         to: `/dashboards/${node.pId}`,
         search,
@@ -190,6 +203,30 @@ export default function DashboardTree() {
       });
       updateVisualizationData({
         visualizationId: "c",
+        data: [{ value: 0 }],
+      });
+      updateVisualizationData({
+        visualizationId: "directives",
+        data: [{ value: 0 }],
+      });
+      updateVisualizationData({
+        visualizationId: "aa",
+        data: [{ value: 0 }],
+      });
+      updateVisualizationData({
+        visualizationId: "aav",
+        data: [{ value: 0 }],
+      });
+      updateVisualizationData({
+        visualizationId: "av",
+        data: [{ value: 0 }],
+      });
+      updateVisualizationData({
+        visualizationId: "bav",
+        data: [{ value: 0 }],
+      });
+      updateVisualizationData({
+        visualizationId: "na",
         data: [{ value: 0 }],
       });
     }

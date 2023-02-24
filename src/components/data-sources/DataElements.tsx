@@ -10,7 +10,6 @@ import {
   Checkbox,
   Flex,
   Heading,
-  Input,
   Stack,
   Table,
   Tbody,
@@ -21,21 +20,22 @@ import {
   Tr,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
+import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
 import { useDataElements } from "../../Queries";
-import { $paginations } from "../../Store";
+import { $paginations, $hasDHIS2, $currentDataSource } from "../../Store";
 import { globalIds } from "../../utils/utils";
-import GlobalAndFilter from "./GlobalAndFilter";
-import GlobalSearchFilter from "./GlobalSearchFilter";
 import LoadingIndicator from "../LoadingIndicator";
-import { isEmpty } from "lodash";
+import GlobalSearchFilter from "./GlobalSearchFilter";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
 const DataElements = ({ onChange, denNum }: IndicatorProps) => {
   const paginations = useStore($paginations);
+  const hasDHIS2 = useStore($hasDHIS2);
+  const currentDataSource = useStore($currentDataSource);
   const [type, setType] = useState<"filter" | "dimension">("dimension");
 
   const selected = Object.entries(denNum?.dataDimensions || {})
@@ -43,7 +43,6 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
     .map(([key]) => {
       return key;
     });
-  console.log(selected);
   const [q, setQ] = useState<string>("");
   const [useGlobal, setUseGlobal] = useState<boolean>(
     () => selected.indexOf("h9oh0VhweQM") !== -1
@@ -70,7 +69,9 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
   const { isLoading, isSuccess, isError, error, data } = useDataElements(
     currentPage,
     pageSize,
-    q
+    q,
+    hasDHIS2,
+    currentDataSource
   );
 
   const handlePageChange = (nextPage: number) => {

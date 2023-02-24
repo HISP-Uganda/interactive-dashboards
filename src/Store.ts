@@ -1,5 +1,6 @@
+import axios from "axios";
 import { combine } from "effector";
-import { fromPairs, isEqual, sortBy } from "lodash";
+import { fromPairs, isEqual, sortBy, isEmpty } from "lodash";
 import { headerHeight, padding, sideWidth } from "./components/constants";
 import { domain } from "./Domain";
 import {
@@ -765,6 +766,32 @@ export const $dataSourceType = combine(
       return dataSource.type;
     }
     return "";
+  }
+);
+
+export const $currentDataSource = combine(
+  $indicator,
+  $dataSources,
+  (indicator, dataSources) => {
+    const ds = dataSources.find((ds) => ds.id === indicator.dataSource);
+    if (ds && !isEmpty(ds.authentication)) {
+      console.log("Have we enetered here");
+      return axios.create({
+        baseURL: `${ds.authentication.url}/api/`,
+        auth: {
+          username: ds.authentication.username,
+          password: ds.authentication.password,
+        },
+      });
+    }
+  }
+);
+
+export const $ds = combine(
+  $indicator,
+  $dataSources,
+  (indicator, dataSources) => {
+    return dataSources.find((ds) => ds.id === indicator.dataSource);
   }
 );
 

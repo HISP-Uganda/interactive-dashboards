@@ -23,7 +23,7 @@ import { useStore } from "effector-react";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
 import { useDataElementGroups } from "../../Queries";
-import { $paginations } from "../../Store";
+import { $paginations, $hasDHIS2, $currentDataSource } from "../../Store";
 import { globalIds } from "../../utils/utils";
 import GlobalSearchFilter from "./GlobalSearchFilter";
 import LoadingIndicator from "../LoadingIndicator";
@@ -34,6 +34,8 @@ const INNER_LIMIT = 4;
 
 const DataElementGroups = ({ onChange, denNum }: IndicatorProps) => {
   const paginations = useStore($paginations);
+  const hasDHIS2 = useStore($hasDHIS2);
+  const currentDataSource = useStore($currentDataSource);
   const [type, setType] = useState<"filter" | "dimension">("dimension");
 
   const selected = Object.entries(denNum?.dataDimensions || {})
@@ -67,7 +69,9 @@ const DataElementGroups = ({ onChange, denNum }: IndicatorProps) => {
   const { isLoading, isSuccess, isError, error, data } = useDataElementGroups(
     currentPage,
     pageSize,
-    q
+    q,
+    hasDHIS2,
+    currentDataSource
   );
 
   const handlePageChange = (nextPage: number) => {
