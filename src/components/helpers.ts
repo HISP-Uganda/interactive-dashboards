@@ -6,7 +6,7 @@ export const loadData = async (node: EventDataNode<DataNode>, engine: any) => {
   if (node.children) {
     return node.children;
   }
-  if (node.nodeSource) {
+  if (node.nodeSource && node.nodeSource.resource) {
     const query: any = {
       data: {
         resource: node.nodeSource.resource,
@@ -19,10 +19,18 @@ export const loadData = async (node: EventDataNode<DataNode>, engine: any) => {
 
     if (data.dataElementGroupSets) {
       data.options = data.dataElementGroupSets.flatMap(
-        ({ dataElementGroups }: any) => dataElementGroups
+        ({ dataElementGroups, id, name, code }: any) => {
+          if (dataElementGroups) {
+            return dataElementGroups;
+          } else if (id) {
+            return { id, name, code };
+          }
+        }
       );
     } else if (data.dataElements) {
       data.options = data.dataElements;
+    } else if (data.dataElementGroups) {
+      data.options = data.dataElementGroups;
     }
     const options = data.options.map((o: any) => {
       const calculated: DataNode = {
