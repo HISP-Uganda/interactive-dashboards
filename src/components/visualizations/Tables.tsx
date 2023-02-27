@@ -1,24 +1,23 @@
 import {
   Box,
+  SimpleGrid,
   Stack,
   Table,
+  TableCaption,
   Tbody,
   Td,
+  Text,
   Th,
   Thead,
   Tr,
-  Text,
-  SimpleGrid,
-  TableCaption,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
+import { fromPairs, groupBy, max, mean, sum } from "lodash";
 import { useEffect } from "react";
-import { fromPairs, groupBy, sum, orderBy } from "lodash";
 import { useElementSize } from "usehooks-ts";
+import { updateVisualizationData } from "../../Events";
 import { ChartProps } from "../../interfaces";
 import { $store } from "../../Store";
-import { generateUid } from "../../utils/uid";
-import { updateVisualizationData } from "../../Events";
 
 interface TableProps extends ChartProps {
   category?: string;
@@ -34,30 +33,35 @@ const computeFinancialYears = (year: number) => {
   });
 };
 
-export const innerColumns = (index: number) => {
-  if (index === 0) {
-    return {
-      position: "sticky",
-      w: "400px",
-      minWidth: "400px",
-      maxWidth: "400px",
-      left: "0px",
-      backgroundColor: "white",
-      zIndex: 100,
-    } as any;
-  }
-  // if (index === 1) {
-  //   return {
-  //     position: "sticky",
-  //     w: "250px",
-  //     minW: "250px",
-  //     maxWidth: "250px",
-  //     left: "200px",
-  //     backgroundColor: "white",
-  //     zIndex: 100,
-  //   } as any;
-  // }
-  return {} as any;
+const computeDirectives = (data: any[], elements: string[]) => {
+  const groupData = data.filter(({ dx }: any) => elements.indexOf(dx) !== -1);
+  const value = mean(
+    Object.entries(groupBy(groupData, "dx")).map(([dx, group]) => {
+      return max(
+        Object.entries(groupBy(group, "pe")).map(([pe, peData]) => {
+          const actualValue = peData.find(
+            ({ Duw5yep8Vae }: any) => Duw5yep8Vae === "HKtncMjp06U"
+          );
+          const targetValue = peData.find(
+            ({ Duw5yep8Vae }: any) => Duw5yep8Vae === "Px8Lqkxy2si"
+          );
+
+          if (actualValue && targetValue) {
+            return (
+              (Number(actualValue.value) * 100) / Number(targetValue.value)
+            );
+          }
+          return 0;
+        })
+      );
+    })
+  );
+
+  if (value >= 100) return "aa";
+  if (value >= 75 && value < 100) return "aav";
+  if (value >= 50 && value < 75) return "av";
+  if (value >= 25 && value < 50) return "bav";
+  return "nac";
 };
 
 const Tables = ({
@@ -87,6 +91,78 @@ const Tables = ({
       }
       return row.id;
     });
+
+    if (store.rows.length > 0) {
+      const first = store.rows[0];
+      if (first.child) {
+        const grouped = groupBy(store.rows, "interventionCode");
+        const processedDir = Object.entries(grouped).map(
+          ([directive, elements]) => {
+            return computeDirectives(
+              data,
+              elements.map(({ id }: any) => id)
+            );
+          }
+        );
+        const aa = processedDir.filter((a) => a === "aa").length;
+        const aav = processedDir.filter((a) => a === "aav").length;
+        const av = processedDir.filter((a) => a === "av").length;
+        const bav = processedDir.filter((a) => a === "bav").length;
+        const nac = processedDir.filter((a) => a === "nac").length;
+
+        updateVisualizationData({
+          visualizationId: "aa",
+          data: [{ value: aa }],
+        });
+        updateVisualizationData({
+          visualizationId: "aav",
+          data: [{ value: aav }],
+        });
+        updateVisualizationData({
+          visualizationId: "av",
+          data: [{ value: av }],
+        });
+        updateVisualizationData({
+          visualizationId: "bav",
+          data: [{ value: bav }],
+        });
+        updateVisualizationData({
+          visualizationId: "nac",
+          data: [{ value: nac }],
+        });
+      } else {
+        const processedDir = store.rows.map(({ elements }) => {
+          return computeDirectives(data, elements);
+        });
+
+        const aa = processedDir.filter((a) => a === "aa").length;
+        const aav = processedDir.filter((a) => a === "aav").length;
+        const av = processedDir.filter((a) => a === "av").length;
+        const bav = processedDir.filter((a) => a === "bav").length;
+        const nac = processedDir.filter((a) => a === "nac").length;
+
+        updateVisualizationData({
+          visualizationId: "aa",
+          data: [{ value: aa }],
+        });
+        updateVisualizationData({
+          visualizationId: "aav",
+          data: [{ value: aav }],
+        });
+        updateVisualizationData({
+          visualizationId: "av",
+          data: [{ value: av }],
+        });
+        updateVisualizationData({
+          visualizationId: "bav",
+          data: [{ value: bav }],
+        });
+        updateVisualizationData({
+          visualizationId: "nac",
+          data: [{ value: nac }],
+        });
+      }
+    }
 
     const filtered = data.filter(({ dx }: any) => elements.indexOf(dx) !== -1);
     const groupedByDx = groupBy(filtered, "dx");
@@ -298,7 +374,7 @@ const Tables = ({
                     borderColor="#DDDDDD"
                     borderStyle="solid"
                     borderWidth="thin"
-                    color="black"
+                    // color="black"
                     // fontSize="lg"
                     key={id}
                     rowSpan={2}
@@ -320,7 +396,7 @@ const Tables = ({
                     borderStyle="solid"
                     borderWidth="thin"
                     fontSize="md"
-                    color="black"
+                    // color="black"
                   >
                     {fy.key}
                   </Th>
@@ -350,8 +426,8 @@ const Tables = ({
                         borderColor="#DDDDDD"
                         borderStyle="solid"
                         borderWidth="thin"
-                        fontWeight="bold"
-                        color="black"
+                        // fontWeight="bold"
+                        // color="black"
                         fontSize="sm"
                         bg={bg}
                         key={id}
@@ -373,7 +449,7 @@ const Tables = ({
                         <Td
                           borderColor="#DDDDDD"
                           borderStyle="solid"
-                          fontWeight="bold"
+                          // fontWeight="bold"
                           borderWidth="thin"
                           key={`${id}${row.id}`}
                           w={w}
@@ -436,18 +512,21 @@ const Tables = ({
                             bg = "green";
                             // color = "white";
                           } else if (realValue >= 75) {
-                            bg = "green.500";
-                            // color = "white";
-                          } else if (realValue >= 49) {
                             bg = "yellow";
                             // color = "white";
-                          } else if (realValue >= 25) {
-                            bg = "orange";
-                            // color = "white";
-                          } else if (realValue < 25) {
+                          } else if (realValue < 75) {
                             bg = "red";
-                            // color = "white";
                           }
+                          // else if (realValue >= 49) {
+                          //   bg = "yellow";
+                          //   // color = "white";
+                          // } else if (realValue >= 25) {
+                          //   bg = "orange";
+                          //   // color = "white";
+                          // } else if (realValue < 25) {
+                          //   bg = "red";
+                          //   // color = "white";
+                          // }
                         }
                         return {
                           key: `${row.id}${fy.value}`,

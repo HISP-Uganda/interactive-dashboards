@@ -132,7 +132,14 @@ export const processPieChart = (
         textinfo: "label+percent+name",
         hoverinfo: "label+percent+name",
         textposition: "inside",
+        textfont: {
+          size: [16, 16, 16],
+          color: ["black", "black", "black"],
+        },
         hole: 0.1,
+        marker: {
+          colors: ["green", "yellow", "red"],
+        },
       },
     ];
   }

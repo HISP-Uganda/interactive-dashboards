@@ -1,7 +1,6 @@
 import {
   Checkbox,
   Heading,
-  Input,
   Stack,
   Table,
   Tbody,
@@ -12,8 +11,6 @@ import {
 } from "@chakra-ui/react";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
-import { globalIds } from "../../utils/utils";
-import GlobalAndFilter from "./GlobalAndFilter";
 import GlobalSearchFilter from "./GlobalSearchFilter";
 
 interface DimensionProps extends IndicatorProps {
