@@ -183,8 +183,6 @@ const Tables = ({
             if (percentage >= 0.75) return "ma";
             return "na";
           }
-
-          return "na";
         }
       );
     });
@@ -324,7 +322,7 @@ const Tables = ({
                   justifyItems="center"
                   justifyContent="center"
                 >
-                  <Text>Achieved (&gt;= 100% )</Text>
+                  <Text>Achieved</Text>
                 </Stack>
                 <Stack
                   h="50px"
@@ -337,7 +335,7 @@ const Tables = ({
                   justifyItems="center"
                   justifyContent="center"
                 >
-                  <Text>Moderately achieved (75-99%)</Text>
+                  <Text>Moderately achieved</Text>
                 </Stack>
                 <Stack
                   h="50px"
@@ -350,7 +348,7 @@ const Tables = ({
                   justifyItems="center"
                   justifyContent="center"
                 >
-                  <Text>Not achieved (&lt;75%)</Text>
+                  <Text>Not achieved</Text>
                 </Stack>
                 <Stack
                   h="50px"
