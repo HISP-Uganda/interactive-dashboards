@@ -392,8 +392,7 @@ export const useInitials = () => {
         visualizationId: "keyResultAreas",
         data: [
           {
-            value: uniq(processedGroupSets.map((e: any) => e.keyResultAreaCode))
-              .length,
+            value: uniq(processedGroupSets.map((e: any) => e.id)).length,
           },
         ],
       });

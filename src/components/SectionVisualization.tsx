@@ -26,6 +26,8 @@ const SectionVisualization = (section: ISection) => {
         alignItems="center"
         justifyContent="center"
         justifyItems="center"
+        w="100%"
+        h="100%"
         onClick={(e: MouseEvent<HTMLElement>) => {
           if (e.detail === 2 && store.isAdmin) {
             setCurrentSection(section);
@@ -37,7 +39,7 @@ const SectionVisualization = (section: ISection) => {
         }}
       >
         <Marquee
-          velocity={100}
+          velocity={60}
           direction="rtl"
           onFinish={() => {}}
           resetAfterTries={200}

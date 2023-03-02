@@ -16,7 +16,7 @@ import {
   setRows,
   updateVisualizationData,
 } from "../Events";
-import { DataNode, LocationGenerics } from "../interfaces";
+import { DataNode, IDataElement, LocationGenerics } from "../interfaces";
 import { $store } from "../Store";
 import { loadData } from "./helpers";
 
@@ -63,15 +63,35 @@ export default function DashboardTree() {
         { id: "b", title: "MA", bg: "yellow" },
         { id: "c", title: "NA", bg: "red" },
       ]);
-      const elements = await db.dataElements.toArray();
+      const allElements = await db.dataElements.toArray();
+
+      let elements: IDataElement[] = [];
+
+      if (info.node.id === "dWAaPPBAEbL") {
+        elements = allElements.filter(({ themeCode }) => !themeCode);
+      } else {
+        elements = allElements.filter(({ themeCode }) => !!themeCode);
+      }
       setRows(
         children.map((c: any) => {
-          const filteredElements = elements.filter(
-            (e) =>
+          const filteredElements = elements.filter((e) => {
+            if (info.node.id === "emIWijzLHR4") {
+              return e.themeCode === c.key;
+            }
+            if (info.node.id === "iE5A3BBdv2z") {
+              return e.programCode === c.key;
+            }
+
+            if (info.node.id === "M0ACvr6Coqn") {
+              return e.interventionCode === c.key;
+            }
+
+            return (
               e.interventionCode === c.key ||
               e.themeCode === c.key ||
               e.programCode === c.key
-          );
+            );
+          });
           return {
             ...c,
             child: false,
@@ -82,9 +102,7 @@ export default function DashboardTree() {
       );
       updateVisualizationData({
         visualizationId: "keyResultAreas",
-        data: [
-          { value: uniq(elements.map((e) => e.keyResultAreaCode)).length },
-        ],
+        data: [{ value: uniq(elements.map((e) => e.id)).length }],
       });
       updateVisualizationData({
         visualizationId: "indicators",
