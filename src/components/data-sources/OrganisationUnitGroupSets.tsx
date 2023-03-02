@@ -20,33 +20,33 @@ import {
   Tr,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
-import { useIndicators } from "../../Queries";
+import { useOrganisationUnitGroupSets } from "../../Queries";
 import { $paginations, $hasDHIS2, $currentDataSource } from "../../Store";
 import { globalIds } from "../../utils/utils";
-import LoadingIndicator from "../LoadingIndicator";
 import GlobalSearchFilter from "./GlobalSearchFilter";
+import LoadingIndicator from "../LoadingIndicator";
+import { isEmpty } from "lodash";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
-const Indicators = ({ denNum, onChange }: IndicatorProps) => {
+const OrganizationUnitGroupSets = ({ denNum, onChange }: IndicatorProps) => {
+  const paginations = useStore($paginations);
+  const hasDHIS2 = useStore($hasDHIS2);
+  const currentDataSource = useStore($currentDataSource);
   const [type, setType] = useState<"filter" | "dimension">("dimension");
-
+  const [q, setQ] = useState<string>("");
   const selected = Object.entries(denNum?.dataDimensions || {})
-    .filter(([k, { resource }]) => resource === "i")
+    .filter(([k, { resource }]) => resource === "ougs")
     .map(([key]) => {
       return key;
     });
   const [useGlobal, setUseGlobal] = useState<boolean>(
-    () => selected.indexOf("JRDOr08JWSW") !== -1
+    () => selected.indexOf("GQhi6pRnTKF") !== -1
   );
-  const [q, setQ] = useState<string>("");
-  const paginations = useStore($paginations);
-  const hasDHIS2 = useStore($hasDHIS2);
-  const currentDataSource = useStore($currentDataSource);
+
   const {
     pages,
     pagesCount,
@@ -56,7 +56,7 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
     pageSize,
     setPageSize,
   } = usePagination({
-    total: paginations.totalIndicators,
+    total: paginations.totalOrganisationUnitGroupSets,
     limits: {
       outer: OUTER_LIMIT,
       inner: INNER_LIMIT,
@@ -66,43 +66,31 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
       currentPage: 1,
     },
   });
-
-  const selectedIndicators = Object.entries(
-    denNum?.dataDimensions || {}
-  ).flatMap(([i, { resource }]) => {
-    if (resource === "i") {
-      return i;
-    }
-    return [];
-  });
-
-  const { isLoading, isSuccess, isError, error, data } = useIndicators(
-    currentPage,
-    pageSize,
-    q,
-    selectedIndicators,
-    hasDHIS2,
-    currentDataSource
-  );
-
+  const { isLoading, isSuccess, isError, error, data } =
+    useOrganisationUnitGroupSets(
+      currentPage,
+      pageSize,
+      q,
+      hasDHIS2,
+      currentDataSource
+    );
   const handlePageChange = (nextPage: number) => {
     setCurrentPage(nextPage);
   };
-
   return (
     <Stack spacing="30px">
       <GlobalSearchFilter
         denNum={denNum}
-        dimension="dx"
+        dimension=""
         setType={setType}
         useGlobal={useGlobal}
         setUseGlobal={setUseGlobal}
-        resource="i"
+        resource="ougs"
         type={type}
         onChange={onChange}
         setQ={setQ}
         q={q}
-        id={globalIds[2].value}
+        id={globalIds[3].value}
       />
       {isLoading && (
         <Flex w="100%" alignItems="center" justifyContent="center">
@@ -138,15 +126,15 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
                         onChange({
                           id: record.id,
                           type,
-                          dimension: "dx",
-                          resource: "i",
+                          dimension: "",
+                          resource: "ougs",
                         });
                       } else {
                         onChange({
                           id: record.id,
                           type,
-                          dimension: "dx",
-                          resource: "i",
+                          dimension: "",
+                          resource: "ougs",
                           remove: true,
                         });
                       }
@@ -198,4 +186,4 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
   );
 };
 
-export default Indicators;
+export default OrganizationUnitGroupSets;

@@ -1,10 +1,11 @@
 // import { ResponsiveChoropleth } from "@nivo/geo";
-import { Spinner, Stack, Text } from "@chakra-ui/react";
+import { Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { ChartProps, Threshold } from "../../interfaces";
 import { findLevelsAndOus, useMaps } from "../../Queries";
 import { $indicators, $store } from "../../Store";
 import VisualizationTitle from "./VisualizationTitle";
+import LoadingIndicator from "../LoadingIndicator";
 
 export default function ({
   visualization,
@@ -40,11 +41,12 @@ export default function ({
     levelIsGlobal !== -1 || levels.length === 0 ? store.levels : levels,
     ouIsGlobal !== -1 ? store.organisations.map((k) => String(k)) : ous,
     data,
-    thresholds
+    thresholds,
+    []
   );
   return (
     <>
-      {isLoading && <Spinner />}
+      {isLoading && <LoadingIndicator />}
       {isSuccess && (
         <Stack w="100%" h="100%" spacing={0}>
           {visualization.name && (
@@ -182,7 +184,7 @@ export default function ({
           </Stack>
         </Stack>
       )}
-      {isError && <pre>{JSON.stringify(error)}</pre>}
+      {isError && <Text>No data/Error occurred</Text>}
     </>
   );
 }

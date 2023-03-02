@@ -1,16 +1,13 @@
-import { Box, Spinner } from "@chakra-ui/react";
-import { useOrganisationUnits } from "../Queries";
 import OUTree from "./OUTree";
 
-const OUTreeSelect = () => {
-  const { isLoading, isSuccess, isError, error, data } = useOrganisationUnits();
-  return (
-    <>
-      {isLoading && <Spinner />}
-      {isSuccess && <OUTree {...data} />}
-      {isError && <Box>{error.message}</Box>}
-    </>
-  );
+const OUTreeSelect = ({
+  value,
+  onChange,
+}: {
+  value: string[];
+  onChange: (value: string[]) => void;
+}) => {
+  return <OUTree onChange={onChange} value={value} />;
 };
 
 export default OUTreeSelect;

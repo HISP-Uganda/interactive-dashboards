@@ -1,212 +1,165 @@
-import { Box, Stack, Text } from "@chakra-ui/react";
-import { Tree } from "antd";
-// import type { DataNode } from "antd/lib/tree";
-import { GroupBase, Select } from "chakra-react-select";
-import React, { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { Stack, Text } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
+import { Tree } from "antd";
+import arrayToTree from "array-to-tree";
+import { GroupBase, Select } from "chakra-react-select";
+import { useLiveQuery } from "dexie-react-hooks";
 import { useStore } from "effector-react";
-import { flatMapDeep, isArray, max } from "lodash";
-import {
-  setCheckedKeys,
-  setExpandedKeys,
-  setGroups,
-  setLevels,
-  setMinSublevel,
-  setOrganisations,
-} from "../Events";
-import { DataNode, Option } from "../interfaces";
+import { flatten } from "lodash";
+import React, { useState } from "react";
+import { db } from "../db";
+import { setGroups, setLevels } from "../Events";
+import { Option } from "../interfaces";
 import { $store } from "../Store";
 
-function traverse(node: any, path: any[] = [], result: any[] = []) {
-  if (node && (!node.children || node.children.length === 0)) {
-    result.push(path.concat(node.level));
-  }
-  if (node && node.children && node.children.length > 0) {
-    for (const child of node.children) {
-      traverse(child, path.concat(node.level), result);
-    }
-  }
-  return result;
-}
-
-const getMembers: any = (members: any[]) => {
-  let children: any[] = [];
-  const flattenMembers = members.map((m) => {
-    if (m.children && m.children.length) {
-      children = [...children, ...m.children];
-    }
-    return m;
-  });
-
-  return flattenMembers.concat(
-    children.length ? getMembers(children) : children
-  );
-};
-
-const updateTreeData = (
-  list: DataNode[],
-  key: React.Key,
-  children: DataNode[]
-): DataNode[] =>
-  list.map((node) => {
-    if (node.key === key) {
-      return {
-        ...node,
-        children,
-      };
-    }
-    if (node.children) {
-      return {
-        ...node,
-        children: updateTreeData(node.children, key, children),
-      };
-    }
-    return node;
-  });
-
 const OUTree = ({
-  units,
-  groups,
-  levels,
+    value,
+    onChange,
 }: {
-  units: DataNode[];
-  levels: Option[];
-  groups: Option[];
+    value: string[];
+    onChange: (value: string[]) => void;
 }) => {
-  const store = useStore($store);
-  const engine = useDataEngine();
-  const [treeData, setTreeData] = useState<DataNode[]>(units);
-  const [flattened, setFlattened] = useState<any[]>(units);
-  const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
-  const queryClient = useQueryClient();
-  const onCheck = (
-    checkedKeysValue:
-      | { checked: React.Key[]; halfChecked: React.Key[] }
-      | React.Key[]
-  ) => {
-    queryClient.cancelQueries();
-    let checked: React.Key[] = [];
-    setCheckedKeys(checkedKeysValue);
-    if (isArray(checkedKeysValue)) {
-      setOrganisations(checkedKeysValue);
-      checked = checkedKeysValue;
-    } else {
-      setOrganisations(checkedKeysValue.checked);
-      checked = checkedKeysValue.checked;
-    }
-    const filtered = flattened
-      .filter(({ key }) => checked.indexOf(key) !== -1)
-      .map(({ level }) => Number(level));
-    const minSublevel: number | null | undefined = max(filtered);
-    if (minSublevel && minSublevel + 1 <= store.maxLevel) {
-      setMinSublevel(minSublevel + 1);
-    } else {
-      setMinSublevel(store.maxLevel);
-    }
-  };
+    const store = useStore($store);
+    const engine = useDataEngine();
+    const organisations = useLiveQuery(() => db.organisations.toArray());
+    const levels = useLiveQuery(() => db.levels.toArray());
+    const groups = useLiveQuery(() => db.groups.toArray());
+    const expandedKeys = useLiveQuery(() => db.expandedKeys.get("1"));
+    const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
+    const [checkedKeys, setCheckedKeys] = useState<
+        { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[]
+    >(() => {
+        return { checked: value, halfChecked: [] };
+    });
 
-  const onSelect = (selectedKeysValue: React.Key[]) => {
-    setOrganisations(selectedKeysValue);
-    setCheckedKeys({ checked: selectedKeysValue, halfChecked: [] });
-  };
+    const onLoadData = async ({ id, children }: any) => {
+        if (children) {
+            return;
+        }
+        try {
+            const {
+                units: { organisationUnits },
+            }: any = await engine.query({
+                units: {
+                    resource: "organisationUnits.json",
+                    params: {
+                        filter: `id:in:[${id}]`,
+                        paging: "false",
+                        order: "shortName:desc",
+                        fields: "children[id,name,path,leaf]",
+                    },
+                },
+            });
+            const found = organisationUnits.map((unit: any) => {
+                return unit.children
+                    .map((child: any) => {
+                        return {
+                            id: child.id,
+                            pId: id,
+                            value: child.id,
+                            title: child.name,
+                            key: child.id,
+                            isLeaf: child.leaf,
+                        };
+                    })
+                    .sort((a: any, b: any) => {
+                        if (a.title > b.title) {
+                            return 1;
+                        }
+                        if (a.title < b.title) {
+                            return -1;
+                        }
+                        return 0;
+                    });
+            });
+            await db.organisations.bulkPut(flatten(found));
+        } catch (e) {
+            console.log(e);
+        }
+    };
+    const onExpand = async (expandedKeysValue: React.Key[]) => {
+        await db.expandedKeys.put({
+            id: "1",
+            name: expandedKeysValue.join(","),
+        });
+        setAutoExpandParent(false);
+    };
 
-  const onExpand = (expandedKeysValue: React.Key[]) => {
-    setExpandedKeys(expandedKeysValue);
-    setAutoExpandParent(false);
-  };
-  const onLoadData = async ({ key, children }: any) => {
-    if (children) {
-      return;
-    }
-    try {
-      const {
-        units: { organisationUnits },
-      }: any = await engine.query({
-        units: {
-          resource: "organisationUnits.json",
-          params: {
-            filter: `id:in:[${key}]`,
-            paging: "false",
-            order: "shortName:desc",
-            fields: "children[id,name,level,path,leaf]",
-          },
-        },
-      });
-      const found = organisationUnits.flatMap((unit: any) => {
-        return unit.children
-          .map((child: any) => {
-            const record: DataNode = {
-              key: child.id,
-              title: child.name,
-              isLeaf: child.leaf,
-              level: child.level,
-            };
-            return record;
-          })
-          .sort((a: any, b: any) => {
-            if (a.title > b.title) {
-              return 1;
-            }
-            if (a.title < b.title) {
-              return -1;
-            }
-            return 0;
-          });
-      });
-      setFlattened((prev) => [...prev, ...found]);
-      setTreeData((origin) => updateTreeData(origin, key, found));
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  return (
-    <Stack bgColor="white" spacing="20px">
-      <Box border="1px solid gray" h="250px" overflow="auto">
-        <Tree
-          multiple
-          checkable
-          treeData={treeData}
-          loadData={onLoadData}
-          checkStrictly
-          onExpand={onExpand}
-          expandedKeys={store.expandedKeys}
-          autoExpandParent={autoExpandParent}
-          onCheck={onCheck}
-          checkedKeys={store.checkedKeys}
-          onSelect={onSelect}
-          selectedKeys={store.organisations}
-        />
-      </Box>
-      <Stack>
-        <Text>Level</Text>
-        <Select<Option, true, GroupBase<Option>>
-          isMulti
-          options={levels}
-          value={levels.filter(
-            (d: Option) => store.levels.indexOf(d.value) !== -1
-          )}
-          onChange={(e) => {
-            setLevels(e.map((ex) => ex.value));
-          }}
-        />
-      </Stack>
-      <Stack>
-        <Text>Group</Text>
-        <Select<Option, true, GroupBase<Option>>
-          isMulti
-          options={groups}
-          value={groups.filter(
-            (d: Option) => store.groups.indexOf(d.value) !== -1
-          )}
-          onChange={(e) => {
-            setGroups(e.map((ex) => ex.value));
-          }}
-        />
-      </Stack>
-    </Stack>
-  );
+    const onCheck = async (
+        checkedKeysValue:
+            | { checked: React.Key[]; halfChecked: React.Key[] }
+            | React.Key[]
+    ) => {
+        let allChecked = [];
+        if (Array.isArray(checkedKeysValue)) {
+            allChecked = checkedKeysValue;
+        } else {
+            allChecked = checkedKeysValue.checked;
+        }
+        setCheckedKeys(checkedKeysValue);
+        onChange(allChecked.map((val) => String(val)));
+    };
+    return (
+        <Stack bgColor="white" spacing="20px">
+            {organisations !== undefined && (
+                <>
+                    <Tree
+                        checkable
+                        onExpand={onExpand}
+                        checkStrictly
+                        expandedKeys={
+                            expandedKeys !== undefined
+                                ? expandedKeys.name.split(",")
+                                : []
+                        }
+                        autoExpandParent={autoExpandParent}
+                        onCheck={onCheck}
+                        checkedKeys={checkedKeys}
+                        loadData={onLoadData}
+                        style={{
+                            maxHeight: "500px",
+                            overflow: "auto",
+                            fontSize: "18px",
+                        }}
+                        treeData={arrayToTree(organisations, {
+                            parentProperty: "pId",
+                        })}
+                    />
+                </>
+            )}
+            {levels !== undefined && (
+                <Stack zIndex={300}>
+                    {/* <Text fontSize="2xl" color="yellow.500">Key Reult Areas</Text>
+          <Select<Option, true, GroupBase<Option>>
+            isMulti
+            options={levels}
+            value={levels.filter(
+              (d: Option) => store.levels.indexOf(String(d.value)) !== -1
+            )}
+            onChange={(e) => {
+              setLevels(e.map((ex) => ex.value));
+            }}
+          /> */}
+                </Stack>
+            )}
+            {/* {groups !== undefined && (
+        <Stack zIndex={200}>
+          <Text>Group</Text>
+          <Select<Option, true, GroupBase<Option>>
+            isMulti
+            options={groups}
+            hideSelectedOptions
+            value={groups.filter(
+              (d: Option) => store.groups.indexOf(d.value) !== -1
+            )}
+            onChange={(e) => {
+              setGroups(e.map((ex) => ex.value));
+            }}
+          />
+        </Stack>
+      )} */}
+        </Stack>
+    );
 };
 
 export default OUTree;

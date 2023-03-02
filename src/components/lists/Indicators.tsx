@@ -3,7 +3,6 @@ import {
   Button,
   Input,
   Spacer,
-  Spinner,
   Stack,
   Table,
   Tbody,
@@ -11,6 +10,7 @@ import {
   Th,
   Thead,
   Tr,
+  Text,
 } from "@chakra-ui/react";
 import { Link, useNavigate } from "@tanstack/react-location";
 import { useQueryClient } from "@tanstack/react-query";
@@ -27,6 +27,7 @@ import { $store, createIndicator } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import { generalPadding, otherHeight } from "../constants";
 import PaginatedTable from "./PaginatedTable";
+import LoadingIndicator from "../LoadingIndicator";
 
 const Indicators = () => {
   const navigate = useNavigate();
@@ -97,6 +98,7 @@ const Indicators = () => {
         <Button
           onClick={() => {
             const indicator = createIndicator();
+            setIndicator(indicator);
             navigate({ to: `/indicators/${indicator.id}` });
           }}
           colorScheme="blue"
@@ -111,10 +113,10 @@ const Indicators = () => {
         alignItems="center"
         flex={1}
       >
-        {isLoading && <Spinner />}
+        {isLoading && <LoadingIndicator />}
         {isSuccess && (
           <Stack spacing="10px" w="100%">
-            <Table variant="simple">
+            <Table variant="striped">
               <Thead>
                 <Tr>
                   <Th>Name</Th>
@@ -179,19 +181,20 @@ const Indicators = () => {
               currentPage={currentPage}
               setNextPage={setCurrentPage}
               total={
-                data &&
-                data.filter((d) => {
-                  return (
-                    d &&
-                    (d.name?.toLowerCase().includes(q.toLowerCase()) ||
-                      d.id.includes(q))
-                  );
-                }).length
+                (data &&
+                  data.filter((d) => {
+                    return (
+                      d &&
+                      (d.name?.toLowerCase().includes(q.toLowerCase()) ||
+                        d.id.includes(q))
+                    );
+                  }).length) ||
+                0
               }
             />
           </Stack>
         )}
-        {isError && <pre>{JSON.stringify(error, null, 2)}</pre>}
+        {isError && <Text>No data/Error occurred</Text>}
       </Stack>
     </Stack>
   );

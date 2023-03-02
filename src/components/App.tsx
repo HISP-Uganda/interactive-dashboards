@@ -4,9 +4,8 @@ import {
   Grid,
   GridItem,
   IconButton,
-  Image,
-  Spinner,
   Stack,
+  Text,
   useMediaQuery,
 } from "@chakra-ui/react";
 import {
@@ -52,8 +51,8 @@ import { decodeFromBinary, encodeToBinary } from "../utils/utils";
 import { otherHeaders, padding, sideWidth } from "./constants";
 import DashboardMenu from "./DashboardMenu";
 import Footer from "./Footer";
+import LoadingIndicator from "./LoadingIndicator";
 import MOHLogo from "./MOHLogo";
-import MOHLogo2 from "./MOHLogo2";
 import SectionMenu from "./SectionMenu";
 import SidebarContent from "./SidebarContent";
 
@@ -240,14 +239,14 @@ const App = () => {
           justifyContent="center"
           h="calc(100vh - 48px)"
         >
-          <Spinner />
+          <LoadingIndicator />
         </Flex>
       )}
       {isSuccess && (
         <Router
           location={location}
           routes={routes}
-          defaultPendingElement={<Spinner />}
+          defaultPendingElement={<LoadingIndicator />}
         >
           <Grid
             templateColumns={{ md: "auto", lg: dashboardColumns }}
@@ -259,26 +258,41 @@ const App = () => {
           >
             {showSide && (
               <Grid
-                templateRows={`${otherHeaders}px 1fr ${otherHeaders}px`}
+                templateRows={`${otherHeaders}px 1fr`}
                 pr={`${padding}px`}
                 gap={`${padding}px`}
                 h={dashboardHeight}
                 maxH={dashboardHeight}
+                bg="#FEE300"
               >
                 <Stack
                   h="100%"
                   w="100%"
-                  alignItems="center"
+                  // alignItems="center"
                   alignContent="center"
-                  justifyContent="center"
-                  justifyItems="center"
+                  // justifyContent="center"
+                  // justifyItems="center"
+                  direction="row"
+                  spacing="20px"
                 >
                   <MOHLogo height={otherHeaders} width={sideWidth} />
+                  <Stack spacing={0}>
+                    <Text
+                      textTransform="uppercase"
+                      fontWeight="extrabold"
+                      fontSize="xl"
+                    >
+                      Office of the President
+                    </Text>
+                    <Text fontWeight="semi-bold" color="black">
+                      The Republic of Uganda
+                    </Text>
+                  </Stack>
                 </Stack>
                 <GridItem>
                   <SidebarContent />
                 </GridItem>
-                <Stack
+                {/* <Stack
                   h="100%"
                   w="100%"
                   alignItems="center"
@@ -286,12 +300,7 @@ const App = () => {
                   justifyContent="center"
                   justifyItems="center"
                 >
-                  <Image
-                    src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/logo.png"
-                    maxH={`${otherHeaders}px`}
-                    maxW={`${sideWidth}px`}
-                  />
-                </Stack>
+                </Stack> */}
               </Grid>
             )}
             <FullScreen handle={handle}>
@@ -303,6 +312,7 @@ const App = () => {
                 h={handle.active ? "100vh" : dashboardHeight}
                 maxH={handle.active ? "100vh" : dashboardHeight}
                 bgColor={handle.active ? "gray.300" : ""}
+                bg="yellow.300"
               >
                 <GridItem
                   h="100%"
@@ -319,15 +329,6 @@ const App = () => {
                     w="100%"
                     spacing="40px"
                   >
-                    {(handle.active || !showSide) && (
-                      <MOHLogo2>
-                        <Image
-                          src="https://raw.githubusercontent.com/HISP-Uganda/covid-dashboard/master/src/images/Coat_of_arms_of_Uganda.svg"
-                          maxH={`${otherHeaders}px`}
-                          maxW={`${sideWidth}px`}
-                        />
-                      </MOHLogo2>
-                    )}
                     {!handle.active && !store.showSider && (
                       <IconButton
                         bgColor="none"

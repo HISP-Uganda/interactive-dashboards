@@ -4,7 +4,6 @@ import {
   Button,
   Divider,
   Spacer,
-  Spinner,
   Stack,
   Table,
   Tbody,
@@ -12,6 +11,7 @@ import {
   Th,
   Thead,
   Tr,
+  Text,
 } from "@chakra-ui/react";
 import { Link, useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
@@ -20,6 +20,7 @@ import { deleteDocument, useDataSources } from "../../Queries";
 import { $store } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import { generalPadding, otherHeight } from "../constants";
+import LoadingIndicator from "../LoadingIndicator";
 const DataSources = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
@@ -66,9 +67,9 @@ const DataSources = () => {
         alignItems="center"
         flex={1}
       >
-        {isLoading && <Spinner />}
+        {isLoading && <LoadingIndicator />}
         {isSuccess && (
-          <Table variant="simple" w="100%">
+          <Table variant="striped" w="100%">
             <Thead>
               <Tr>
                 <Th>Name</Th>
@@ -106,7 +107,7 @@ const DataSources = () => {
             </Tbody>
           </Table>
         )}
-        {isError && <pre>{JSON.stringify(error, null, 2)}</pre>}
+        {isError && <Text>No data/Error occurred</Text>}
       </Stack>
     </Stack>
   );

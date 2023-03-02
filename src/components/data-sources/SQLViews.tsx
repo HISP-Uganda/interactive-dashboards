@@ -2,13 +2,20 @@ import { Box, Progress, Stack, Text } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { IndicatorProps, Option } from "../../interfaces";
 import { useSQLViews } from "../../Queries";
+import { useStore } from "effector-react";
+import { $hasDHIS2, $currentDataSource } from "../../Store";
 
 const SQLViews = ({ denNum, onChange, changeQuery }: IndicatorProps) => {
-  const { isLoading, isSuccess, isError, error, data } = useSQLViews();
+  const hasDHIS2 = useStore($hasDHIS2);
+  const currentDataSource = useStore($currentDataSource);
+  const { isLoading, isSuccess, isError, error, data } = useSQLViews(
+    hasDHIS2,
+    currentDataSource
+  );
   return (
     <>
       {isLoading && <Progress />}
-      {isSuccess && (
+      {isSuccess && data && (
         <Stack>
           <Text>SQL View</Text>
           <Select<Option, false, GroupBase<Option>>
@@ -30,7 +37,8 @@ const SQLViews = ({ denNum, onChange, changeQuery }: IndicatorProps) => {
               onChange({
                 id: e?.value || "",
                 type: "dimension",
-                what: "v",
+                resource: "v",
+                dimension: "",
                 replace: true,
               });
               if (changeQuery) {
