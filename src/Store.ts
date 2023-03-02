@@ -274,7 +274,6 @@ export const $store = domain
         }
     )
     .on(changePeriods, (state, periods) => {
-        console.log(periods);
         return { ...state, periods };
     })
     .on(changeSelectedCategory, (state, selectedCategory) => {
@@ -548,7 +547,17 @@ export const $indicator = domain
         changeNumeratorDimension,
         (
             state,
-            { id, dimension, type, resource, replace, remove, label = "" }
+            {
+                id,
+                dimension,
+                type,
+                resource,
+                replace,
+                remove,
+                prefix,
+                suffix,
+                label = "",
+            }
         ) => {
             if (state.numerator) {
                 if (remove) {
@@ -576,7 +585,15 @@ export const $indicator = domain
                             ...state.numerator,
                             dataDimensions: {
                                 ...working,
-                                [id]: { id, resource, type, dimension, label },
+                                [id]: {
+                                    id,
+                                    resource,
+                                    type,
+                                    dimension,
+                                    label,
+                                    prefix,
+                                    suffix,
+                                },
                             },
                         },
                     };
@@ -587,7 +604,15 @@ export const $indicator = domain
                         ...state.numerator,
                         dataDimensions: {
                             ...state.numerator.dataDimensions,
-                            [id]: { id, resource, type, dimension, label },
+                            [id]: {
+                                id,
+                                resource,
+                                type,
+                                dimension,
+                                prefix,
+                                suffix,
+                                label,
+                            },
                         },
                     },
                 };
@@ -598,7 +623,17 @@ export const $indicator = domain
         changeDenominatorDimension,
         (
             state,
-            { id, dimension, resource, type, replace, remove, label = "" }
+            {
+                id,
+                dimension,
+                resource,
+                type,
+                replace,
+                remove,
+                prefix,
+                suffix,
+                label = "",
+            }
         ) => {
             if (state.denominator) {
                 if (remove) {
@@ -625,7 +660,15 @@ export const $indicator = domain
                             ...state.denominator,
                             dataDimensions: {
                                 ...working,
-                                [id]: { id, dimension, type, resource, label },
+                                [id]: {
+                                    id,
+                                    dimension,
+                                    type,
+                                    prefix,
+                                    suffix,
+                                    resource,
+                                    label,
+                                },
                             },
                         },
                     };
@@ -637,7 +680,15 @@ export const $indicator = domain
                         ...state.denominator,
                         dataDimensions: {
                             ...state.denominator.dataDimensions,
-                            [id]: { id, type, dimension, resource, label },
+                            [id]: {
+                                id,
+                                type,
+                                dimension,
+                                prefix,
+                                suffix,
+                                resource,
+                                label,
+                            },
                         },
                     },
                 };
@@ -648,7 +699,6 @@ export const $indicator = domain
         return { ...state, useInBuildIndicators };
     })
     .on(setIndicator, (_, indicator) => {
-        console.log(indicator);
         return indicator;
     });
 
@@ -788,7 +838,6 @@ export const $currentDataSource = combine(
     (indicator, dataSources) => {
         const ds = dataSources.find((ds) => ds.id === indicator.dataSource);
         if (ds && !isEmpty(ds.authentication)) {
-            console.log("Have we enetered here");
             return axios.create({
                 baseURL: `${ds.authentication.url}/api/`,
                 auth: {
