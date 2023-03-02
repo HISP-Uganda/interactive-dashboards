@@ -83,7 +83,7 @@ const Denominator = () => {
             )}
             onChange={(e) =>
               changeDenominatorAttribute({
-                attribute: "type",
+                attribute: "resource",
                 value: e?.value,
               })
             }

@@ -1,8 +1,7 @@
 import { useDataEngine } from "@dhis2/app-runtime";
-import "antd/dist/antd.css";
-import TreeSelect from "antd/lib/tree-select";
-import { flatten, uniqBy } from "lodash";
-import { useState } from "react";
+import { TreeSelect } from "antd";
+import { useLiveQuery } from "dexie-react-hooks";
+import { flatten } from "lodash";
 import { db } from "../db";
 
 type OrgUnitTreeProps = {
@@ -12,85 +11,63 @@ type OrgUnitTreeProps = {
   value: string;
 };
 
-const OrgUnitTree = ({
-  initial,
-  expandedKeys,
-  onChange,
-  value,
-}: OrgUnitTreeProps) => {
+const OrgUnitTree = ({ onChange, value }: OrgUnitTreeProps) => {
   const engine = useDataEngine();
-  const [treeData, setTreeData] = useState<any[]>(initial);
-  const [expanded, setExpanded] = useState<React.Key[]>(expandedKeys);
-  const onLoadData = async (parent: any) => {
+  const expanded = useLiveQuery(() => db.expanded.toArray());
+  const organisations = useLiveQuery(() => db.organisations.toArray());
+
+  const onLoadData = async ({ children, key }: any) => {
     try {
-      const parentChildren = treeData.find((t) => t.pId === parent.id);
-      if (parentChildren === undefined) {
-        const {
-          units: { organisationUnits },
-        }: any = await engine.query({
-          units: {
-            resource: "organisationUnits.json",
-            params: {
-              filter: `id:in:[${parent.id}]`,
-              paging: "false",
-              order: "shortName:desc",
-              fields: "children[id,name,path,leaf]",
-            },
-          },
-        });
-        const found = organisationUnits.map((unit: any) => {
-          return unit.children
-            .map((child: any) => {
-              return {
-                id: child.id,
-                pId: parent.id,
-                value: child.id,
-                title: child.name,
-                isLeaf: child.leaf,
-                _key: child.id,
-              };
-            })
-            .sort((a: any, b: any) => {
-              if (a.title > b.title) {
-                return 1;
-              }
-              if (a.title < b.title) {
-                return -1;
-              }
-              return 0;
-            });
-        });
-        const all: any[] = uniqBy(
-          [
-            ...treeData.map((a: any) => {
-              return { ...a, _key: a.id };
-            }),
-            ...flatten(found),
-          ],
-          "id"
-        );
-        db.collection("facilities").set(all, {
-          keys: true,
-        });
-        setTreeData(all);
+      if (children) {
+        return;
       }
+      const {
+        units: { organisationUnits },
+      }: any = await engine.query({
+        units: {
+          resource: "organisationUnits.json",
+          params: {
+            filter: `id:in:[${key}]`,
+            paging: "false",
+            order: "shortName:desc",
+            fields: "children[id,name,path,leaf]",
+          },
+        },
+      });
+      const found = organisationUnits.map((unit: any) => {
+        return unit.children
+          .map((child: any) => {
+            return {
+              id: child.id,
+              pId: key,
+              value: child.id,
+              title: child.name,
+              isLeaf: child.leaf,
+              key: child.id,
+            };
+          })
+          .sort((a: any, b: any) => {
+            if (a.title > b.title) {
+              return 1;
+            }
+            if (a.title < b.title) {
+              return -1;
+            }
+            return 0;
+          });
+      });
+      await db.organisations.bulkPut(flatten(found));
     } catch (e) {
       console.log(e);
     }
   };
-  const onTreeExpand = (expandedKeys: React.Key[]) => {
-    db.collection("expanded").set(
-      expandedKeys.map((k) => {
-        return {
-          value: k,
-          _key: k,
-        };
-      }),
-      {
-        keys: true,
-      }
+  const onTreeExpand = async (expandedKeys: React.Key[]) => {
+    await db.expanded.clear();
+    await db.expanded.bulkPut(
+      expandedKeys.map((val) => {
+        return { id: String(val), name: String(val) };
+      })
     );
-    setExpanded(() => expandedKeys);
   };
   return (
     <TreeSelect
@@ -99,14 +76,14 @@ const OrgUnitTree = ({
       style={{ width: "100%" }}
       value={value}
       listHeight={700}
-      treeExpandedKeys={expanded}
+      treeExpandedKeys={expanded?.map(({ id }) => id)}
       onTreeExpand={onTreeExpand}
       dropdownStyle={{ overflow: "auto" }}
       placeholder="Please select location"
       onChange={onChange}
       showSearch={true}
       loadData={onLoadData}
-      treeData={treeData}
+      treeData={organisations}
     />
   );
 };

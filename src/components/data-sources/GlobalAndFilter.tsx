@@ -1,95 +1,103 @@
-import { Dispatch, SetStateAction } from "react";
+import { Checkbox, Radio, RadioGroup, Stack } from "@chakra-ui/react";
 import { Event } from "effector";
-import { Checkbox, Radio, RadioGroup, Stack, Text } from "@chakra-ui/react";
-import { ChangeEvent } from "react";
-import { IData } from "../../interfaces";
+import { ChangeEvent, Dispatch, SetStateAction } from "react";
+import { Dimension, IData } from "../../interfaces";
 
 type GlobalAndFilterProps = {
   dimension: string;
+  type: string;
   useGlobal: boolean;
   denNum: IData | undefined;
-  setDimension: Dispatch<SetStateAction<"filter" | "dimension">>;
+  setType: Dispatch<SetStateAction<"filter" | "dimension">>;
   setUseGlobal: Dispatch<SetStateAction<boolean>>;
-  hasGlobalFilter?: boolean;
-  type: string;
-  onChange: Event<{
-    id: string;
-    what: string;
-    type: string;
-    remove?: boolean | undefined;
-    label?: string | undefined;
-  }>;
+  resource: string;
+  prefix?: string;
+  suffix?: string;
+  onChange: Event<Dimension>;
   id: string;
 };
 
 const GlobalAndFilter = ({
   dimension,
   useGlobal,
-  setDimension,
+  setType,
   setUseGlobal,
   onChange,
+  resource,
   type,
+  prefix,
+  suffix,
   id,
-  hasGlobalFilter = true,
   denNum,
 }: GlobalAndFilterProps) => {
   return (
-    <Stack spacing="20px">
+    <Stack direction="row" flex={1}>
       <RadioGroup
-        onChange={(dimension: "filter" | "dimension") => {
-          setDimension(dimension);
+        onChange={(type: "filter" | "dimension") => {
+          setType(type);
           Object.entries(denNum?.dataDimensions || {})
-            .filter(([k, { what }]) => what === type)
+            .filter(([k, { resource: r }]) => r === resource)
             .forEach(([key, dim]) => {
               onChange({
                 id: key,
-                type: dimension,
-                what: type,
+                dimension: dimension,
+                type: type,
+                resource: resource,
+                prefix: prefix,
+                suffix: suffix,
                 label: dim.label,
               });
             });
         }}
-        value={dimension}
+        value={type}
       >
         <Stack direction="row">
           <Radio value="dimension">Dimension</Radio>
           <Radio value="filter">Filter</Radio>
         </Stack>
       </RadioGroup>
-      {hasGlobalFilter && (
-        <Checkbox
-          onChange={(e: ChangeEvent<HTMLInputElement>) => {
-            setUseGlobal(() => e.target.checked);
-            Object.entries(denNum?.dataDimensions || {})
-              .filter(([k, { what }]) => what === type)
-              .forEach(([key]) => {
-                onChange({
-                  id: key,
-                  type: dimension,
-                  what: type,
-                  remove: true,
-                });
-              });
-            if (e.target.checked) {
+      <Checkbox
+        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+          e.persist();
+          setUseGlobal(() => e.target.checked);
+          Object.entries(denNum?.dataDimensions || {})
+            .filter(([k, { resource: r }]) => r === resource)
+            .forEach(([key]) => {
               onChange({
-                id,
-                type: dimension,
-                what: type,
-              });
-            } else {
-              onChange({
-                id,
-                type: dimension,
-                what: type,
+                id: key,
+                dimension: dimension,
+                type: type,
+                resource: resource,
+                prefix: prefix,
+                suffix: suffix,
                 remove: true,
               });
-            }
-          }}
-          isChecked={useGlobal}
-        >
-          Use Global Filter
-        </Checkbox>
-      )}
+            });
+          if (e.target?.checked) {
+            onChange({
+              id,
+              dimension: dimension,
+              type: type,
+              resource: resource,
+              prefix: prefix,
+              suffix: suffix,
+            });
+          } else {
+            onChange({
+              id,
+              dimension: dimension,
+              type: type,
+              resource: resource,
+              prefix: prefix,
+              suffix: suffix,
+              remove: true,
+            });
+          }
+        }}
+        isChecked={useGlobal}
+      >
+        Use Global Filter
+      </Checkbox>
     </Stack>
   );
 };

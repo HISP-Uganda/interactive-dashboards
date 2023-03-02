@@ -2,9 +2,8 @@ import { Stack } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { update } from "lodash";
 import Plot from "react-plotly.js";
-
 import { ChartProps } from "../../interfaces";
-import { $visualizationData, $visualizationMetadata } from "../../Store";
+import { $visualizationMetadata } from "../../Store";
 import { exclusions } from "../../utils/utils";
 import { processPieChart } from "../processors";
 import VisualizationTitle from "./VisualizationTitle";
@@ -29,22 +28,22 @@ const PieChart = ({
     layout: {
       legend: { x: 0.5, y: -0.3, orientation: "h" },
       yaxis: { automargin: true },
-      colorway: [
-        "#1f77b4",
-        "#ff7f0e",
-        "#2ca02c",
-        "#d62728",
-        "#9467bd",
-        "#8c564b",
-        "#e377c2",
-        "#7f7f7f",
-        "#bcbd22",
-      ],
+      // colorway: [
+      //   "green",
+      //   "#ff7f0e",
+      //   "#2ca02c",
+      //   "#d62728",
+      //   "#9467bd",
+      //   "#8c564b",
+      //   "#e377c2",
+      //   "#7f7f7f",
+      //   "#bcbd22",
+      // ],
     },
   };
-  Object.entries(layoutProperties || {}).forEach(([property, value]) => {
-    update(availableProperties, property, () => value);
-  });
+  // Object.entries(layoutProperties || {}).forEach(([property, value]) => {
+  //   update(availableProperties, property, () => value);
+  // });
   const titleFontSize = dataProperties?.["data.title.fontsize"] || "1.5vh";
   const titleCase = dataProperties?.["data.title.case"] || "";
   const titleColor = dataProperties?.["data.title.color"] || "black";

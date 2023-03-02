@@ -7,6 +7,7 @@ const PeriodPicker = ({ selectedPeriods, onChange }: PickerProps) => {
     React.useState<Item[]>(selectedPeriods);
   return (
     <PeriodDimension
+      style={{ backgroundColor: "yellow" }}
       onSelect={({ items }: { items: { id: string; name: string }[] }) => {
         setAvailablePeriods(items);
         onChange(items);

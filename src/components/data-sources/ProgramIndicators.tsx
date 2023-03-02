@@ -10,8 +10,6 @@ import {
   Checkbox,
   Flex,
   Heading,
-  Input,
-  Spinner,
   Stack,
   Table,
   Tbody,
@@ -22,23 +20,34 @@ import {
   Tr,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
+import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
 import { useProgramIndicators } from "../../Queries";
-import { $paginations } from "../../Store";
+import { $paginations, $hasDHIS2, $currentDataSource } from "../../Store";
 import { globalIds } from "../../utils/utils";
-import GlobalAndFilter from "./GlobalAndFilter";
+import LoadingIndicator from "../LoadingIndicator";
+import GlobalSearchFilter from "./GlobalSearchFilter";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
 const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
-  const [dimension, setDimension] = useState<"filter" | "dimension">(
-    "dimension"
+  const [type, setType] = useState<"filter" | "dimension">("dimension");
+
+  const selected = Object.entries(denNum?.dataDimensions || {})
+    .filter(([k, { resource }]) => resource === "pi")
+    .map(([key]) => {
+      return key;
+    });
+  const [useGlobal, setUseGlobal] = useState<boolean>(
+    () => selected.indexOf("Eep3rko7uh6") !== -1
   );
-  const [useGlobal, setUseGlobal] = useState<boolean>(false);
   const [q, setQ] = useState<string>("");
   const paginations = useStore($paginations);
+
+  const hasDHIS2 = useStore($hasDHIS2);
+  const currentDataSource = useStore($currentDataSource);
 
   const {
     pages,
@@ -62,8 +71,8 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
 
   const selectedProgramIndicators = Object.entries(
     denNum?.dataDimensions || {}
-  ).flatMap(([i, { what }]) => {
-    if (what === "i") {
+  ).flatMap(([i, { resource }]) => {
+    if (resource === "pi") {
       return i;
     }
     return [];
@@ -73,7 +82,9 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
     currentPage,
     pageSize,
     q,
-    selectedProgramIndicators
+    selectedProgramIndicators,
+    hasDHIS2,
+    currentDataSource
   );
 
   const handlePageChange = (nextPage: number) => {
@@ -82,38 +93,29 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
 
   return (
     <Stack spacing="30px">
-      <GlobalAndFilter
+      <GlobalSearchFilter
         denNum={denNum}
-        dimension={dimension}
-        setDimension={setDimension}
+        dimension="dx"
+        setType={setType}
         useGlobal={useGlobal}
         setUseGlobal={setUseGlobal}
-        hasGlobalFilter={false}
-        type="pi"
+        resource="pi"
+        type={type}
         onChange={onChange}
+        setQ={setQ}
+        q={q}
         id={globalIds[1].value}
       />
-      {!useGlobal && (
-        <Input
-          value={q}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setQ(e.target.value)}
-        />
-      )}
       {isLoading && (
         <Flex w="100%" alignItems="center" justifyContent="center">
-          <Spinner />
+          <LoadingIndicator />
         </Flex>
       )}
-      {isSuccess && (
-        <Table
-          size="sm"
-          variant="striped"
-          colorScheme="gray"
-          textTransform="none"
-        >
+      {isSuccess && data && (
+        <Table variant="striped" colorScheme="gray" textTransform="none">
           <Thead>
             <Tr py={1}>
-              <Th>
+              <Th w="10px">
                 <Checkbox />
               </Th>
               <Th>
@@ -137,19 +139,21 @@ const ProgramIndicators = ({ denNum, onChange }: IndicatorProps) => {
                       if (e.target.checked) {
                         onChange({
                           id: record.id,
-                          type: dimension,
-                          what: "pi",
+                          type,
+                          dimension: "dx",
+                          resource: "pi",
                         });
                       } else {
                         onChange({
                           id: record.id,
-                          type: dimension,
-                          what: "pi",
+                          type,
+                          dimension: "dx",
+                          resource: "pi",
                           remove: true,
                         });
                       }
                     }}
-                    isChecked={!!denNum?.dataDimensions?.[record.id]}
+                    isChecked={!isEmpty(denNum?.dataDimensions?.[record.id])}
                   />
                 </Td>
                 <Td>{record.id}</Td>

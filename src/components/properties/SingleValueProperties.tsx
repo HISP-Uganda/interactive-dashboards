@@ -135,10 +135,7 @@ const SingleValueProperties = ({
       </Stack>
       <Stack>
         <Text>Single Value Background Color</Text>
-        <ColorPalette
-          visualization={visualization}
-          attribute="data.backgroundColor"
-        />
+        <ColorPalette visualization={visualization} attribute="layout.bg" />
       </Stack>
       <Stack>
         <Text>Single Value Border and Border Radius</Text>
@@ -255,7 +252,6 @@ const SingleValueProperties = ({
         </NumberInput>
       </Stack>
       <Stack>
-        <Text></Text>
         <ColorRangePicker visualization={visualization} />
       </Stack>
       <Stack>
@@ -305,6 +301,80 @@ const SingleValueProperties = ({
           options={progressAlignments}
           isClearable
         />
+      </Stack>
+
+      <Stack>
+        <Text>Target Spacing</Text>
+        <NumberInput
+          value={visualization.properties["data.targetspacing"] || 0}
+          min={0}
+          step={1}
+          onChange={(value1: string, value2: number) =>
+            changeVisualizationProperties({
+              visualization: visualization.id,
+              attribute: "data.targetspacing",
+              value: value2,
+            })
+          }
+        >
+          <NumberInputField />
+          <NumberInputStepper>
+            <NumberIncrementStepper />
+            <NumberDecrementStepper />
+          </NumberInputStepper>
+        </NumberInput>
+      </Stack>
+
+      <Stack>
+        <Text>Target Color</Text>
+        <ColorPalette
+          visualization={visualization}
+          attribute="data.targetcolor"
+        />
+      </Stack>
+
+      <Stack>
+        <Text>Thickness</Text>
+        <NumberInput
+          value={visualization.properties["data.targetthickness"] || 0}
+          min={0}
+          step={1}
+          onChange={(value1: string, value2: number) =>
+            changeVisualizationProperties({
+              visualization: visualization.id,
+              attribute: "data.targetthickness",
+              value: value2,
+            })
+          }
+        >
+          <NumberInputField />
+          <NumberInputStepper>
+            <NumberIncrementStepper />
+            <NumberDecrementStepper />
+          </NumberInputStepper>
+        </NumberInput>
+      </Stack>
+
+      <Stack>
+        <Text>Radius</Text>
+        <NumberInput
+          value={visualization.properties["data.targetradius"] || 0}
+          min={30}
+          step={1}
+          onChange={(value1: string, value2: number) =>
+            changeVisualizationProperties({
+              visualization: visualization.id,
+              attribute: "data.targetradius",
+              value: value2,
+            })
+          }
+        >
+          <NumberInputField />
+          <NumberInputStepper>
+            <NumberIncrementStepper />
+            <NumberDecrementStepper />
+          </NumberInputStepper>
+        </NumberInput>
       </Stack>
       <Stack>
         <Text>Grouping</Text>

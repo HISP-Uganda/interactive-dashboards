@@ -10,8 +10,6 @@ import {
   Checkbox,
   Flex,
   Heading,
-  Input,
-  Spinner,
   Stack,
   Table,
   Tbody,
@@ -22,29 +20,32 @@ import {
   Tr,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
+import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
 import { useOrganisationUnitLevels } from "../../Queries";
-import { $paginations } from "../../Store";
+import { $paginations, $hasDHIS2, $currentDataSource } from "../../Store";
 import { globalIds } from "../../utils/utils";
-import GlobalAndFilter from "./GlobalAndFilter";
+import LoadingIndicator from "../LoadingIndicator";
+import GlobalSearchFilter from "./GlobalSearchFilter";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
 const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
-  const [dimension, setDimension] = useState<"filter" | "dimension">("filter");
+  const [type, setType] = useState<"filter" | "dimension">("dimension");
   const selected = Object.entries(denNum?.dataDimensions || {})
-    .filter(([k, { what }]) => what === "oul")
+    .filter(([k, { resource }]) => resource === "oul")
     .map(([key]) => {
       return key;
     });
   const [useGlobal, setUseGlobal] = useState<boolean>(
-    selected.indexOf("GQhi6pRnTKF") !== -1
+    () => selected.indexOf("GQhi6pRnTKF") !== -1
   );
   const [q, setQ] = useState<string>("");
   const paginations = useStore($paginations);
-
+  const hasDHIS2 = useStore($hasDHIS2);
+  const currentDataSource = useStore($currentDataSource);
   const {
     pages,
     pagesCount,
@@ -65,7 +66,13 @@ const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
     },
   });
   const { isLoading, isSuccess, isError, error, data } =
-    useOrganisationUnitLevels(currentPage, pageSize, q);
+    useOrganisationUnitLevels(
+      currentPage,
+      pageSize,
+      q,
+      hasDHIS2,
+      currentDataSource
+    );
 
   const handlePageChange = (nextPage: number) => {
     setCurrentPage(nextPage);
@@ -73,37 +80,30 @@ const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
 
   return (
     <Stack spacing="30px">
-      <GlobalAndFilter
+      <GlobalSearchFilter
         denNum={denNum}
-        dimension={dimension}
-        setDimension={setDimension}
+        dimension="ou"
+        setType={setType}
         useGlobal={useGlobal}
         setUseGlobal={setUseGlobal}
-        type="oul"
+        resource="oul"
+        prefix="LEVEL-"
+        type={type}
         onChange={onChange}
+        setQ={setQ}
+        q={q}
         id={globalIds[4].value}
       />
-      {!useGlobal && (
-        <Input
-          value={q}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setQ(e.target.value)}
-        />
-      )}
       {isLoading && (
         <Flex w="100%" alignItems="center" justifyContent="center">
-          <Spinner />
+          <LoadingIndicator />
         </Flex>
       )}
-      {isSuccess && !useGlobal && (
-        <Table
-          variant="striped"
-          size="sm"
-          colorScheme="gray"
-          textTransform="none"
-        >
+      {isSuccess && data && !useGlobal && (
+        <Table variant="striped" colorScheme="gray" textTransform="none">
           <Thead>
             <Tr py={1}>
-              <Th>
+              <Th w="10px">
                 <Checkbox />
               </Th>
               <Th>
@@ -127,19 +127,23 @@ const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
                       if (e.target.checked) {
                         onChange({
                           id: record.id,
-                          type: dimension,
-                          what: "oul",
+                          type,
+                          dimension: "ou",
+                          resource: "oul",
+                          prefix: "LEVEL-",
                         });
                       } else {
                         onChange({
                           id: record.id,
-                          type: dimension,
-                          what: "oul",
+                          type,
+                          dimension: "ou",
+                          resource: "oul",
+                          prefix: "LEVEL-",
                           remove: true,
                         });
                       }
                     }}
-                    checked={!!denNum?.dataDimensions?.[record.id]}
+                    isChecked={!isEmpty(denNum?.dataDimensions?.[record.id])}
                   />
                 </Td>
                 <Td>{record.id}</Td>
