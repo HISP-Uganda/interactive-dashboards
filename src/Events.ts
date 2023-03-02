@@ -1,28 +1,28 @@
 import { domain } from "./Domain";
 import {
-  DataNode,
-  DataValueAttribute,
-  ICategory,
-  IDashboard,
-  IDataSource,
-  IIndicator,
-  ISection,
-  Item,
-  IVisualization,
-  Option,
-  IDataElement,
-  IRow,
-  IColumn,
-  IndicatorProps,
-  Dimension,
+    DataNode,
+    DataValueAttribute,
+    ICategory,
+    IDashboard,
+    IDataSource,
+    IIndicator,
+    ISection,
+    Item,
+    IVisualization,
+    Option,
+    IDataElement,
+    IRow,
+    IColumn,
+    IndicatorProps,
+    Dimension,
 } from "./interfaces";
 
 export const loadDefaults = domain.createEvent<{
-  dashboards: string[];
-  categories: string[];
-  dataSources: string[];
-  settings: string[];
-  organisationUnits: DataNode[];
+    dashboards: string[];
+    categories: string[];
+    dataSources: string[];
+    settings: string[];
+    organisationUnits: DataNode[];
 }>();
 
 export const setShowSider = domain.createEvent<boolean>();
@@ -42,7 +42,7 @@ export const changeCategoryId = domain.createEvent<string>();
 export const changeDataSourceId = domain.createEvent<string>();
 export const changeAdministration = domain.createEvent<boolean>();
 export const addPagination = domain.createEvent<{
-  [key: string]: number;
+    [key: string]: number;
 }>();
 
 export const changeDataSource = domain.createEvent<string | undefined>();
@@ -51,30 +51,30 @@ export const setCategory = domain.createEvent<ICategory>();
 export const setIndicator = domain.createEvent<IIndicator>();
 
 export const changeNumeratorExpressionValue = domain.createEvent<{
-  attribute: string;
-  value: string;
-  isGlobal: boolean;
+    attribute: string;
+    value: string;
+    isGlobal: boolean;
 }>();
 export const changeDenominatorExpressionValue = domain.createEvent<{
-  attribute: string;
-  value: string;
-  isGlobal: boolean;
+    attribute: string;
+    value: string;
+    isGlobal: boolean;
 }>();
 
 export const changeIndicatorAttribute = domain.createEvent<{
-  attribute: "name" | "description" | "factor" | "query" | "custom";
-  value: any;
+    attribute: "name" | "description" | "factor" | "query" | "custom";
+    value: any;
 }>();
 
 export const changeVisualizationData = domain.createEvent<{
-  attribute: "name" | "description" | "factor" | "query";
-  value: any;
+    attribute: "name" | "description" | "factor" | "query";
+    value: any;
 }>();
 
 export const changeNumeratorAttribute =
-  domain.createEvent<DataValueAttribute>();
+    domain.createEvent<DataValueAttribute>();
 export const changeDenominatorAttribute =
-  domain.createEvent<DataValueAttribute>();
+    domain.createEvent<DataValueAttribute>();
 
 export const changeNumeratorDimension = domain.createEvent<Dimension>();
 
@@ -93,41 +93,41 @@ export const setAsDefault = domain.createEvent<boolean>();
 export const changeRefreshRate = domain.createEvent<string>();
 export const toggle = domain.createEvent<void>();
 export const changeVisualizationAttribute = domain.createEvent<{
-  attribute: string;
-  value?: any;
-  visualization: string;
+    attribute: string;
+    value?: any;
+    visualization: string;
 }>();
 
 export const changeVisualizationOverride = domain.createEvent<{
-  override: string;
-  value: string;
-  visualization: string;
+    override: string;
+    value: string;
+    visualization: string;
 }>();
 
 export const changeSectionAttribute = domain.createEvent<{
-  attribute: string;
-  value?: any;
+    attribute: string;
+    value?: any;
 }>();
 
 export const addOverride = domain.createEvent<{
-  attribute: "ou" | "dx" | "pe";
-  value: string;
+    attribute: "ou" | "dx" | "pe";
+    value: string;
 }>();
 
 export const changeVisualizationProperties = domain.createEvent<{
-  visualization: string;
-  attribute: string;
-  value?: any;
+    visualization: string;
+    attribute: string;
+    value?: any;
 }>();
 
 export const updateVisualizationData = domain.createEvent<{
-  visualizationId: string;
-  data: any;
+    visualizationId: string;
+    data: any;
 }>();
 
 export const updateVisualizationMetadata = domain.createEvent<{
-  visualizationId: string;
-  data: any;
+    visualizationId: string;
+    data: any;
 }>();
 
 export const setOrganisations = domain.createEvent<string[]>();
@@ -137,18 +137,18 @@ export const setRefreshInterval = domain.createEvent<string>();
 export const setDefaultDashboard = domain.createEvent<string>();
 export const changeHasDashboards = domain.createEvent<boolean>();
 export const changeVisualizationType = domain.createEvent<{
-  visualization: string;
-  section: ISection;
+    visualization: string;
+    section: ISection;
 }>();
 
 export const changePeriods = domain.createEvent<Item[]>();
 
 export const onChangeOrganisations = domain.createEvent<{
-  levels: string[];
-  organisations: string[];
-  groups: string[];
-  expandedKeys: React.Key[];
-  checkedKeys: React.Key[];
+    levels: string[];
+    organisations: string[];
+    groups: string[];
+    expandedKeys: React.Key[];
+    checkedKeys: React.Key[];
 }>();
 
 export const setCurrentPage = domain.createEvent<string>();
@@ -157,13 +157,13 @@ export const setDataSets = domain.createEvent<Option[]>();
 export const assignDataSet = domain.createEvent<string>();
 
 export const setCategorization = domain.createEvent<{
-  [key: string]: any[];
+    [key: string]: any[];
 }>();
 
 export const setHasChildren = domain.createEvent<boolean | undefined>();
 export const setNodeSource = domain.createEvent<{
-  field: string;
-  value: string;
+    field: string;
+    value: string;
 }>();
 export const setVersion = domain.createEvent<string>();
 export const setAvailableCategories = domain.createEvent<any[]>();
@@ -176,7 +176,7 @@ export const setAvailableCategoryOptionCombos = domain.createEvent<any[]>();
 export const setTargetCategoryOptionCombos = domain.createEvent<any[]>();
 export const setSystemId = domain.createEvent<string>();
 export const setCheckedKeys = domain.createEvent<
-  { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[]
+    { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[]
 >();
 
 export const setLevels = domain.createEvent<string[]>();
