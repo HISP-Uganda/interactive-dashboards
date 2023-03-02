@@ -10,8 +10,6 @@ import {
   Checkbox,
   Flex,
   Heading,
-  Input,
-  Spinner,
   Stack,
   Table,
   Tbody,
@@ -22,14 +20,14 @@ import {
   Tr,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
+import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
 import { useIndicators } from "../../Queries";
-import { $paginations } from "../../Store";
+import { $paginations, $hasDHIS2, $currentDataSource } from "../../Store";
 import { globalIds } from "../../utils/utils";
-import GlobalAndFilter from "./GlobalAndFilter";
-import GlobalSearchFilter from "./GlobalSearchFilter";
 import LoadingIndicator from "../LoadingIndicator";
+import GlobalSearchFilter from "./GlobalSearchFilter";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
@@ -47,7 +45,8 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
   );
   const [q, setQ] = useState<string>("");
   const paginations = useStore($paginations);
-
+  const hasDHIS2 = useStore($hasDHIS2);
+  const currentDataSource = useStore($currentDataSource);
   const {
     pages,
     pagesCount,
@@ -81,7 +80,9 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
     currentPage,
     pageSize,
     q,
-    selectedIndicators
+    selectedIndicators,
+    hasDHIS2,
+    currentDataSource
   );
 
   const handlePageChange = (nextPage: number) => {
@@ -150,7 +151,7 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
                         });
                       }
                     }}
-                    isChecked={!!denNum?.dataDimensions?.[record.id]}
+                    isChecked={!isEmpty(denNum?.dataDimensions?.[record.id])}
                   />
                 </Td>
                 <Td>{record.id}</Td>

@@ -1,6 +1,6 @@
 import { Stack, Text, SimpleGrid, Box } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { update } from "lodash";
+import { update, isEmpty } from "lodash";
 import Plot from "react-plotly.js";
 import { ChartProps } from "../../interfaces";
 import { $visualizationMetadata } from "../../Store";
@@ -94,19 +94,21 @@ const BarGraph = ({
           />
         </Stack>
         <Stack direction="row" spacing="20px" justify="center">
-          {allSeries.map((series, index) => (
-            <Stack
-              direction="row"
-              spacing="2px"
-              alignItems="center"
-              key={index}
-            >
-              <Text bgColor={colors[index]} w="10px" h="10px">
-                &nbsp;
-              </Text>
-              <Text noOfLines={[1, 2, 3]}>{series}</Text>
-            </Stack>
-          ))}
+          {allSeries
+            .filter((v) => !isEmpty(v))
+            .map((series, index) => (
+              <Stack
+                direction="row"
+                spacing="2px"
+                alignItems="center"
+                key={index}
+              >
+                <Text bgColor={colors[index]} w="10px" h="10px">
+                  &nbsp;
+                </Text>
+                <Text noOfLines={[1, 2, 3]}>{series}</Text>
+              </Stack>
+            ))}
         </Stack>
       </Stack>
     </Stack>

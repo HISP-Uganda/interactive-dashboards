@@ -3,7 +3,7 @@ import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { changeVisualizationProperties } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
-import { isArray, uniq } from "lodash";
+import { isArray, uniq, groupBy } from "lodash";
 import { $visualizationData } from "../../Store";
 import { customComponents } from "../../utils/components";
 import { chartTypes, colors, createOptions } from "../../utils/utils";
@@ -14,11 +14,49 @@ const PieChartProperties = ({
   visualization: IVisualization;
 }) => {
   const visualizationData = useStore($visualizationData);
-  const columns = visualizationData[visualization.id]
-    ? Object.keys(visualizationData[visualization.id][0]).map<Option>((o) => {
-        return { value: o, label: o };
-      })
-    : [];
+  // const columns = visualizationData[visualization.id]
+  //   ? Object.keys(visualizationData[visualization.id][0]).map<Option>((o) => {
+  //       return { value: o, label: o };
+  //     })
+  //   : [];
+  const processData = () => {
+    const columns = Object.keys(visualizationData[visualization.id][0]);
+
+    if (columns.length === 2) {
+      const all: string[] = visualizationData[visualization.id].map(
+        (a: any) => {
+          const value = parseInt(a.value, 10);
+
+          if (value >= 100) {
+            return "a";
+          }
+
+          if (value >= 75) {
+            return "b";
+          }
+
+          return "c";
+        }
+      );
+
+      return [
+        { indicator: "Achieved", value: all.filter((v) => v === "a").length },
+        {
+          indicator: "Moderately Achieved",
+          value: all.filter((v) => v === "b").length,
+        },
+        {
+          indicator: "Not Achieved",
+          value: all.filter((v) => v === "c").length,
+        },
+      ];
+    }
+    return [];
+  };
+
+  const columns = Object.keys(processData()[0]).map<Option>((o) => {
+    return { value: o, label: o };
+  });
 
   return (
     <Stack>
@@ -77,7 +115,6 @@ const PieChartProperties = ({
         isClearable
         components={customComponents}
       />
-
     </Stack>
   );
 };

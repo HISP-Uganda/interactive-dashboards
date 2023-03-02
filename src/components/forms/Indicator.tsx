@@ -26,6 +26,7 @@ import {
   $indicator,
   $store,
   createIndicator,
+  $ds,
 } from "../../Store";
 import { generalPadding, otherHeight } from "../constants";
 import { displayDataSourceType } from "../data-sources";
@@ -47,7 +48,6 @@ const Indicator = () => {
     setLoading(false);
     navigate({ to: "/indicators" });
   };
-
   return (
     <Box
       p={`${generalPadding}px`}
@@ -150,7 +150,6 @@ const Indicator = () => {
               <Stack direction="row" spacing="50px">
                 <Button
                   onClick={() => {
-                    console.log(indicator);
                     navigate({
                       to: `/indicators/${indicator.id}/numerator`,
                       search,

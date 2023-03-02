@@ -1,9 +1,11 @@
-import { Box, Stack, Text, useDisclosure } from "@chakra-ui/react";
+import { Box, Stack, Text, IconButton, useDisclosure } from "@chakra-ui/react";
 import React from "react";
 import { SwatchesPicker } from "react-color";
+import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
 import useOnClickOutside from "use-onclickoutside";
 import { changeVisualizationProperties } from "../Events";
 import { IVisualization } from "../interfaces";
+import { swatchColors } from "../utils/utils";
 
 type ColorPalletProps = {
   visualization: IVisualization;
@@ -15,17 +17,31 @@ const ColorPalette = ({ visualization, attribute }: ColorPalletProps) => {
   const ref = React.useRef(null);
   useOnClickOutside(ref, onClose);
   return (
-    <Stack position="relative" bgColor="gray.400" p="5px">
+    <Stack position="relative" bgColor="gray.400" direction="row" spacing="0">
       <Text
-        // width="36px"
-        height="24px"
-        borderRadius="2px"
+        flex={1}
+        // height="24px"
+        // borderRadius="2px"
         bgColor={visualization.properties?.[attribute] || "black"}
         onClick={onToggle}
-      ></Text>
+      />
+      <IconButton
+        aria-label="delete"
+        bgColor="none"
+        borderRadius="none"
+        icon={<DeleteIcon w={3} h={3} />}
+        onClick={() =>
+          changeVisualizationProperties({
+            visualization: visualization.id,
+            attribute: attribute,
+            value: "",
+          })
+        }
+      />
       {isOpen && (
-        <Box bottom={0} top={7} zIndex={1000} position="absolute">
+        <Box bottom={0} top="42px" zIndex={1000} position="absolute">
           <SwatchesPicker
+            colors={swatchColors}
             color={visualization.properties?.[attribute] || ""}
             onChangeComplete={(color) => {
               changeVisualizationProperties({

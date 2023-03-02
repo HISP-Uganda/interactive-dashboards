@@ -21,10 +21,13 @@ const SectionVisualization = (section: ISection) => {
     carousel: <Carousel {...section} />,
     marquee: (
       <Stack
+        bg={section.bg}
         alignContent="center"
         alignItems="center"
         justifyContent="center"
         justifyItems="center"
+        w="100%"
+        h="100%"
         onClick={(e: MouseEvent<HTMLElement>) => {
           if (e.detail === 2 && store.isAdmin) {
             setCurrentSection(section);
@@ -36,7 +39,7 @@ const SectionVisualization = (section: ISection) => {
         }}
       >
         <Marquee
-          velocity={100}
+          velocity={60}
           direction="rtl"
           onFinish={() => {}}
           resetAfterTries={200}
@@ -60,6 +63,7 @@ const SectionVisualization = (section: ISection) => {
       <Stack
         h="100%"
         w="100%"
+        bg={section.bg}
         spacing={0}
         alignItems="center"
         alignContent="center"
@@ -94,6 +98,7 @@ const SectionVisualization = (section: ISection) => {
           flex={1}
           w="100%"
           h="100%"
+          bg={section.bg}
         >
           {section.visualizations.map((visualization) => (
             <Visualization
