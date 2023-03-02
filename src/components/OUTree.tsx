@@ -122,7 +122,7 @@ const OUTree = ({
       )}
       {levels !== undefined && (
         <Stack zIndex={300}>
-          <Text fontSize="2xl" color="yellow.500">Key Reult Areas</Text>
+          {/* <Text fontSize="2xl" color="yellow.500">Key Reult Areas</Text>
           <Select<Option, true, GroupBase<Option>>
             isMulti
             options={levels}
@@ -132,7 +132,7 @@ const OUTree = ({
             onChange={(e) => {
               setLevels(e.map((ex) => ex.value));
             }}
-          />
+          /> */}
         </Stack>
       )}
       {/* {groups !== undefined && (
