@@ -3,7 +3,7 @@ import { useStore } from "effector-react";
 import { $store } from "../Store";
 import DashboardList from "./DashboardList";
 import Menus from "./Menus";
-interface SidebarProps extends StackProps {}
+interface SidebarProps extends StackProps { }
 
 const SidebarContent = ({ ...rest }: SidebarProps) => {
   const store = useStore($store);
@@ -14,13 +14,14 @@ const SidebarContent = ({ ...rest }: SidebarProps) => {
         fontSize="xl"
         fontWeight="bold"
         textAlign="left"
+        textTransform="uppercase"
         pl="3"
-        pt="2"
-        color="black"
+        pt="5"
+        color="blue.600"
       >
         Dashboard Menu
       </Text>
-      <Divider borderColor="gray.600" />
+      <Divider borderColor="blue.600" />
       {store.isAdmin ? (
         store.currentPage === "dashboard" ? (
           <DashboardList />
@@ -28,8 +29,8 @@ const SidebarContent = ({ ...rest }: SidebarProps) => {
           <Menus />
         )
       ) : (
-        <DashboardList />
-      )}
+          <DashboardList />
+        )}
     </Stack>
   );
 };

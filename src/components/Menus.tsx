@@ -6,7 +6,7 @@ import { MdAddchart, MdInput, MdOutlineDashboard } from "react-icons/md";
 const Menus = () => {
   const navigate = useNavigate();
   return (
-    <Stack spacing="25px">
+    <Stack spacing="25px" pl="3">
       <Stack
         alignItems="center"
         alignContent="center"
