@@ -86,6 +86,7 @@ import {
     setVisualizations,
     setDataElementGroups,
     setDataElementGroupSets,
+    setDecreasing,
 } from "./Events";
 import {
     ICategory,
@@ -247,6 +248,7 @@ export const $store = domain
         originalColumns: [],
         dataElementGroups: [],
         dataElementGroupSets: [],
+        decreasing: [],
     })
     .on(setOrganisations, (state, organisations) => {
         return { ...state, organisations };
@@ -354,6 +356,9 @@ export const $store = domain
     })
     .on(setDataElementGroupSets, (state, dataElementGroupSets) => {
         return { ...state, dataElementGroupSets };
+    })
+    .on(setDecreasing, (state, decreasing) => {
+        return { ...state, decreasing };
     });
 
 export const $dataSource = domain
