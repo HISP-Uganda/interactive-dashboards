@@ -62,7 +62,7 @@ export default function DashboardTree() {
                 { id: "a", title: "A", bg: "green" },
                 { id: "b", title: "MA", bg: "yellow" },
                 { id: "c", title: "NA", bg: "red" },
-                { id: "d", title: "N/A", bg: "" },
+                { id: "d", title: "X", bg: "" },
             ]);
             const allElements = await db.dataElements.toArray();
             let elements: IDataElement[] = [];
