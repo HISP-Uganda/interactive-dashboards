@@ -87,6 +87,7 @@ import {
     setDataElementGroups,
     setDataElementGroupSets,
     setDecreasing,
+    changeDashboardSortOrder,
 } from "./Events";
 import {
     ICategory,
@@ -185,6 +186,7 @@ export const createDashboard = (id = generateUid()): IDashboard => {
         targetCategoryCombo: "",
         targetCategoryOptionCombos: [],
         nodeSource: {},
+        sortOrder: 0,
     };
 };
 
@@ -434,6 +436,9 @@ export const $dashboard = domain
     })
     .on(changeDashboardName, (state, name) => {
         return { ...state, name };
+    })
+    .on(changeDashboardSortOrder, (state, sortOrder) => {
+        return { ...state, sortOrder };
     })
     .on(changeDashboardDescription, (state, description) => {
         return { ...state, description };

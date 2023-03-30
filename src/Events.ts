@@ -86,6 +86,7 @@ export const changeDefaults = domain.createEvent<void>();
 export const increment = domain.createEvent<number>();
 export const changeCategory = domain.createEvent<string>();
 export const changeDashboardName = domain.createEvent<string>();
+export const changeDashboardSortOrder = domain.createEvent<number>();
 export const changeDashboardDescription = domain.createEvent<string>();
 export const changeSelectedCategory = domain.createEvent<string>();
 export const changeSelectedDashboard = domain.createEvent<string>();

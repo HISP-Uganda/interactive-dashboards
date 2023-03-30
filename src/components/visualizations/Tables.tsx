@@ -43,9 +43,9 @@ const previousFinancialYear = () => {
     const year = currentDate.getFullYear();
 
     if (currentDate.getMonth() <= 6) {
-        return `${year - 1}July`;
+        return `${year - 2}July`;
     }
-    return `${year}July`;
+    return `${year - 1}July`;
 };
 
 const Tables = ({ data }: TableProps) => {
@@ -77,7 +77,6 @@ const Tables = ({ data }: TableProps) => {
                         Duw5yep8Vae === "Px8Lqkxy2si" &&
                         pe === previousFinancialYear()
                 );
-
                 if (actualValue && targetValue) {
                     return isDecreasing
                         ? (Number(targetValue.value) * 100) /
@@ -85,7 +84,7 @@ const Tables = ({ data }: TableProps) => {
                         : (Number(actualValue.value) * 100) /
                               Number(targetValue.value);
                 }
-                return 0;
+                return -1;
             })
         );
 
@@ -93,7 +92,8 @@ const Tables = ({ data }: TableProps) => {
         if (value >= 75 && value < 100) return "aav";
         if (value >= 50 && value < 75) return "av";
         if (value >= 25 && value < 50) return "bav";
-        return "nac";
+        if (value !== -1) return "nac";
+        return "nodata";
     };
 
     const processSummaries = () => {
@@ -110,10 +110,11 @@ const Tables = ({ data }: TableProps) => {
                 const grouped = groupBy(store.rows, "interventionCode");
                 const processedDir = Object.entries(grouped).map(
                     ([directive, elements]) => {
-                        return computeDirectives(
+                        const value = computeDirectives(
                             data,
                             elements.map(({ id }: any) => id)
                         );
+                        return value;
                     }
                 );
                 const aa = processedDir.filter((a) => a === "aa").length;
@@ -195,25 +196,25 @@ const Tables = ({ data }: TableProps) => {
             );
 
             if (actualValue && targetValue) {
-                const percentage = isDecreasing
-                    ? Number(targetValue.value) / Number(actualValue.value)
-                    : Number(actualValue.value) / Number(targetValue.value);
-                if (percentage >= 1) return "a";
-                if (percentage >= 0.75) return "ma";
-                return "na";
+                const value =
+                    (Number(actualValue.value) * 100) /
+                    Number(targetValue.value);
+                if (isDecreasing) {
+                    if (value <= 100) return "a";
+                    if (value > 100 && value <= 175) return "ma";
+                    if (value > 175) return "na";
+                } else {
+                    if (value >= 100) return "a";
+                    if (value >= 75 && value < 100) return "ma";
+                    if (value < 175) return "na";
+                }
             }
             return "n/a";
         });
-        const achieved = all.filter((a) => a.indexOf("a") !== -1);
-        const moderately = all.filter(
-            (a) => a.indexOf("a") === -1 && a.indexOf("ma") !== -1
-        );
-        const notAchieved = all.filter(
-            (a) =>
-                a.indexOf("na") !== -1 &&
-                a.indexOf("a") === -1 &&
-                a.indexOf("ma") === -1
-        );
+        console.log(all);
+        const achieved = all.filter((a) => a === "a");
+        const moderately = all.filter((a) => a === "ma");
+        const notAchieved = all.filter((a) => a === "na");
 
         updateVisualizationData({
             visualizationId: "a",
@@ -533,14 +534,14 @@ const Tables = ({ data }: TableProps) => {
                                                                 ) {
                                                                     if (
                                                                         percentage >=
-                                                                        100
+                                                                        175
                                                                     ) {
                                                                         bg =
                                                                             "red";
                                                                         // color = "white";
                                                                     } else if (
                                                                         percentage >=
-                                                                        75
+                                                                        101
                                                                     ) {
                                                                         bg =
                                                                             "yellow";
