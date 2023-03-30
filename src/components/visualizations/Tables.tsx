@@ -33,17 +33,23 @@ const computeFinancialYears = (year: number) => {
     });
 };
 
-const Tables = ({
-    visualization,
-    category,
-    series,
-    layoutProperties,
-    dataProperties,
-    section,
-    data,
-}: TableProps) => {
-    const store = useStore($store);
+const formatter = Intl.NumberFormat("en-US", {
+    style: "percent",
+    maximumFractionDigits: 0,
+});
 
+const previousFinancialYear = () => {
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+
+    if (currentDate.getMonth() <= 6) {
+        return `${year - 1}July`;
+    }
+    return `${year}July`;
+};
+
+const Tables = ({ data }: TableProps) => {
+    const store = useStore($store);
     const [squareRef, { width, height }] = useElementSize();
 
     const processed: { [key: string]: string } = fromPairs(
@@ -60,27 +66,26 @@ const Tables = ({
         const value = mean(
             Object.entries(groupBy(groupData, "dx")).map(([dx, group]) => {
                 const isDecreasing = store.decreasing.indexOf(dx) !== -1;
-                return max(
-                    Object.entries(groupBy(group, "pe")).map(([pe, peData]) => {
-                        const actualValue = peData.find(
-                            ({ Duw5yep8Vae }: any) =>
-                                Duw5yep8Vae === "HKtncMjp06U"
-                        );
-                        const targetValue = peData.find(
-                            ({ Duw5yep8Vae }: any) =>
-                                Duw5yep8Vae === "Px8Lqkxy2si"
-                        );
 
-                        if (actualValue && targetValue) {
-                            return isDecreasing
-                                ? (Number(targetValue.value) * 100) /
-                                      Number(actualValue.value)
-                                : (Number(actualValue.value) * 100) /
-                                      Number(targetValue.value);
-                        }
-                        return 0;
-                    })
+                const actualValue = group.find(
+                    ({ Duw5yep8Vae, pe }: any) =>
+                        Duw5yep8Vae === "HKtncMjp06U" &&
+                        pe === previousFinancialYear()
                 );
+                const targetValue = group.find(
+                    ({ Duw5yep8Vae, pe }: any) =>
+                        Duw5yep8Vae === "Px8Lqkxy2si" &&
+                        pe === previousFinancialYear()
+                );
+
+                if (actualValue && targetValue) {
+                    return isDecreasing
+                        ? (Number(targetValue.value) * 100) /
+                              Number(actualValue.value)
+                        : (Number(actualValue.value) * 100) /
+                              Number(targetValue.value);
+                }
+                return 0;
             })
         );
 
@@ -178,28 +183,26 @@ const Tables = ({
 
         let all = Object.entries(groupedByDx).map(([dx, dataElementData]) => {
             const isDecreasing = store.decreasing.indexOf(dx) !== -1;
-            return Object.entries(groupBy(dataElementData, "pe")).map(
-                ([pe, group]) => {
-                    const actualValue = group.find(
-                        ({ Duw5yep8Vae }: any) => Duw5yep8Vae === "HKtncMjp06U"
-                    );
-                    const targetValue = group.find(
-                        ({ Duw5yep8Vae }: any) => Duw5yep8Vae === "Px8Lqkxy2si"
-                    );
-
-                    if (actualValue && targetValue) {
-                        const percentage = isDecreasing
-                            ? Number(targetValue.value) /
-                              Number(actualValue.value)
-                            : Number(actualValue.value) /
-                              Number(targetValue.value);
-                        if (percentage >= 1) return "a";
-                        if (percentage >= 0.75) return "ma";
-                        return "na";
-                    }
-                    return "n/a";
-                }
+            const actualValue = dataElementData.find(
+                ({ Duw5yep8Vae, pe }: any) =>
+                    Duw5yep8Vae === "HKtncMjp06U" &&
+                    pe === previousFinancialYear()
             );
+            const targetValue = dataElementData.find(
+                ({ Duw5yep8Vae, pe }: any) =>
+                    Duw5yep8Vae === "Px8Lqkxy2si" &&
+                    pe === previousFinancialYear()
+            );
+
+            if (actualValue && targetValue) {
+                const percentage = isDecreasing
+                    ? Number(targetValue.value) / Number(actualValue.value)
+                    : Number(actualValue.value) / Number(targetValue.value);
+                if (percentage >= 1) return "a";
+                if (percentage >= 0.75) return "ma";
+                return "na";
+            }
+            return "n/a";
         });
         const achieved = all.filter((a) => a.indexOf("a") !== -1);
         const moderately = all.filter(
@@ -234,7 +237,7 @@ const Tables = ({
                 ({ dx }: any) => dataElements.indexOf(dx) !== -1
             );
             const groupedByPeriod = groupBy(filtered, "pe");
-            let returnValue: { [key: string]: number } = {};
+            let returnValue: { [key: string]: any } = {};
             Object.entries(groupedByPeriod).forEach(([period, des]) => {
                 const groupedByDx = Object.entries(groupBy(des, "dx")).map(
                     ([dx, group]) => {
@@ -275,10 +278,19 @@ const Tables = ({
                 returnValue = {
                     ...returnValue,
                     ...{
-                        [`${period}a`]: a,
-                        [`${period}b`]: b,
-                        [`${period}c`]: c,
-                        [`${period}d`]: dataElements.length - (a + b + c),
+                        [`${period}a`]: formatter.format(
+                            a / dataElements.length
+                        ),
+                        [`${period}b`]: formatter.format(
+                            b / dataElements.length
+                        ),
+                        [`${period}c`]: formatter.format(
+                            c / dataElements.length
+                        ),
+                        [`${period}d`]: formatter.format(
+                            (dataElements.length - (a + b + c)) /
+                                dataElements.length
+                        ),
                     },
                 };
             });
@@ -460,7 +472,6 @@ const Tables = ({
                         <Tbody>
                             {store.rows.map((row, bigIndex) => {
                                 const pd = processData(row.elements, row.child);
-                                console.log(pd);
                                 return (
                                     <Tr key={row.id}>
                                         {store.originalColumns.map(
@@ -605,25 +616,13 @@ const Tables = ({
                                                         Number(value);
                                                     if (realValue >= 100) {
                                                         bg = "green";
-                                                        // color = "white";
                                                     } else if (
                                                         realValue >= 75
                                                     ) {
                                                         bg = "yellow";
-                                                        // color = "white";
                                                     } else if (realValue < 75) {
                                                         bg = "red";
                                                     }
-                                                    // else if (realValue >= 49) {
-                                                    //   bg = "yellow";
-                                                    //   // color = "white";
-                                                    // } else if (realValue >= 25) {
-                                                    //   bg = "orange";
-                                                    //   // color = "white";
-                                                    // } else if (realValue < 25) {
-                                                    //   bg = "red";
-                                                    //   // color = "white";
-                                                    // }
                                                 }
                                                 return {
                                                     key: `${row.id}${fy.value}`,
