@@ -530,6 +530,7 @@ export const useDashboards = (systemId: string) => {
                         checkable: false,
                         nodeSource: d.nodeSource,
                         hasChildren: d.hasChildren,
+                        sortOrder: d.sortOrder,
                     };
                     return node;
                 });
@@ -632,6 +633,7 @@ export const useDashboard = (
                     checkable: false,
                     nodeSource: dashboard.nodeSource,
                     hasChildren: dashboard.hasChildren,
+                    sortOrder: dashboard.sortOrder,
                 };
                 await db.dashboards.put(current);
             }

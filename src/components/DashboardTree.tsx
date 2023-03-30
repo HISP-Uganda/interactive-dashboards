@@ -6,7 +6,7 @@ import { EventDataNode } from "antd/es/tree";
 import arrayToTree from "array-to-tree";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useStore } from "effector-react";
-import { uniq } from "lodash";
+import { uniq, sortBy, orderBy } from "lodash";
 import React, { useState } from "react";
 import { db } from "../db";
 import {
@@ -19,6 +19,7 @@ import {
 import { DataNode, IDataElement, LocationGenerics } from "../interfaces";
 import { $store } from "../Store";
 import { loadData } from "./helpers";
+import { Stack } from "@chakra-ui/react";
 
 const labels: { [key: string]: string } = {
     M0ACvr6Coqn: "Commitments",
@@ -285,7 +286,11 @@ export default function DashboardTree() {
                 //   fontSize: "18px",
             }}
             treeData={
-                treeData ? arrayToTree(treeData, { parentProperty: "pId" }) : []
+                treeData
+                    ? arrayToTree(orderBy(treeData, "sortOrder"), {
+                          parentProperty: "pId",
+                      })
+                    : []
             }
         />
     );

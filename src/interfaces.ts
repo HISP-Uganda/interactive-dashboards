@@ -1,3 +1,4 @@
+import { sortBy } from "lodash";
 import { MakeGenerics } from "@tanstack/react-location";
 import { OptionBase } from "chakra-react-select";
 import type { DataNode as IDataNode } from "antd/es/tree";
@@ -150,6 +151,7 @@ export interface IDashboard extends INamed {
         search: string;
         subSearch: string;
     }>;
+    sortOrder: number;
 }
 export interface Pagination {
     total: number;
@@ -173,6 +175,7 @@ export interface DataNode extends IDataNode {
     }>;
     hasChildren?: boolean;
     bg?: string;
+    sortOrder: number;
 }
 
 export interface Option extends OptionBase {
