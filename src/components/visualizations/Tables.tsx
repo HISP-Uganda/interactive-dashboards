@@ -10,6 +10,7 @@ import {
     Th,
     Thead,
     Tr,
+    Button,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { fromPairs, groupBy, max, mean, sum } from "lodash";
@@ -18,6 +19,11 @@ import { useElementSize } from "usehooks-ts";
 import { updateVisualizationData } from "../../Events";
 import { ChartProps } from "../../interfaces";
 import { $store } from "../../Store";
+import React, { useRef } from 'react';
+import { utils, writeFile } from 'xlsx';
+
+
+
 
 interface TableProps extends ChartProps {
     category?: string;
@@ -32,6 +38,8 @@ const computeFinancialYears = (year: number) => {
         };
     });
 };
+
+
 
 const formatter = Intl.NumberFormat("en-US", {
     style: "percent",
@@ -49,6 +57,7 @@ const previousFinancialYear = () => {
 };
 
 const Tables = ({ data }: TableProps) => {
+    const tbl = useRef(null);
     const store = useStore($store);
     const [squareRef, { width, height }] = useElementSize();
 
@@ -80,9 +89,9 @@ const Tables = ({ data }: TableProps) => {
                 if (actualValue && targetValue) {
                     return isDecreasing
                         ? (Number(targetValue.value) * 100) /
-                              Number(actualValue.value)
+                        Number(actualValue.value)
                         : (Number(actualValue.value) * 100) /
-                              Number(targetValue.value);
+                        Number(targetValue.value);
                 }
                 return -1;
             })
@@ -211,7 +220,6 @@ const Tables = ({ data }: TableProps) => {
             }
             return "n/a";
         });
-        console.log(all);
         const achieved = all.filter((a) => a === "a");
         const moderately = all.filter((a) => a === "ma");
         const notAchieved = all.filter((a) => a === "na");
@@ -256,9 +264,9 @@ const Tables = ({ data }: TableProps) => {
                         if (actualValue && targetValue) {
                             const percentage = isDecreasing
                                 ? Number(targetValue.value) /
-                                  Number(actualValue.value)
+                                Number(actualValue.value)
                                 : Number(actualValue.value) /
-                                  Number(targetValue.value);
+                                Number(targetValue.value);
                             return {
                                 a: percentage >= 1 ? 1 : 0,
                                 b: percentage >= 0.75 && percentage < 1 ? 1 : 0,
@@ -290,7 +298,7 @@ const Tables = ({ data }: TableProps) => {
                         ),
                         [`${period}d`]: formatter.format(
                             (dataElements.length - (a + b + c)) /
-                                dataElements.length
+                            dataElements.length
                         ),
                     },
                 };
@@ -313,7 +321,7 @@ const Tables = ({ data }: TableProps) => {
                     h={`${height}px`}
                     w="100%"
                 >
-                    <Table variant="unstyled" w="100%" bg="white" size="sm">
+                    <Table variant="unstyled" w="100%" bg="white" size="sm" ref={tbl}>
                         <TableCaption
                             placement="top"
                             bg="white"
@@ -325,7 +333,7 @@ const Tables = ({ data }: TableProps) => {
                             zIndex={100}
                         >
                             <SimpleGrid
-                                columns={4}
+                                columns={5}
                                 gap="2px"
                                 alignItems="center"
                                 zIndex="1000000"
@@ -386,6 +394,24 @@ const Tables = ({ data }: TableProps) => {
                                 >
                                     <Text>No data</Text>
                                 </Stack>
+                                <Stack
+                                    h="50px"
+                                    fontSize="xl"
+                                    // fontWeight="semi-bold"
+                                    color="black"
+                                    //bg="#AAAAAA"
+                                    alignItems="center"
+                                    alignContent="center"
+                                    justifyItems="center"
+                                    justifyContent="center"
+                                >
+                                    <Button colorScheme="blue" onClick={() => {
+                                        const wb = utils.table_to_book(tbl.current);
+                                        writeFile(wb, "Table.xlsx")
+                                    }}>
+                                        Download Table as excel
+                                    </Button>
+                                </Stack>
                             </SimpleGrid>
                         </TableCaption>
                         <Thead>
@@ -426,7 +452,7 @@ const Tables = ({ data }: TableProps) => {
                                             borderStyle="solid"
                                             borderWidth="thin"
                                             fontSize="md"
-                                            // color="black"
+                                        // color="black"
                                         >
                                             {fy.key}
                                         </Th>
@@ -462,7 +488,7 @@ const Tables = ({ data }: TableProps) => {
                                                 fontSize="sm"
                                                 bg={bg}
                                                 key={id}
-                                                // {...otherRows(1, index + 1)}
+                                            // {...otherRows(1, index + 1)}
                                             >
                                                 {title}
                                             </Th>
@@ -486,11 +512,11 @@ const Tables = ({ data }: TableProps) => {
                                                     w={w}
                                                 >
                                                     {col === 0 &&
-                                                    store.selectedDashboard ===
+                                                        store.selectedDashboard ===
                                                         "emIWijzLHR4"
                                                         ? `${bigIndex + 1}. ${
-                                                              row[id]
-                                                          }`
+                                                        row[id]
+                                                        }`
                                                         : row[id]}
                                                 </Td>
                                             )
@@ -504,16 +530,16 @@ const Tables = ({ data }: TableProps) => {
                                                             let color = "black";
                                                             const actual =
                                                                 processed[
-                                                                    `${row.id}${fy.value}${cId}`
+                                                                `${row.id}${fy.value}${cId}`
                                                                 ];
                                                             const target =
                                                                 processed[
-                                                                    `${row.id}${fy.value}Px8Lqkxy2si`
+                                                                `${row.id}${fy.value}Px8Lqkxy2si`
                                                                 ];
 
                                                             if (
                                                                 cId ===
-                                                                    "HKtncMjp06U" &&
+                                                                "HKtncMjp06U" &&
                                                                 actual &&
                                                                 target
                                                             ) {
@@ -574,14 +600,14 @@ const Tables = ({ data }: TableProps) => {
                                                                 }
                                                             } else if (
                                                                 cId ===
-                                                                    "HKtncMjp06U" &&
+                                                                "HKtncMjp06U" &&
                                                                 !actual
                                                             ) {
                                                                 bg = "#AAAAAA";
                                                             }
                                                             if (
                                                                 cId ===
-                                                                    "Px8Lqkxy2si" &&
+                                                                "Px8Lqkxy2si" &&
                                                                 actual
                                                             ) {
                                                             } else if (
@@ -593,10 +619,10 @@ const Tables = ({ data }: TableProps) => {
                                                                 key: `${row.id}${fy.value}${cId}`,
                                                                 value:
                                                                     pd[
-                                                                        `${fy.value}${cId}`
+                                                                    `${fy.value}${cId}`
                                                                     ] ||
                                                                     processed[
-                                                                        `${row.id}${fy.value}${cId}`
+                                                                    `${row.id}${fy.value}${cId}`
                                                                     ],
                                                                 bg,
                                                                 color,
@@ -607,7 +633,7 @@ const Tables = ({ data }: TableProps) => {
 
                                                 const value =
                                                     processed[
-                                                        `${row.id}${fy.value}`
+                                                    `${row.id}${fy.value}`
                                                     ];
 
                                                 let bg = "#AAAAAA";
