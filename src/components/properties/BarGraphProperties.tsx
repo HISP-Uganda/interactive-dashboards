@@ -1,16 +1,4 @@
-import {
-  Input,
-  Radio,
-  RadioGroup,
-  Stack,
-  Text,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-  Checkbox,
-} from "@chakra-ui/react";
+import { Input, Radio, RadioGroup, Stack, Text, Tabs, TabList, TabPanels, Tab, TabPanel, Checkbox, } from "@chakra-ui/react";
 import { ChangeEvent } from "react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
@@ -35,8 +23,8 @@ const BarGraphProperties = ({
   const metadata = useStore($visualizationMetadata)[visualization.id];
   const columns = visualizationData[visualization.id]
     ? Object.keys(visualizationData[visualization.id][0]).map<Option>((o) => {
-        return { value: o, label: o };
-      })
+      return { value: o, label: o };
+    })
     : [];
 
   return (

@@ -15,7 +15,7 @@ const SidebarContent = ({ ...rest }: SidebarProps) => {
         fontWeight="bold"
         textAlign="left"
         textTransform="uppercase"
-        pl="3"
+        pl="8"
         pt="5"
         color="blue.600"
       >

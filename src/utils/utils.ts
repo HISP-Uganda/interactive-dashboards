@@ -678,6 +678,7 @@ export const chartTypes: Option[] = [
     { value: "tables", label: "Table" },
     { value: "boxplot", label: "Box Plot" },
     { value: "scatterplot", label: "Scatter Plot" },
+    { value: "heatmap", label: "Heat Map" },
 ];
 
 export const createOptions = (options: string[]): Option[] => {
