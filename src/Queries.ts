@@ -56,18 +56,7 @@ import { getSearchParams, processMap } from "./utils/utils";
 
 export const api = axios.create({
     baseURL: "https://services.dhis2.hispuganda.org/",
-    // baseURL: "http://localhost:3001/",
 });
-
-const createApi = (ds: IDataSource) => {
-    return axios.create({
-        baseURL: `${ds.authentication.url}/api/`,
-        auth: {
-            username: ds.authentication.username,
-            password: ds.authentication.password,
-        },
-    });
-};
 
 export const queryDataSource = async (
     dataSource: IDataSource,
@@ -152,7 +141,7 @@ export const getIndex = async (
     }
 };
 
-export const getOneRecord = async (
+export const getOneRecord = async <TData>(
     index: string,
     id: string,
     signal: AbortSignal | undefined
@@ -216,146 +205,18 @@ export const useInitials = () => {
         systemInfo: {
             resource: "system/info",
         },
-
-        // dataElementGroupSets: {
-        //     resource:
-        //         "dataElementGroupSets.json?filter=attributeValues.attribute.id:eq:MeGs34GOrPw&fields=dataElementGroups[id,name,code,dataElements[id,code,name,dataElementGroups[id,groupSets[id,attributeValues[value,attribute[id,name]]]]]],id,code,name,attributeValues[attribute[id,name],value]",
-        // },
-        // directives: {
-        //     resource:
-        //         "dataElementGroupSets/G5xzDCd4bhZ.json?fields=dataElementGroups[id,name,code,dataElements[id,code,name],attributeValues[attribute[id,name],value]],id,code,name",
-        // },
-        // programs: {
-        //     resource: "optionSets/nZffnMQwoWr/options.json",
-        // },
     };
     return useQuery<any, Error>(
         ["initial"],
         async ({ signal }) => {
-            // const systemInfo = await db.systemInfo.get("1");
-            // if (!systemInfo) {
             const {
                 systemInfo: { systemId, systemName, instanceBaseUrl },
                 me: { organisationUnits, authorities },
                 levels: { organisationUnitLevels },
                 groups: { organisationUnitGroups },
                 dataSets: { dataSets },
-            }: // dataElementGroupSets: { dataElementGroupSets },
-            // directives: { dataElementGroups },
-            // programs: { options },
-            any = await engine.query(ouQuery);
-            // const processedPrograms = fromPairs(
-            //     options.map(({ code, name }: any) => [code, name])
-            // );
-            // const processedDirectives = dataElementGroups.flatMap(
-            //     ({
-            //         code: degCode,
-            //         name: degName,
-            //         dataElements,
-            //         id: degId,
-            //         attributeValues,
-            //     }: any) => {
-            //         return dataElements.map(({ id, name, code }: any) => {
-            //             let programCode = "";
-            //             const attribute = attributeValues.find(
-            //                 ({ attribute }: any) =>
-            //                     attribute.id === "UBWSASWdyfi"
-            //             );
-            //             if (attribute) {
-            //                 programCode = attribute.value;
-            //             }
-            //             return {
-            //                 id,
-            //                 name,
-            //                 code,
-            //                 intervention: degName,
-            //                 interventionCode: degCode,
-            //                 subKeyResultArea: name,
-            //                 subKeyResultAreaCode: code,
-            //                 degId,
-            //                 keyResultArea: name,
-            //                 keyResultAreaCode: code,
-            //                 theme: "",
-            //                 program: processedPrograms[programCode] || "",
-            //                 programCode,
-            //             };
-            //         });
-            //     }
-            // );
+            }: any = await engine.query(ouQuery);
 
-            // const processedGroupSets = dataElementGroupSets.flatMap(
-            //     ({
-            //         dataElementGroups,
-            //         attributeValues,
-            //         id: degsId,
-            //         code: degsCode,
-            //         name: degsName,
-            //     }: any) => {
-            //         const themeAttribute = attributeValues.find(
-            //             (a: any) => a.attribute.id === "MeGs34GOrPw"
-            //         );
-            //         return dataElementGroups.flatMap(
-            //             ({
-            //                 code: degCode,
-            //                 name: degName,
-            //                 dataElements,
-            //                 id: degId,
-            //             }: any) => {
-            //                 return dataElements.map(
-            //                     ({
-            //                         id,
-            //                         name,
-            //                         code,
-            //                         dataElementGroups,
-            //                     }: any) => {
-            //                         let programCode = "";
-            //                         const program = dataElementGroups.find(
-            //                             ({ id }: any) => id === "OsfAXDfjEHp"
-            //                         );
-            //                         if (program) {
-            //                             const groupSet = program.groupSets.find(
-            //                                 ({ id }: any) =>
-            //                                     id === "PeN6InXuGmD"
-            //                             );
-            //                             if (groupSet) {
-            //                                 const attribute =
-            //                                     groupSet.attributeValues.find(
-            //                                         ({ attribute }: any) =>
-            //                                             attribute.id ===
-            //                                             "UBWSASWdyfi"
-            //                                     );
-            //                                 if (attribute) {
-            //                                     programCode = attribute.value;
-            //                                 }
-            //                             }
-            //                         }
-            //                         return {
-            //                             id,
-            //                             name,
-            //                             code,
-            //                             intervention: degName,
-            //                             interventionCode: degCode,
-            //                             subKeyResultArea: name,
-            //                             subKeyResultAreaCode: code,
-            //                             degId,
-            //                             keyResultArea: name,
-            //                             keyResultAreaCode: code,
-            //                             themeCode: themeAttribute?.value || "",
-            //                             theme: "",
-            //                             program:
-            //                                 processedPrograms[programCode] ||
-            //                                 "",
-            //                             programCode,
-            //                             degsId,
-            //                             degsName,
-            //                             degsCode,
-            //                         };
-            //                     }
-            //                 );
-            //             }
-            //         );
-            //     }
-            // );
             const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
             const facilities: string[] = organisationUnits.map(
                 (unit: any) => unit.id
@@ -404,39 +265,11 @@ export const useInitials = () => {
             setLevels([
                 minLevel === 1 ? "3" : `${minLevel ? minLevel + 1 : 4}`,
             ]);
-            // updateVisualizationData({
-            //     visualizationId: "keyResultAreas",
-            //     data: [
-            //         {
-            //             value: uniq(processedGroupSets.map((e: any) => e.id))
-            //                 .length,
-            //         },
-            //     ],
-            // });
-            // updateVisualizationData({
-            //     visualizationId: "indicators",
-            //     data: [{ value: processedGroupSets.length }],
-            // });
-            // updateVisualizationData({
-            //     visualizationId: "interventions",
-            //     data: [
-            //         {
-            //             value: uniq(
-            //                 processedGroupSets.map(
-            //                     (e: any) => e.interventionCode
-            //                 )
-            //             ).length,
-            //         },
-            //     ],
-            // });
+
             updateVisualizationData({
                 visualizationId: "outputs",
                 data: [{ value: 0 }],
             });
-            // updateVisualizationData({
-            //     visualizationId: "directives",
-            //     data: [{ value: dataElementGroups.length }],
-            // });
 
             await db.systemInfo.bulkPut([
                 { id: "1", systemId, systemName, instanceBaseUrl },
@@ -445,11 +278,6 @@ export const useInitials = () => {
             await db.levels.bulkPut(organisationUnitLevels);
             await db.groups.bulkPut(organisationUnitGroups);
             await db.dataSets.bulkPut(dataSets);
-            // await db.dataElements.bulkPut([
-            //     ...processedGroupSets,
-            //     ...processedDirectives,
-            // ]);
-            // }
             return true;
         },
         {}
@@ -464,7 +292,14 @@ export const useDataSources = (systemId: string) => {
                 setCurrentPage("data-sources");
                 setShowFooter(false);
                 setShowSider(true);
-                return await getIndex("i-data-sources", systemId, [], signal);
+                const data = await getIndex(
+                    "i-data-sources",
+                    systemId,
+                    [],
+                    signal
+                );
+                console.log(data);
+                return data;
             } catch (error) {
                 console.error(error);
                 return [];
@@ -476,9 +311,14 @@ export const useDataSource = (id: string) => {
     return useQuery<boolean, Error>(
         ["i-data-sources", id],
         async ({ signal }) => {
-            const dataSource: IDataSource =
-                (await getOneRecord("i-data-sources", id, signal)) ||
-                createDataSource(id);
+            let dataSource: IDataSource = await getOneRecord(
+                "i-data-sources",
+                id,
+                signal
+            );
+            if (isEmpty(dataSource)) {
+                dataSource = createDataSource(id);
+            }
             setDataSource(dataSource);
             return true;
         }
