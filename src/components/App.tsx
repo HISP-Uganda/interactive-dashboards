@@ -55,6 +55,7 @@ import LoadingIndicator from "./LoadingIndicator";
 import MOHLogo from "./MOHLogo";
 import SectionMenu from "./SectionMenu";
 import SidebarContent from "./SidebarContent";
+import ImageUpload from "./ImageUpload";
 
 const history = createHashHistory();
 const location = new ReactLocation<LocationGenerics>({
@@ -277,10 +278,11 @@ const App = () => {
                                     direction="row"
                                     spacing="20px"
                                 >
-                                    <MOHLogo
+                                    {/* <MOHLogo
                                         height={otherHeaders}
                                         width={sideWidth}
-                                    />
+                                    /> */}
+                                    <ImageUpload alignment="top-left" />
                                     <Stack spacing={0}>
                                         <Text
                                             textTransform="uppercase"
@@ -300,6 +302,10 @@ const App = () => {
                                 <GridItem>
                                     <SidebarContent />
                                 </GridItem>
+                                <ImageUpload
+                                    alignment="bottom-left"
+                                    maxH={`${otherHeaders}px`}
+                                />
                             </Grid>
                         )}
                         <FullScreen handle={handle}>
@@ -361,7 +367,6 @@ const App = () => {
                                 <GridItem
                                     w={dashboardWidth}
                                     maxW={dashboardWidth}
-                                    bgColor="white"
                                 >
                                     <Footer handle={handle} />
                                 </GridItem>

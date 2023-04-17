@@ -1,5 +1,6 @@
 import axios from "axios";
-import { combine } from "effector";
+import { combine, createApi } from "effector";
+import produce from "immer";
 import { fromPairs, isEqual, sortBy, isEmpty } from "lodash";
 import { headerHeight, padding, sideWidth } from "./components/constants";
 import { domain } from "./Domain";
@@ -96,6 +97,7 @@ import {
     IStore,
     IVisualization,
     Option,
+    IImage,
 } from "./interfaces";
 import { generateUid } from "./utils/uid";
 import { getRelativePeriods, relativePeriodTypes } from "./utils/utils";
@@ -184,6 +186,9 @@ export const createDashboard = (id = generateUid()): IDashboard => {
         targetCategoryCombo: "",
         targetCategoryOptionCombos: [],
         nodeSource: {},
+        tag1: "",
+        tag2: "",
+        images: [],
     };
 };
 
@@ -475,6 +480,24 @@ export const $dashboard = domain
     .on(setSections, (state, sections) => {
         return { ...state, sections };
     });
+
+export const dashboardApi = createApi($dashboard, {
+    addImage: (state, image: IImage) => {
+        const imageSearch = state.images.findIndex(
+            ({ alignment }) => image.alignment === alignment
+        );
+        if (imageSearch !== -1) {
+            const images = produce(state.images, (draft) => {
+                draft[imageSearch].src = image.src;
+            });
+
+            return produce(state, (draft) => {
+                draft.images = images;
+            });
+        }
+        return { ...state, images: [...state.images, image] };
+    },
+});
 
 export const $indicator = domain
     .createStore<IIndicator>(createIndicator())
