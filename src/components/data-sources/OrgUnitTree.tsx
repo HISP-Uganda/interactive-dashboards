@@ -1,9 +1,7 @@
 import { Stack } from "@chakra-ui/react";
-import { useStore } from "effector-react";
 import { useState } from "react";
 import { IndicatorProps } from "../../interfaces";
-import { $store } from "../../Store";
-import { globalIds, computeGlobalParams } from "../../utils/utils";
+import { computeGlobalParams, globalIds } from "../../utils/utils";
 import GlobalSearchFilter from "./GlobalSearchFilter";
 
 const OrgUnitTree = ({ denNum, onChange }: IndicatorProps) => {

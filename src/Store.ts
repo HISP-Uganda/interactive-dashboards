@@ -98,6 +98,8 @@ import {
     IVisualization,
     Option,
     IImage,
+    IDashboardSetting,
+    Storage,
 } from "./interfaces";
 import { generateUid } from "./utils/uid";
 import { getRelativePeriods, relativePeriodTypes } from "./utils/utils";
@@ -170,7 +172,7 @@ export const createDashboard = (id = generateUid()): IDashboard => {
         id,
         sections: [],
         published: false,
-        rows: 12,
+        rows: 24,
         columns: 24,
         showSider: true,
         category: "uDWxMNyXZeo",
@@ -186,8 +188,7 @@ export const createDashboard = (id = generateUid()): IDashboard => {
         targetCategoryCombo: "",
         targetCategoryOptionCombos: [],
         nodeSource: {},
-        tag1: "",
-        tag2: "",
+        tag: "Example tag",
         images: [],
     };
 };
@@ -212,6 +213,24 @@ export const $paginations = domain
     });
 
 export const $filters = domain.createStore<{ [key: string]: any }>({});
+
+export const $settings = domain.createStore<IDashboardSetting>({
+    defaultDashboard: "",
+    storage: "data-store",
+    name: "",
+    id: generateUid(),
+});
+
+export const settingsApi = createApi($settings, {
+    changeDefaultDashboard: (state, defaultDashboard: string) =>
+        produce(state, (draft) => {
+            draft.defaultDashboard = defaultDashboard;
+        }),
+    changeStorage: (state, storage: Storage) =>
+        produce(state, (draft) => {
+            draft.storage = storage;
+        }),
+});
 
 export const $store = domain
     .createStore<IStore>({
@@ -497,6 +516,14 @@ export const dashboardApi = createApi($dashboard, {
         }
         return { ...state, images: [...state.images, image] };
     },
+    changeTag: (state, tag: string) =>
+        produce(state, (draft) => {
+            draft.tag = tag;
+        }),
+    changeBg: (state, bg: string) =>
+        produce(state, (draft) => {
+            draft.bg = bg;
+        }),
 });
 
 export const $indicator = domain
@@ -1163,4 +1190,9 @@ export const $dimensions = $store.map(
         return initial;
     }
 );
+export const $isOpen = domain.createStore<boolean>(false);
+export const isOpenApi = createApi($isOpen, {
+    onOpen: () => true,
+    onClose: () => false,
+});
 // $previousCategoryOptionCombo.watch((v) => console.log(v));

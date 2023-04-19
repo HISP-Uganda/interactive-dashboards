@@ -56,11 +56,13 @@ import {
     $dataSets,
     $store,
     createSection,
+    $settings,
 } from "../Store";
 import { generateUid } from "../utils/uid";
 import AutoRefreshPicker from "./AutoRefreshPicker";
 import OUTree from "./OUTree";
 import PeriodPicker from "./PeriodPicker";
+import { useDataEngine } from "@dhis2/app-runtime";
 
 const searchOptions: Option[] = [
     { label: "Data Element", value: "de" },
@@ -71,6 +73,8 @@ const searchOptions: Option[] = [
 const DashboardMenu = () => {
     const search = useSearch<LocationGenerics>();
     const toast = useToast();
+    const engine = useDataEngine();
+    const { storage } = useStore($settings);
 
     const { isOpen, onOpen, onClose } = useDisclosure();
     const {
@@ -88,22 +92,43 @@ const DashboardMenu = () => {
     const [isNotDesktop] = useMediaQuery(["(max-width: 992px)"]);
     const updateDashboard = async (data: any) => {
         setLoading(true);
-        await saveDocument("i-dashboards", store.systemId, data);
+        await saveDocument(
+            storage,
+            "i-dashboards",
+            store.systemId,
+            data,
+            engine,
+            "create"
+        );
         const setting = {
             default: store.defaultDashboard,
             id: store.systemId,
         };
-        await saveDocument("i-dashboard-settings", store.systemId, setting);
+        await saveDocument(
+            storage,
+            "i-dashboard-settings",
+            store.systemId,
+            setting,
+            engine,
+            "create"
+        );
         setLoading(() => false);
         setRefresh(true);
         onClose();
     };
 
     const togglePublish = async (data: IDashboard, value: boolean) => {
-        await saveDocument("i-dashboards", store.systemId, {
-            ...data,
-            published: true,
-        });
+        await saveDocument(
+            storage,
+            "i-dashboards",
+            store.systemId,
+            {
+                ...data,
+                published: true,
+            },
+            engine,
+            "create"
+        );
         setDashboards(
             dashboards.map((d) => {
                 if (data.id === d.id) {

@@ -1,7 +1,7 @@
 import { Divider, Stack, StackProps, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { $store } from "../Store";
-import DashboardList from "./DashboardList";
+// import DashboardList from "./DashboardList";
 import Menus from "./Menus";
 interface SidebarProps extends StackProps {}
 
@@ -23,12 +23,14 @@ const SidebarContent = ({ ...rest }: SidebarProps) => {
             <Divider borderColor="gray.600" />
             {store.isAdmin ? (
                 store.currentPage === "dashboard" ? (
-                    <DashboardList />
-                ) : store.currentPage === "sections" ? null : (
+                    <Text>Coming soon</Text>
+                ) : // <DashboardList />
+                store.currentPage === "sections" ? null : (
                     <Menus />
                 )
             ) : (
-                <DashboardList />
+                <Text>Coming soon</Text>
+                // <DashboardList />
             )}
         </Stack>
     );

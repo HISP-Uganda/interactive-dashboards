@@ -1,298 +1,193 @@
-import { DeleteIcon } from "@chakra-ui/icons";
-import {
-    Button,
-    Flex,
-    IconButton,
-    Input,
-    NumberDecrementStepper,
-    NumberIncrementStepper,
-    NumberInput,
-    NumberInputField,
-    NumberInputStepper,
-    Radio,
-    RadioGroup,
-    Spacer,
-    Stack,
-    Text,
-    Textarea,
-} from "@chakra-ui/react";
-import { GroupBase, Select } from "chakra-react-select";
-import { useStore } from "effector-react";
-import { ChangeEvent, DragEvent, useEffect, useRef, useState } from "react";
-import { BiDuplicate } from "react-icons/bi";
-import {
-    addVisualization2Section,
-    changeSectionAttribute,
-    changeVisualizationAttribute,
-    changeVisualizationOverride,
-    changeVisualizationProperties,
-    deleteSectionVisualization,
-    duplicateVisualization,
-    setShowSider,
-    setVisualizations,
-} from "../Events";
-import { IVisualization, Option } from "../interfaces";
-import { useVisualizationData } from "../Queries";
-import { $indicators, $section, $store, $settings } from "../Store";
-import { generateUid } from "../utils/uid";
-import { chartTypes } from "../utils/utils";
-import ColorPalette from "./ColorPalette";
-import LoadingIndicator from "./LoadingIndicator";
-import SectionColorPalette from "./SectionColorPalette";
-import SectionImages from "./SectionImages";
-import SectionVisualization from "./SectionVisualization";
-import VisualizationProperties from "./visualizations/VisualizationProperties";
+import React from 'react'
 
-const alignmentOptions: Option[] = [
-    { label: "flex-start", value: "flex-start" },
-    { label: "flex-end", value: "flex-end" },
-    { label: "center", value: "center" },
-    { label: "space-between", value: "space-between" },
-    { label: "space-around", value: "space-around" },
-    { label: "space-evenly", value: "space-evenly" },
-    { label: "stretch", value: "stretch" },
-    { label: "start", value: "start" },
-    { label: "end", value: "end" },
-    { label: "baseline", value: "baseline" },
-];
+export default function OldDashboard() {
+  return (
+      <Grid
+          templateColumns={{ md: "auto", lg: dashboardColumns }}
+          maxH={{ md: "calc(100vh - 48px)" }}
+          h={{ md: "calc(100vh - 48px)" }}
+          p={`${padding}px`}
+          w="100vw"
+          maxW="100vw"
+      >
+          {showSide && (
+              <Grid
+                  templateRows={`${otherHeaders}px 1fr`}
+                  pr={`${padding}px`}
+                  gap={`${padding}px`}
+                  h={dashboardHeight}
+                  maxH={dashboardHeight}
+                  // bg="#FEE300"
+              >
+                  <Stack
+                      h="100%"
+                      w="100%"
+                      // alignItems="center"
+                      alignContent="center"
+                      // justifyContent="center"
+                      // justifyItems="center"
+                      direction="row"
+                      spacing="20px"
+                  >
+                      {/* <MOHLogo
+                                        height={otherHeaders}
+                                        width={sideWidth}
+                                    /> */}
+                      <ImageUpload alignment="top-left" />
+                      <Stack spacing={0}>
+                          <Text
+                              textTransform="uppercase"
+                              fontWeight="extrabold"
+                              fontSize="xl"
+                          >
+                              Office of the President
+                          </Text>
+                          <Text fontWeight="semi-bold" color="black">
+                              The Republic of Uganda
+                          </Text>
+                      </Stack>
+                  </Stack>
+                  <GridItem>
+                      <SidebarContent />
+                  </GridItem>
+                  <ImageUpload
+                      alignment="bottom-left"
+                      maxH={`${otherHeaders}px`}
+                  />
+              </Grid>
+          )}
+          <FullScreen handle={handle}>
+              <Grid
+                  templateRows={`${otherHeaders}px 1fr ${otherHeaders}px`}
+                  gap={`${padding}px`}
+                  w={dashboardWidth}
+                  maxW={dashboardWidth}
+                  h={handle.active ? "100vh" : dashboardHeight}
+                  maxH={handle.active ? "100vh" : dashboardHeight}
+                  bgColor={handle.active ? "gray.300" : ""}
+                  // bg="yellow.300"
+              >
+                  <GridItem
+                      h="100%"
+                      w={dashboardWidth}
+                      maxW={dashboardWidth}
+                      bgColor="white"
+                      p="5px"
+                  >
+                      <Stack
+                          h="100%"
+                          alignContent="center"
+                          alignItems="center"
+                          direction="row"
+                          w="100%"
+                          spacing="40px"
+                      >
+                          {!handle.active && !store.showSider && (
+                              <IconButton
+                                  bgColor="none"
+                                  variant="ghost"
+                                  aria-label="Search database"
+                                  icon={<BiArrowToRight />}
+                                  onClick={() => setShowSider(true)}
+                                  _hover={{ bg: "none" }}
+                              />
+                          )}
+                          {!handle.active && store.showSider && (
+                              <IconButton
+                                  variant="ghost"
+                                  bgColor="none"
+                                  aria-label="Search database"
+                                  icon={<BiArrowToLeft />}
+                                  onClick={() => setShowSider(false)}
+                                  _hover={{ bg: "none" }}
+                              />
+                          )}
+                          {topMenuOptions[store.currentPage]}
+                      </Stack>
+                  </GridItem>
+                  <GridItem>
+                      <Outlet />
+                  </GridItem>
+                  <GridItem w={dashboardWidth} maxW={dashboardWidth}>
+                      <Footer handle={handle} />
+                  </GridItem>
+              </Grid>
+          </FullScreen>
+      </Grid>
+  );
+}
 
-const VisualizationTypes = ({
-    visualization,
-}: {
-    visualization: IVisualization;
-}) => {
-    return (
-        <Stack>
-            <Text>Visualization Type</Text>
-            <Select<Option, false, GroupBase<Option>>
-                value={chartTypes.find(
-                    (d: Option) => d.value === visualization.type
-                )}
-                onChange={(e) =>
-                    changeVisualizationAttribute({
-                        attribute: "type",
-                        value: e?.value,
-                        visualization: visualization.id,
-                    })
-                }
-                options={chartTypes}
-                isClearable
-            />
-        </Stack>
-    );
-};
-const VisualizationQuery = ({
-    visualization,
-}: {
-    visualization: IVisualization;
-}) => {
-    const indicators = useStore($indicators);
-    const settings = useStore($settings);
-    const { systemId } = useStore($store);
-    const { isLoading, isSuccess, isError, error } = useVisualizationData(
-        settings.storage,
-        systemId
-    );
-    return (
-        <Stack>
-            <Text>Visualization Query</Text>
-            {isLoading && <LoadingIndicator />}
-            {isSuccess && (
-                <Select<Option, true, GroupBase<Option>>
-                    isMulti
-                    value={indicators
-                        .map((i) => {
-                            const current: Option = {
-                                value: i.id,
-                                label: i.name || "",
-                            };
-                            return current;
-                        })
-                        .filter(
-                            (d: Option) =>
-                                String(visualization.indicator)
-                                    .split(",")
-                                    .indexOf(d.value) !== -1
-                        )}
-                    onChange={(e) => {
-                        changeVisualizationAttribute({
-                            attribute: "indicator",
-                            value: e.map((ex) => ex.value).join(","),
-                            visualization: visualization.id,
-                        });
-                    }}
-                    options={indicators.map((i) => {
-                        const current: Option = {
-                            value: i.id,
-                            label: i.name || "",
-                        };
-                        return current;
-                    })}
-                    isClearable
-                />
-            )}
-            {isError && <Text>No data/Error occurred</Text>}
-        </Stack>
-    );
-};
 
-const VisualizationOverride = ({
-    visualization,
-}: {
-    visualization: IVisualization;
-}) => {
-    const indicators = useStore($indicators);
-    const indicator = indicators.find((i) => i.id === visualization.indicator);
-    return (
-        <>
-            {indicator && indicator.numerator?.type === "ANALYTICS" && (
-                <Stack>
-                    <Text>Overrides</Text>
-                    <Stack direction="row">
-                        <Text>DX</Text>
-                        <RadioGroup
-                            value={visualization.overrides["dx"]}
-                            onChange={(e: string) =>
-                                changeVisualizationOverride({
-                                    override: "dx",
-                                    value: e,
-                                    visualization: visualization.id,
-                                })
-                            }
-                        >
-                            <Stack direction="row">
-                                <Radio value="dimension">Dimension</Radio>
-                                <Radio value="filter">Filter</Radio>
-                            </Stack>
-                        </RadioGroup>
-                    </Stack>
-                    <Stack direction="row">
-                        <Text>OU</Text>
-                        <RadioGroup
-                            value={visualization.overrides["ou"]}
-                            onChange={(e: string) =>
-                                changeVisualizationOverride({
-                                    override: "ou",
-                                    value: e,
-                                    visualization: visualization.id,
-                                })
-                            }
-                        >
-                            <Stack direction="row">
-                                <Radio value="dimension">Dimension</Radio>
-                                <Radio value="filter">Filter</Radio>
-                            </Stack>
-                        </RadioGroup>
-                    </Stack>
-                    <Stack direction="row">
-                        <Text>OU Level</Text>
-                        <RadioGroup
-                            value={visualization.overrides["oul"]}
-                            onChange={(e: string) =>
-                                changeVisualizationOverride({
-                                    override: "oul",
-                                    value: e,
-                                    visualization: visualization.id,
-                                })
-                            }
-                        >
-                            <Stack direction="row">
-                                <Radio value="dimension">Dimension</Radio>
-                                <Radio value="filter">Filter</Radio>
-                            </Stack>
-                        </RadioGroup>
-                    </Stack>
-                    <Stack direction="row">
-                        <Text>OU Group</Text>
-                        <RadioGroup
-                            value={visualization.overrides["oug"]}
-                            onChange={(e: string) =>
-                                changeVisualizationOverride({
-                                    override: "oug",
-                                    value: e,
-                                    visualization: visualization.id,
-                                })
-                            }
-                        >
-                            <Stack direction="row">
-                                <Radio value="dimension">Dimension</Radio>
-                                <Radio value="filter">Filter</Radio>
-                            </Stack>
-                        </RadioGroup>
-                    </Stack>
-                    <Stack direction="row">
-                        <Text>PE</Text>
-                        <RadioGroup
-                            value={visualization.overrides["pe"]}
-                            onChange={(e: string) =>
-                                changeVisualizationOverride({
-                                    override: "pe",
-                                    value: e,
-                                    visualization: visualization.id,
-                                })
-                            }
-                        >
-                            <Stack direction="row">
-                                <Radio value="dimension">Dimension</Radio>
-                                <Radio value="filter">Filter</Radio>
-                            </Stack>
-                        </RadioGroup>
-                    </Stack>
-                </Stack>
-            )}
-        </>
-    );
-};
 
-const Section = () => {
-    const section = useStore($section);
-    const [active, setActive] = useState<string>("title");
-
-    useEffect(() => {
-        setShowSider(false);
-    }, []);
-
-    const dragItem = useRef<number | undefined | null>();
-    const dragOverItem = useRef<number | null>();
-    const dragStart = (e: DragEvent<HTMLButtonElement>, position: number) => {
-        dragItem.current = position;
-        console.log(position);
-    };
-
-    const dragEnter = (e: DragEvent<HTMLButtonElement>, position: number) => {
-        dragOverItem.current = position;
-        console.log(position);
-    };
-
-    const drop = (e: DragEvent<HTMLButtonElement>) => {
-        const copyListItems = [...section.visualizations];
-
-        if (
-            dragItem.current !== null &&
-            dragItem.current !== undefined &&
-            dragOverItem.current !== null &&
-            dragOverItem.current !== undefined
-        ) {
-            const dragItemContent = copyListItems[dragItem.current];
-            copyListItems.splice(dragItem.current, 1);
-            copyListItems.splice(dragOverItem.current, 0, dragItemContent);
-            dragItem.current = null;
-            dragOverItem.current = null;
-            setVisualizations(copyListItems);
-        }
-    };
-
-    return (
-        <Stack
-            maxH="calc(100vh - 350px)"
-            minH="calc(100vh - 350px)"
-            bg="gray.300"
-            direction="row"
+<Grid
+            templateColumns={templateColumns}
+            templateRows={templateRows}
+            gap="5px"
+            h="100%"
+            w="100%"
         >
-            <Stack w="70%">
+            {dashboard?.sections.map((section: ISection, index: number) => (
+                <GridItem
+                    draggable
+                    onDragStart={(e) => dragStart(e, index)}
+                    onDragEnter={(e) => dragEnter(e, index)}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDragEnd={drop}
+                    bgColor={section.bg}
+                    key={section.id}
+                    colSpan={{ lg: section.colSpan, md: 1 }}
+                    rowSpan={{ lg: section.rowSpan, md: 1 }}
+                    h={
+                        isNotDesktop
+                            ? section.height
+                                ? section.height
+                                : "15vh"
+                            : "100%"
+                    }
+                    maxH={
+                        isNotDesktop
+                            ? section.height
+                                ? section.height
+                                : "15vh"
+                            : "100%"
+                    }
+                    onClick={(e: MouseEvent<HTMLElement>) => {
+                        if (e.detail === 2 && store.isAdmin) {
+                            setCurrentSection(section);
+                            navigate({
+                                to: `/dashboards/${dashboard.id}/section`,
+                                search,
+                            });
+                        }
+                    }}
+                >
+                    <SectionVisualization {...section} />
+                </GridItem>
+            ))}
+        </Grid>
+
+
+
+		<Grid
+            templateColumns="1fr 30%"
+            gap="5px"
+            minH="calc(100vh - 200px)"
+            minW="calc(100vw - 200px)"
+        >
+            <GridItem
+                bgColor="white"
+                minH="calc(100vh - 200px)"
+                minW="calc(100vw - 200px)"
+                w="100%"
+            >
                 <SectionVisualization {...section} />
-            </Stack>
-            <Stack w="30%">
+            </GridItem>
+            <Grid
+                templateRows={`${headerHeight * 3}px 1fr`}
+                gap="5px"
+                h={otherHeight}
+                maxH={otherHeight}
+            >
                 <Flex
                     gap="5px"
                     flexWrap="wrap"
@@ -339,7 +234,7 @@ const Section = () => {
                 </Flex>
                 <Stack overflow="auto" flex={1}>
                     {active === "title" && (
-                        <Stack p="10px" spacing="20px" bgColor="white">
+                        <Stack p="10px" spacing="20px" bgColor="white" flex={1}>
                             <Text>Title</Text>
                             <Input
                                 value={section.title}
@@ -639,9 +534,5 @@ const Section = () => {
                             )
                     )}
                 </Stack>
-            </Stack>
-        </Stack>
-    );
-};
-
-export default Section;
+            </Grid>
+        </Grid>

@@ -14,7 +14,7 @@ import {
     Thead,
     Tr,
 } from "@chakra-ui/react";
-import { useNavigate } from "@tanstack/react-location";
+import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { ChangeEvent } from "react";
@@ -24,12 +24,19 @@ import {
     changeNumeratorDimension,
     changeNumeratorExpressionValue,
 } from "../../Events";
-import { Option } from "../../interfaces";
+import { Option, LocationGenerics } from "../../interfaces";
 import { saveDocument } from "../../Queries";
-import { $dataSourceType, $indicator, $store, $hasDHIS2 } from "../../Store";
+import {
+    $dataSourceType,
+    $indicator,
+    $store,
+    $hasDHIS2,
+    $settings,
+} from "../../Store";
 import { getSearchParams, globalIds } from "../../utils/utils";
 import { generalPadding, otherHeight } from "../constants";
 import { displayDataSourceType } from "../data-sources";
+import { useDataEngine } from "@dhis2/app-runtime";
 
 const availableOptions: Option[] = [
     { value: "SQL_VIEW", label: "SQL Views" },
@@ -37,10 +44,12 @@ const availableOptions: Option[] = [
 ];
 const Numerator = () => {
     const indicator = useStore($indicator);
+    const search = useSearch<LocationGenerics>();
     const dataSourceType = useStore($dataSourceType);
     const store = useStore($store);
-    const navigate = useNavigate();
-
+    const navigate = useNavigate<LocationGenerics>();
+    const engine = useDataEngine();
+    const { storage } = useStore($settings);
     return (
         <Stack
             p={`${generalPadding}px`}
@@ -209,13 +218,18 @@ const Numerator = () => {
                 <Spacer />
                 <Button
                     onClick={async () => {
-                        console.log(indicator);
                         await saveDocument(
+                            storage,
                             "i-visualization-queries",
                             store.systemId,
-                            indicator
+                            indicator,
+                            engine,
+                            search.action || "create"
                         );
-                        navigate({ to: `/indicators/${indicator.id}` });
+                        navigate({
+                            to: `/settings/indicators/${indicator.id}`,
+                            search: { action: "update" },
+                        });
                     }}
                 >
                     OK

@@ -678,6 +678,12 @@ export const chartTypes: Option[] = [
     { value: "tables", label: "Table" },
     { value: "boxplot", label: "Box Plot" },
     { value: "scatterplot", label: "Scatter Plot" },
+    { value: "dashboardList", label: "Dashboard List" },
+    { value: "dashboardTree", label: "Dashboard Tree" },
+    { value: "categoryList", label: "Dashboard Categories" },
+    { value: "filters", label: "Dashboard Filter" },
+    { value: "imageVisualization", label: "Image" },
+    { value: "dashboardTitle", label: "Dashboard Title" },
 ];
 
 export const createOptions = (options: string[]): Option[] => {
