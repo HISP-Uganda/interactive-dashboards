@@ -1,9 +1,8 @@
-import React, { ChangeEvent, Dispatch, SetStateAction } from "react";
-import { Stack, Input } from "@chakra-ui/react";
-import GlobalAndFilter from "./GlobalAndFilter";
-import { IData, Dimension } from "../../interfaces";
-import { globalIds } from "../../utils/utils";
+import { Input, Stack } from "@chakra-ui/react";
 import { Event } from "effector";
+import React, { ChangeEvent, Dispatch, SetStateAction } from "react";
+import { Dimension, IData } from "../../interfaces";
+import GlobalAndFilter from "./GlobalAndFilter";
 
 type GlobalSearchFilterProps = {
     denNum?: IData;

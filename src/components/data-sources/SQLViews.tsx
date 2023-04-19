@@ -1,9 +1,9 @@
 import { Box, Progress, Stack, Text } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
+import { useStore } from "effector-react";
 import { IndicatorProps, Option } from "../../interfaces";
 import { useSQLViews } from "../../Queries";
-import { useStore } from "effector-react";
-import { $hasDHIS2, $currentDataSource } from "../../Store";
+import { $currentDataSource, $hasDHIS2 } from "../../Store";
 
 const SQLViews = ({ denNum, onChange, changeQuery }: IndicatorProps) => {
     const hasDHIS2 = useStore($hasDHIS2);

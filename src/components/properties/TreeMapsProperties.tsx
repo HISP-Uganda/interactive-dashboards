@@ -5,11 +5,8 @@ import { changeVisualizationProperties } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData } from "../../Store";
 
-
 const TreeMapsProperties = () => {
-  return (
-    <div>TreeMapsProperties</div>
-  )
-}
+    return <div>TreeMapsProperties</div>;
+};
 
-export default TreeMapsProperties; 
+export default TreeMapsProperties;

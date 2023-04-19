@@ -4,10 +4,17 @@ import type { DataNode as IDataNode } from "antd/es/tree";
 
 import { Event } from "effector";
 
-export interface Image {
+export type Storage = "data-store" | "es";
+export interface IImage {
     id: string;
     src: string;
-    alignment: string;
+    alignment:
+        | "bottom-left"
+        | "top-left"
+        | "bottom-right"
+        | "top-right"
+        | "middle-bottom"
+        | "middle-top";
 }
 
 export interface IColumn {
@@ -33,6 +40,10 @@ export interface INamed {
     id: string;
     name?: string;
     description?: string;
+}
+export interface IDashboardSetting extends INamed {
+    defaultDashboard: string;
+    storage: Storage;
 }
 export interface Authentication {
     username: string;
@@ -115,7 +126,7 @@ export interface ISection {
     carouselOver: string;
     colSpan: number;
     rowSpan: number;
-    images: Image[];
+    images: IImage[];
     isBottomSection: boolean;
     bg: string;
     height: string;
@@ -150,6 +161,8 @@ export interface IDashboard extends INamed {
         search: string;
         subSearch: string;
     }>;
+    tag: string;
+    images: IImage[];
 }
 export interface Pagination {
     total: number;
@@ -257,6 +270,7 @@ export type LocationGenerics = MakeGenerics<{
         groups: string;
         organisations: string;
         dataSourceId: string;
+        action: "create" | "update";
     };
 }>;
 

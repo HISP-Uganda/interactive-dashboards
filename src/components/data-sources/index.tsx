@@ -1,6 +1,6 @@
-import { ChangeEvent } from "react";
-import { Stack, Textarea, Text, Input } from "@chakra-ui/react";
+import { Input, Stack, Text, Textarea } from "@chakra-ui/react";
 import { Event } from "effector";
+import { ChangeEvent } from "react";
 import { DataValueAttribute, IndicatorProps } from "../../interfaces";
 import DHIS2 from "./DHIS2";
 interface DHIS2Props extends IndicatorProps {

@@ -11,23 +11,26 @@ import {
     Stack,
     Textarea,
 } from "@chakra-ui/react";
-import { useNavigate } from "@tanstack/react-location";
+import { useNavigate, useSearch } from "@tanstack/react-location";
+import { useQueryClient } from "@tanstack/react-query";
 import { useStore } from "effector-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useQueryClient } from "@tanstack/react-query";
-import { setDataSource, setShowSider } from "../../Events";
-import { IDataSource } from "../../interfaces";
+import { setDataSource } from "../../Events";
+import { IDataSource, LocationGenerics } from "../../interfaces";
 import { saveDocument } from "../../Queries";
-import { $dataSource, $store, createDataSource } from "../../Store";
+import { $dataSource, $store, createDataSource, $settings } from "../../Store";
 import { generalPadding, otherHeight } from "../constants";
-import { isEmpty } from "lodash";
+import { useDataEngine } from "@dhis2/app-runtime";
 
 const DataSource = () => {
     const navigate = useNavigate();
+    const { action } = useSearch<LocationGenerics>();
     const queryClient = useQueryClient();
     const dataSource = useStore($dataSource);
     const store = useStore($store);
+    const engine = useDataEngine();
+    const { storage } = useStore($settings);
     const {
         handleSubmit,
         register,
@@ -42,12 +45,19 @@ const DataSource = () => {
     const isCurrentDHIS2 = watch("isCurrentDHIS2");
 
     const add = async (values: IDataSource) => {
-        await saveDocument("i-data-sources", store.systemId, values);
+        await saveDocument(
+            storage,
+            "i-data-sources",
+            store.systemId,
+            values,
+            engine,
+            action || "create"
+        );
         await queryClient.invalidateQueries(["data-sources"]);
     };
     async function onSubmit(values: any) {
         await add(values);
-        navigate({ to: "/data-sources" });
+        navigate({ to: "/settings/data-sources" });
     }
 
     useEffect(() => {
@@ -205,7 +215,7 @@ const DataSource = () => {
                             colorScheme="red"
                             onClick={() => {
                                 setDataSource(createDataSource());
-                                navigate({ to: "/data-sources" });
+                                navigate({ to: "/settings/data-sources" });
                             }}
                         >
                             Cancel

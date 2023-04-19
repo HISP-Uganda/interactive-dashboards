@@ -1,11 +1,10 @@
-import { Box, Icon, Stack } from "@chakra-ui/react";
+import { Box, Stack, Text } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { BiRefresh } from "react-icons/bi";
 import { setRefreshInterval } from "../Events";
-
 import { Option } from "../interfaces";
 import { $dashboard } from "../Store";
+
 const periodTypes: Option[] = [
     { value: "off", label: "Off" },
     { value: "5", label: "5s" },
@@ -22,13 +21,8 @@ const periodTypes: Option[] = [
 const AutoRefreshPicker = () => {
     const dashboard = useStore($dashboard);
     return (
-        <Stack
-            direction="row"
-            spacing="0px"
-            alignItems="center"
-            justifyContent="center"
-        >
-            <Icon as={BiRefresh} w={6} h={6} />
+        <Stack>
+            <Text>Auto Refresh Interval</Text>
             <Box w="110px">
                 <Select<Option, false, GroupBase<Option>>
                     placeholder="Refresh"
@@ -37,7 +31,6 @@ const AutoRefreshPicker = () => {
                     )}
                     onChange={(e) => setRefreshInterval(e?.value || "off")}
                     options={periodTypes}
-                    size="sm"
                 />
             </Box>
         </Stack>

@@ -5,11 +5,8 @@ import { changeVisualizationProperties } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData } from "../../Store";
 
-
 const HeatMapProperties = () => {
-  return (
-    <div>HeatMapProperties</div>
-  )
-}
+    return <div>HeatMapProperties</div>;
+};
 
 export default HeatMapProperties;

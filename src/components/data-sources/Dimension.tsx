@@ -11,8 +11,8 @@ import {
 } from "@chakra-ui/react";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
-import GlobalSearchFilter from "./GlobalSearchFilter";
 import { computeGlobalParams } from "../../utils/utils";
+import GlobalSearchFilter from "./GlobalSearchFilter";
 
 interface DimensionProps extends IndicatorProps {
     dimensionItem: { [key: string]: any };
