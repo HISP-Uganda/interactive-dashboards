@@ -45,14 +45,26 @@ import {
     IIndicator,
     IVisualization,
     Threshold,
+    IDashboardSetting,
+    Storage,
+    INamed,
 } from "./interfaces";
 import {
     createCategory,
     createDashboard,
     createDataSource,
     createIndicator,
+    settingsApi,
 } from "./Store";
 import { getSearchParams, processMap } from "./utils/utils";
+
+type QueryProps = {
+    namespace: string;
+    systemId: string;
+    otherQueries: any[];
+    signal?: AbortSignal;
+    engine: any;
+};
 
 export const api = axios.create({
     baseURL: "https://services.dhis2.hispuganda.org/",
@@ -105,27 +117,49 @@ export const queryDataSource = async (
     return data;
 };
 
-export const getIndex = async (
-    namespace: string,
-    systemId: string,
-    otherQueries: any[] = [],
-    signal?: AbortSignal
+export const getDHIS2Index = async <TData>(
+    args: Pick<QueryProps, "namespace" | "engine">
 ) => {
+    const { engine, namespace } = args;
+    const namespaceQuery = {
+        namespaceKeys: {
+            resource: `dataStore/${namespace}`,
+        },
+    };
+    try {
+        const { namespaceKeys }: any = await engine.query(namespaceQuery);
+        const query: any = fromPairs(
+            namespaceKeys.map((n: string) => [
+                n,
+                {
+                    resource: `dataStore/${namespace}/${n}`,
+                },
+            ])
+        );
+        const response: any = await engine.query(query);
+        return Object.values<TData>(response);
+    } catch (error) {
+        console.log(error);
+    }
+    return [];
+};
+
+export const getESIndex = async <TData>(args: Omit<QueryProps, "engine">) => {
     let must: any[] = [
         {
-            term: { "systemId.keyword": systemId },
+            term: { "systemId.keyword": args.systemId },
         },
-        ...otherQueries,
+        ...args.otherQueries,
     ];
     try {
         let {
             data: {
                 hits: { hits },
             },
-        }: any = await api.post(
+        } = await api.post<{ hits: { hits: Array<{ _source: TData }> } }>(
             "wal/search",
             {
-                index: namespace,
+                index: args.namespace,
                 size: 1000,
                 query: {
                     bool: {
@@ -133,31 +167,59 @@ export const getIndex = async (
                     },
                 },
             },
-            { signal }
+            { signal: args.signal }
         );
-        return hits.map(({ _source }: any) => _source);
+        return hits.map(({ _source }) => _source);
     } catch (error) {
         return [];
     }
 };
 
-export const getOneRecord = async <TData>(
-    index: string,
+export const getIndex = async <TData>(
+    storage: "data-store" | "es",
+    args: QueryProps
+) => {
+    if (storage === "es") {
+        return await getESIndex<TData>(args);
+    }
+
+    return await getDHIS2Index<TData>(args);
+};
+
+export const getDHIS2Record = async <TData>(
     id: string,
-    signal: AbortSignal | undefined
+    args: Pick<QueryProps, "namespace" | "engine">
+) => {
+    const { namespace, engine } = args;
+    const namespaceQuery = {
+        storedValue: {
+            resource: `dataStore/${namespace}/${id}`,
+        },
+    };
+    try {
+        const { storedValue } = await engine.query(namespaceQuery);
+        return storedValue as TData;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const getESRecord = async <TData>(
+    id: string,
+    args: Omit<QueryProps, "systemId" | "engine">
 ) => {
     try {
         let {
             data: {
                 body: { _source },
             },
-        }: any = await api.post(
+        } = await api.post<{ body: { _source: TData } }>(
             "wal/get",
             {
-                index,
+                index: args.namespace,
                 id,
             },
-            { signal }
+            { signal: args.signal }
         );
         return _source;
     } catch (error) {
@@ -165,16 +227,18 @@ export const getOneRecord = async <TData>(
     }
 };
 
-const loadResource = async (
-    namespace: string,
-    systemId: string,
-    otherQueries: any[] = [],
-    signal?: AbortSignal
+export const getOneRecord = async <TData>(
+    storage: "data-store" | "es",
+    id: string,
+    args: Omit<QueryProps, "systemId">
 ) => {
-    return await getIndex(namespace, systemId, otherQueries, signal);
+    if (storage === "es") {
+        return getESRecord<TData>(id, args);
+    }
+    return getDHIS2Record<TData>(id, args);
 };
 
-export const useInitials = () => {
+export const useInitials = (storage: "data-store" | "es") => {
     const engine = useDataEngine();
     const ouQuery = {
         me: {
@@ -237,18 +301,22 @@ export const useInitials = () => {
                     isLeaf: unit.leaf,
                 };
             });
-            const settings = await loadResource(
-                "i-dashboard-settings",
+            const settings = await getIndex<IDashboardSetting>(storage, {
+                namespace: "i-dashboard-settings",
                 systemId,
-                [],
-                signal
-            );
+                otherQueries: [],
+                signal,
+                engine,
+            });
             const defaultDashboard = settings.find(
                 (s: any) => s.id === systemId && s.default
             );
             if (defaultDashboard) {
-                changeSelectedDashboard(defaultDashboard.default);
-                setDefaultDashboard(defaultDashboard.default);
+                changeSelectedDashboard(defaultDashboard.defaultDashboard);
+                setDefaultDashboard(defaultDashboard.defaultDashboard);
+                if (defaultDashboard.storage) {
+                    settingsApi.changeStorage(defaultDashboard.storage);
+                }
             }
             if (minSublevel && minSublevel + 1 <= maxLevel) {
                 setMinSublevel(minSublevel + 1);
@@ -284,7 +352,11 @@ export const useInitials = () => {
     );
 };
 
-export const useDataSources = (systemId: string) => {
+export const useDataSources = (
+    storage: "data-store" | "es",
+    systemId: string
+) => {
+    const engine = useDataEngine();
     return useQuery<IDataSource[], Error>(
         ["i-data-sources"],
         async ({ signal }) => {
@@ -292,14 +364,13 @@ export const useDataSources = (systemId: string) => {
                 setCurrentPage("data-sources");
                 setShowFooter(false);
                 setShowSider(true);
-                const data = await getIndex(
-                    "i-data-sources",
+                return await getIndex<IDataSource>(storage, {
+                    namespace: "i-data-sources",
                     systemId,
-                    [],
-                    signal
-                );
-                console.log(data);
-                return data;
+                    otherQueries: [],
+                    signal,
+                    engine,
+                });
             } catch (error) {
                 console.error(error);
                 return [];
@@ -307,15 +378,17 @@ export const useDataSources = (systemId: string) => {
         }
     );
 };
-export const useDataSource = (id: string) => {
+export const useDataSource = (storage: "data-store" | "es", id: string) => {
+    const engine = useDataEngine();
     return useQuery<boolean, Error>(
         ["i-data-sources", id],
         async ({ signal }) => {
-            let dataSource: IDataSource = await getOneRecord(
-                "i-data-sources",
-                id,
-                signal
-            );
+            let dataSource = await getOneRecord<IDataSource>(storage, id, {
+                namespace: "i-data-sources",
+                otherQueries: [],
+                signal,
+                engine,
+            });
             if (isEmpty(dataSource)) {
                 dataSource = createDataSource(id);
             }
@@ -325,17 +398,22 @@ export const useDataSource = (id: string) => {
     );
 };
 
-export const useDashboards = (systemId: string) => {
+export const useDashboards = (
+    storage: "data-store" | "es",
+    systemId: string
+) => {
+    const engine = useDataEngine();
     return useQuery<IDashboard[], Error>(
         ["i-dashboards"],
         async ({ signal }) => {
             try {
-                const dashboards = await getIndex(
-                    "i-dashboards",
+                const dashboards = await getIndex<IDashboard>(storage, {
+                    namespace: "i-dashboards",
                     systemId,
-                    [],
-                    signal
-                );
+                    otherQueries: [],
+                    signal,
+                    engine,
+                });
                 const processed = dashboards.map((d: any) => {
                     const node: DataNode = {
                         isLeaf: !d.hasChildren,
@@ -361,6 +439,7 @@ export const useDashboards = (systemId: string) => {
 };
 
 export const useDashboard = (
+    storage: "data-store" | "es",
     id: string,
     systemId: string,
     refresh: boolean = true
@@ -370,11 +449,12 @@ export const useDashboard = (
         ["i-dashboards", id],
         async ({ signal }) => {
             if (refresh) {
-                let dashboard: IDashboard | null = await getOneRecord(
-                    "i-dashboards",
-                    id,
-                    signal
-                );
+                let dashboard = await getOneRecord<IDashboard>(storage, id, {
+                    namespace: "i-dashboards",
+                    otherQueries: [],
+                    signal,
+                    engine,
+                });
                 if (isEmpty(dashboard)) {
                     dashboard = createDashboard(id);
                 } else if (dashboard.targetCategoryCombo) {
@@ -391,24 +471,27 @@ export const useDashboard = (
                     setTargetCategoryOptionCombos(categoryOptionCombos);
                 }
 
-                const queries = await getIndex(
-                    "i-visualization-queries",
+                const queries = await getIndex<IIndicator>(storage, {
+                    namespace: "i-visualization-queries",
                     systemId,
-                    [],
-                    signal
-                );
-                const dataSources = await getIndex(
-                    "i-data-sources",
+                    otherQueries: [],
+                    signal,
+                    engine,
+                });
+                const dataSources = await getIndex<IDataSource>(storage, {
+                    namespace: "i-data-sources",
                     systemId,
-                    [],
-                    signal
-                );
-                const categories = await getIndex(
-                    "i-categories",
+                    otherQueries: [],
+                    signal,
+                    engine,
+                });
+                const categories = await getIndex<ICategory>(storage, {
+                    namespace: "i-categories",
                     systemId,
-                    [],
-                    signal
-                );
+                    otherQueries: [],
+                    signal,
+                    engine,
+                });
                 setCategories(categories);
                 setDataSources(dataSources);
                 setCurrentDashboard(dashboard);
@@ -457,12 +540,27 @@ export const useDashboard = (
     );
 };
 
-export const useCategories = (systemId: string) => {
+export const useCategories = (
+    storage: "data-store" | "es",
+    systemId: string
+) => {
+    const engine = useDataEngine();
+
     return useQuery<ICategory[], Error>(
         ["i-categories"],
         async ({ signal }) => {
             try {
-                return await getIndex("i-categories", systemId, [], signal);
+                return await getIndex(
+                    storage,
+
+                    {
+                        namespace: "i-categories",
+                        systemId,
+                        otherQueries: [],
+                        signal,
+                        engine,
+                    }
+                );
             } catch (error) {
                 console.error(error);
                 return [];
@@ -471,31 +569,49 @@ export const useCategories = (systemId: string) => {
     );
 };
 
-export const useCategory = (id: string) => {
-    return useQuery<void, Error>(["i-categories", id], async ({ signal }) => {
-        try {
-            let category = await getOneRecord("i-categories", id, signal);
-            if (!category) {
-                category = createCategory(id);
+export const useCategory = (storage: "data-store" | "es", id: string) => {
+    const engine = useDataEngine();
+
+    return useQuery<boolean, Error>(
+        ["i-categories", id],
+        async ({ signal }) => {
+            try {
+                let category = await getOneRecord<ICategory>(storage, id, {
+                    namespace: "i-categories",
+                    otherQueries: [],
+                    signal,
+                    engine,
+                });
+                console.log(category);
+                if (!category) {
+                    category = createCategory(id);
+                }
+                setCategory(category);
+                return true;
+            } catch (error) {
+                console.error(error);
             }
-            setCategory(category);
-            return;
-        } catch (error) {
-            console.error(error);
+            return true;
         }
-    });
+    );
 };
-export const useVisualizationData = (systemId: string) => {
+export const useVisualizationData = (
+    storage: "data-store" | "es",
+    systemId: string
+) => {
+    const engine = useDataEngine();
+
     return useQuery<IIndicator[], Error>(
         ["i-visualization-queries"],
         async ({ signal }) => {
             try {
-                return await getIndex(
-                    "i-visualization-queries",
+                return await getIndex(storage, {
+                    namespace: "i-visualization-queries",
                     systemId,
-                    [],
-                    signal
-                );
+                    otherQueries: [],
+                    signal,
+                    engine,
+                });
             } catch (error) {
                 console.error(error);
                 return [];
@@ -504,22 +620,31 @@ export const useVisualizationData = (systemId: string) => {
     );
 };
 
-export const useVisualizationDatum = (id: string, systemId: string) => {
+export const useVisualizationDatum = (
+    storage: "data-store" | "es",
+    id: string,
+    systemId: string
+) => {
+    const engine = useDataEngine();
+
     return useQuery<boolean, Error>(
         ["i-visualization-queries", id],
         async ({ signal }) => {
             try {
-                const dataSources = await getIndex(
-                    "i-data-sources",
+                const dataSources = await getIndex<IDataSource>(storage, {
+                    namespace: "i-data-sources",
                     systemId,
-                    [],
-                    signal
-                );
-                let indicator = await getOneRecord(
-                    "i-visualization-queries",
-                    id,
-                    signal
-                );
+                    otherQueries: [],
+                    signal,
+                    engine,
+                });
+
+                let indicator = await getOneRecord<IIndicator>(storage, id, {
+                    namespace: "i-visualization-queries",
+                    otherQueries: [],
+                    signal,
+                    engine,
+                });
                 if (isEmpty(indicator)) {
                     indicator = createIndicator(id);
                 }
@@ -1873,21 +1998,44 @@ export const useMaps = (
     );
 };
 
-export const saveDocument = async (
+export const saveDocument = async <TData extends INamed>(
+    storage: Storage,
     index: string,
     systemId: string,
-    document: { [key: string]: any }
+    document: TData,
+    engine: any,
+    type: "create" | "update"
 ) => {
-    const { data } = await api.post(`wal/index?index=${index}`, {
-        ...document,
-        systemId,
-    });
-    return data;
+    if (storage === "es") {
+        const { data } = await api.post(`wal/index?index=${index}`, {
+            ...document,
+            systemId,
+        });
+        return data;
+    }
+    const mutation: any = {
+        type,
+        resource: `dataStore/${index}/${document.id}`,
+        data: document,
+    };
+    return engine.mutate(mutation);
 };
 
-export const deleteDocument = async (index: string, id: string) => {
-    const { data } = await api.post(`wal/delete?index=${index}&id=${id}`);
-    return data;
+export const deleteDocument = async (
+    storage: Storage,
+    index: string,
+    id: string,
+    engine: any
+) => {
+    if (storage === "es") {
+        const { data } = await api.post(`wal/delete?index=${index}&id=${id}`);
+        return data;
+    }
+    const mutation: any = {
+        type: "delete",
+        resource: `dataStore/${index}/${id}`,
+    };
+    return engine.mutate(mutation);
 };
 
 export const useOptionSet = (optionSetId: string) => {

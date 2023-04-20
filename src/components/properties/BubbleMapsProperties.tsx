@@ -5,11 +5,8 @@ import { changeVisualizationProperties } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData } from "../../Store";
 
-
 const BubbleMapsProperties = () => {
-  return (
-    <div>BubbleMapsProperties</div>
-  )
-}
+    return <div>BubbleMapsProperties</div>;
+};
 
 export default BubbleMapsProperties;

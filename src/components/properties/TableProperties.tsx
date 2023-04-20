@@ -5,14 +5,10 @@ import { changeVisualizationProperties } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData } from "../../Store";
 
-
-import React from 'react'
+import React from "react";
 
 const TableProperties = () => {
-  return (
-    <div>TableProperties</div>
-  )
-}
+    return <div>TableProperties</div>;
+};
 
-
-export default TableProperties; 
+export default TableProperties;

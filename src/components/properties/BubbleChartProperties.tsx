@@ -5,13 +5,10 @@ import { changeVisualizationProperties } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData } from "../../Store";
 
-import React from 'react'
+import React from "react";
 
 const BubbleChartProperties = () => {
-  return (
-    <div>BubbleChartProperties</div>
-  )
-}
-
+    return <div>BubbleChartProperties</div>;
+};
 
 export default BubbleChartProperties;

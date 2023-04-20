@@ -678,7 +678,12 @@ export const chartTypes: Option[] = [
     { value: "tables", label: "Table" },
     { value: "boxplot", label: "Box Plot" },
     { value: "scatterplot", label: "Scatter Plot" },
-    { value: "heatmap", label: "Heat Map" },
+    { value: "dashboardList", label: "Dashboard List" },
+    { value: "dashboardTree", label: "Dashboard Tree" },
+    { value: "categoryList", label: "Dashboard Categories" },
+    { value: "filters", label: "Dashboard Filter" },
+    { value: "imageVisualization", label: "Image" },
+    { value: "dashboardTitle", label: "Dashboard Title" },
 ];
 
 export const createOptions = (options: string[]): Option[] => {
@@ -1144,7 +1149,6 @@ export const swatchColors: string[][] = [
         "#eeeeee",
         "#e0e0e0",
         "#bdbdbd",
-        "#9e9e9e",
         "#757575",
         "#616161",
         "#424242",
@@ -1158,7 +1162,6 @@ export const swatchColors: string[][] = [
         "#b0bec5",
         "#90a4ae",
         "#78909c",
-        "#607d8b",
         "#546e7a",
         "#455a64",
         "#37474f",

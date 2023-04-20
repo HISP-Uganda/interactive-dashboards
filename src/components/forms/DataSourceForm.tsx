@@ -5,13 +5,18 @@ import { useDataSource } from "../../Queries";
 import { generalPadding, otherHeight } from "../constants";
 import DataSource from "./DataSource";
 import LoadingIndicator from "../LoadingIndicator";
+import { useStore } from "effector-react";
+import { $settings } from "../../Store";
 
 export default function DataSourceForm() {
+    const { storage } = useStore($settings);
     const {
         params: { dataSourceId },
     } = useMatch<LocationGenerics>();
-    const { isLoading, isSuccess, isError, error } =
-        useDataSource(dataSourceId);
+    const { isLoading, isSuccess, isError, error } = useDataSource(
+        storage,
+        dataSourceId
+    );
     return (
         <Stack
             p={`${generalPadding}px`}
@@ -25,10 +30,9 @@ export default function DataSourceForm() {
             alignItems="center"
             w="100%"
         >
-            <Text>{dataSourceId}</Text>
             {isLoading && <LoadingIndicator />}
             {isSuccess && <DataSource />}
-            {isError && <Text>No data/Error occurred</Text>}
+            {isError && <pre>{JSON.stringify(error)}</pre>}
         </Stack>
     );
 }

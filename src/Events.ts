@@ -2,19 +2,16 @@ import { domain } from "./Domain";
 import {
     DataNode,
     DataValueAttribute,
+    Dimension,
     ICategory,
     IDashboard,
+    IDataElement,
     IDataSource,
     IIndicator,
     ISection,
     Item,
     IVisualization,
     Option,
-    IDataElement,
-    IRow,
-    IColumn,
-    IndicatorProps,
-    Dimension,
 } from "./interfaces";
 
 export const loadDefaults = domain.createEvent<{

@@ -5,11 +5,8 @@ import { changeVisualizationProperties } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData } from "../../Store";
 
-
 const BoxPlotProperties = () => {
-  return (
-    <div>BoxPlotProperties</div>
-  )
-}
+    return <div>BoxPlotProperties</div>;
+};
 
 export default BoxPlotProperties;

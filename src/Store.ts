@@ -1,5 +1,6 @@
 import axios from "axios";
-import { combine } from "effector";
+import { combine, createApi } from "effector";
+import produce from "immer";
 import { fromPairs, isEqual, sortBy, isEmpty } from "lodash";
 import { headerHeight, padding, sideWidth } from "./components/constants";
 import { domain } from "./Domain";
@@ -96,6 +97,9 @@ import {
     IStore,
     IVisualization,
     Option,
+    IImage,
+    IDashboardSetting,
+    Storage,
 } from "./interfaces";
 import { generateUid } from "./utils/uid";
 import { getRelativePeriods, relativePeriodTypes } from "./utils/utils";
@@ -168,7 +172,7 @@ export const createDashboard = (id = generateUid()): IDashboard => {
         id,
         sections: [],
         published: false,
-        rows: 12,
+        rows: 24,
         columns: 24,
         showSider: true,
         category: "uDWxMNyXZeo",
@@ -184,6 +188,8 @@ export const createDashboard = (id = generateUid()): IDashboard => {
         targetCategoryCombo: "",
         targetCategoryOptionCombos: [],
         nodeSource: {},
+        tag: "Example tag",
+        images: [],
     };
 };
 
@@ -207,6 +213,24 @@ export const $paginations = domain
     });
 
 export const $filters = domain.createStore<{ [key: string]: any }>({});
+
+export const $settings = domain.createStore<IDashboardSetting>({
+    defaultDashboard: "",
+    storage: "data-store",
+    name: "",
+    id: generateUid(),
+});
+
+export const settingsApi = createApi($settings, {
+    changeDefaultDashboard: (state, defaultDashboard: string) =>
+        produce(state, (draft) => {
+            draft.defaultDashboard = defaultDashboard;
+        }),
+    changeStorage: (state, storage: Storage) =>
+        produce(state, (draft) => {
+            draft.storage = storage;
+        }),
+});
 
 export const $store = domain
     .createStore<IStore>({
@@ -475,6 +499,32 @@ export const $dashboard = domain
     .on(setSections, (state, sections) => {
         return { ...state, sections };
     });
+
+export const dashboardApi = createApi($dashboard, {
+    addImage: (state, image: IImage) => {
+        const imageSearch = state.images.findIndex(
+            ({ alignment }) => image.alignment === alignment
+        );
+        if (imageSearch !== -1) {
+            const images = produce(state.images, (draft) => {
+                draft[imageSearch].src = image.src;
+            });
+
+            return produce(state, (draft) => {
+                draft.images = images;
+            });
+        }
+        return { ...state, images: [...state.images, image] };
+    },
+    changeTag: (state, tag: string) =>
+        produce(state, (draft) => {
+            draft.tag = tag;
+        }),
+    changeBg: (state, bg: string) =>
+        produce(state, (draft) => {
+            draft.bg = bg;
+        }),
+});
 
 export const $indicator = domain
     .createStore<IIndicator>(createIndicator())
@@ -1140,4 +1190,9 @@ export const $dimensions = $store.map(
         return initial;
     }
 );
+export const $isOpen = domain.createStore<boolean>(false);
+export const isOpenApi = createApi($isOpen, {
+    onOpen: () => true,
+    onClose: () => false,
+});
 // $previousCategoryOptionCombo.watch((v) => console.log(v));

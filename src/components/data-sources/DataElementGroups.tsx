@@ -20,14 +20,14 @@ import {
     Tr,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
+import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
 import { useDataElementGroups } from "../../Queries";
-import { $paginations, $hasDHIS2, $currentDataSource } from "../../Store";
-import { globalIds, computeGlobalParams } from "../../utils/utils";
-import GlobalSearchFilter from "./GlobalSearchFilter";
+import { $currentDataSource, $hasDHIS2, $paginations } from "../../Store";
+import { computeGlobalParams, globalIds } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
-import { isEmpty } from "lodash";
+import GlobalSearchFilter from "./GlobalSearchFilter";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;

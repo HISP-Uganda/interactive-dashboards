@@ -5,12 +5,10 @@ import { changeVisualizationProperties } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData } from "../../Store";
 
-import React from 'react'
+import React from "react";
 
 const SunBurstChartproperties = () => {
-  return (
-    <div>SunBurstChartproperties</div>
-  )
-}
+    return <div>SunBurstChartproperties</div>;
+};
 
-export default SunBurstChartproperties; 
+export default SunBurstChartproperties;

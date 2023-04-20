@@ -1,0 +1,538 @@
+import React from 'react'
+
+export default function OldDashboard() {
+  return (
+      <Grid
+          templateColumns={{ md: "auto", lg: dashboardColumns }}
+          maxH={{ md: "calc(100vh - 48px)" }}
+          h={{ md: "calc(100vh - 48px)" }}
+          p={`${padding}px`}
+          w="100vw"
+          maxW="100vw"
+      >
+          {showSide && (
+              <Grid
+                  templateRows={`${otherHeaders}px 1fr`}
+                  pr={`${padding}px`}
+                  gap={`${padding}px`}
+                  h={dashboardHeight}
+                  maxH={dashboardHeight}
+                  // bg="#FEE300"
+              >
+                  <Stack
+                      h="100%"
+                      w="100%"
+                      // alignItems="center"
+                      alignContent="center"
+                      // justifyContent="center"
+                      // justifyItems="center"
+                      direction="row"
+                      spacing="20px"
+                  >
+                      {/* <MOHLogo
+                                        height={otherHeaders}
+                                        width={sideWidth}
+                                    /> */}
+                      <ImageUpload alignment="top-left" />
+                      <Stack spacing={0}>
+                          <Text
+                              textTransform="uppercase"
+                              fontWeight="extrabold"
+                              fontSize="xl"
+                          >
+                              Office of the President
+                          </Text>
+                          <Text fontWeight="semi-bold" color="black">
+                              The Republic of Uganda
+                          </Text>
+                      </Stack>
+                  </Stack>
+                  <GridItem>
+                      <SidebarContent />
+                  </GridItem>
+                  <ImageUpload
+                      alignment="bottom-left"
+                      maxH={`${otherHeaders}px`}
+                  />
+              </Grid>
+          )}
+          <FullScreen handle={handle}>
+              <Grid
+                  templateRows={`${otherHeaders}px 1fr ${otherHeaders}px`}
+                  gap={`${padding}px`}
+                  w={dashboardWidth}
+                  maxW={dashboardWidth}
+                  h={handle.active ? "100vh" : dashboardHeight}
+                  maxH={handle.active ? "100vh" : dashboardHeight}
+                  bgColor={handle.active ? "gray.300" : ""}
+                  // bg="yellow.300"
+              >
+                  <GridItem
+                      h="100%"
+                      w={dashboardWidth}
+                      maxW={dashboardWidth}
+                      bgColor="white"
+                      p="5px"
+                  >
+                      <Stack
+                          h="100%"
+                          alignContent="center"
+                          alignItems="center"
+                          direction="row"
+                          w="100%"
+                          spacing="40px"
+                      >
+                          {!handle.active && !store.showSider && (
+                              <IconButton
+                                  bgColor="none"
+                                  variant="ghost"
+                                  aria-label="Search database"
+                                  icon={<BiArrowToRight />}
+                                  onClick={() => setShowSider(true)}
+                                  _hover={{ bg: "none" }}
+                              />
+                          )}
+                          {!handle.active && store.showSider && (
+                              <IconButton
+                                  variant="ghost"
+                                  bgColor="none"
+                                  aria-label="Search database"
+                                  icon={<BiArrowToLeft />}
+                                  onClick={() => setShowSider(false)}
+                                  _hover={{ bg: "none" }}
+                              />
+                          )}
+                          {topMenuOptions[store.currentPage]}
+                      </Stack>
+                  </GridItem>
+                  <GridItem>
+                      <Outlet />
+                  </GridItem>
+                  <GridItem w={dashboardWidth} maxW={dashboardWidth}>
+                      <Footer handle={handle} />
+                  </GridItem>
+              </Grid>
+          </FullScreen>
+      </Grid>
+  );
+}
+
+
+
+<Grid
+            templateColumns={templateColumns}
+            templateRows={templateRows}
+            gap="5px"
+            h="100%"
+            w="100%"
+        >
+            {dashboard?.sections.map((section: ISection, index: number) => (
+                <GridItem
+                    draggable
+                    onDragStart={(e) => dragStart(e, index)}
+                    onDragEnter={(e) => dragEnter(e, index)}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDragEnd={drop}
+                    bgColor={section.bg}
+                    key={section.id}
+                    colSpan={{ lg: section.colSpan, md: 1 }}
+                    rowSpan={{ lg: section.rowSpan, md: 1 }}
+                    h={
+                        isNotDesktop
+                            ? section.height
+                                ? section.height
+                                : "15vh"
+                            : "100%"
+                    }
+                    maxH={
+                        isNotDesktop
+                            ? section.height
+                                ? section.height
+                                : "15vh"
+                            : "100%"
+                    }
+                    onClick={(e: MouseEvent<HTMLElement>) => {
+                        if (e.detail === 2 && store.isAdmin) {
+                            setCurrentSection(section);
+                            navigate({
+                                to: `/dashboards/${dashboard.id}/section`,
+                                search,
+                            });
+                        }
+                    }}
+                >
+                    <SectionVisualization {...section} />
+                </GridItem>
+            ))}
+        </Grid>
+
+
+
+		<Grid
+            templateColumns="1fr 30%"
+            gap="5px"
+            minH="calc(100vh - 200px)"
+            minW="calc(100vw - 200px)"
+        >
+            <GridItem
+                bgColor="white"
+                minH="calc(100vh - 200px)"
+                minW="calc(100vw - 200px)"
+                w="100%"
+            >
+                <SectionVisualization {...section} />
+            </GridItem>
+            <Grid
+                templateRows={`${headerHeight * 3}px 1fr`}
+                gap="5px"
+                h={otherHeight}
+                maxH={otherHeight}
+            >
+                <Flex
+                    gap="5px"
+                    flexWrap="wrap"
+                    bgColor="white"
+                    p="5px"
+                    alignContent="flex-start"
+                >
+                    <Button
+                        size="sm"
+                        onClick={() => setActive(() => "title")}
+                        variant="outline"
+                        colorScheme={active === "title" ? "teal" : "gray"}
+                    >
+                        Section options
+                    </Button>
+                    {section.visualizations.map((visualization, index) => (
+                        <Button
+                            draggable
+                            onDragStart={(e) => dragStart(e, index)}
+                            onDragEnter={(e) => dragEnter(e, index)}
+                            onDragOver={(e) => e.preventDefault()}
+                            onDragEnd={drop}
+                            size="sm"
+                            variant="outline"
+                            key={visualization.id}
+                            colorScheme={
+                                active === visualization.id ? "teal" : "yellow"
+                            }
+                            onClick={() => setActive(() => visualization.id)}
+                        >
+                            {visualization.name || visualization.id}
+                        </Button>
+                    ))}
+                    <Button
+                        size="sm"
+                        onClick={() => {
+                            const id = generateUid();
+                            addVisualization2Section(id);
+                            setActive(id);
+                        }}
+                    >
+                        Add Visualization
+                    </Button>
+                </Flex>
+                <Stack overflow="auto" flex={1}>
+                    {active === "title" && (
+                        <Stack p="10px" spacing="20px" bgColor="white" flex={1}>
+                            <Text>Title</Text>
+                            <Input
+                                value={section.title}
+                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                    changeSectionAttribute({
+                                        attribute: "title",
+                                        value: e.target.value,
+                                    })
+                                }
+                            />
+
+                            <Text>Row Span</Text>
+                            <NumberInput
+                                value={section.rowSpan}
+                                max={12}
+                                min={1}
+                                onChange={(value1: string, value2: number) =>
+                                    changeSectionAttribute({
+                                        attribute: "rowSpan",
+                                        value: value2,
+                                    })
+                                }
+                            >
+                                <NumberInputField />
+                                <NumberInputStepper>
+                                    <NumberIncrementStepper />
+                                    <NumberDecrementStepper />
+                                </NumberInputStepper>
+                            </NumberInput>
+
+                            <Text>Column Span</Text>
+                            <NumberInput
+                                value={section.colSpan}
+                                max={24}
+                                min={1}
+                                onChange={(value1: string, value2: number) =>
+                                    changeSectionAttribute({
+                                        attribute: "colSpan",
+                                        value: value2,
+                                    })
+                                }
+                            >
+                                <NumberInputField />
+                                <NumberInputStepper>
+                                    <NumberIncrementStepper />
+                                    <NumberDecrementStepper />
+                                </NumberInputStepper>
+                            </NumberInput>
+
+                            <Text>Height(when on small devices)</Text>
+                            <Input
+                                value={section.height}
+                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                    changeSectionAttribute({
+                                        attribute: "height",
+                                        value: e.target.value,
+                                    })
+                                }
+                            />
+                            <Text>Background Colour</Text>
+                            <SectionColorPalette section={section} />
+                            <Text>Arrangement</Text>
+                            <RadioGroup
+                                onChange={(e: string) =>
+                                    changeSectionAttribute({
+                                        attribute: "direction",
+                                        value: e,
+                                    })
+                                }
+                                value={section.direction}
+                            >
+                                <Stack direction="row">
+                                    <Radio value="row">Horizontal</Radio>
+                                    <Radio value="column">Vertical</Radio>
+                                </Stack>
+                            </RadioGroup>
+
+                            <Text>Content Alignment</Text>
+                            <Select<Option, false, GroupBase<Option>>
+                                value={alignmentOptions.find(
+                                    (d: Option) =>
+                                        d.value === section.justifyContent
+                                )}
+                                onChange={(e) =>
+                                    changeSectionAttribute({
+                                        attribute: "justifyContent",
+                                        value: e?.value,
+                                    })
+                                }
+                                options={alignmentOptions}
+                                isClearable
+                            />
+                            <Text>Display Style</Text>
+                            <RadioGroup
+                                value={section.display}
+                                onChange={(e: string) =>
+                                    changeSectionAttribute({
+                                        attribute: "display",
+                                        value: e,
+                                    })
+                                }
+                            >
+                                <Stack direction="row">
+                                    <Radio value="normal">Normal</Radio>
+                                    <Radio value="carousel">Carousel</Radio>
+                                    <Radio value="marquee">Marquee</Radio>
+                                    <Radio value="grid">Grid</Radio>
+                                    <Radio value="tab">Tabs</Radio>
+                                </Stack>
+                            </RadioGroup>
+                            <Text>Carousel Over</Text>
+                            <RadioGroup
+                                value={section.carouselOver}
+                                onChange={(e: string) =>
+                                    changeSectionAttribute({
+                                        attribute: "carouselOver",
+                                        value: e,
+                                    })
+                                }
+                            >
+                                <Stack direction="row">
+                                    <Radio value="items">Items</Radio>
+                                    <Radio value="groups">Groups</Radio>
+                                </Stack>
+                            </RadioGroup>
+                            <SectionImages />
+                        </Stack>
+                    )}
+                    {section.visualizations.map(
+                        (visualization) =>
+                            visualization.id === active && (
+                                <Stack
+                                    key={visualization.id}
+                                    // bgColor={visualization.bg}
+                                    bgColor="white"
+                                    overflow="auto"
+                                    flex={1}
+                                >
+                                    <Stack
+                                        direction="row"
+                                        fontSize="xl"
+                                        p="10px"
+                                        spacing="0"
+                                    >
+                                        <Text>{`${visualization.name}(${visualization.id})`}</Text>
+                                        <Spacer />
+                                        <IconButton
+                                            variant="ghost"
+                                            onClick={() => {
+                                                const id = generateUid();
+                                                duplicateVisualization({
+                                                    ...visualization,
+                                                    id,
+                                                });
+                                                setActive(() => id);
+                                            }}
+                                            icon={
+                                                <BiDuplicate
+                                                    color="green"
+                                                    size="24px"
+                                                />
+                                            }
+                                            aria-label="Down"
+                                        />
+                                        <IconButton
+                                            variant="ghost"
+                                            onClick={() => {
+                                                deleteSectionVisualization(
+                                                    visualization.id
+                                                );
+                                                if (
+                                                    section.visualizations
+                                                        .length > 1
+                                                ) {
+                                                    const viz =
+                                                        section.visualizations[
+                                                            section
+                                                                .visualizations
+                                                                .length - 2
+                                                        ];
+                                                    setActive(() => viz.id);
+                                                } else {
+                                                    setActive(() => "title");
+                                                }
+                                            }}
+                                            icon={<DeleteIcon color="red" />}
+                                            aria-label="Down"
+                                        />
+                                    </Stack>
+                                    <Stack pl="10px" spacing="20px">
+                                        <Text>Title</Text>
+                                        <Input
+                                            value={visualization.name}
+                                            onChange={(
+                                                e: ChangeEvent<HTMLInputElement>
+                                            ) =>
+                                                changeVisualizationAttribute({
+                                                    attribute: "name",
+                                                    value: e.target.value,
+                                                    visualization:
+                                                        visualization.id,
+                                                })
+                                            }
+                                        />
+                                        <Text>Title font size</Text>
+                                        <NumberInput
+                                            value={
+                                                visualization.properties[
+                                                    "data.title.fontSize"
+                                                ] || 2
+                                            }
+                                            max={10}
+                                            min={1}
+                                            step={0.1}
+                                            onChange={(
+                                                value1: string,
+                                                value2: number
+                                            ) =>
+                                                changeVisualizationProperties({
+                                                    visualization:
+                                                        visualization?.id,
+                                                    attribute:
+                                                        "data.title.fontSize",
+                                                    value: value2,
+                                                })
+                                            }
+                                        >
+                                            <NumberInputField />
+                                            <NumberInputStepper>
+                                                <NumberIncrementStepper />
+                                                <NumberDecrementStepper />
+                                            </NumberInputStepper>
+                                        </NumberInput>
+                                        <Text>Title font weight</Text>
+                                        <NumberInput
+                                            value={
+                                                visualization.properties[
+                                                    "data.title.fontWeight"
+                                                ] || 250
+                                            }
+                                            max={1000}
+                                            min={100}
+                                            step={50}
+                                            onChange={(
+                                                value1: string,
+                                                value2: number
+                                            ) =>
+                                                changeVisualizationProperties({
+                                                    visualization:
+                                                        visualization.id,
+                                                    attribute:
+                                                        "data.title.fontWeight",
+                                                    value: value2,
+                                                })
+                                            }
+                                        >
+                                            <NumberInputField />
+                                            <NumberInputStepper>
+                                                <NumberIncrementStepper />
+                                                <NumberDecrementStepper />
+                                            </NumberInputStepper>
+                                        </NumberInput>
+
+                                        <Text>Title font color</Text>
+                                        <ColorPalette
+                                            visualization={visualization}
+                                            attribute="data.title.color"
+                                        />
+                                        <VisualizationQuery
+                                            visualization={visualization}
+                                        />
+                                        <Text>Expression</Text>
+                                        <Textarea
+                                            value={visualization.expression}
+                                            onChange={(
+                                                e: ChangeEvent<HTMLTextAreaElement>
+                                            ) =>
+                                                changeVisualizationAttribute({
+                                                    attribute: "expression",
+                                                    value: e.target.value,
+                                                    visualization:
+                                                        visualization.id,
+                                                })
+                                            }
+                                        />
+                                        <VisualizationOverride
+                                            visualization={visualization}
+                                        />
+                                        <VisualizationTypes
+                                            visualization={visualization}
+                                        />
+                                        <VisualizationProperties
+                                            visualization={visualization}
+                                        />
+                                    </Stack>
+                                </Stack>
+                            )
+                    )}
+                </Stack>
+            </Grid>
+        </Grid>

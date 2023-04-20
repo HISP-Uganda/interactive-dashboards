@@ -24,8 +24,8 @@ import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
 import { useIndicators } from "../../Queries";
-import { $paginations, $hasDHIS2, $currentDataSource } from "../../Store";
-import { globalIds, computeGlobalParams } from "../../utils/utils";
+import { $currentDataSource, $hasDHIS2, $paginations } from "../../Store";
+import { computeGlobalParams, globalIds } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import GlobalSearchFilter from "./GlobalSearchFilter";
 
