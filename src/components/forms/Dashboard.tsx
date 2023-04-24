@@ -181,14 +181,14 @@ const Dashboard = () => {
         setCurrentDashboard({ ...data, published: value });
     };
     return (
-        <Stack w="100%" h="100%" p="5px">
+        <Stack w="100%" h="100%" p="5px" bg={dashboard.bg}>
             <Grid
                 templateColumns={templateColumns}
                 templateRows={templateRows}
                 gap="5px"
                 h="100%"
                 w="100%"
-                bg={dashboard.bg}
+
             >
                 {dashboard?.sections.map((section: ISection, index: number) => (
                     <GridItem
@@ -240,7 +240,7 @@ const Dashboard = () => {
                     maxH="calc(100vh - 200px)"
                     maxW="calc(100vw - 200px)"
                 >
-                    <ModalHeader>Modal Title</ModalHeader>
+                    <ModalHeader>Edit Settings</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
                         <Section />

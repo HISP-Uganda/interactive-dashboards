@@ -35,9 +35,10 @@ const NavItem = ({ option: { label, value, dashboards } }: NavItemProps) => {
           fontSize="lg"
           m="2"
           cursor="pointer"
-          _hover={{ bgColor: "yellow.50", color: "black" }}
-          bgColor={dashboard.id === d.id ? "yellow.300" : ""}
-          // color={dashboard.id === d.id ? "gray.500" : ""}
+          _hover={{ bgColor: "teal", color: "white" }}
+          bgColor={dashboard.id === d.id ? "gray.200" : "gray.200"}
+          //color={dashboard.id === d.id ? "black" : ""}
+          _active={{ bgColor: "teal", color: "white" }}
           onClick={(e) => {
             e.stopPropagation();
             navigate({
