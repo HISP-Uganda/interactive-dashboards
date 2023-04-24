@@ -1,7 +1,6 @@
 import { AddIcon } from "@chakra-ui/icons";
 import {
     Button,
-    Divider,
     Spacer,
     Stack,
     Table,
@@ -11,7 +10,6 @@ import {
     Th,
     Thead,
     Tr,
-    Grid,
 } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate } from "@tanstack/react-location";
@@ -33,9 +31,8 @@ import {
 } from "../../Events";
 import { DataNode, IDashboard, LocationGenerics } from "../../interfaces";
 import { deleteDocument, useDashboards } from "../../Queries";
-import { $store, $settings } from "../../Store";
+import { $settings, $store, dashboardTypeApi } from "../../Store";
 import { generateUid } from "../../utils/uid";
-import { generalPadding, otherHeight } from "../constants";
 import { loadData } from "../helpers";
 import LoadingIndicator from "../LoadingIndicator";
 
@@ -72,6 +69,7 @@ const Dashboards = () => {
                 <Spacer />
                 <Button
                     onClick={() => {
+                        dashboardTypeApi.set("dynamic");
                         setRefresh(true);
                         navigate({
                             to: `/dashboards/${generateUid()}`,
@@ -89,7 +87,29 @@ const Dashboards = () => {
                     colorScheme="blue"
                 >
                     <AddIcon mr="2" />
-                    Add Dashboard
+                    New Dynamic Dashboard
+                </Button>
+                <Button
+                    onClick={() => {
+                        dashboardTypeApi.set("fixed");
+                        setRefresh(true);
+                        navigate({
+                            to: `/dashboards/${generateUid()}`,
+                            search: {
+                                action: "create",
+                                periods: store.periods
+                                    .map((i) => i.id)
+                                    .join("-"),
+                                organisations: store.organisations.join("-"),
+                                groups: store.groups.join("-"),
+                                levels: store.levels.join("-"),
+                            },
+                        });
+                    }}
+                    colorScheme="blue"
+                >
+                    <AddIcon mr="2" />
+                    New Fixed Dashboard
                 </Button>
             </Stack>
             <Stack alignContent="center" alignItems="center" flex={1}>

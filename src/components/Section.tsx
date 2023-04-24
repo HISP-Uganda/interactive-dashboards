@@ -286,10 +286,9 @@ const Section = () => {
         <Stack
             maxH="calc(100vh - 350px)"
             minH="calc(100vh - 350px)"
-            bg="gray.300"
             direction="row"
         >
-            <Stack w="70%">
+            <Stack w="70%" flex={1} bg={section.bg} alignItems="center">
                 <SectionVisualization {...section} />
             </Stack>
             <Stack w="30%">

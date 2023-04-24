@@ -100,6 +100,8 @@ import {
     IImage,
     IDashboardSetting,
     Storage,
+    ScreenSize,
+    Playlist,
 } from "./interfaces";
 import { generateUid } from "./utils/uid";
 import { getRelativePeriods, relativePeriodTypes } from "./utils/utils";
@@ -120,6 +122,38 @@ export const createSection = (id = generateUid()): ISection => {
         bg: "white",
         height: "100%",
         headerBg: "",
+        lg: {
+            x: 0,
+            y: 0,
+            w: 2,
+            h: 2,
+            i: id,
+            static: false,
+        },
+        md: {
+            x: 0,
+            y: 0,
+            w: 2,
+            h: 2,
+            i: id,
+            static: false,
+        },
+        sm: {
+            x: 0,
+            y: 0,
+            w: 2,
+            h: 2,
+            i: id,
+            static: false,
+        },
+        xs: {
+            x: 0,
+            y: 0,
+            w: 2,
+            h: 2,
+            i: id,
+            static: false,
+        },
     };
 };
 
@@ -174,24 +208,26 @@ export const createDashboard = (id = generateUid()): IDashboard => {
         published: false,
         rows: 24,
         columns: 24,
-        showSider: true,
         category: "uDWxMNyXZeo",
-        showTop: true,
         name: "New Dashboard",
         refreshInterval: "off",
         dataSet: "",
         categorization: {},
         availableCategories: [],
         availableCategoryOptionCombos: [],
-        bottomSection: { ...createSection(), isBottomSection: true, title: "" },
         bg: "gray.300",
         targetCategoryCombo: "",
         targetCategoryOptionCombos: [],
         nodeSource: {},
         tag: "Example tag",
         images: [],
+        type: "dynamic",
     };
 };
+export const $dashboardType = domain.createStore<"fixed" | "dynamic">("fixed");
+export const dashboardTypeApi = createApi($dashboardType, {
+    set: (_, value: "fixed" | "dynamic") => value,
+});
 
 export const $paginations = domain
     .createStore<{ [key: string]: number }>({
@@ -213,6 +249,12 @@ export const $paginations = domain
     });
 
 export const $filters = domain.createStore<{ [key: string]: any }>({});
+
+export const $size = domain.createStore<ScreenSize>("md");
+
+export const sizeApi = createApi($size, {
+    set: (_, val: ScreenSize) => val,
+});
 
 export const $settings = domain.createStore<IDashboardSetting>({
     defaultDashboard: "",
@@ -421,28 +463,12 @@ export const $dashboard = domain
             sections,
         };
     })
-    .on(setCurrentDashboard, (_, dashboard) => {
-        return {
-            ...dashboard,
-            bottomSection: dashboard.bottomSection
-                ? dashboard.bottomSection
-                : { ...createSection(), isBottomSection: true, title: "" },
-        };
-    })
+    .on(setCurrentDashboard, (_, dashboard) => dashboard)
     .on(changeDefaults, (state) => {
         return { ...state, hasDashboards: true, hasDefaultDashboard: true };
     })
     .on(toggleDashboard, (state, published) => {
         return { ...state, published };
-    })
-    .on(toggle, (state) => {
-        if (state.showSider) {
-            return { ...state, showSider: false };
-        } else if (state.showTop && !state.showSider) {
-            return { ...state, showTop: false };
-        } else if (state.showSider === false && state.showTop === false) {
-            return { ...state, showTop: true, showSider: true };
-        }
     })
     .on(setRefreshInterval, (state, refreshInterval) => {
         return { ...state, refreshInterval };
@@ -1195,4 +1221,6 @@ export const isOpenApi = createApi($isOpen, {
     onOpen: () => true,
     onClose: () => false,
 });
+export const $playlist = domain.createStore<Array<Playlist>>([]);
+export const playlistApi = createApi($playlist, {});
 // $previousCategoryOptionCombo.watch((v) => console.log(v));

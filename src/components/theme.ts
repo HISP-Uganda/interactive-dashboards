@@ -14,6 +14,8 @@ const theme = extendTheme({
         global: {
             body: {
                 // bg: "gray.50",
+                // boxSizing: "border-box",
+                // position: "relative",
                 p: "0",
                 m: "0",
             },

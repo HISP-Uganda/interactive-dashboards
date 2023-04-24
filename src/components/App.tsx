@@ -33,13 +33,14 @@ import {
     setShowFooter,
     setShowSider,
 } from "../Events";
-import { LocationGenerics } from "../interfaces";
+import { LocationGenerics, ScreenSize } from "../interfaces";
 import { useInitials } from "../Queries";
 import { decodeFromBinary, encodeToBinary } from "../utils/utils";
 import LoadingIndicator from "./LoadingIndicator";
 import Settings from "./Settings";
 import { useStore } from "effector-react";
-import { $settings } from "../Store";
+import { $settings, sizeApi } from "../Store";
+import Panel from "./Panel";
 
 const history = createHashHistory();
 const location = new ReactLocation<LocationGenerics>({
@@ -52,14 +53,36 @@ const location = new ReactLocation<LocationGenerics>({
     ),
 });
 
+const sizes: { [k: number]: ScreenSize } = {
+    0: "xs",
+    1: "sm",
+    2: "md",
+    3: "lg",
+};
+
 const App = () => {
     const { storage } = useStore($settings);
     const { isLoading, isSuccess, isError, error } = useInitials(storage);
     const handle = useFullScreenHandle();
     const [isNotDesktop] = useMediaQuery(["(max-width: 992px)"]);
+
+    const [phone, tablet, laptop, desktop] = useMediaQuery([
+        "(max-width: 768px)",
+        "(min-width: 768px)",
+        "(min-width: 992px)",
+        "(min-width: 1200px)",
+    ]);
+
     useEffect(() => {
         setIsNotDesktop(isNotDesktop);
     }, [isNotDesktop]);
+
+    useEffect(() => {
+        const index = [phone, tablet, laptop, desktop].lastIndexOf(true);
+        if (index >= 0 && index <= 3) {
+            sizeApi.set(sizes[index]);
+        }
+    }, [phone, tablet, laptop, desktop]);
 
     useEffect(() => {
         const callback = async (event: KeyboardEvent) => {
@@ -87,6 +110,14 @@ const App = () => {
             },
             path: "/",
             element: <Home />,
+        },
+        {
+            loader: async () => {
+                setCurrentPage("");
+                return {};
+            },
+            path: "/panel",
+            element: <Panel />,
         },
         {
             path: "/settings",

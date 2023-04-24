@@ -55,6 +55,7 @@ import {
     createDataSource,
     createIndicator,
     settingsApi,
+    dashboardTypeApi,
 } from "./Store";
 import { getSearchParams, processMap } from "./utils/utils";
 
@@ -470,7 +471,7 @@ export const useDashboard = (
                     });
                     setTargetCategoryOptionCombos(categoryOptionCombos);
                 }
-
+                dashboardTypeApi.set(dashboard.type);
                 const queries = await getIndex<IIndicator>(storage, {
                     namespace: "i-visualization-queries",
                     systemId,
