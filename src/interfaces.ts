@@ -5,6 +5,7 @@ import type { DataNode as IDataNode } from "antd/es/tree";
 import { Event } from "effector";
 
 export type Storage = "data-store" | "es";
+export type ScreenSize = "xs" | "sm" | "md" | "lg";
 export interface IImage {
     id: string;
     src: string;
@@ -131,6 +132,10 @@ export interface ISection {
     bg: string;
     height: string;
     headerBg: string;
+    lg: ReactGridLayout.Layout;
+    md: ReactGridLayout.Layout;
+    sm: ReactGridLayout.Layout;
+    xs: ReactGridLayout.Layout;
 }
 
 export interface IFilter {}
@@ -141,8 +146,6 @@ export interface IDashboard extends INamed {
     sections: ISection[];
     published: boolean;
     isDefault?: boolean;
-    showSider: boolean;
-    showTop: boolean;
     refreshInterval: string;
     rows: number;
     columns: number;
@@ -150,7 +153,6 @@ export interface IDashboard extends INamed {
     categorization: { [key: string]: any[] };
     availableCategories: any[];
     availableCategoryOptionCombos: any[];
-    bottomSection: ISection;
     bg: string;
     targetCategoryCombo: string;
     targetCategoryOptionCombos: any[];
@@ -163,6 +165,7 @@ export interface IDashboard extends INamed {
     }>;
     tag: string;
     images: IImage[];
+    type: "fixed" | "dynamic";
 }
 export interface Pagination {
     total: number;
@@ -271,6 +274,7 @@ export type LocationGenerics = MakeGenerics<{
         organisations: string;
         dataSourceId: string;
         action: "create" | "update";
+        type: "fixed" | "dynamic";
     };
 }>;
 
@@ -327,3 +331,14 @@ export interface SystemInfo {
 }
 
 export interface DexieStore {}
+
+type PlaylistItem = {
+    id: string;
+    type: "dashboard" | "section" | "visualization";
+    dashboard?: string;
+    section?: string;
+};
+export interface Playlist {
+    items: Array<PlaylistItem>;
+    interval: number;
+}

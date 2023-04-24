@@ -1,26 +1,23 @@
 import { Box, SimpleGrid, Stack } from "@chakra-ui/react";
-import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { MouseEvent } from "react";
 import Marquee from "react-marquee-slider";
 import { setCurrentSection } from "../Events";
-import { LocationGenerics, ISection } from "../interfaces";
-import { $dashboard, $store, isOpenApi } from "../Store";
+import { ISection } from "../interfaces";
+import { $store, isOpenApi } from "../Store";
 import Carousel from "./visualizations/Carousel";
 import TabPanelVisualization from "./visualizations/TabPanelVisualization";
 import Visualization from "./visualizations/Visualization";
 import VisualizationTitle from "./visualizations/VisualizationTitle";
 
 const SectionVisualization = (section: ISection) => {
-    const search = useSearch<LocationGenerics>();
     const store = useStore($store);
-    const navigate = useNavigate();
-    const dashboard = useStore($dashboard);
 
     const displays = {
         carousel: <Carousel {...section} />,
         marquee: (
             <Stack
+                key={section.id}
                 bg={section.bg}
                 alignContent="center"
                 alignItems="center"
@@ -35,25 +32,27 @@ const SectionVisualization = (section: ISection) => {
                     }
                 }}
             >
-                <Marquee
-                    velocity={60}
-                    direction="rtl"
-                    onFinish={() => {}}
-                    resetAfterTries={200}
-                    scatterRandomly={false}
-                    onInit={() => {}}
-                >
-                    {section.visualizations.map((visualization) => (
-                        <Stack direction="row" key={visualization.id}>
-                            <Visualization
-                                section={section}
-                                key={visualization.id}
-                                visualization={visualization}
-                            />
-                            <Box w="70px">&nbsp;</Box>
-                        </Stack>
-                    ))}
-                </Marquee>
+                <Stack w="100%">
+                    <Marquee
+                        velocity={60}
+                        direction="rtl"
+                        onFinish={() => {}}
+                        resetAfterTries={200}
+                        scatterRandomly={false}
+                        onInit={() => {}}
+                    >
+                        {section.visualizations.map((visualization) => (
+                            <Stack direction="row" key={visualization.id}>
+                                <Visualization
+                                    section={section}
+                                    key={visualization.id}
+                                    visualization={visualization}
+                                />
+                                <Box w="70px">&nbsp;</Box>
+                            </Stack>
+                        ))}
+                    </Marquee>
+                </Stack>
             </Stack>
         ),
         grid: (
@@ -66,6 +65,7 @@ const SectionVisualization = (section: ISection) => {
                 alignContent="center"
                 justifyContent="center"
                 justifyItems="center"
+                key={section.id}
             >
                 {section.title && (
                     <VisualizationTitle
@@ -85,7 +85,7 @@ const SectionVisualization = (section: ISection) => {
             </Stack>
         ),
         normal: (
-            <Stack h="100%" w="100%" spacing={0}>
+            <Stack h="100%" w="100%" spacing={0} key={section.id}>
                 {section.title && (
                     <VisualizationTitle
                         section={section}

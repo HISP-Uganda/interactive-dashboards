@@ -2,8 +2,6 @@ import {
     Box,
     Button,
     Checkbox,
-    Grid,
-    GridItem,
     IconButton,
     Input,
     Modal,
@@ -16,12 +14,13 @@ import {
     Stack,
     Text,
     Textarea,
-    useBreakpointValue,
     useDisclosure,
 } from "@chakra-ui/react";
+import { useDataEngine } from "@dhis2/app-runtime";
+import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { ChangeEvent, DragEvent, MouseEvent, useRef, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { SwatchesPicker } from "react-color";
 import { FaPlus } from "react-icons/fa";
 import {
@@ -34,34 +33,27 @@ import {
     setDashboards,
     setDefaultDashboard,
     setRefresh,
-    setSections,
 } from "../../Events";
-import {
-    IDashboard,
-    ISection,
-    Option,
-    LocationGenerics,
-} from "../../interfaces";
+import { IDashboard, LocationGenerics, Option } from "../../interfaces";
 import { saveDocument } from "../../Queries";
 import {
     $categoryOptions,
     $dashboard,
     $dashboards,
-    $dimensions,
     $isOpen,
     $section,
+    $settings,
     $store,
     createSection,
-    isOpenApi,
     dashboardApi,
-    $settings,
+    isOpenApi,
+    $dashboardType,
 } from "../../Store";
-import Section from "../Section";
-import SectionVisualization from "../SectionVisualization";
-import AutoRefreshPicker from "../AutoRefreshPicker";
-import { useDataEngine } from "@dhis2/app-runtime";
-import { useSearch, useNavigate } from "@tanstack/react-location";
 import { swatchColors } from "../../utils/utils";
+import AutoRefreshPicker from "../AutoRefreshPicker";
+import DynamicDashboard from "../DynamicDashboard";
+import Section from "../Section";
+import FixedDashboard from "../FixedDashboard";
 
 const Dashboard = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -78,48 +70,10 @@ const Dashboard = () => {
     const store = useStore($store);
     const dashboard = useStore($dashboard);
     const section = useStore($section);
-    const { isNotDesktop } = useStore($dimensions);
     const isOpen = useStore($isOpen);
+    const dashboardType = useStore($dashboardType);
     const engine = useDataEngine();
     const { storage } = useStore($settings);
-    const templateColumns = useBreakpointValue({
-        base: "auto",
-        sm: "auto",
-        md: "auto",
-        lg: `repeat(${dashboard.columns}, 1fr)`,
-    });
-    const templateRows = useBreakpointValue({
-        base: "auto",
-        sm: "auto",
-        md: "auto",
-        lg: `repeat(${dashboard.rows}, 1fr)`,
-    });
-    const dragItem = useRef<number | undefined | null>();
-    const dragOverItem = useRef<number | null>();
-    const dragStart = (e: DragEvent<HTMLDivElement>, position: number) => {
-        dragItem.current = position;
-    };
-
-    const dragEnter = (e: DragEvent<HTMLDivElement>, position: number) => {
-        dragOverItem.current = position;
-    };
-
-    const drop = (e: DragEvent<HTMLDivElement>) => {
-        const copyListItems = [...dashboard.sections];
-        if (
-            dragItem.current !== null &&
-            dragItem.current !== undefined &&
-            dragOverItem.current !== null &&
-            dragOverItem.current !== undefined
-        ) {
-            const dragItemContent = copyListItems[dragItem.current];
-            copyListItems.splice(dragItem.current, 1);
-            copyListItems.splice(dragOverItem.current, 0, dragItemContent);
-            dragItem.current = null;
-            dragOverItem.current = null;
-            setSections(copyListItems);
-        }
-    };
 
     const onClick = () => {
         setCurrentSection(createSection());
@@ -142,20 +96,35 @@ const Dashboard = () => {
             search.action || "create"
         );
         const setting = {
-            default: store.defaultDashboard,
-            id: store.systemId,
+            defaultDashboard: store.defaultDashboard,
+            id: "settings",
         };
-        await saveDocument(
-            storage,
-            "i-dashboard-settings",
-            store.systemId,
-            setting,
-            engine,
-            "update"
-        );
+        try {
+            await saveDocument(
+                storage,
+                "i-dashboard-settings",
+                store.systemId,
+                setting,
+                engine,
+                "update"
+            );
+        } catch (error) {
+            await saveDocument(
+                storage,
+                "i-dashboard-settings",
+                store.systemId,
+                setting,
+                engine,
+                "create"
+            );
+        }
         setLoading(() => false);
         setRefresh(true);
         onClose();
+        navigate({
+            search: (old) => ({ ...old, action: "update" }),
+            replace: true,
+        });
     };
 
     const togglePublish = async (data: IDashboard, value: boolean) => {
@@ -182,51 +151,11 @@ const Dashboard = () => {
     };
     return (
         <Stack w="100%" h="100%" p="5px" bg={dashboard.bg}>
-            <Grid
-                templateColumns={templateColumns}
-                templateRows={templateRows}
-                gap="5px"
-                h="100%"
-                w="100%"
-
-            >
-                {dashboard?.sections.map((section: ISection, index: number) => (
-                    <GridItem
-                        draggable
-                        onDragStart={(e) => dragStart(e, index)}
-                        onDragEnter={(e) => dragEnter(e, index)}
-                        onDragOver={(e) => e.preventDefault()}
-                        onDragEnd={drop}
-                        bgColor={section.bg}
-                        key={section.id}
-                        colSpan={{ lg: section.colSpan, md: 1 }}
-                        rowSpan={{ lg: section.rowSpan, md: 1 }}
-                        h={
-                            isNotDesktop
-                                ? section.height
-                                    ? section.height
-                                    : "15vh"
-                                : "100%"
-                        }
-                        maxH={
-                            isNotDesktop
-                                ? section.height
-                                    ? section.height
-                                    : "15vh"
-                                : "100%"
-                        }
-                        onClick={(e: MouseEvent<HTMLElement>) => {
-                            if (e.detail === 2 && store.isAdmin) {
-                                setCurrentSection(section);
-                                isOpenApi.onOpen();
-                            }
-                        }}
-                    >
-                        <SectionVisualization {...section} />
-                    </GridItem>
-                ))}
-            </Grid>
-
+            {dashboardType === "dynamic" ? (
+                <DynamicDashboard />
+            ) : (
+                <FixedDashboard />
+            )}
             <Modal
                 isOpen={isOpen}
                 onClose={() => isOpenApi.onClose()}
@@ -240,7 +169,7 @@ const Dashboard = () => {
                     maxH="calc(100vh - 200px)"
                     maxW="calc(100vw - 200px)"
                 >
-                    <ModalHeader>Edit Settings</ModalHeader>
+                    <ModalHeader>Modal Title</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
                         <Section />
