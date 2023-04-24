@@ -1,4 +1,4 @@
-import { Box, Flex, useMediaQuery } from "@chakra-ui/react";
+import { Box, Flex, useMediaQuery, Spinner } from "@chakra-ui/react";
 import {
     createHashHistory,
     Outlet,
@@ -45,9 +45,7 @@ import Panel from "./Panel";
 const history = createHashHistory();
 const location = new ReactLocation<LocationGenerics>({
     history,
-    parseSearch: parseSearchWith((value) =>
-        JSON.parse(decodeFromBinary(value))
-    ),
+    parseSearch: parseSearchWith((value) => JSON.parse(decodeFromBinary(value))),
     stringifySearch: stringifySearchWith((value) =>
         encodeToBinary(JSON.stringify(value))
     ),
@@ -262,14 +260,14 @@ const App = () => {
                     justifyContent="center"
                     h="calc(100vh - 48px)"
                 >
-                    <LoadingIndicator />
+                    <Spinner />
                 </Flex>
             )}
             {isSuccess && (
                 <Router
                     location={location}
                     routes={routes}
-                    defaultPendingElement={<LoadingIndicator />}
+                    defaultPendingElement={<Spinner />}
                 >
                     <Outlet />
                 </Router>
