@@ -640,6 +640,8 @@ export const $indicator = domain
         ) => {
             if (state.numerator) {
                 if (remove) {
+                    console.log("Dead0");
+
                     const { [id]: removed, ...others } =
                         state.numerator.dataDimensions;
                     return {
@@ -677,7 +679,8 @@ export const $indicator = domain
                         },
                     };
                 }
-                return {
+
+                const computedState = {
                     ...state,
                     numerator: {
                         ...state.numerator,
@@ -695,6 +698,7 @@ export const $indicator = domain
                         },
                     },
                 };
+                return computedState;
             }
         }
     )

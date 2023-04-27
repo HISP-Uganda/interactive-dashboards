@@ -36,15 +36,6 @@ const OrganizationUnitGroups = ({ denNum, onChange }: IndicatorProps) => {
     const paginations = useStore($paginations);
     const hasDHIS2 = useStore($hasDHIS2);
     const currentDataSource = useStore($currentDataSource);
-    // const [type, setType] = useState<"filter" | "dimension">("dimension");
-    // const selected = Object.entries(denNum?.dataDimensions || {})
-    //     .filter(([k, { resource }]) => resource === "oug")
-    //     .map(([key]) => {
-    //         return key;
-    //     });
-    // const [useGlobal, setUseGlobal] = useState<boolean>(
-    //     () => selected.indexOf("of2WvtwqbHR") !== -1
-    // );
     const [q, setQ] = useState<string>("");
 
     const { previousType, isGlobal } = computeGlobalParams(

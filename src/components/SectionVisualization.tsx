@@ -1,4 +1,4 @@
-import { Box, SimpleGrid, Stack } from "@chakra-ui/react";
+import { Box, SimpleGrid, Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { MouseEvent } from "react";
 import Marquee from "react-marquee-slider";
@@ -102,6 +102,7 @@ const SectionVisualization = (section: ISection) => {
                     w="100%"
                     h="100%"
                     bg={section.bg}
+                    spacing="0"
                 >
                     {section.visualizations.map((visualization) => (
                         <Visualization

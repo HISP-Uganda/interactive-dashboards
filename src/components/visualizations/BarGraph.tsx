@@ -82,6 +82,9 @@ const BarGraph = ({
                                 automargin: true,
                                 showgrid: false,
                                 type: "category",
+                                labels: {
+                                    rotate: 0,
+                                },
                             },
                             ...availableProperties.layout,
                         }}
@@ -111,7 +114,10 @@ const BarGraph = ({
                                 <Text bgColor={colors[index]} w="10px" h="10px">
                                     &nbsp;
                                 </Text>
-                                <Text noOfLines={[1, 2, 3]}>{series}</Text>
+                                <Text noOfLines={[1, 2, 3]}>
+                                    {metadata[visualization.id][series]?.name ||
+                                        series}
+                                </Text>
                             </Stack>
                         ))}
                 </Stack>

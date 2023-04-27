@@ -1,6 +1,16 @@
 import React, { ChangeEvent, useRef } from "react";
 import { IVisualization } from "../../interfaces";
-import { Stack, Text, Input, Button } from "@chakra-ui/react";
+import {
+    Stack,
+    Text,
+    Input,
+    Button,
+    NumberDecrementStepper,
+    NumberIncrementStepper,
+    NumberInput,
+    NumberInputField,
+    NumberInputStepper,
+} from "@chakra-ui/react";
 import { changeVisualizationProperties } from "../../Events";
 
 export default function ImageProperties({
@@ -53,6 +63,51 @@ export default function ImageProperties({
                 type="file"
                 onChange={handleFileChange}
             />
+
+            <Stack>
+                <Text>Image Height</Text>
+                <NumberInput
+                    value={visualization.properties["data.height"] || 20}
+                    max={100}
+                    min={20}
+                    step={2}
+                    onChange={(value1: string, value2: number) =>
+                        changeVisualizationProperties({
+                            visualization: visualization.id,
+                            attribute: "data.height",
+                            value: value2,
+                        })
+                    }
+                >
+                    <NumberInputField />
+                    <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                    </NumberInputStepper>
+                </NumberInput>
+            </Stack>
+            <Stack>
+                <Text>Image Width</Text>
+                <NumberInput
+                    value={visualization.properties["data.width"] || 20}
+                    max={100}
+                    min={20}
+                    step={2}
+                    onChange={(value1: string, value2: number) =>
+                        changeVisualizationProperties({
+                            visualization: visualization.id,
+                            attribute: "data.width",
+                            value: value2,
+                        })
+                    }
+                >
+                    <NumberInputField />
+                    <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                    </NumberInputStepper>
+                </NumberInput>
+            </Stack>
         </Stack>
     );
 }

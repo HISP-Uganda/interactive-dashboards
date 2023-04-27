@@ -13,9 +13,11 @@ const OrgUnitTree = ({ denNum, onChange }: IndicatorProps) => {
     );
     const [type, setType] = useState<"filter" | "dimension">(previousType);
     const [useGlobal, setUseGlobal] = useState<boolean>(isGlobal);
+    console.log(globalIds[5].value);
     return (
         <Stack spacing="20px">
             <GlobalSearchFilter
+                denNum={denNum}
                 dimension="ou"
                 setType={setType}
                 useGlobal={useGlobal}

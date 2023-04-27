@@ -26,13 +26,7 @@ import {
 } from "../../Events";
 import { Option, LocationGenerics } from "../../interfaces";
 import { saveDocument } from "../../Queries";
-import {
-    $dataSourceType,
-    $indicator,
-    $store,
-    $hasDHIS2,
-    $settings,
-} from "../../Store";
+import { $dataSourceType, $indicator, $store, $settings } from "../../Store";
 import { getSearchParams, globalIds } from "../../utils/utils";
 import { generalPadding, otherHeight } from "../constants";
 import { displayDataSourceType } from "../data-sources";
