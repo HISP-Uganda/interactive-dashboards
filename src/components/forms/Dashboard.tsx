@@ -152,10 +152,11 @@ const Dashboard = () => {
     return (
         <Stack w="100%" h="100%" p="5px" bg={dashboard.bg}>
             {dashboardType === "dynamic" ? (
+
                 <DynamicDashboard />
             ) : (
-                <FixedDashboard />
-            )}
+                    <FixedDashboard />
+                )}
             <Modal
                 isOpen={isOpen}
                 onClose={() => isOpenApi.onClose()}
@@ -169,7 +170,7 @@ const Dashboard = () => {
                     maxH="calc(100vh - 200px)"
                     maxW="calc(100vw - 200px)"
                 >
-                    <ModalHeader>Modal Title</ModalHeader>
+                    <ModalHeader>Edit Visualisation and Section</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
                         <Section />

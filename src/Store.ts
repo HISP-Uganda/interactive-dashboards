@@ -111,7 +111,7 @@ export const createSection = (id = generateUid()): ISection => {
         id,
         rowSpan: 1,
         colSpan: 1,
-        title: "Example section",
+        title: "Section Name",
         visualizations: [],
         direction: "row",
         display: "normal",
@@ -201,7 +201,10 @@ export const createIndicator = (id = generateUid()): IIndicator => {
     };
 };
 
-export const createDashboard = (id = generateUid()): IDashboard => {
+export const createDashboard = (
+    id = generateUid(),
+    type: "dynamic" | "fixed" = "dynamic"
+): IDashboard => {
     return {
         id,
         sections: [],
@@ -221,7 +224,7 @@ export const createDashboard = (id = generateUid()): IDashboard => {
         nodeSource: {},
         tag: "Example tag",
         images: [],
-        type: "dynamic",
+        type,
     };
 };
 export const $dashboardType = domain.createStore<"fixed" | "dynamic">("fixed");

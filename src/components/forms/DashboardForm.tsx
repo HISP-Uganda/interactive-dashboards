@@ -3,12 +3,13 @@ import { useMatch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { LocationGenerics } from "../../interfaces";
 import { useDashboard } from "../../Queries";
-import { $store, $settings } from "../../Store";
+import { $store, $settings, $dashboardType } from "../../Store";
 import Dashboard from "./Dashboard";
 import LoadingIndicator from "../LoadingIndicator";
 
 export default function DashboardForm() {
     const store = useStore($store);
+    const dashboardType = useStore($dashboardType);
     const { storage } = useStore($settings);
     const {
         params: { dashboardId },
@@ -17,7 +18,9 @@ export default function DashboardForm() {
         storage,
         dashboardId,
         store.systemId,
-        store.refresh
+        dashboardType,
+        store.refresh,
+
     );
     return (
         <Stack
