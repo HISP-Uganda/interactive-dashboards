@@ -443,6 +443,7 @@ export const useDashboard = (
     storage: "data-store" | "es",
     id: string,
     systemId: string,
+    dashboardType: "dynamic" | "fixed",
     refresh: boolean = true
 ) => {
     const engine = useDataEngine();
@@ -457,7 +458,7 @@ export const useDashboard = (
                     engine,
                 });
                 if (isEmpty(dashboard)) {
-                    dashboard = createDashboard(id);
+                    dashboard = createDashboard(id, dashboardType);
                 } else if (dashboard.targetCategoryCombo) {
                     const {
                         combo: { categoryOptionCombos },

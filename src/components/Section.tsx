@@ -353,7 +353,7 @@ const Section = () => {
                             <Text>Row Span</Text>
                             <NumberInput
                                 value={section.rowSpan}
-                                max={12}
+                                max={24}
                                 min={1}
                                 onChange={(value1: string, value2: number) =>
                                     changeSectionAttribute({
@@ -515,9 +515,9 @@ const Section = () => {
                                                 ) {
                                                     const viz =
                                                         section.visualizations[
-                                                            section
-                                                                .visualizations
-                                                                .length - 2
+                                                        section
+                                                            .visualizations
+                                                            .length - 2
                                                         ];
                                                     setActive(() => viz.id);
                                                 } else {
@@ -547,7 +547,7 @@ const Section = () => {
                                         <NumberInput
                                             value={
                                                 visualization.properties[
-                                                    "data.title.fontSize"
+                                                "data.title.fontSize"
                                                 ] || 2
                                             }
                                             max={10}
@@ -576,7 +576,7 @@ const Section = () => {
                                         <NumberInput
                                             value={
                                                 visualization.properties[
-                                                    "data.title.fontWeight"
+                                                "data.title.fontWeight"
                                                 ] || 250
                                             }
                                             max={1000}
