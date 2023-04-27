@@ -307,18 +307,17 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
         );
     });
 
-    const { isLoading, isSuccess, data, isError } = useVisualization(
+    const { isLoading, isSuccess, data, isError, error } = useVisualization(
         visualization,
         currentIndicators,
         currentDataSources,
         dashboard.refreshInterval,
         globalFilters
     );
-    // deriveSingleValues(visualizationData, visualization.expression);
     return (
         <Stack
             spacing={0}
-            p={0}
+            p={1}
             m={0}
             h="100%"
             w="100%"
@@ -340,7 +339,7 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
                     {isLoading && <LoadingIndicator />}
                     {isSuccess &&
                         getVisualization(visualization, data, section)}
-                    {isError && <Text>No data/Error occurred</Text>}
+                    {isError && <pre>{JSON.stringify(visualization.id)}</pre>}
                 </>
             )}
         </Stack>

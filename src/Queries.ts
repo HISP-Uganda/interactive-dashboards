@@ -271,7 +271,7 @@ export const useInitials = (storage: "data-store" | "es") => {
             resource: "system/info",
         },
     };
-    return useQuery<any, Error>(
+    return useQuery<boolean, Error>(
         ["initial"],
         async ({ signal }) => {
             const {
@@ -1207,7 +1207,7 @@ const findDimension = (
     globalFilters: { [key: string]: any } = {}
 ) => {
     return Object.entries(dimension).map(
-        ([key, { resource, type, dimension, prefix, ...rest }]) => {
+        ([key, { resource, type, dimension, prefix }]) => {
             const globalValue = globalFilters[key];
             if (globalValue) {
                 return {
@@ -1268,45 +1268,35 @@ export const findLevelsAndOus = (indicator: IIndicator | undefined) => {
     return { levels: [], ous: [] };
 };
 
-const joinItems = (items: string[][], joiner: "dimension" | "filter") => {
-    return items
-        .flatMap((item: string[]) => {
-            if (item[0]) {
-                return [`${joiner}=${item[1]}:${item[0]}`];
-            }
-            return [];
-        })
-        .join("&");
-};
-
 const makeDHIS2Query = (
     data: IData,
     globalFilters: { [key: string]: any } = {},
     overrides: { [key: string]: any } = {}
 ) => {
-    const allDimensions = findDimension(data.dataDimensions, globalFilters);
+    const filtered = fromPairs(
+        Object.entries(data.dataDimensions).filter(
+            ([id, dimension]) => dimension.type && dimension.dimension
+        )
+    );
+    const allDimensions = findDimension(filtered, globalFilters);
+
     return Object.entries(
         groupBy(allDimensions, (v) => `${v.type}${v.dimension}`)
     )
         .flatMap(([x, y]) => {
             const first = y[0];
             const finalValues = y.map(({ value }) => value).join(";");
-            if (first.dimension === "") {
-                return y.map(({ value }) => `${first.type}=${value}`);
+            if (y) {
+                if (first.dimension === "") {
+                    return y.map(({ value }) => `${first.type}=${value}`);
+                }
+                return [`${first.type}=${first.dimension}:${finalValues}`];
             }
-            return [`${first.type}=${first.dimension}:${finalValues}`];
+            return [];
         })
         .join("&");
 };
 
-const hasGlobal = (globalFilters: { [key: string]: any }, value: string) => {
-    return Object.keys(globalFilters).some((element) => {
-        if (element.indexOf(value) !== -1) {
-            return true;
-        }
-        return false;
-    });
-};
 const makeSQLViewsQueries = (
     expressions: IExpressions = {},
     globalFilters: { [key: string]: any } = {},
@@ -1609,7 +1599,6 @@ export const useVisualization = (
 
                     if (Object.keys(dhis2Queries).length > 0) {
                         const response: any = await engine.query(dhis2Queries);
-
                         numerator = response.numerator;
                         denominator = response.denominator;
                     } else if (allQueries.length > 0) {

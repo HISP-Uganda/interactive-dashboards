@@ -1,5 +1,5 @@
 import moment from "moment";
-import { bbox, center } from "@turf/turf";
+import { center } from "@turf/turf";
 
 import {
     format,
@@ -797,7 +797,6 @@ export const processMap = (
     thresholds: Threshold[]
 ) => {
     const mapCenter = center(geojson).geometry.coordinates;
-    const bounds = bbox(geojson);
     const organisationUnits = Object.values(otherLevels).flatMap(
         ({ organisationUnits }: any) => organisationUnits
     );
@@ -846,7 +845,6 @@ export const processMap = (
                     value: value
                         ? Intl.NumberFormat("en-US", {
                               style: "percent",
-                              // notation: "standard",
                               maximumFractionDigits: 2,
                           }).format(value / 100)
                         : "No Data",

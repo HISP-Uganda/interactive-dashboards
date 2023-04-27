@@ -35,10 +35,10 @@ const BarGraphProperties = ({
     const metadata = useStore($visualizationMetadata)[visualization.id];
     const columns = visualizationData[visualization.id]
         ? Object.keys(visualizationData[visualization.id][0]).map<Option>(
-            (o) => {
-                return { value: o, label: o };
-            }
-        )
+              (o) => {
+                  return { value: o, label: o };
+              }
+          )
         : [];
 
     return (
@@ -237,7 +237,7 @@ const BarGraphProperties = ({
                                         value={chartTypes.find(
                                             (pt) =>
                                                 visualization.properties[
-                                                `data.${x}`
+                                                    `data.${x}`
                                                 ] === pt.value
                                         )}
                                         onChange={(e) => {

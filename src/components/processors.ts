@@ -55,7 +55,6 @@ export const processGraphs = (
         const realColumns = columns.map(({ name }) => name);
         if (series) {
             allSeries = uniq(data.map((num: any) => num[series]));
-
             chartData = allSeries.map((se: any) => {
                 return {
                     x:

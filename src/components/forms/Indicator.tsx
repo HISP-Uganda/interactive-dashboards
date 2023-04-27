@@ -189,6 +189,7 @@ const Indicator = () => {
                         )}
                     </>
                 )}
+                <pre>{JSON.stringify(indicator, null, 2)}</pre>
                 <Stack direction="row">
                     <Button
                         colorScheme="red"
