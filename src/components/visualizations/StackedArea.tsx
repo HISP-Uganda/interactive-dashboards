@@ -4,39 +4,50 @@ import { ChartProps } from '../../interfaces';
 import { $visualizationData } from '../../Store';
 import { $visualizationMetadata } from '../../Store';
 
-interface ScatterPlotProps extends ChartProps {
+interface StackedAreaProps extends ChartProps {
   category?: string;
   series?: string;
 }
 
-const ScatterPlot = ({ visualization}: ScatterPlotProps) => {
+const StackedArea = ({ visualization }: StackedAreaProps) => {
   const visualizationData = useStore($visualizationData)?.[visualization.id];
   const metadata = useStore($visualizationMetadata)?.[visualization.id];
 
-  const traces = visualizationData?.map((data: any, i: number) => {
+  const traces = visualizationData?.reduce((acc: any, data: any, i: number) => {
     const monthData = metadata?.[data.pe];
-    return {
-      x: [monthData?.name],
-      y: [parseFloat(data.value)],
-      mode: 'markers',
-      type: 'scatter',
-      //name: series ? `${category} ${series} ${i + 1}` : `${category} ${i + 1}`,
-      marker: { size: 12 },
-    };
-  }) || [];
+    const seriesName = data.series;
+    const category = data.category;
+    const value = parseFloat(data.value);
+
+    if (!acc[seriesName]) {
+      acc[seriesName] = {
+        x: [],
+        y: [],
+        type: 'scatter',
+        mode: 'lines',
+        name: seriesName,
+        stackgroup: 'one',
+      };
+    }
+
+    acc[seriesName].x.push(monthData?.name);
+    acc[seriesName].y.push(value);
+
+    return acc;
+  }, {});
 
   return (
     <Plot
-      data={traces}
+      data={Object.values(traces)}
       layout={{
-        title: 'Scatter Plot',
+        title: 'Stacked Area Chart',
         xaxis: {
           title: 'Month',
         },
         yaxis: {
           title: 'Doses Given',
         },
-       showlegend:false,
+        showlegend: true,
       }}
       style={{ width: '100%', height: '100%' }}
       config={{ displayModeBar: false, responsive: true }}
@@ -44,4 +55,4 @@ const ScatterPlot = ({ visualization}: ScatterPlotProps) => {
   );
 };
 
-export default ScatterPlot;
+export default StackedArea;
