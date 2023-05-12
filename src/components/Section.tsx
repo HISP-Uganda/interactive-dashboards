@@ -632,18 +632,19 @@ const Section = () => {
                                         <VisualizationProperties
                                             visualization={visualization}
                                         />
-                    <Checkbox
-                      isChecked={visualization.needFilter}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                        console.log(e.target.checked);
+                                
+                                    <Checkbox
+                                    isChecked={visualization.needFilter}
+                                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                                        console.log(e.target.checked);
 
-                        changeVisualizationAttribute({
-                          visualization: visualization.id,
-                          attribute: "needFilter",
-                          value: e.target.checked,
-                        });
-                      }}
-                    ></Checkbox>
+                                        changeVisualizationAttribute({
+                                        visualization: visualization.id,
+                                        attribute: "needFilter",
+                                        value: e.target.checked,
+                                        });
+                                    }}
+                                    > Need Filter</Checkbox>
                                     </Stack>
                                 </Stack>
                             )

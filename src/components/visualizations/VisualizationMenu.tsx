@@ -47,8 +47,6 @@ import Visualization from "./Visualization";
 import { changeVisualizationOrder, changeVisualizationShow } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 const sortingOptions: Option[] = [{ label: "Top", value: "desc" }, { label: "Bottom", value: "asc" }]
-const { isOpen: isFull, onOpen: onFull, onClose: onUnFull } = useDisclosure();
-const { isOpen: isOpen1, onOpen: onOpen1, onClose: onClose1 } = useDisclosure();
 type VisualizationMenuProps = {
     section: ISection;
 };
@@ -57,6 +55,7 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
     const store = useStore($store);
     const navigate = useNavigate();
     const search = useSearch<LocationGenerics>();
+    const { isOpen: isOpen1, onOpen: onOpen1, onClose: onClose1 } = useDisclosure();
     const {
         isOpen: isFull,
         onOpen: onFull,
@@ -150,12 +149,12 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
                         View as Single Value
                     </MenuItem>
                     {section.visualizations.map(
-            (visualization) =>
-              visualization.needFilter && (
-                <MenuItem fontSize="18px" icon={<AiFillFilter />}
-                onClick={onOpen1} >
-                  Filter
-                </MenuItem>
+                        (visualization) =>
+                         visualization.needFilter && (
+                            <MenuItem fontSize="18px" icon={<AiFillFilter />}
+                            onClick={onOpen1} >
+                            Filter
+                            </MenuItem>
               )
           )}
                     {store.isAdmin && (

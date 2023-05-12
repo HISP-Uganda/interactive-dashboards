@@ -195,7 +195,7 @@ export const changeVisualizationOrder = domain.createEvent<{
     order: string;
     section: ISection;
   }>();
-  export const changeVisualizationShow = domain.createEvent<{
+export const changeVisualizationShow = domain.createEvent<{
     show: number;
     section: ISection;
   }>();

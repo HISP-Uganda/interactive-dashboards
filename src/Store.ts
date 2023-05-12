@@ -529,7 +529,7 @@ export const $dashboard = domain
     })
     .on(setSections, (state, sections) => {
         return { ...state, sections };
-    });
+    })
     .on(changeVisualizationOrder,(state,{order,section})=>{
         const sections = state.sections.map((s) => {
           if (s.id === section.id) {
@@ -821,6 +821,8 @@ export const $section = domain
             id,
             indicator: "",
             type: "",
+            show:0,
+            order:"desc",
             name: `Visualization ${state.visualizations.length + 1}`,
             properties: {},
             overrides: {},
