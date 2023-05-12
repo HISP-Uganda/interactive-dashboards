@@ -15,6 +15,7 @@ import {
     Stack,
     Text,
     Textarea,
+    Checkbox,
 } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
@@ -631,6 +632,18 @@ const Section = () => {
                                         <VisualizationProperties
                                             visualization={visualization}
                                         />
+                    <Checkbox
+                      isChecked={visualization.needFilter}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                        console.log(e.target.checked);
+
+                        changeVisualizationAttribute({
+                          visualization: visualization.id,
+                          attribute: "needFilter",
+                          value: e.target.checked,
+                        });
+                      }}
+                    ></Checkbox>
                                     </Stack>
                                 </Stack>
                             )
