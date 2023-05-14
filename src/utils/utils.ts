@@ -678,6 +678,7 @@ export const chartTypes: Option[] = [
     { value: "tables", label: "Table" },
     { value: "boxplot", label: "Box Plot" },
     { value: "scatterplot", label: "Scatter Plot" },
+    { value: "stackedarea", label: "Stacked Area" },
     { value: "dashboardList", label: "Dashboard List" },
     { value: "dashboardTree", label: "Dashboard Tree" },
     { value: "categoryList", label: "Dashboard Categories" },

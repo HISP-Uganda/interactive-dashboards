@@ -47,9 +47,11 @@ const BarGraph = ({
     const colors = availableProperties.layout.colorway;
     const { chartData, allSeries } = processGraphs(
         data,
+        visualization.order,
+        visualization.show,
+        dataProperties,
         category,
         series,
-        dataProperties,
         metadata[visualization.id]
     );
     return (

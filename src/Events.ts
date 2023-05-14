@@ -191,3 +191,11 @@ export const setRefresh = domain.createEvent<boolean>();
 
 export const setDataElementGroups = domain.createEvent<string[]>();
 export const setDataElementGroupSets = domain.createEvent<string[]>();
+export const changeVisualizationOrder = domain.createEvent<{
+    order: string;
+    section: ISection;
+  }>();
+export const changeVisualizationShow = domain.createEvent<{
+    show: number;
+    section: ISection;
+  }>();

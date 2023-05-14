@@ -1,39 +1,60 @@
 import Plot from "react-plotly.js";
 import { ChartProps } from "../../interfaces";
+import { useStore } from "effector-react";
+import { $visualizationData } from "../../Store";
+import { $visualizationMetadata } from "../../Store";
 
 interface SunBurstProps extends ChartProps {
   category?: string;
   series?: string;
 }
 
-const SunburstChart = ({}: SunBurstProps) => {
-  const datas: any = [
-    {
-      type: "sunburst",
-      labels: [
-        "Eve",
-        "Cain",
-        "Seth",
-        "Enos",
-        "Noam",
-        "Abel",
-        "Awan",
-        "Enoch",
-        "Azura",
-      ],
-      parents: ["", "Eve", "Eve", "Seth", "Seth", "Eve", "Eve", "Awan", "Eve"],
-      values: [10, 14, 12, 10, 2, 6, 6, 4, 4],
-      outsidetextfont: { size: 20, color: "#377eb8" },
-      leaf: { opacity: 0.4 },
-      marker: { line: { width: 2 } },
-    },
-  ];
+interface SunburstData {
+  type: string;
+  labels: string[];
+  parents: string[];
+  values: number[];
+  outsidetextfont: {
+    size: number;
+    color: string;
+  };
+  leaf: {
+    opacity: number;
+  };
+  marker: {
+    line: {
+      width: number;
+    };
+  };
+}
+
+const SunburstChart = ({ visualization }: SunBurstProps) => {
+  const visualizationData = useStore($visualizationData)?.[visualization.id];
+  const visualizationMetadata = useStore($visualizationMetadata)?.[visualization.id];
+
+  // transform data to the format expected by the sunburst chart
+  const data: SunburstData = {
+    type: "sunburst",
+    labels: [],
+    parents: [],
+    values: [],
+    outsidetextfont: { size: 20, color: "#377eb8" },
+    leaf: { opacity: 0.4 },
+    marker: { line: { width: 2 } },
+  };
+  // use map to iterate over the data and metadata to populate the sunburst chart
+  visualizationData?.map((dataItem) => {
+    const metadataItem = visualizationMetadata?.[dataItem.dx];
+    data.labels.push(metadataItem?.name);
+    data.parents.push("");
+    data.values.push(parseFloat(dataItem?.value));
+  });
 
   return (
     <Plot
-      data={datas}
+      data={[data]}
       layout={{
-        margin: { l: 0, r: 0, b: 0, t: 0 },
+        margin: { l: 0, r: 0, b: 0, t: 50 },
         width: 500,
         height: 500,
       }}
