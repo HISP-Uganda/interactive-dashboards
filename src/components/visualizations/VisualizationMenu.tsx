@@ -150,13 +150,13 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
                     </MenuItem>
                     {section.visualizations.map(
                         (visualization) =>
-                         visualization.needFilter && (
-                            <MenuItem fontSize="18px" icon={<AiFillFilter />}
-                            onClick={onOpen1} >
-                            Filter
-                            </MenuItem>
-              )
-          )}
+                            visualization.needFilter && (
+                                <MenuItem fontSize="18px" icon={<AiFillFilter />}
+                                    onClick={onOpen1} >
+                                    Filter
+                                </MenuItem>
+                            )
+                    )}
                     {store.isAdmin && (
                         <MenuItem
                             fontSize="18px"
@@ -190,38 +190,38 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
                 </ModalContent>
             </Modal>
             <Modal
-        // initialFocusRef={initialRef}
-        // finalFocusRef={finalRef}
-        isOpen={isOpen1}
-        onClose={onClose1}
-        closeOnOverlayClick={false}
-      >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Filter Your Own Choice
+                // initialFocusRef={initialRef}
+                // finalFocusRef={finalRef}
+                isOpen={isOpen1}
+                onClose={onClose1}
+                closeOnOverlayClick={false}
+            >
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Filter Your Own Choice
 
           </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={6}>
-            <FormControl>
-              <FormLabel>Show</FormLabel>
-              <Stack spacing={3}>
-                <Select<Option, false, GroupBase<Option>>
-                  options={sortingOptions}
-                  value={sortingOptions.find(({ value }) => value === section.visualizations[0].order)}
-                  onChange={(e) => changeVisualizationOrder({ section, order: e?.value || "" })}
-                />
-              </Stack>
-            </FormControl>
+                    <ModalCloseButton />
+                    <ModalBody pb={6}>
+                        <FormControl>
+                            <FormLabel>Show</FormLabel>
+                            <Stack spacing={3}>
+                                <Select<Option, false, GroupBase<Option>>
+                                    options={sortingOptions}
+                                    value={sortingOptions.find(({ value }) => value === section.visualizations[0]?.order)}
+                                    onChange={(e) => changeVisualizationOrder({ section, order: e?.value || "" })}
+                                />
+                            </Stack>
+                        </FormControl>
 
-            <FormControl mt={4}>
-              <FormLabel>Enter Value</FormLabel>
-              <Input placeholder='Enter your Choice' value={section.visualizations[0].show}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => changeVisualizationShow({ section, show: Number(e.target.value) })} />
-            </FormControl>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+                        <FormControl mt={4}>
+                            <FormLabel>Enter Value</FormLabel>
+                            <Input placeholder='Enter your Choice' value={section.visualizations[0]?.show}
+                                onChange={(e: ChangeEvent<HTMLInputElement>) => changeVisualizationShow({ section, show: Number(e.target.value) })} />
+                        </FormControl>
+                    </ModalBody>
+                </ModalContent>
+            </Modal>
 
 
         </>
