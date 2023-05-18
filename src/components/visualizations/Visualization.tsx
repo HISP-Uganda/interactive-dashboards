@@ -29,6 +29,7 @@ import SunburstChart from "./SunburstChart";
 import Tables from "./Tables";
 import TreeMaps from "./TreeMaps";
 import LoadingIndicator from "../LoadingIndicator";
+import NewTables from "./NewTables";
 
 type VisualizationProps = {
   visualization: IVisualization;
@@ -253,6 +254,16 @@ const getVisualization = (
     ),
     scatterplot: (
       <ScatterPlot
+        section={section}
+        data={data}
+        visualization={visualization}
+        {...otherProperties}
+        layoutProperties={layoutProperties}
+        dataProperties={dataProperties}
+      />
+    ),
+    newtables: (
+      <NewTables
         section={section}
         data={data}
         visualization={visualization}
