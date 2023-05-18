@@ -26,6 +26,7 @@ const labels: { [key: string]: string } = {
     dWAaPPBAEbL: "Directives",
     emIWijzLHR4: "Themes",
     iE5A3BBdv2z: "Programmes",
+    p2racpd5cNU: "Performance"
 };
 
 export default function DashboardTree() {
@@ -173,6 +174,10 @@ export default function DashboardTree() {
                     // { id: "program", title: "Programme" },
                     { id: "name", title: "Indicators", w: "500px" },
                 ]);
+            } else if (node.pId === "p2racpd5cNU") {
+                setOriginalColumns([
+                    { id: "name", title: "Commitments", w: "600px" },
+                ]);
             } else {
                 setOriginalColumns([
                     { id: "name", title: "Indicator", w: "600px" },
@@ -288,8 +293,8 @@ export default function DashboardTree() {
             treeData={
                 treeData
                     ? arrayToTree(orderBy(treeData, "sortOrder"), {
-                          parentProperty: "pId",
-                      })
+                        parentProperty: "pId",
+                    })
                     : []
             }
         />

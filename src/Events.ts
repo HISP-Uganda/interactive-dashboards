@@ -171,6 +171,7 @@ export const setAvailableCategories = domain.createEvent<any[]>();
 export const setRows = domain.createEvent<any[]>();
 export const setColumns = domain.createEvent<any[]>();
 export const setOriginalColumns = domain.createEvent<any[]>();
+export const setFixedColumns = domain.createEvent<any[]>();
 export const setSections = domain.createEvent<ISection[]>();
 export const setVisualizations = domain.createEvent<IVisualization[]>();
 export const setAvailableCategoryOptionCombos = domain.createEvent<any[]>();

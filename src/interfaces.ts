@@ -228,6 +228,7 @@ export interface IStore {
     dataElementGroups: string[];
     dataElementGroupSets: string[];
     decreasing: string[];
+    fixedColumns: any[];
 }
 
 export type IndicatorProps = {

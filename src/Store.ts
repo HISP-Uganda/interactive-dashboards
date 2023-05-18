@@ -82,6 +82,7 @@ import {
     setRows,
     setColumns,
     setOriginalColumns,
+    setFixedColumns,
     setSections,
     setVisualizations,
     setDataElementGroups,
@@ -248,6 +249,7 @@ export const $store = domain
         rows: [],
         columns: [],
         originalColumns: [],
+        fixedColumns: [],
         dataElementGroups: [],
         dataElementGroupSets: [],
         decreasing: [],
@@ -358,6 +360,9 @@ export const $store = domain
     })
     .on(setDataElementGroupSets, (state, dataElementGroupSets) => {
         return { ...state, dataElementGroupSets };
+    })
+    .on(setFixedColumns, (state, fixedColumns) => {
+        return { ...state, fixedColumns };
     })
     .on(setDecreasing, (state, decreasing) => {
         return { ...state, decreasing };
@@ -1101,4 +1106,3 @@ export const $dimensions = $store.map(
         return initial;
     }
 );
-// $previousCategoryOptionCombo.watch((v) => console.log(v));

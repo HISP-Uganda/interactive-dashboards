@@ -94,13 +94,9 @@ npm manifest:
       "@tanstack/react-table": "^8.5.22",
       "@turf/turf": "^6.5.0",
       "@types/react-textfit": "^1.1.0",
-<<<<<<< HEAD
-      "antd": "^5.1.6",
-=======
       "@use-gesture/react": "^10.2.24",
       "antd": "^5.1.6",
       "array-to-tree": "^3.3.2",
->>>>>>> bc1d6c31ca9ead857f065a28033ab0c09a2fad21
       "axios": "^1.2.4",
       "chakra-react-select": "^3.1.2",
       "cors": "^2.8.5",
