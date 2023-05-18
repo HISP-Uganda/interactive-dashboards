@@ -1,7 +1,7 @@
 import { Spinner, Stack, Text } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { setCategorization } from "../../Events";
+import { dashboardApi } from "../../Events";
 import { Option } from "../../interfaces";
 import { useDataSet } from "../../Queries";
 import { $dashboard } from "../../Store";
@@ -33,7 +33,7 @@ const DashboardCategorization = ({ dataSet }: DashboardCategorizationProps) => {
                                             value: any,
                                             actions: any
                                         ) => {
-                                            setCategorization({
+                                            dashboardApi.setCategorization({
                                                 ...dashboard.categorization,
                                                 [id]: value,
                                             });

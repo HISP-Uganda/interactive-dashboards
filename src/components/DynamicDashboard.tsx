@@ -4,7 +4,7 @@ import React, { useState, MouseEvent } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import { setCurrentDashboard, setCurrentSection } from "../Events";
+import { dashboardApi, sectionApi } from "../Events";
 import { $dashboard, $size, isOpenApi, $store } from "../Store";
 import SectionVisualization from "./SectionVisualization";
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
@@ -47,7 +47,7 @@ export default function DynamicDashboard() {
                 h="100%"
                 onClick={(e: MouseEvent<HTMLElement>) => {
                     if (e.detail === 2 && store.isAdmin) {
-                        setCurrentSection(section);
+                        sectionApi.setCurrentSection(section);
                         isOpenApi.onOpen();
                     }
                 }}
@@ -101,7 +101,7 @@ export default function DynamicDashboard() {
 
             return current;
         });
-        setCurrentDashboard({ ...dashboard, sections });
+        dashboardApi.setCurrentDashboard({ ...dashboard, sections });
     }
     return (
         <Stack>

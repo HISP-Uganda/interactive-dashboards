@@ -3,21 +3,18 @@ import { useDataEngine } from "@dhis2/app-runtime";
 import { Tree } from "antd";
 import arrayToTree from "array-to-tree";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useStore } from "effector-react";
 import { uniqBy } from "lodash";
 import React, { useState } from "react";
 import { db } from "../db";
-import { setDataElements, setThemes } from "../Events";
+import { storeApi } from "../Events";
 import { DataNode } from "../interfaces";
 import { useTheme } from "../Queries";
-import { $store } from "../Store";
 import LoadingIndicator from "./LoadingIndicator";
 
 function TreeObject() {
     const treeData = useLiveQuery(() => db.themes.toArray());
     const expanded = useLiveQuery(() => db.expanded.get("1"));
     const engine = useDataEngine();
-    const store = useStore($store);
     const [checkedKeys, setCheckedKeys] = useState<
         { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[]
     >([]);
@@ -158,7 +155,7 @@ function TreeObject() {
         }
         const themes = allChecked.map((v) => String(v));
         setCheckedKeys(checkedKeysValue);
-        setThemes(themes);
+        storeApi.setThemes(themes);
 
         const elements = await db.dataElements
             .where("keyResultAreaCode")
@@ -170,7 +167,7 @@ function TreeObject() {
             .or("interventionCode")
             .anyOf(themes)
             .toArray();
-        setDataElements(elements);
+        storeApi.setDataElements(elements);
     };
 
     const onSelect = (selectedKeysValue: React.Key[], info: any) => {

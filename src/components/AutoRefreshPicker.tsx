@@ -1,7 +1,7 @@
 import { Box, Stack, Text } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { setRefreshInterval } from "../Events";
+import { dashboardApi } from "../Events";
 import { Option } from "../interfaces";
 import { $dashboard } from "../Store";
 
@@ -29,7 +29,9 @@ const AutoRefreshPicker = () => {
                     value={periodTypes.find(
                         (pt) => pt.value === dashboard.refreshInterval
                     )}
-                    onChange={(e) => setRefreshInterval(e?.value || "off")}
+                    onChange={(e) =>
+                        dashboardApi.setRefreshInterval(e?.value || "off")
+                    }
                     options={periodTypes}
                 />
             </Box>

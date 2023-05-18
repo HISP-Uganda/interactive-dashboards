@@ -315,16 +315,7 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
         globalFilters
     );
     return (
-        <Stack
-            spacing={0}
-            p={1}
-            m={0}
-            h="100%"
-            w="100%"
-            justifyContent="center"
-            flex={1}
-            bg={visualization.bg}
-        >
+        <>
             {visualization.expression &&
                 getVisualization(
                     visualization,
@@ -342,7 +333,7 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
                     {isError && <pre>{JSON.stringify(visualization.id)}</pre>}
                 </>
             )}
-        </Stack>
+        </>
     );
 };
 

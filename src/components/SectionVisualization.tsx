@@ -2,7 +2,7 @@ import { Box, SimpleGrid, Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { MouseEvent } from "react";
 import Marquee from "react-marquee-slider";
-import { setCurrentSection } from "../Events";
+import { sectionApi } from "../Events";
 import { ISection } from "../interfaces";
 import { $store, isOpenApi } from "../Store";
 import Carousel from "./visualizations/Carousel";
@@ -27,7 +27,7 @@ const SectionVisualization = (section: ISection) => {
                 h="100%"
                 onClick={(e: MouseEvent<HTMLElement>) => {
                     if (e.detail === 2 && store.isAdmin) {
-                        setCurrentSection(section);
+                        sectionApi.setCurrentSection(section);
                         isOpenApi.onOpen();
                     }
                 }}
@@ -85,7 +85,7 @@ const SectionVisualization = (section: ISection) => {
             </Stack>
         ),
         normal: (
-            <Stack h="100%" w="100%" spacing={0} key={section.id}>
+            <Stack h="100%" w="100%" spacing={0} key={section.id} flex={1}>
                 {section.title && (
                     <VisualizationTitle
                         section={section}
@@ -93,16 +93,14 @@ const SectionVisualization = (section: ISection) => {
                     />
                 )}
                 <Stack
-                    alignItems="center"
-                    justifyItems="center"
-                    alignContent="center"
+                    alignItems={section.alignItems}
                     justifyContent={section.justifyContent || "space-around"}
                     direction={section.direction}
-                    flex={1}
                     w="100%"
                     h="100%"
                     bg={section.bg}
-                    spacing="0"
+                    spacing={section.spacing}
+                    p={section.padding}
                 >
                     {section.visualizations.map((visualization) => (
                         <Visualization

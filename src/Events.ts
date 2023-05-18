@@ -1,3 +1,6 @@
+import { createApi } from "effector";
+import produce from "immer";
+import { fromPairs } from "lodash";
 import { domain } from "./Domain";
 import {
     DataNode,
@@ -7,12 +10,35 @@ import {
     IDashboard,
     IDataElement,
     IDataSource,
+    IExpressionValue,
+    IImage,
     IIndicator,
+    IPagination,
     ISection,
     Item,
     IVisualization,
-    Option,
+    ScreenSize,
+    Storage,
 } from "./interfaces";
+import {
+    $categories,
+    $category,
+    $dashboard,
+    $dashboards,
+    $dashboardType,
+    $dataSets,
+    $dataSource,
+    $dataSources,
+    $indicator,
+    $indicators,
+    $paginations,
+    $section,
+    $settings,
+    $size,
+    $store,
+    $visualizationData,
+    $visualizationMetadata,
+} from "./Store";
 
 export const loadDefaults = domain.createEvent<{
     dashboards: string[];
@@ -22,172 +48,877 @@ export const loadDefaults = domain.createEvent<{
     organisationUnits: DataNode[];
 }>();
 
-export const setShowSider = domain.createEvent<boolean>();
-export const setDataSources = domain.createEvent<IDataSource[]>();
-export const setCategories = domain.createEvent<ICategory[]>();
-export const setDashboards = domain.createEvent<IDashboard[]>();
-export const setCurrentDashboard = domain.createEvent<IDashboard>();
-export const addSection = domain.createEvent<ISection>();
-export const addVisualization2Section = domain.createEvent<string>();
-export const duplicateVisualization = domain.createEvent<IVisualization>();
-export const deleteSection = domain.createEvent<string | undefined>();
-export const deleteSectionVisualization = domain.createEvent<string>();
-export const setCurrentSection = domain.createEvent<ISection>();
-export const toggleDashboard = domain.createEvent<boolean>();
-export const changeDashboardId = domain.createEvent<string>();
-export const changeCategoryId = domain.createEvent<string>();
-export const changeDataSourceId = domain.createEvent<string>();
-export const changeAdministration = domain.createEvent<boolean>();
-export const addPagination = domain.createEvent<{
-    [key: string]: number;
-}>();
+export const paginationApi = createApi($paginations, {
+    addPagination: (state, pagination: Partial<IPagination>) => {
+        return {
+            ...state,
+            ...pagination,
+        };
+    },
+});
+export const sizeApi = createApi($size, {
+    set: (_, val: ScreenSize) => val,
+});
 
-export const changeDataSource = domain.createEvent<string | undefined>();
-export const setDataSource = domain.createEvent<IDataSource>();
-export const setCategory = domain.createEvent<ICategory>();
-export const setIndicator = domain.createEvent<IIndicator>();
+export const settingsApi = createApi($settings, {
+    changeDefaultDashboard: (state, defaultDashboard: string) =>
+        produce(state, (draft) => {
+            draft.defaultDashboard = defaultDashboard;
+        }),
+    changeStorage: (state, storage: Storage) =>
+        produce(state, (draft) => {
+            draft.storage = storage;
+        }),
+});
 
-export const changeNumeratorExpressionValue = domain.createEvent<{
-    attribute: string;
-    value: string;
-    isGlobal: boolean;
-}>();
-export const changeDenominatorExpressionValue = domain.createEvent<{
-    attribute: string;
-    value: string;
-    isGlobal: boolean;
-}>();
+export const storeApi = createApi($store, {
+    setOrganisations: (state, organisations: string[]) => {
+        return { ...state, organisations };
+    },
+    setExpandedKeys: (state, expandedKeys: React.Key[]) => {
+        return { ...state, expandedKeys };
+    },
+    setShowSider: (state, showSider: boolean) => {
+        return { ...state, showSider };
+    },
+    onChangeOrganisations: (
+        state,
+        {
+            levels,
+            groups,
+            organisations,
+            expandedKeys,
+            checkedKeys,
+        }: {
+            levels: string[];
+            organisations: string[];
+            groups: string[];
+            expandedKeys: React.Key[];
+            checkedKeys: React.Key[];
+        }
+    ) => {
+        return {
+            ...state,
+            levels,
+            groups,
+            organisations,
+            expandedKeys,
+            checkedKeys,
+        };
+    },
+    changePeriods: (state, periods: Item[]) => {
+        return { ...state, periods };
+    },
+    changeSelectedCategory: (state, selectedCategory: string) => {
+        return { ...state, selectedCategory };
+    },
+    changeSelectedDashboard: (state, selectedDashboard: string) => {
+        return { ...state, selectedDashboard };
+    },
+    changeAdministration: (state, isAdmin: boolean) => {
+        return { ...state, isAdmin };
+    },
+    changeHasDashboards: (state, hasDashboards: boolean) => {
+        return { ...state, hasDashboards };
+    },
+    setDefaultDashboard: (state, defaultDashboard: string) => {
+        return { ...state, defaultDashboard };
+    },
+    setCurrentPage: (state, currentPage: string) => {
+        return { ...state, currentPage };
+    },
+    setSystemId: (state, systemId: string) => {
+        return { ...state, systemId };
+    },
+    setCheckedKeys: (
+        state,
+        checkedKeys:
+            | { checked: React.Key[]; halfChecked: React.Key[] }
+            | React.Key[]
+    ) => {
+        return { ...state, checkedKeys };
+    },
+    setLevels: (state, levels: string[]) => {
+        return { ...state, levels };
+    },
+    setGroups: (state, groups: string[]) => {
+        return { ...state, groups };
+    },
+    setShowFooter: (state, showFooter: boolean) => {
+        return { ...state, showFooter };
+    },
+    setSystemName: (state, systemName: string) => {
+        return { ...state, systemName };
+    },
+    setMinSublevel: (state, minSublevel: number) => {
+        return { ...state, minSublevel };
+    },
+    setMaxLevel: (state, maxLevel: number) => {
+        return { ...state, maxLevel };
+    },
+    setInstanceBaseUrl: (state, instanceBaseUrl: string) => {
+        return { ...state, instanceBaseUrl };
+    },
+    setIsNotDesktop: (state, isNotDesktop: boolean) => {
+        return { ...state, isNotDesktop };
+    },
+    setIsFullScreen: (state, isFullScreen: boolean) => {
+        return { ...state, isFullScreen };
+    },
+    setRefresh: (state, refresh: boolean) => {
+        return { ...state, refresh };
+    },
+    setThemes: (state, themes: string[]) => {
+        return { ...state, themes };
+    },
+    setDataElements: (state, dataElements: IDataElement[]) => {
+        return { ...state, dataElements };
+    },
+    setVersion: (state, version: string) => {
+        return { ...state, version };
+    },
+    setRows: (state, rows: any[]) => {
+        return { ...state, rows };
+    },
+    setColumns: (state, columns: any[]) => {
+        return { ...state, columns };
+    },
+    setOriginalColumns: (state, originalColumns: any[]) => {
+        return { ...state, originalColumns };
+    },
+    setDataElementGroups: (state, dataElementGroups: string[]) => {
+        return { ...state, dataElementGroups };
+    },
+    setDataElementGroupSets: (state, dataElementGroupSets: string[]) => {
+        return { ...state, dataElementGroupSets };
+    },
+});
 
-export const changeIndicatorAttribute = domain.createEvent<{
-    attribute: "name" | "description" | "factor" | "query" | "custom";
-    value: any;
-}>();
+export const dataSourceApi = createApi($dataSource, {
+    setDataSource: (_, dataSource: IDataSource) => dataSource,
+    changeDataSourceId: (state, id: string) => {
+        return { ...state, id };
+    },
+});
 
-export const changeVisualizationData = domain.createEvent<{
-    attribute: "name" | "description" | "factor" | "query";
-    value: any;
-}>();
+export const dashboardApi = createApi($dashboard, {
+    addSection: (state, section: ISection) => {
+        if (section.isBottomSection) {
+            return { ...state, bottomSection: section };
+        }
+        const isNew = state.sections.find((s) => s.id === section.id);
+        let sections: ISection[] = state.sections;
+        if (isNew) {
+            sections = sections.map((s) => {
+                if (s.id === section.id) {
+                    return section;
+                }
+                return s;
+            });
+        } else {
+            sections = [...sections, section];
+        }
+        const currentDashboard = { ...state, sections };
+        return currentDashboard;
+    },
+    deleteSection: (state, section: string | undefined) => {
+        const sections = state.sections.filter((s) => s.id !== section);
+        return {
+            ...state,
+            sections,
+        };
+    },
+    setCurrentDashboard: (_, dashboard: IDashboard) => dashboard,
+    changeDefaults: (state) => {
+        return { ...state, hasDashboards: true, hasDefaultDashboard: true };
+    },
+    toggleDashboard: (state, published: boolean) => {
+        return { ...state, published };
+    },
+    setRefreshInterval: (state, refreshInterval: string) => {
+        return { ...state, refreshInterval };
+    },
+    changeCategory: (state, category: string) => {
+        return { ...state, category };
+    },
+    changeDashboardName: (state, name: string) => {
+        return { ...state, name };
+    },
+    changeDashboardDescription: (state, description: string) => {
+        return { ...state, description };
+    },
+    changeDashboardId: (state, id: string) => {
+        return { ...state, id };
+    },
+    changeVisualizationType: (
+        state,
+        { section, visualization }: { section: ISection; visualization: string }
+    ) => {
+        const sections = state.sections.map((s) => {
+            if (s.id === section.id) {
+                const visualizations = section.visualizations.map((viz) => {
+                    return { ...viz, type: visualization };
+                });
+                return { ...section, visualizations };
+            }
+            return s;
+        });
+        return { ...state, sections };
+    },
+    assignDataSet: (state, dataSet: string) => {
+        return { ...state, dataSet };
+    },
+    setCategorization: (
+        state,
+        categorization: {
+            [key: string]: any[];
+        }
+    ) => {
+        return { ...state, categorization };
+    },
+    setAvailableCategories: (state, availableCategories: any[]) => {
+        return { ...state, availableCategories };
+    },
 
-export const changeNumeratorAttribute =
-    domain.createEvent<DataValueAttribute>();
-export const changeDenominatorAttribute =
-    domain.createEvent<DataValueAttribute>();
+    setAvailableCategoryOptionCombos: (
+        state,
+        availableCategoryOptionCombos: any[]
+    ) => {
+        return { ...state, availableCategoryOptionCombos };
+    },
+    setTargetCategoryOptionCombos: (
+        state,
+        targetCategoryOptionCombos: any[]
+    ) => {
+        return { ...state, targetCategoryOptionCombos };
+    },
+    setHasChildren: (state, hasChildren: boolean) => {
+        return { ...state, hasChildren };
+    },
+    setNodeSource: (
+        state,
+        {
+            field,
+            value,
+        }: {
+            field: string;
+            value: string;
+        }
+    ) => {
+        const nodeSource = state.nodeSource || {};
+        return { ...state, nodeSource: { ...nodeSource, [field]: value } };
+    },
+    setSections: (state, sections: ISection[]) => {
+        return { ...state, sections };
+    },
+    addImage: (state, image: IImage) => {
+        const imageSearch = state.images.findIndex(
+            ({ alignment }) => image.alignment === alignment
+        );
+        if (imageSearch !== -1) {
+            const images = produce(state.images, (draft) => {
+                draft[imageSearch].src = image.src;
+            });
 
-export const changeNumeratorDimension = domain.createEvent<Dimension>();
+            return produce(state, (draft) => {
+                draft.images = images;
+            });
+        }
+        return { ...state, images: [...state.images, image] };
+    },
+    changeTag: (state, tag: string) =>
+        produce(state, (draft) => {
+            draft.tag = tag;
+        }),
+    changeBg: (state, bg: string) =>
+        produce(state, (draft) => {
+            draft.bg = bg;
+        }),
+});
 
-export const changeDenominatorDimension = domain.createEvent<Dimension>();
+export const indicatorApi = createApi($indicator, {
+    changeIndicatorAttribute: (
+        state,
+        {
+            attribute,
+            value,
+        }: {
+            attribute: "name" | "description" | "factor" | "query" | "custom";
+            value: any;
+        }
+    ) => {
+        return { ...state, [attribute]: value };
+    },
+    changeDenominatorExpressionValue: (
+        state,
+        { attribute, value, isGlobal }: IExpressionValue
+    ) => {
+        if (state.denominator) {
+            return {
+                ...state,
+                denominator: {
+                    ...state.denominator,
+                    expressions: {
+                        ...state.denominator.expressions,
+                        [attribute]: { value, isGlobal },
+                    },
+                },
+            };
+        }
+    },
+    changeNumeratorExpressionValue: (
+        state,
+        { attribute, value, isGlobal }: IExpressionValue
+    ) => {
+        if (state.numerator) {
+            return {
+                ...state,
+                numerator: {
+                    ...state.numerator,
+                    expressions: {
+                        ...state.numerator.expressions,
+                        [attribute]: { value, isGlobal },
+                    },
+                },
+            };
+        }
+    },
+    changeDenominatorAttribute: (
+        state,
+        { attribute, value }: DataValueAttribute
+    ) => {
+        if (state.denominator) {
+            return {
+                ...state,
+                denominator: {
+                    ...state.denominator,
+                    [attribute]: value,
+                },
+            };
+        }
+    },
+    changeNumeratorAttribute: (
+        state,
+        { attribute, value }: DataValueAttribute
+    ) => {
+        if (state.numerator) {
+            return {
+                ...state,
+                numerator: {
+                    ...state.numerator,
+                    [attribute]: value,
+                },
+            };
+        }
+    },
+    changeDataSource: (state, dataSource: string | undefined) => {
+        return {
+            ...state,
+            dataSource: dataSource,
+        };
+    },
+    changeNumeratorDimension: (
+        state,
+        {
+            id,
+            dimension,
+            type,
+            resource,
+            replace,
+            remove,
+            prefix,
+            suffix,
+            label = "",
+        }: Dimension
+    ) => {
+        if (state.numerator) {
+            if (remove) {
+                const { [id]: removed, ...others } =
+                    state.numerator.dataDimensions;
+                return {
+                    ...state,
+                    numerator: {
+                        ...state.numerator,
+                        dataDimensions: others,
+                    },
+                };
+            }
 
-export const changeUseIndicators = domain.createEvent<boolean>();
-export const setVisualizationQueries = domain.createEvent<IIndicator[]>();
-export const changeDefaults = domain.createEvent<void>();
-export const increment = domain.createEvent<number>();
-export const changeCategory = domain.createEvent<string>();
-export const changeDashboardName = domain.createEvent<string>();
-export const changeDashboardDescription = domain.createEvent<string>();
-export const changeSelectedCategory = domain.createEvent<string>();
-export const changeSelectedDashboard = domain.createEvent<string>();
-export const setAsDefault = domain.createEvent<boolean>();
-export const changeRefreshRate = domain.createEvent<string>();
-export const toggle = domain.createEvent<void>();
-export const changeVisualizationAttribute = domain.createEvent<{
-    attribute: string;
-    value?: any;
-    visualization: string;
-}>();
+            if (replace) {
+                const working = fromPairs(
+                    Object.entries(state.numerator.dataDimensions).filter(
+                        ([i, d]) => d.resource !== resource
+                    )
+                );
 
-export const changeVisualizationOverride = domain.createEvent<{
-    override: string;
-    value: string;
-    visualization: string;
-}>();
+                return {
+                    ...state,
+                    numerator: {
+                        ...state.numerator,
+                        dataDimensions: {
+                            ...working,
+                            [id]: {
+                                id,
+                                resource,
+                                type,
+                                dimension,
+                                label,
+                                prefix,
+                                suffix,
+                            },
+                        },
+                    },
+                };
+            }
+            const computedState = {
+                ...state,
+                numerator: {
+                    ...state.numerator,
+                    dataDimensions: {
+                        ...state.numerator.dataDimensions,
+                        [id]: {
+                            id,
+                            resource,
+                            type,
+                            dimension,
+                            prefix,
+                            suffix,
+                            label,
+                        },
+                    },
+                },
+            };
+            return computedState;
+        }
+    },
+    changeDenominatorDimension: (
+        state,
+        {
+            id,
+            dimension,
+            resource,
+            type,
+            replace,
+            remove,
+            prefix,
+            suffix,
+            label = "",
+        }: Dimension
+    ) => {
+        if (state.denominator) {
+            if (remove) {
+                const { [id]: removed, ...rest } =
+                    state.denominator.dataDimensions;
+                return {
+                    ...state,
+                    denominator: {
+                        ...state.denominator,
+                        dataDimensions: rest,
+                    },
+                };
+            }
 
-export const changeSectionAttribute = domain.createEvent<{
-    attribute: string;
-    value?: any;
-}>();
+            if (replace) {
+                const working = fromPairs(
+                    Object.entries(state.denominator.dataDimensions).filter(
+                        ([_, d]) => d.resource !== resource
+                    )
+                );
+                return {
+                    ...state,
+                    denominator: {
+                        ...state.denominator,
+                        dataDimensions: {
+                            ...working,
+                            [id]: {
+                                id,
+                                dimension,
+                                type,
+                                prefix,
+                                suffix,
+                                resource,
+                                label,
+                            },
+                        },
+                    },
+                };
+            }
+            return {
+                ...state,
+                denominator: {
+                    ...state.denominator,
+                    dataDimensions: {
+                        ...state.denominator.dataDimensions,
+                        [id]: {
+                            id,
+                            type,
+                            dimension,
+                            prefix,
+                            suffix,
+                            resource,
+                            label,
+                        },
+                    },
+                },
+            };
+        }
+    },
+    changeUseIndicators: (state, useInBuildIndicators: boolean) => {
+        return { ...state, useInBuildIndicators };
+    },
+    setIndicator: (_, indicator: IIndicator) => {
+        return indicator;
+    },
+});
 
-export const addOverride = domain.createEvent<{
-    attribute: "ou" | "dx" | "pe";
-    value: string;
-}>();
+export const sectionApi = createApi($section, {
+    setCurrentSection: (_, section: ISection) => {
+        return { ...section, images: section.images ? section.images : [] };
+    },
+    addVisualization2Section: (state, id: string) => {
+        const visualization: IVisualization = {
+            id,
+            indicator: "",
+            type: "",
+            name: `Visualization ${state.visualizations.length + 1}`,
+            properties: {},
+            overrides: {},
+            group: "",
+            bg: "",
+        };
+        return {
+            ...state,
+            visualizations: [...state.visualizations, visualization],
+        };
+    },
+    duplicateVisualization: (state, visualization: IVisualization) => {
+        return {
+            ...state,
+            visualizations: [...state.visualizations, visualization],
+        };
+    },
+    deleteSectionVisualization: (state, visualizationId: string) => {
+        return {
+            ...state,
+            visualizations: state.visualizations.filter(
+                ({ id }) => id !== visualizationId
+            ),
+        };
+    },
+    changeVisualizationAttribute: (
+        state,
+        {
+            attribute,
+            value,
+            visualization,
+        }: {
+            attribute: string;
+            value?: any;
+            visualization: string;
+        }
+    ) => {
+        const visualizations = state.visualizations.map((v: IVisualization) => {
+            if (v.id === visualization) {
+                return { ...v, [attribute]: value };
+            }
+            return v;
+        });
+        return { ...state, visualizations };
+    },
 
-export const changeVisualizationProperties = domain.createEvent<{
-    visualization: string;
-    attribute: string;
-    value?: any;
-}>();
+    changeSectionAttribute: (
+        state,
+        {
+            attribute,
+            value,
+        }: {
+            attribute: string;
+            value?: any;
+        }
+    ) => {
+        return { ...state, [attribute]: value };
+    },
+    changeVisualizationOverride: (
+        state,
+        {
+            visualization,
+            override,
+            value,
+        }: {
+            override: string;
+            value: string;
+            visualization: string;
+        }
+    ) => {
+        const visualizations: IVisualization[] = state.visualizations.map(
+            (v: IVisualization) => {
+                if (v.id === visualization) {
+                    return {
+                        ...v,
+                        overrides: { ...v.overrides, [override]: value },
+                    };
+                }
+                return v;
+            }
+        );
+        return { ...state, visualizations };
+    },
 
-export const updateVisualizationData = domain.createEvent<{
-    visualizationId: string;
-    data: any;
-}>();
+    changeVisualizationProperties: (
+        state,
+        {
+            attribute,
+            value,
+            visualization,
+        }: {
+            visualization: string;
+            attribute: string;
+            value?: any;
+        }
+    ) => {
+        const visualizations: IVisualization[] = state.visualizations.map(
+            (v: IVisualization) => {
+                if (v.id === visualization) {
+                    return {
+                        ...v,
+                        properties: { ...v.properties, [attribute]: value },
+                    };
+                }
+                return v;
+            }
+        );
+        return { ...state, visualizations };
+    },
 
-export const updateVisualizationMetadata = domain.createEvent<{
-    visualizationId: string;
-    data: any;
-}>();
+    setVisualizations: (state, visualizations: IVisualization[]) => {
+        return { ...state, visualizations };
+    },
+});
 
-export const setOrganisations = domain.createEvent<string[]>();
-export const setExpandedKeys = domain.createEvent<React.Key[]>();
-export const changeOrganisations = domain.createEvent<string>();
-export const setRefreshInterval = domain.createEvent<string>();
-export const setDefaultDashboard = domain.createEvent<string>();
-export const changeHasDashboards = domain.createEvent<boolean>();
-export const changeVisualizationType = domain.createEvent<{
-    visualization: string;
-    section: ISection;
-}>();
+export const dataSourcesApi = createApi($dataSources, {
+    setDataSources: (_, dataSources: IDataSource[]) => dataSources,
+});
+export const indicatorsApi = createApi($indicators, {
+    setVisualizationQueries: (_, indicators: IIndicator[]) => indicators,
+});
+export const categoriesApi = createApi($categories, {
+    setCategories: (_, categories: ICategory[]) => categories,
+});
+export const dashboardsApi = createApi($dashboards, {
+    setDashboards: (_, dashboards: IDashboard[]) => dashboards,
+});
 
-export const changePeriods = domain.createEvent<Item[]>();
+export const dataSetsApi = createApi($dataSets, {
+    setDataSets: (_, dataSets) => dataSets,
+});
 
-export const onChangeOrganisations = domain.createEvent<{
-    levels: string[];
-    organisations: string[];
-    groups: string[];
-    expandedKeys: React.Key[];
-    checkedKeys: React.Key[];
-}>();
+export const visualizationDataApi = createApi($visualizationData, {
+    updateVisualizationData: (
+        state,
+        {
+            visualizationId,
+            data,
+        }: {
+            visualizationId: string;
+            data: any;
+        }
+    ) => {
+        return { ...state, [visualizationId]: data };
+    },
+});
 
-export const setCurrentPage = domain.createEvent<string>();
+export const visualizationMetadataApi = createApi($visualizationMetadata, {
+    updateVisualizationMetadata: (
+        state,
+        {
+            visualizationId,
+            data,
+        }: {
+            visualizationId: string;
+            data: any;
+        }
+    ) => {
+        return { ...state, [visualizationId]: data };
+    },
+});
 
-export const setDataSets = domain.createEvent<Option[]>();
-export const assignDataSet = domain.createEvent<string>();
+export const dashboardTypeApi = createApi($dashboardType, {
+    set: (_, value: "fixed" | "dynamic") => value,
+});
 
-export const setCategorization = domain.createEvent<{
-    [key: string]: any[];
-}>();
+export const categoryApi = createApi($category, {
+    setCategory: (_, category: ICategory) => category,
+    changeCategoryId: (state, id: string) => {
+        return { ...state, id };
+    },
+});
 
-export const setHasChildren = domain.createEvent<boolean | undefined>();
-export const setNodeSource = domain.createEvent<{
-    field: string;
-    value: string;
-}>();
-export const setVersion = domain.createEvent<string>();
-export const setAvailableCategories = domain.createEvent<any[]>();
-export const setRows = domain.createEvent<any[]>();
-export const setColumns = domain.createEvent<any[]>();
-export const setOriginalColumns = domain.createEvent<any[]>();
-export const setSections = domain.createEvent<ISection[]>();
-export const setVisualizations = domain.createEvent<IVisualization[]>();
-export const setAvailableCategoryOptionCombos = domain.createEvent<any[]>();
-export const setTargetCategoryOptionCombos = domain.createEvent<any[]>();
-export const setSystemId = domain.createEvent<string>();
-export const setCheckedKeys = domain.createEvent<
-    { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[]
->();
+// export const setShowSider = domain.createEvent<boolean>();
+// export const setDataSources = domain.createEvent<IDataSource[]>();
+// export const setCategories = domain.createEvent<ICategory[]>();
+// export const setDashboards = domain.createEvent<IDashboard[]>();
+// export const setCurrentDashboard = domain.createEvent<IDashboard>();
+// export const addSection = domain.createEvent<ISection>();
+// export const addVisualization2Section = domain.createEvent<string>();
+// export const duplicateVisualization = domain.createEvent<IVisualization>();
+// export const deleteSection = domain.createEvent<string | undefined>();
+// export const deleteSectionVisualization = domain.createEvent<string>();
+// export const setCurrentSection = domain.createEvent<ISection>();
+// export const toggleDashboard = domain.createEvent<boolean>();
+// export const changeDashboardId = domain.createEvent<string>();
+// export const changeCategoryId = domain.createEvent<string>();
+// export const changeDataSourceId = domain.createEvent<string>();
+// export const changeAdministration = domain.createEvent<boolean>();
+// export const addPagination = domain.createEvent<{
+//     [key: string]: number;
+// }>();
 
-export const setLevels = domain.createEvent<string[]>();
-export const setDataElements = domain.createEvent<IDataElement[]>();
-export const setGroups = domain.createEvent<string[]>();
-export const setThemes = domain.createEvent<string[]>();
-export const setShowFooter = domain.createEvent<boolean>();
-export const setSystemName = domain.createEvent<string>();
-export const setInstanceBaseUrl = domain.createEvent<string>();
-export const setMinSublevel = domain.createEvent<number>();
-export const setMaxLevel = domain.createEvent<number>();
-export const setIsNotDesktop = domain.createEvent<boolean>();
-export const setIsFullScreen = domain.createEvent<boolean>();
-export const setRefresh = domain.createEvent<boolean>();
+// export const changeDataSource = domain.createEvent<string | undefined>();
+// export const setDataSource = domain.createEvent<IDataSource>();
+// export const setCategory = domain.createEvent<ICategory>();
+// export const setIndicator = domain.createEvent<IIndicator>();
 
-export const setDataElementGroups = domain.createEvent<string[]>();
-export const setDataElementGroupSets = domain.createEvent<string[]>();
+// export const changeNumeratorExpressionValue = domain.createEvent<{
+//     attribute: string;
+//     value: string;
+//     isGlobal: boolean;
+// }>();
+// export const changeDenominatorExpressionValue = domain.createEvent<{
+//     attribute: string;
+//     value: string;
+//     isGlobal: boolean;
+// }>();
+
+// export const changeIndicatorAttribute = domain.createEvent<{
+//     attribute: "name" | "description" | "factor" | "query" | "custom";
+//     value: any;
+// }>();
+
+// export const changeVisualizationData = domain.createEvent<{
+//     attribute: "name" | "description" | "factor" | "query";
+//     value: any;
+// }>();
+
+// export const changeNumeratorAttribute =
+//     domain.createEvent<DataValueAttribute>();
+// export const changeDenominatorAttribute =
+//     domain.createEvent<DataValueAttribute>();
+
+// export const changeNumeratorDimension = domain.createEvent<Dimension>();
+
+// export const changeDenominatorDimension = domain.createEvent<Dimension>();
+
+// export const changeUseIndicators = domain.createEvent<boolean>();
+// export const setVisualizationQueries = domain.createEvent<IIndicator[]>();
+// export const changeDefaults = domain.createEvent<void>();
+// export const increment = domain.createEvent<number>();
+// export const changeCategory = domain.createEvent<string>();
+// export const changeDashboardName = domain.createEvent<string>();
+// export const changeDashboardDescription = domain.createEvent<string>();
+// export const changeSelectedCategory = domain.createEvent<string>();
+// export const changeSelectedDashboard = domain.createEvent<string>();
+// export const setAsDefault = domain.createEvent<boolean>();
+// export const changeRefreshRate = domain.createEvent<string>();
+// export const toggle = domain.createEvent<void>();
+// export const changeVisualizationAttribute = domain.createEvent<{
+//     attribute: string;
+//     value?: any;
+//     visualization: string;
+// }>();
+
+// export const changeVisualizationOverride = domain.createEvent<{
+//     override: string;
+//     value: string;
+//     visualization: string;
+// }>();
+
+// export const changeSectionAttribute = domain.createEvent<{
+//     attribute: string;
+//     value?: any;
+// }>();
+
+// export const addOverride = domain.createEvent<{
+//     attribute: "ou" | "dx" | "pe";
+//     value: string;
+// }>();
+
+// export const changeVisualizationProperties = domain.createEvent<{
+//     visualization: string;
+//     attribute: string;
+//     value?: any;
+// }>();
+
+// export const updateVisualizationData = domain.createEvent<{
+//     visualizationId: string;
+//     data: any;
+// }>();
+
+// export const updateVisualizationMetadata = domain.createEvent<{
+//     visualizationId: string;
+//     data: any;
+// }>();
+
+// export const setOrganisations = domain.createEvent<string[]>();
+// export const setExpandedKeys = domain.createEvent<React.Key[]>();
+// export const changeOrganisations = domain.createEvent<string>();
+// export const setRefreshInterval = domain.createEvent<string>();
+// export const setDefaultDashboard = domain.createEvent<string>();
+// export const changeHasDashboards = domain.createEvent<boolean>();
+// export const changeVisualizationType = domain.createEvent<{
+//     visualization: string;
+//     section: ISection;
+// }>();
+
+// export const changePeriods = domain.createEvent<Item[]>();
+
+// export const onChangeOrganisations = domain.createEvent<{
+//     levels: string[];
+//     organisations: string[];
+//     groups: string[];
+//     expandedKeys: React.Key[];
+//     checkedKeys: React.Key[];
+// }>();
+
+// export const setCurrentPage = domain.createEvent<string>();
+
+// export const setDataSets = domain.createEvent<Option[]>();
+// export const assignDataSet = domain.createEvent<string>();
+
+// export const setCategorization = domain.createEvent<{
+//     [key: string]: any[];
+// }>();
+
+// export const setHasChildren = domain.createEvent<boolean | undefined>();
+// export const setNodeSource = domain.createEvent<{
+//     field: string;
+//     value: string;
+// }>();
+// export const setVersion = domain.createEvent<string>();
+// export const setAvailableCategories = domain.createEvent<any[]>();
+// export const setRows = domain.createEvent<any[]>();
+// export const setColumns = domain.createEvent<any[]>();
+// export const setOriginalColumns = domain.createEvent<any[]>();
+// export const setSections = domain.createEvent<ISection[]>();
+// export const setVisualizations = domain.createEvent<IVisualization[]>();
+// export const setAvailableCategoryOptionCombos = domain.createEvent<any[]>();
+// export const setTargetCategoryOptionCombos = domain.createEvent<any[]>();
+// export const setSystemId = domain.createEvent<string>();
+// export const setCheckedKeys = domain.createEvent<
+//     { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[]
+// >();
+
+// export const setLevels = domain.createEvent<string[]>();
+// export const setDataElements = domain.createEvent<IDataElement[]>();
+// export const setGroups = domain.createEvent<string[]>();
+// export const setThemes = domain.createEvent<string[]>();
+// export const setShowFooter = domain.createEvent<boolean>();
+// export const setSystemName = domain.createEvent<string>();
+// export const setInstanceBaseUrl = domain.createEvent<string>();
+// export const setMinSublevel = domain.createEvent<number>();
+// export const setMaxLevel = domain.createEvent<number>();
+// export const setIsNotDesktop = domain.createEvent<boolean>();
+// export const setIsFullScreen = domain.createEvent<boolean>();
+// export const setRefresh = domain.createEvent<boolean>();
+
+// export const setDataElementGroups = domain.createEvent<string[]>();
+// export const setDataElementGroupSets = domain.createEvent<string[]>();

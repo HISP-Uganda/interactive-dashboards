@@ -19,19 +19,23 @@ import { uniq } from "lodash";
 import { useEffect, useState } from "react";
 import { db } from "../../db";
 import {
-    changeSelectedCategory,
-    changeSelectedDashboard,
-    setColumns,
-    setCurrentDashboard,
-    setDataElements,
-    setOriginalColumns,
-    setRefresh,
-    setRows,
-    updateVisualizationData,
+    // changeSelectedCategory,
+    // changeSelectedDashboard,
+    // setColumns,
+    // setCurrentDashboard,
+    // setDataElements,
+    // setOriginalColumns,
+    // setRefresh,
+    // setRows,
+    // updateVisualizationData,
+    dashboardTypeApi,
+    storeApi,
+    dashboardApi,
+    visualizationDataApi,
 } from "../../Events";
 import { DataNode, IDashboard, LocationGenerics } from "../../interfaces";
 import { deleteDocument, useDashboards } from "../../Queries";
-import { $settings, $store, dashboardTypeApi } from "../../Store";
+import { $settings, $store } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import { loadData } from "../helpers";
 import LoadingIndicator from "../LoadingIndicator";
@@ -70,7 +74,7 @@ const Dashboards = () => {
                 <Button
                     onClick={() => {
                         dashboardTypeApi.set("dynamic");
-                        setRefresh(true);
+                        storeApi.setRefresh(true);
                         navigate({
                             to: `/dashboards/${generateUid()}`,
                             search: {
@@ -92,7 +96,7 @@ const Dashboards = () => {
                 <Button
                     onClick={() => {
                         dashboardTypeApi.set("fixed");
-                        setRefresh(true);
+                        storeApi.setRefresh(true);
                         navigate({
                             to: `/dashboards/${generateUid()}`,
                             search: {
@@ -132,9 +136,13 @@ const Dashboards = () => {
                                     key={dashboard.id}
                                     cursor="pointer"
                                     onClick={async () => {
-                                        setCurrentDashboard(dashboard);
-                                        changeSelectedDashboard(dashboard.id);
-                                        changeSelectedCategory(
+                                        dashboardApi.setCurrentDashboard(
+                                            dashboard
+                                        );
+                                        storeApi.changeSelectedDashboard(
+                                            dashboard.id
+                                        );
+                                        storeApi.changeSelectedCategory(
                                             dashboard.category || ""
                                         );
                                         const node: EventDataNode<DataNode> = {
@@ -163,7 +171,7 @@ const Dashboards = () => {
                                             node,
                                             engine
                                         );
-                                        setOriginalColumns([
+                                        storeApi.setOriginalColumns([
                                             {
                                                 id: "title",
                                                 title: "Indicator",
@@ -173,15 +181,15 @@ const Dashboards = () => {
                                                 title: "Indicators",
                                             },
                                         ]);
-                                        setColumns([
+                                        storeApi.setColumns([
                                             { id: "a", title: "A" },
                                             { id: "b", title: "MA" },
                                             { id: "c", title: "NA" },
                                         ]);
                                         const elements =
                                             await db.dataElements.toArray();
-                                        setDataElements(elements);
-                                        setRows(
+                                        storeApi.setDataElements(elements);
+                                        storeApi.setRows(
                                             children.map((c: any) => {
                                                 const filteredElements =
                                                     elements.filter(
@@ -205,40 +213,52 @@ const Dashboards = () => {
                                                 };
                                             })
                                         );
-                                        updateVisualizationData({
-                                            visualizationId: "keyResultAreas",
-                                            data: [
-                                                {
-                                                    value: uniq(
-                                                        elements.map(
-                                                            (e) =>
-                                                                e.keyResultAreaCode
-                                                        )
-                                                    ).length,
-                                                },
-                                            ],
-                                        });
-                                        updateVisualizationData({
-                                            visualizationId: "indicators",
-                                            data: [{ value: elements.length }],
-                                        });
-                                        updateVisualizationData({
-                                            visualizationId: "interventions",
-                                            data: [
-                                                {
-                                                    value: uniq(
-                                                        elements.map(
-                                                            (e) =>
-                                                                e.interventionCode
-                                                        )
-                                                    ).length,
-                                                },
-                                            ],
-                                        });
-                                        updateVisualizationData({
-                                            visualizationId: "outputs",
-                                            data: [{ value: 0 }],
-                                        });
+                                        visualizationDataApi.updateVisualizationData(
+                                            {
+                                                visualizationId:
+                                                    "keyResultAreas",
+                                                data: [
+                                                    {
+                                                        value: uniq(
+                                                            elements.map(
+                                                                (e) =>
+                                                                    e.keyResultAreaCode
+                                                            )
+                                                        ).length,
+                                                    },
+                                                ],
+                                            }
+                                        );
+                                        visualizationDataApi.updateVisualizationData(
+                                            {
+                                                visualizationId: "indicators",
+                                                data: [
+                                                    { value: elements.length },
+                                                ],
+                                            }
+                                        );
+                                        visualizationDataApi.updateVisualizationData(
+                                            {
+                                                visualizationId:
+                                                    "interventions",
+                                                data: [
+                                                    {
+                                                        value: uniq(
+                                                            elements.map(
+                                                                (e) =>
+                                                                    e.interventionCode
+                                                            )
+                                                        ).length,
+                                                    },
+                                                ],
+                                            }
+                                        );
+                                        visualizationDataApi.updateVisualizationData(
+                                            {
+                                                visualizationId: "outputs",
+                                                data: [{ value: 0 }],
+                                            }
+                                        );
                                         navigate({
                                             to: `/dashboards/${dashboard.id}`,
                                             search: {

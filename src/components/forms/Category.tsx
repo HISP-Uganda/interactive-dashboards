@@ -14,7 +14,7 @@ import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useQueryClient } from "@tanstack/react-query";
 import { useStore } from "effector-react";
 import { useForm } from "react-hook-form";
-import { setCategory } from "../../Events";
+import { categoryApi } from "../../Events";
 import { ICategory, LocationGenerics } from "../../interfaces";
 import { saveDocument } from "../../Queries";
 import { $category, $settings, $store, createCategory } from "../../Store";
@@ -95,7 +95,7 @@ const Category = () => {
                         <Button
                             colorScheme="red"
                             onClick={() => {
-                                setCategory(createCategory());
+                                categoryApi.setCategory(createCategory());
                                 navigate({ to: "/settings/categories" });
                             }}
                         >

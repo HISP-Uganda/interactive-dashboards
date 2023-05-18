@@ -1,4 +1,4 @@
-import { Box, Flex, useMediaQuery, Spinner } from "@chakra-ui/react";
+import { Box, Flex, Spinner, useMediaQuery } from "@chakra-ui/react";
 import {
     createHashHistory,
     Outlet,
@@ -8,8 +8,8 @@ import {
     Router,
     stringifySearchWith,
 } from "@tanstack/react-location";
+import { useStore } from "effector-react";
 import { useEffect } from "react";
-import { useFullScreenHandle } from "react-full-screen";
 import {
     CategoryForm,
     DashboardForm,
@@ -26,26 +26,20 @@ import {
     Indicators,
 } from "../components/lists";
 import Section from "../components/Section";
-import {
-    setCurrentPage,
-    setIsFullScreen,
-    setIsNotDesktop,
-    setShowFooter,
-    setShowSider,
-} from "../Events";
+import { sizeApi, storeApi } from "../Events";
 import { LocationGenerics, ScreenSize } from "../interfaces";
 import { useInitials } from "../Queries";
+import { $settings } from "../Store";
 import { decodeFromBinary, encodeToBinary } from "../utils/utils";
-import LoadingIndicator from "./LoadingIndicator";
-import Settings from "./Settings";
-import { useStore } from "effector-react";
-import { $settings, sizeApi } from "../Store";
 import Panel from "./Panel";
+import Settings from "./Settings";
 
 const history = createHashHistory();
 const location = new ReactLocation<LocationGenerics>({
     history,
-    parseSearch: parseSearchWith((value) => JSON.parse(decodeFromBinary(value))),
+    parseSearch: parseSearchWith((value) =>
+        JSON.parse(decodeFromBinary(value))
+    ),
     stringifySearch: stringifySearchWith((value) =>
         encodeToBinary(JSON.stringify(value))
     ),
@@ -61,7 +55,6 @@ const sizes: { [k: number]: ScreenSize } = {
 const App = () => {
     const { storage } = useStore($settings);
     const { isLoading, isSuccess, isError, error } = useInitials(storage);
-    const handle = useFullScreenHandle();
     const [isNotDesktop] = useMediaQuery(["(max-width: 992px)"]);
 
     const [phone, tablet, laptop, desktop] = useMediaQuery([
@@ -72,7 +65,7 @@ const App = () => {
     ]);
 
     useEffect(() => {
-        setIsNotDesktop(isNotDesktop);
+        storeApi.setIsNotDesktop(isNotDesktop);
     }, [isNotDesktop]);
 
     useEffect(() => {
@@ -82,28 +75,10 @@ const App = () => {
         }
     }, [phone, tablet, laptop, desktop]);
 
-    useEffect(() => {
-        const callback = async (event: KeyboardEvent) => {
-            if (event.key === "F5" || event.key === "f5") {
-                await handle.enter();
-                if (handle.active) {
-                    setIsFullScreen(true);
-                } else {
-                    setShowSider(true);
-                    setIsFullScreen(true);
-                }
-            }
-        };
-        document.addEventListener("keydown", callback);
-        return () => {
-            document.removeEventListener("keydown", callback);
-        };
-    }, []);
-
     const routes: Route<LocationGenerics>[] = [
         {
             loader: async () => {
-                setCurrentPage("");
+                storeApi.setCurrentPage("");
                 return {};
             },
             path: "/",
@@ -111,7 +86,7 @@ const App = () => {
         },
         {
             loader: async () => {
-                setCurrentPage("");
+                storeApi.setCurrentPage("");
                 return {};
             },
             path: "/panel",
@@ -132,8 +107,8 @@ const App = () => {
                             path: "/",
                             element: <Categories />,
                             loader: async () => {
-                                setCurrentPage("categories");
-                                setShowSider(true);
+                                storeApi.setCurrentPage("categories");
+                                storeApi.setShowSider(true);
                                 return {};
                             },
                         },
@@ -141,9 +116,9 @@ const App = () => {
                             path: ":categoryId",
                             element: <CategoryForm />,
                             loader: () => {
-                                setCurrentPage("category");
-                                setShowFooter(false);
-                                setShowSider(true);
+                                storeApi.setCurrentPage("category");
+                                storeApi.setShowFooter(false);
+                                storeApi.setShowSider(true);
                                 return {};
                             },
                         },
@@ -156,9 +131,9 @@ const App = () => {
                             path: "/",
                             element: <DataSources />,
                             loader: () => {
-                                setCurrentPage("data-sources");
-                                setShowFooter(false);
-                                setShowSider(true);
+                                storeApi.setCurrentPage("data-sources");
+                                storeApi.setShowFooter(false);
+                                storeApi.setShowSider(true);
                                 return {};
                             },
                         },
@@ -166,8 +141,8 @@ const App = () => {
                             path: ":dataSourceId",
                             element: <DataSourceForm />,
                             loader: () => {
-                                setCurrentPage("data-source");
-                                setShowFooter(false);
+                                storeApi.setCurrentPage("data-source");
+                                storeApi.setShowFooter(false);
                                 return {};
                             },
                         },
@@ -180,9 +155,9 @@ const App = () => {
                             path: "/",
                             element: <Indicators />,
                             loader: () => {
-                                setCurrentPage("indicators");
-                                setShowFooter(false);
-                                setShowSider(true);
+                                storeApi.setCurrentPage("indicators");
+                                storeApi.setShowFooter(false);
+                                storeApi.setShowSider(true);
                                 return {};
                             },
                         },
@@ -193,9 +168,9 @@ const App = () => {
                                     path: "/",
                                     element: <IndicatorForm />,
                                     loader: () => {
-                                        setShowFooter(false);
-                                        setCurrentPage("indicator");
-                                        setShowSider(true);
+                                        storeApi.setShowFooter(false);
+                                        storeApi.setCurrentPage("indicator");
+                                        storeApi.setShowSider(true);
                                         return {};
                                     },
                                 },
@@ -215,9 +190,9 @@ const App = () => {
                             path: "/",
                             element: <Dashboards />,
                             loader: () => {
-                                setCurrentPage("dashboards");
-                                setShowFooter(false);
-                                setShowSider(true);
+                                storeApi.setCurrentPage("dashboards");
+                                storeApi.setShowFooter(false);
+                                storeApi.setShowSider(true);
                                 return {};
                             },
                         },
@@ -232,9 +207,9 @@ const App = () => {
                     path: "/",
                     element: <DashboardForm />,
                     loader: () => {
-                        setCurrentPage("dashboard");
-                        setShowFooter(true);
-                        setShowSider(true);
+                        storeApi.setCurrentPage("dashboard");
+                        storeApi.setShowFooter(true);
+                        storeApi.setShowSider(true);
                         return {};
                     },
                 },
@@ -242,12 +217,15 @@ const App = () => {
                     path: "section",
                     element: <Section />,
                     loader: async () => {
-                        setCurrentPage("sections");
-                        setShowFooter(false);
+                        storeApi.setCurrentPage("sections");
+                        storeApi.setShowFooter(false);
                         return {};
                     },
                 },
             ],
+        },
+        {
+            element: <Home />,
         },
     ];
 

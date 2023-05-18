@@ -1,9 +1,10 @@
 import React, { useRef, ChangeEvent } from "react";
 import { Stack, StackProps } from "@chakra-ui/react";
-import { $dashboard, dashboardApi } from "../Store";
+import { dashboardApi } from "../Events";
 import { useStore } from "effector-react";
 import { generateUid } from "../utils/uid";
 import { PLACE_HOLDER } from "../constants";
+import { $dashboard } from "../Store";
 interface Props extends StackProps {
     alignment:
         | "bottom-left"

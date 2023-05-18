@@ -29,9 +29,11 @@ import { FaGlobeAfrica } from "react-icons/fa";
 
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import {
-    changeVisualizationType,
-    deleteSection,
-    setCurrentSection,
+    // changeVisualizationType,
+    // deleteSection,
+    // setCurrentSection,
+    sectionApi,
+    dashboardApi,
 } from "../../Events";
 import { LocationGenerics, ISection } from "../../interfaces";
 import Visualization from "./Visualization";
@@ -72,7 +74,7 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
                         <MenuItem
                             fontSize="18px"
                             onClick={() => {
-                                setCurrentSection(section);
+                                sectionApi.setCurrentSection(section);
                                 isOpenApi.onOpen();
                             }}
                             icon={<EditIcon />}
@@ -91,7 +93,7 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
                     <MenuItem
                         fontSize="18px"
                         onClick={() =>
-                            changeVisualizationType({
+                            dashboardApi.changeVisualizationType({
                                 section,
                                 visualization: "line",
                             })
@@ -103,7 +105,7 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
                     <MenuItem
                         fontSize="18px"
                         onClick={() =>
-                            changeVisualizationType({
+                            dashboardApi.changeVisualizationType({
                                 section,
                                 visualization: "bar",
                             })
@@ -115,7 +117,7 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
                     <MenuItem
                         fontSize="18px"
                         onClick={() =>
-                            changeVisualizationType({
+                            dashboardApi.changeVisualizationType({
                                 section,
                                 visualization: "map",
                             })
@@ -127,7 +129,7 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
                     <MenuItem
                         fontSize="18px"
                         onClick={() =>
-                            changeVisualizationType({
+                            dashboardApi.changeVisualizationType({
                                 section,
                                 visualization: "single",
                             })
@@ -136,11 +138,12 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
                     >
                         View as Single Value
                     </MenuItem>
-
                     {store.isAdmin && (
                         <MenuItem
                             fontSize="18px"
-                            onClick={() => deleteSection(section.id)}
+                            onClick={() =>
+                                dashboardApi.deleteSection(section.id)
+                            }
                             icon={<DeleteIcon color="red" />}
                         >
                             Delete

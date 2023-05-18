@@ -11,7 +11,7 @@ import {
     NumberInputField,
     NumberInputStepper,
 } from "@chakra-ui/react";
-import { changeVisualizationProperties } from "../../Events";
+import { sectionApi } from "../../Events";
 
 export default function ImageProperties({
     visualization,
@@ -26,7 +26,7 @@ export default function ImageProperties({
             fileReader.onload = async (e) => {
                 const result = e.target?.result;
                 if (result) {
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: "data.src",
                         value: result,
@@ -45,7 +45,7 @@ export default function ImageProperties({
                     flex={1}
                     value={visualization.properties["data.src"]}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "data.src",
                             value: e.target.value,
@@ -72,7 +72,7 @@ export default function ImageProperties({
                     min={20}
                     step={2}
                     onChange={(value1: string, value2: number) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "data.height",
                             value: value2,
@@ -94,7 +94,7 @@ export default function ImageProperties({
                     min={20}
                     step={2}
                     onChange={(value1: string, value2: number) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "data.width",
                             value: value2,

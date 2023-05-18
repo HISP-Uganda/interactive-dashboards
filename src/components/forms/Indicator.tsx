@@ -14,10 +14,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useStore } from "effector-react";
 import { ChangeEvent, useState } from "react";
 import {
-    changeIndicatorAttribute,
-    changeNumeratorDimension,
-    changeUseIndicators,
-    setIndicator,
+    // changeIndicatorAttribute,
+    // changeNumeratorDimension,
+    // changeUseIndicators,
+    // setIndicator,
+    indicatorApi,
+    sectionApi,
 } from "../../Events";
 import { LocationGenerics } from "../../interfaces";
 import { saveDocument } from "../../Queries";
@@ -76,7 +78,7 @@ const Indicator = () => {
                     <Checkbox
                         isChecked={indicator.useInBuildIndicators}
                         onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                            changeUseIndicators(e.target.checked)
+                            indicatorApi.changeUseIndicators(e.target.checked)
                         }
                     >
                         Use DHIS2 Indicators
@@ -87,7 +89,7 @@ const Indicator = () => {
                     <Input
                         value={indicator.name}
                         onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                            changeIndicatorAttribute({
+                            indicatorApi.changeIndicatorAttribute({
                                 attribute: "name",
                                 value: e.target.value,
                             })
@@ -98,7 +100,7 @@ const Indicator = () => {
                     <Stack>
                         {displayDataSourceType({
                             dataSourceType,
-                            onChange: changeNumeratorDimension,
+                            onChange: indicatorApi.changeNumeratorDimension,
                             denNum: indicator.numerator,
                         })}
                     </Stack>
@@ -111,7 +113,7 @@ const Indicator = () => {
                                 onChange={(
                                     e: ChangeEvent<HTMLTextAreaElement>
                                 ) =>
-                                    changeIndicatorAttribute({
+                                    indicatorApi.changeIndicatorAttribute({
                                         attribute: "description",
                                         value: e.target.value,
                                     })
@@ -122,7 +124,7 @@ const Indicator = () => {
                         <Checkbox
                             isChecked={indicator.custom}
                             onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                changeIndicatorAttribute({
+                                indicatorApi.changeIndicatorAttribute({
                                     attribute: "custom",
                                     value: e.target.checked,
                                 })
@@ -138,7 +140,7 @@ const Indicator = () => {
                                 onChange={(
                                     e: ChangeEvent<HTMLTextAreaElement>
                                 ) =>
-                                    changeIndicatorAttribute({
+                                    indicatorApi.changeIndicatorAttribute({
                                         attribute: "factor",
                                         value: e.target.value,
                                     })
@@ -155,7 +157,7 @@ const Indicator = () => {
                                     onChange={(
                                         e: ChangeEvent<HTMLTextAreaElement>
                                     ) =>
-                                        changeIndicatorAttribute({
+                                        indicatorApi.changeIndicatorAttribute({
                                             attribute: "query",
                                             value: e.target.value,
                                         })
@@ -189,12 +191,11 @@ const Indicator = () => {
                         )}
                     </>
                 )}
-                <pre>{JSON.stringify(indicator, null, 2)}</pre>
                 <Stack direction="row">
                     <Button
                         colorScheme="red"
                         onClick={() => {
-                            setIndicator(createIndicator());
+                            indicatorApi.setIndicator(createIndicator());
                             navigate({ to: "/settings/indicators", search });
                         }}
                     >

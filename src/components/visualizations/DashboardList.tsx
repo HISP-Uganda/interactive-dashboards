@@ -2,7 +2,7 @@ import { Flex, Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import React from "react";
 import { useDashboards } from "../../Queries";
-import { $dashboard, $store } from "../../Store";
+import { $dashboard, $store, $settings } from "../../Store";
 import LoadingIndicator from "../LoadingIndicator";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { LocationGenerics } from "../../interfaces";
@@ -11,8 +11,10 @@ export default function DashboardList() {
     const navigate = useNavigate();
     const search = useSearch<LocationGenerics>();
     const store = useStore($store);
+    const { storage } = useStore($settings);
     const dashboard = useStore($dashboard);
     const { isLoading, isSuccess, isError, error, data } = useDashboards(
+        storage,
         store.systemId
     );
     return (

@@ -9,13 +9,7 @@ import { useStore } from "effector-react";
 import { uniq } from "lodash";
 import React, { useState } from "react";
 import { db } from "../../db";
-import {
-    setColumns,
-    setDataElements,
-    setOriginalColumns,
-    setRows,
-    updateVisualizationData,
-} from "../../Events";
+import { storeApi, visualizationDataApi } from "../../Events";
 import { DataNode, IDataElement, LocationGenerics } from "../../interfaces";
 import { $store } from "../../Store";
 import { loadData } from "../helpers";
@@ -54,11 +48,11 @@ export default function DashboardTree() {
         setSelectedKeys(() => selectedKeys);
         if (info.node.pId === "") {
             const children = await loadData(info.node, engine);
-            setOriginalColumns([
+            storeApi.setOriginalColumns([
                 { id: "title", title: labels[info.node.key] || "" },
                 { id: "totalIndicators", title: "Indicators" },
             ]);
-            setColumns([
+            storeApi.setColumns([
                 { id: "a", title: "A", bg: "green" },
                 { id: "b", title: "MA", bg: "yellow" },
                 { id: "c", title: "NA", bg: "red" },
@@ -72,7 +66,7 @@ export default function DashboardTree() {
             } else {
                 elements = allElements.filter(({ themeCode }) => !!themeCode);
             }
-            setRows(
+            storeApi.setRows(
                 children.map((c: any) => {
                     const filteredElements = elements.filter((e) => {
                         if (info.node.id === "emIWijzLHR4") {
@@ -100,19 +94,19 @@ export default function DashboardTree() {
                     };
                 })
             );
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "keyResultAreas",
                 data: [{ value: uniq(elements.map((e) => e.id)).length }],
             });
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "indicators",
                 data: [{ value: elements.length }],
             });
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "indicators",
                 data: [{ value: elements.length }],
             });
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "interventions",
                 data: [
                     {
@@ -121,16 +115,16 @@ export default function DashboardTree() {
                     },
                 ],
             });
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "outputs",
                 data: [{ value: 0 }],
             });
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "directives",
                 data: [{ value: children.length }],
             });
-            setDataElements(elements);
-            setCheckedKeys({ checked: [], halfChecked: [] });
+            storeApi.setDataElements(elements);
+            storeApi.setCheckedKeys({ checked: [], halfChecked: [] });
 
             navigate({
                 to: `/dashboards/${info.node.key}`,
@@ -164,29 +158,29 @@ export default function DashboardTree() {
                 .or("interventionCode")
                 .anyOf(realCheckedNodes)
                 .toArray();
-            setDataElements(elements);
+            storeApi.setDataElements(elements);
 
             if (node.pId === "dWAaPPBAEbL") {
-                setOriginalColumns([
+                storeApi.setOriginalColumns([
                     { id: "interventionCode", title: "Directives", w: "125px" },
                     // { id: "program", title: "Programme" },
                     { id: "name", title: "Indicators", w: "500px" },
                 ]);
             } else {
-                setOriginalColumns([
+                storeApi.setOriginalColumns([
                     { id: "name", title: "Indicator", w: "600px" },
                 ]);
             }
-            setRows(
+            storeApi.setRows(
                 elements.map((e) => {
                     return { ...e, child: true };
                 })
             );
-            setColumns([
+            storeApi.setColumns([
                 { id: "Px8Lqkxy2si", title: "Target" },
                 { id: "HKtncMjp06U", title: "Actual" },
             ]);
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "keyResultAreas",
                 data: [
                     {
@@ -195,11 +189,11 @@ export default function DashboardTree() {
                     },
                 ],
             });
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "indicators",
                 data: [{ value: elements.length }],
             });
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "interventions",
                 data: [
                     {
@@ -208,11 +202,11 @@ export default function DashboardTree() {
                     },
                 ],
             });
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "outputs",
                 data: [{ value: 0 }],
             });
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "directives",
                 data: [{ value: realCheckedNodes.length }],
             });
@@ -221,44 +215,44 @@ export default function DashboardTree() {
                 search,
             });
         } else {
-            setRows([]);
-            updateVisualizationData({
+            storeApi.setRows([]);
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "indicators",
                 data: [{ value: 0 }],
             });
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "a",
                 data: [{ value: 0 }],
             });
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "b",
                 data: [{ value: 0 }],
             });
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "c",
                 data: [{ value: 0 }],
             });
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "directives",
                 data: [{ value: 0 }],
             });
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "aa",
                 data: [{ value: 0 }],
             });
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "aav",
                 data: [{ value: 0 }],
             });
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "av",
                 data: [{ value: 0 }],
             });
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "bav",
                 data: [{ value: 0 }],
             });
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "na",
                 data: [{ value: 0 }],
             });

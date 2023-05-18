@@ -1,27 +1,25 @@
-import { useState, useEffect } from "react";
 import { AddIcon } from "@chakra-ui/icons";
 import {
     Button,
-    Divider,
     Spacer,
     Stack,
     Table,
     Tbody,
     Td,
+    Text,
     Th,
     Thead,
     Tr,
-    Text,
 } from "@chakra-ui/react";
+import { useDataEngine } from "@dhis2/app-runtime";
 import { Link, useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
+import { useEffect, useState } from "react";
 import { ICategory, LocationGenerics } from "../../interfaces";
 import { deleteDocument, useCategories } from "../../Queries";
-import { $category, $store, $settings } from "../../Store";
+import { $settings, $store } from "../../Store";
 import { generateUid } from "../../utils/uid";
-import { generalPadding, otherHeight } from "../constants";
 import LoadingIndicator from "../LoadingIndicator";
-import { useDataEngine } from "@dhis2/app-runtime";
 
 const Categories = () => {
     const navigate = useNavigate<LocationGenerics>();

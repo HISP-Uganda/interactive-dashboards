@@ -8,7 +8,7 @@ import {
     Text,
 } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
-import { changeVisualizationProperties } from "../../Events";
+import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { createOptions } from "../../utils/utils";
 import ColorRangePicker from "../ColorRangePicker";
@@ -39,7 +39,7 @@ const MapChartProperties = ({
                         visualization.properties?.["layout.mapbox.style"]
                 )}
                 onChange={(e) =>
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: "layout.mapbox.style",
                         value: e?.value,
@@ -56,7 +56,7 @@ const MapChartProperties = ({
                 max={20}
                 min={5.3}
                 onChange={(value1: string, value2: number) =>
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: "layout.zoom",
                         value: value2,

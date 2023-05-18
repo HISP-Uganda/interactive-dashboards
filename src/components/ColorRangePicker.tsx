@@ -17,7 +17,7 @@ import { ChangeEvent, useRef, useState } from "react";
 import { SwatchesPicker } from "react-color";
 import useOnClickOutside from "use-onclickoutside";
 import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
-import { changeVisualizationProperties } from "../Events";
+import { sectionApi } from "../Events";
 import { IVisualization, Threshold } from "../interfaces";
 import { generateUid } from "../utils/uid";
 import { swatchColors } from "../utils/utils";
@@ -39,7 +39,7 @@ export default function ({ visualization }: { visualization: IVisualization }) {
             max: "100",
         };
         const all = [...thresholds, threshold];
-        changeVisualizationProperties({
+        sectionApi.changeVisualizationProperties({
             visualization: visualization.id,
             attribute: "data.thresholds",
             value: all,
@@ -49,7 +49,7 @@ export default function ({ visualization }: { visualization: IVisualization }) {
 
     const removeThreshold = (id: string) => {
         const filtered = thresholds.filter((threshold) => threshold.id !== id);
-        changeVisualizationProperties({
+        sectionApi.changeVisualizationProperties({
             visualization: visualization.id,
             attribute: "data.thresholds",
             value: filtered,
@@ -68,7 +68,7 @@ export default function ({ visualization }: { visualization: IVisualization }) {
             }
             return threshold;
         });
-        changeVisualizationProperties({
+        sectionApi.changeVisualizationProperties({
             visualization: visualization.id,
             attribute: "data.thresholds",
             value: processed,

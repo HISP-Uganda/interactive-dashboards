@@ -15,10 +15,7 @@ import { ChangeEvent } from "react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { isArray, uniq } from "lodash";
-import {
-    changeVisualizationAttribute,
-    changeVisualizationProperties,
-} from "../../Events";
+import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { customComponents } from "../../utils/components";
@@ -46,9 +43,7 @@ const BarGraphProperties = ({
             <Checkbox
                 isChecked={visualization.showTitle}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                    console.log(e.target.checked);
-
-                    changeVisualizationAttribute({
+                    sectionApi.changeVisualizationAttribute({
                         visualization: visualization.id,
                         attribute: "showTitle",
                         value: e.target.checked,
@@ -63,7 +58,7 @@ const BarGraphProperties = ({
                     (pt) => pt.value === visualization.properties["category"]
                 )}
                 onChange={(e) =>
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: "category",
                         value: e?.value,
@@ -79,7 +74,7 @@ const BarGraphProperties = ({
                     (pt) => pt.value === visualization.properties["series"]
                 )}
                 onChange={(e) =>
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: "series",
                         value: e?.value,
@@ -96,7 +91,7 @@ const BarGraphProperties = ({
                         pt.value === visualization.properties["layout.barmode"]
                 )}
                 onChange={(e) =>
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: "layout.barmode",
                         value: e?.value,
@@ -110,7 +105,7 @@ const BarGraphProperties = ({
                 <Text>Orientation</Text>
                 <RadioGroup
                     onChange={(e: string) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "data.orientation",
                             value: e,
@@ -141,7 +136,7 @@ const BarGraphProperties = ({
                 })}
                 onChange={(e) => {
                     const val = e?.value || "";
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: "layout.colorway",
                         value: val.split(","),
@@ -158,7 +153,7 @@ const BarGraphProperties = ({
                 <Text>X-Anchor</Text>
                 <RadioGroup
                     onChange={(e: string) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "layout.legend.xanchor",
                             value: e,
@@ -179,7 +174,7 @@ const BarGraphProperties = ({
                 <Text>Y-Anchor</Text>
                 <RadioGroup
                     onChange={(e: string) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "layout.legend.yanchor",
                             value: e,
@@ -201,7 +196,7 @@ const BarGraphProperties = ({
                 <Input
                     value={visualization.properties["layout.yaxis.title"]}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "layout.yaxis.title",
                             value: e.target.value,
@@ -242,11 +237,14 @@ const BarGraphProperties = ({
                                         )}
                                         onChange={(e) => {
                                             const val = e?.value || "";
-                                            changeVisualizationProperties({
-                                                visualization: visualization.id,
-                                                attribute: `data.${x}`,
-                                                value: val,
-                                            });
+                                            sectionApi.changeVisualizationProperties(
+                                                {
+                                                    visualization:
+                                                        visualization.id,
+                                                    attribute: `data.${x}`,
+                                                    value: val,
+                                                }
+                                            );
                                         }}
                                         options={chartTypes}
                                         isClearable

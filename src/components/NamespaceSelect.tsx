@@ -1,6 +1,6 @@
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { changeDataSource } from "../Events";
+import { indicatorApi } from "../Events";
 import { Option } from "../interfaces";
 import { $dataSourceOptions, $indicator } from "../Store";
 const NamespaceSelect = () => {
@@ -11,7 +11,7 @@ const NamespaceSelect = () => {
             value={dataSourceOptions.find(
                 (d: Option) => d.value === indicator.dataSource
             )}
-            onChange={(e) => changeDataSource(e?.value)}
+            onChange={(e) => indicatorApi.changeDataSource(e?.value)}
             options={dataSourceOptions}
         />
     );

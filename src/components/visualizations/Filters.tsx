@@ -2,7 +2,7 @@ import { Stack, Text } from "@chakra-ui/react";
 import { DropdownButton } from "@dhis2/ui";
 import { useStore } from "effector-react";
 import React from "react";
-import { changePeriods, setOrganisations } from "../../Events";
+import { storeApi } from "../../Events";
 import { Item } from "../../interfaces";
 import { $store } from "../../Store";
 import OUTree from "../OUTree";
@@ -11,7 +11,7 @@ import PeriodPicker from "../PeriodPicker";
 export default function Filters() {
     const store = useStore($store);
     const onChangePeriods = (periods: Item[]) => {
-        changePeriods(periods);
+        storeApi.changePeriods(periods);
     };
     return (
         <DropdownButton
@@ -31,7 +31,7 @@ export default function Filters() {
                     </Text>
                     <OUTree
                         value={store.organisations}
-                        onChange={(value) => setOrganisations(value)}
+                        onChange={(value) => storeApi.setOrganisations(value)}
                     />
                     <Text fontSize="2xl" color="yellow.500">
                         Period
