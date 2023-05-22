@@ -2,6 +2,7 @@ import uniq from "lodash/uniq";
 import update from "lodash/update";
 import { orderBy, sortBy } from "lodash";
 import { allMetadata } from "../utils/utils";
+
 export const processSingleValue = (data: any[]): any => {
     if (data.length > 0) {
         const values = Object.values(data[0]);
@@ -36,24 +37,6 @@ export const processGraphs = (
             () => value
         );
     });
-    // if (data && data.length > 0 && category) {
-    //     const x = uniq(data.map((num: any) => num[category]));
-    //     const columns = x
-    //         .map((c: any) => {
-    //             return {
-    //                 id: c,
-    //                 name: allMetadata[c] || metadata?.[c]?.name || c,
-    //             };
-    //         })
-            // .sort((a, b) => {
-            //     if (a.name < b.name) {
-            //         return -1;
-            //     }
-            //     if (a.name > b.name) {
-            //         return 1;
-            //     }
-            //     return 0;
-            // });
             if (data && data.length > 0 && category) {
                 if (order) {
                     data = orderBy(data, 'value', [order as 'asc' | 'desc'])
