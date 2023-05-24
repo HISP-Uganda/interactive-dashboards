@@ -197,3 +197,5 @@ export const setRefresh = domain.createEvent<boolean>();
 export const setDataElementGroups = domain.createEvent<string[]>();
 export const setDataElementGroupSets = domain.createEvent<string[]>();
 export const setDecreasing = domain.createEvent<string[]>();
+
+export const setRealColumns = domain.createEvent<any[]>();

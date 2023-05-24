@@ -224,6 +224,7 @@ export interface IStore {
     rows: any[];
     columns: any[];
     originalColumns: any[];
+    realColumns: any[];
     version: string;
     dataElementGroups: string[];
     dataElementGroupSets: string[];
