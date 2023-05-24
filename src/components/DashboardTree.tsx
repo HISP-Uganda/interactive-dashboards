@@ -6,7 +6,7 @@ import { EventDataNode } from "antd/es/tree";
 import arrayToTree from "array-to-tree";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useStore } from "effector-react";
-import { uniq, sortBy, orderBy } from "lodash";
+import { orderBy, uniq, groupBy } from "lodash";
 import React, { useState } from "react";
 import { db } from "../db";
 import {
@@ -15,18 +15,20 @@ import {
     setOriginalColumns,
     setRows,
     updateVisualizationData,
+    setRealColumns,
+    setFixedColumns,
 } from "../Events";
 import { DataNode, IDataElement, LocationGenerics } from "../interfaces";
 import { $store } from "../Store";
 import { loadData } from "./helpers";
-import { Stack } from "@chakra-ui/react";
+import { computeFinancialYears } from "../utils/utils";
 
 const labels: { [key: string]: string } = {
     M0ACvr6Coqn: "Commitments",
     dWAaPPBAEbL: "Directives",
     emIWijzLHR4: "Themes",
     iE5A3BBdv2z: "Programmes",
-    p2racpd5cNU: "Performance"
+    JmQ4TJUKOKi: "Performance",
 };
 
 export default function DashboardTree() {
@@ -56,15 +58,54 @@ export default function DashboardTree() {
         setSelectedKeys(() => selectedKeys);
         if (info.node.pId === "") {
             const children = await loadData(info.node, engine);
-            setOriginalColumns([
-                { id: "title", title: labels[info.node.key] || "" },
-                { id: "totalIndicators", title: "Indicators" },
-            ]);
-            setColumns([
+            const columns = [
                 { id: "a", title: "A", bg: "green" },
                 { id: "b", title: "MA", bg: "yellow" },
                 { id: "c", title: "NA", bg: "red" },
                 { id: "d", title: "X", bg: "" },
+            ];
+
+            const firstColumns = [
+                {
+                    id: "title",
+                    title: labels[info.node.key] || "",
+                    columnSpan: 1,
+                    rowSpan: 2,
+                },
+                {
+                    id: "totalIndicators",
+                    title: "Indicators",
+                    columnSpan: 1,
+                    rowSpan: 2,
+                },
+            ];
+
+            setFixedColumns(firstColumns);
+
+            const allColumns = computeFinancialYears(2020).flatMap((fy) => {
+                return columns.map((c) => {
+                    return {
+                        ...c,
+                        fy: fy.value,
+                        bg: c.bg || "",
+                        fullId: `${fy.value}${c.id}`,
+                    };
+                });
+            });
+            setColumns(allColumns);
+            setRealColumns(allColumns);
+            setOriginalColumns([
+                ...firstColumns,
+                ...computeFinancialYears(2020).map(({ value, key }) => {
+                    return {
+                        id: key,
+                        title: value,
+                        columnSpan: columns.length,
+                        textAlign: "center",
+                        rowSpan: 1,
+                        fullId: key,
+                    };
+                }),
             ]);
             const allElements = await db.dataElements.toArray();
             let elements: IDataElement[] = [];
@@ -74,10 +115,14 @@ export default function DashboardTree() {
             } else {
                 elements = allElements.filter(({ themeCode }) => !!themeCode);
             }
+
             setRows(
                 children.map((c: any) => {
                     const filteredElements = elements.filter((e) => {
-                        if (info.node.id === "emIWijzLHR4") {
+                        if (
+                            info.node.id === "emIWijzLHR4" ||
+                            info.node.key === "JmQ4TJUKOKi"
+                        ) {
                             return e.themeCode === c.key;
                         }
                         if (info.node.id === "iE5A3BBdv2z") {
@@ -94,14 +139,49 @@ export default function DashboardTree() {
                             e.programCode === c.key
                         );
                     });
+                    const groups = groupBy(filteredElements, "degId");
+                    const realElements =
+                        info.node.key === "JmQ4TJUKOKi"
+                            ? Object.keys(groups)
+                            : filteredElements.map(({ id }: any) => id);
                     return {
                         ...c,
                         child: false,
-                        totalIndicators: filteredElements.length,
-                        elements: filteredElements.map(({ id }) => id),
+                        totalIndicators: realElements.length,
+                        elements: realElements,
+                        method:
+                            info.node.key === "JmQ4TJUKOKi"
+                                ? "groups"
+                                : "elements",
+                        groups,
                     };
                 })
             );
+
+            if (info.node.key === "JmQ4TJUKOKi") {
+                setColumns([]);
+                setOriginalColumns([
+                    { id: "title", title: "Themes" },
+                    { id: "xx", title: "Commitments" },
+                    { id: "achieved", title: "Achieved" },
+                    { id: "onTrack", title: "On track to be achieved" },
+                    { id: "slow", title: "Actions with slow progress" },
+                ]);
+
+                setRealColumns([
+                    { id: "achieved", title: "Achieved", fullId: "achieved" },
+                    {
+                        id: "onTrack",
+                        title: "On track to be achieved",
+                        fullId: "onTrack",
+                    },
+                    {
+                        id: "slow",
+                        title: "Actions with slow progress",
+                        fullId: "slow",
+                    },
+                ]);
+            }
             updateVisualizationData({
                 visualizationId: "keyResultAreas",
                 data: [{ value: uniq(elements.map((e) => e.id)).length }],
@@ -168,29 +248,76 @@ export default function DashboardTree() {
                 .toArray();
             setDataElements(elements);
 
+            let columns = [
+                { id: "Px8Lqkxy2si", title: "Target" },
+                { id: "HKtncMjp06U", title: "Actual" },
+            ];
+
+            let firstColumns = [];
+
             if (node.pId === "dWAaPPBAEbL") {
-                setOriginalColumns([
+                firstColumns = [
                     { id: "interventionCode", title: "Directives", w: "125px" },
                     // { id: "program", title: "Programme" },
-                    { id: "name", title: "Indicators", w: "500px" },
-                ]);
+                    {
+                        id: "name",
+                        title: "Indicators",
+                        w: "500px",
+                        columnSpan: 1,
+                        rowSpan: 2,
+                    },
+                ];
             } else if (node.pId === "p2racpd5cNU") {
-                setOriginalColumns([
-                    { id: "name", title: "Commitments", w: "600px" },
-                ]);
+                firstColumns = [
+                    {
+                        id: "name",
+                        title: "Commitments",
+                        w: "600px",
+                        columnSpan: 1,
+                        rowSpan: 2,
+                    },
+                ];
             } else {
-                setOriginalColumns([
-                    { id: "name", title: "Indicator", w: "600px" },
-                ]);
+                firstColumns = [
+                    {
+                        id: "name",
+                        title: "Indicator",
+                        w: "600px",
+                        columnSpan: 1,
+                        rowSpan: 2,
+                    },
+                ];
             }
+
+            setFixedColumns(firstColumns);
+
+            const allColumns = computeFinancialYears(2020).flatMap((fy) => {
+                return columns.map((c) => {
+                    return {
+                        ...c,
+                        fullId: `${fy.value}${c.id}`,
+                        fy: fy.value,
+                    };
+                });
+            });
             setRows(
                 elements.map((e) => {
                     return { ...e, child: true };
                 })
             );
-            setColumns([
-                { id: "Px8Lqkxy2si", title: "Target" },
-                { id: "HKtncMjp06U", title: "Actual" },
+            setColumns(allColumns);
+            setRealColumns(allColumns);
+            setOriginalColumns([
+                ...firstColumns,
+                ...computeFinancialYears(2020).map(({ value, key }) => {
+                    return {
+                        id: key,
+                        title: value,
+                        columnSpan: columns.length,
+                        textAlign: "center",
+                        rowSpan: 1,
+                    };
+                }),
             ]);
             updateVisualizationData({
                 visualizationId: "keyResultAreas",
@@ -293,8 +420,8 @@ export default function DashboardTree() {
             treeData={
                 treeData
                     ? arrayToTree(orderBy(treeData, "sortOrder"), {
-                        parentProperty: "pId",
-                    })
+                          parentProperty: "pId",
+                      })
                     : []
             }
         />

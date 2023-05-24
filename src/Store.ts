@@ -89,6 +89,7 @@ import {
     setDataElementGroupSets,
     setDecreasing,
     changeDashboardSortOrder,
+    setRealColumns,
 } from "./Events";
 import {
     ICategory,
@@ -253,6 +254,7 @@ export const $store = domain
         dataElementGroups: [],
         dataElementGroupSets: [],
         decreasing: [],
+        realColumns: [],
     })
     .on(setOrganisations, (state, organisations) => {
         return { ...state, organisations };
@@ -366,6 +368,9 @@ export const $store = domain
     })
     .on(setDecreasing, (state, decreasing) => {
         return { ...state, decreasing };
+    })
+    .on(setRealColumns, (state, realColumns) => {
+        return { ...state, realColumns };
     });
 
 export const $dataSource = domain

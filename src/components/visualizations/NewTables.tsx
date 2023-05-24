@@ -18,8 +18,8 @@ import { useEffect } from "react";
 import { updateVisualizationData } from "../../Events";
 import { ChartProps } from "../../interfaces";
 import { $store } from "../../Store";
-import { utils, writeFile } from 'xlsx';
-import React, { useRef } from 'react';
+import { utils, writeFile } from "xlsx";
+import React, { useRef } from "react";
 import { useElementSize } from "usehooks-ts";
 
 interface TableProps extends ChartProps {
@@ -31,8 +31,6 @@ const NewTables = ({ data }: TableProps) => {
     const tbl = useRef(null);
     const store = useStore($store);
     const [squareRef, { width, height }] = useElementSize();
-
-
     return (
         <Stack w="100%" p="10px" h="100%">
             <Box h="100%" w="100%" ref={squareRef}>
@@ -43,7 +41,13 @@ const NewTables = ({ data }: TableProps) => {
                     h={`${height}px`}
                     w="100%"
                 >
-                    <Table variant="unstyled" w="100%" bg="white" size="sm" ref={tbl}>
+                    <Table
+                        variant="unstyled"
+                        w="100%"
+                        bg="white"
+                        size="sm"
+                        ref={tbl}
+                    >
                         <TableCaption
                             placement="top"
                             bg="white"
@@ -115,10 +119,15 @@ const NewTables = ({ data }: TableProps) => {
                                     justifyItems="center"
                                     justifyContent="center"
                                 >
-                                    <Button colorScheme="blue" onClick={() => {
-                                        const wb = utils.table_to_book(tbl.current);
-                                        writeFile(wb, "Table.xlsx")
-                                    }}>
+                                    <Button
+                                        colorScheme="blue"
+                                        onClick={() => {
+                                            const wb = utils.table_to_book(
+                                                tbl.current
+                                            );
+                                            writeFile(wb, "Table.xlsx");
+                                        }}
+                                    >
                                         Download Table as excel
                                     </Button>
                                 </Stack>
@@ -150,7 +159,6 @@ const NewTables = ({ data }: TableProps) => {
                                         </Th>
                                     )
                                 )}
-
                             </Tr>
                         </Thead>
                         <Tbody>

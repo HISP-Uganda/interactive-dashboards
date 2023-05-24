@@ -1166,3 +1166,12 @@ export const swatchColors: string[][] = [
     ],
     ["#cfd8dc", "#b0bec5", "#78909c", "#455a64"],
 ];
+
+export const computeFinancialYears = (year: number) => {
+    return [0, 1, 2, 3, 4].map((val) => {
+        return {
+            value: `${year + val}July`,
+            key: `${year + val}/${String(year + val + 1).slice(2)}`,
+        };
+    });
+};

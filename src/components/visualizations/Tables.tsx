@@ -19,27 +19,13 @@ import { useElementSize } from "usehooks-ts";
 import { updateVisualizationData } from "../../Events";
 import { ChartProps } from "../../interfaces";
 import { $store } from "../../Store";
-import React, { useRef } from 'react';
-import { utils, writeFile } from 'xlsx';
-
-
-
+import React, { useRef } from "react";
+import { utils, writeFile } from "xlsx";
 
 interface TableProps extends ChartProps {
     category?: string;
     series?: string;
 }
-
-const computeFinancialYears = (year: number) => {
-    return [0, 1, 2, 3, 4].map((val) => {
-        return {
-            value: `${year + val}July`,
-            key: `${year + val}/${String(year + val + 1).slice(2)}`,
-        };
-    });
-};
-
-
 
 const formatter = Intl.NumberFormat("en-US", {
     style: "percent",
@@ -89,9 +75,9 @@ const Tables = ({ data }: TableProps) => {
                 if (actualValue && targetValue) {
                     return isDecreasing
                         ? (Number(targetValue.value) * 100) /
-                        Number(actualValue.value)
+                              Number(actualValue.value)
                         : (Number(actualValue.value) * 100) /
-                        Number(targetValue.value);
+                              Number(targetValue.value);
                 }
                 return -1;
             })
@@ -264,9 +250,9 @@ const Tables = ({ data }: TableProps) => {
                         if (actualValue && targetValue) {
                             const percentage = isDecreasing
                                 ? Number(targetValue.value) /
-                                Number(actualValue.value)
+                                  Number(actualValue.value)
                                 : Number(actualValue.value) /
-                                Number(targetValue.value);
+                                  Number(targetValue.value);
                             return {
                                 a: percentage >= 1 ? 1 : 0,
                                 b: percentage >= 0.75 && percentage < 1 ? 1 : 0,
@@ -298,13 +284,45 @@ const Tables = ({ data }: TableProps) => {
                         ),
                         [`${period}d`]: formatter.format(
                             (dataElements.length - (a + b + c)) /
-                            dataElements.length
+                                dataElements.length
                         ),
                     },
                 };
             });
             return returnValue;
         }
+    };
+
+    const processThemes = (groups: { [key: string]: any[] }) => {
+        const vals = Object.entries(groups).map(([commitment, elements]) => {
+            const dataElements = elements.map(({ id }) => id);
+            console.log(previousFinancialYear());
+            const actualValue = data.find(
+                ({ dx, pe, Duw5yep8Vae }: any) =>
+                    dataElements.indexOf(dx) !== -1 &&
+                    pe === previousFinancialYear() &&
+                    Duw5yep8Vae === "HKtncMjp06U"
+            );
+            const targetValue = data.find(
+                ({ dx, pe, Duw5yep8Vae }: any) =>
+                    dataElements.indexOf(dx) !== -1 &&
+                    pe === previousFinancialYear() &&
+                    Duw5yep8Vae === "Px8Lqkxy2si"
+            );
+
+            //  const actualValue = group.find(
+            //      ({ Duw5yep8Vae }: any) => Duw5yep8Vae === "HKtncMjp06U"
+            //  );
+            //  const targetValue = group.find(
+            //      ({ Duw5yep8Vae }: any) => Duw5yep8Vae === "Px8Lqkxy2si"
+            //  );
+
+            // console.log(filtered);
+            return "oi";
+            // return processData();
+        });
+        console.log(vals);
+        return { achieved: 0, slow: 0, onTrack: 0 };
     };
 
     useEffect(() => {
@@ -321,7 +339,13 @@ const Tables = ({ data }: TableProps) => {
                     h={`${height}px`}
                     w="100%"
                 >
-                    <Table variant="unstyled" w="100%" bg="white" size="sm" ref={tbl}>
+                    <Table
+                        variant="unstyled"
+                        w="100%"
+                        bg="white"
+                        size="sm"
+                        ref={tbl}
+                    >
                         <TableCaption
                             placement="top"
                             bg="white"
@@ -405,10 +429,15 @@ const Tables = ({ data }: TableProps) => {
                                     justifyItems="center"
                                     justifyContent="center"
                                 >
-                                    <Button colorScheme="blue" onClick={() => {
-                                        const wb = utils.table_to_book(tbl.current);
-                                        writeFile(wb, "Table.xlsx")
-                                    }}>
+                                    <Button
+                                        colorScheme="blue"
+                                        onClick={() => {
+                                            const wb = utils.table_to_book(
+                                                tbl.current
+                                            );
+                                            writeFile(wb, "Table.xlsx");
+                                        }}
+                                    >
                                         Download Table as excel
                                     </Button>
                                 </Stack>
@@ -423,38 +452,32 @@ const Tables = ({ data }: TableProps) => {
                                 zIndex={100}
                             >
                                 {store.originalColumns.map(
-                                    ({ title, id, w }, col) => (
+                                    ({
+                                        title,
+                                        id,
+                                        fullId,
+                                        w,
+                                        columnSpan,
+                                        rowSpan,
+                                        textAlign,
+                                    }) => (
                                         <Th
                                             borderColor="#DDDDDD"
                                             borderStyle="solid"
                                             borderWidth="thin"
-                                            // color="black"
+                                            color="black"
                                             // fontSize="lg"
-                                            key={id}
-                                            rowSpan={2}
+                                            key={fullId}
+                                            // bg="blue.300"
+                                            textAlign={textAlign}
+                                            rowSpan={rowSpan}
+                                            colSpan={columnSpan}
                                             // {...otherRows(0, col)}
                                             fontWeight="extrabold"
-                                            w={w}
+                                            // bgColor={bg}
+                                            // w={w}
                                         >
                                             {title}
-                                        </Th>
-                                    )
-                                )}
-                                {computeFinancialYears(2020).map(
-                                    (fy, index) => (
-                                        <Th
-                                            colSpan={store.columns.length}
-                                            key={fy.value}
-                                            // {...otherRows(0, index + 1)}
-                                            // fontWeight="extrabold"
-                                            textAlign="center"
-                                            borderColor="#DDDDDD"
-                                            borderStyle="solid"
-                                            borderWidth="thin"
-                                            fontSize="md"
-                                        // color="black"
-                                        >
-                                            {fy.key}
                                         </Th>
                                     )
                                 )}
@@ -468,209 +491,137 @@ const Tables = ({ data }: TableProps) => {
                                     zIndex={100}
                                     bg="white"
                                 >
-                                    {computeFinancialYears(2020)
-                                        .flatMap((fy) =>
-                                            store.columns.map((c) => {
-                                                return {
-                                                    ...c,
-                                                    id: `${c.id}${fy.value}`,
-                                                    bg: c.bg || "",
-                                                };
-                                            })
-                                        )
-                                        .map(({ id, title, bg }, index) => (
+                                    {store.columns.map(
+                                        ({ bg, id, fullId, title }) => (
                                             <Th
                                                 borderColor="#DDDDDD"
                                                 borderStyle="solid"
                                                 borderWidth="thin"
-                                                fontSize="sm"
-                                                bg={bg}
-                                                key={id}
+                                                // fontSize="sm"
+                                                textAlign="center"
+                                                p="0"
+                                                m="0"
+                                                bgColor={bg}
+                                                key={fullId}
                                             >
                                                 {title}
                                             </Th>
-                                        ))}
+                                        )
+                                    )}
                                 </Tr>
                             )}
                         </Thead>
                         <Tbody>
                             {store.rows.map((row, bigIndex) => {
-                                const pd = processData(row.elements, row.child);
+                                const { method, groups, elements } = row;
+                                const pd =
+                                    method === "elements"
+                                        ? processData(row.elements, row.child)
+                                        : processThemes(groups);
+
                                 return (
-                                    <Tr key={row.id}>
-                                        {store.originalColumns.map(
-                                            ({ title, id, type, w }, col) => (
+                                    <Tr key={`${row.id}${bigIndex}`}>
+                                        {store.fixedColumns.map(
+                                            ({ id }, col) => (
                                                 <Td
                                                     borderColor="#DDDDDD"
                                                     borderStyle="solid"
-                                                    // fontWeight="bold"
                                                     borderWidth="thin"
-                                                    key={`${id}${row.id}`}
-                                                    w={w}
+                                                    key={id}
                                                 >
                                                     {col === 0 &&
-                                                        store.selectedDashboard ===
+                                                    store.selectedDashboard ===
                                                         "emIWijzLHR4"
                                                         ? `${bigIndex + 1}. ${
-                                                        row[id]
-                                                        }`
+                                                              row[id]
+                                                          }`
                                                         : row[id]}
                                                 </Td>
                                             )
                                         )}
-                                        {computeFinancialYears(2020)
-                                            .flatMap((fy) => {
-                                                if (store.columns.length > 0) {
-                                                    return store.columns.map(
-                                                        ({ id: cId }) => {
-                                                            let bg = "";
-                                                            let color = "black";
-                                                            const actual =
-                                                                processed[
-                                                                `${row.id}${fy.value}${cId}`
-                                                                ];
-                                                            const target =
-                                                                processed[
-                                                                `${row.id}${fy.value}Px8Lqkxy2si`
-                                                                ];
-
-                                                            if (
-                                                                cId ===
-                                                                "HKtncMjp06U" &&
-                                                                actual &&
-                                                                target
-                                                            ) {
-                                                                const isDecreasing =
-                                                                    store.decreasing.indexOf(
-                                                                        row.id
-                                                                    ) !== -1;
-                                                                const percentage =
-                                                                    (Number(
-                                                                        actual
-                                                                    ) *
-                                                                        100) /
-                                                                    Number(
-                                                                        target
-                                                                    );
-                                                                if (
-                                                                    isDecreasing
-                                                                ) {
-                                                                    if (
-                                                                        percentage >=
-                                                                        175
-                                                                    ) {
-                                                                        bg =
-                                                                            "red";
-                                                                        // color = "white";
-                                                                    } else if (
-                                                                        percentage >=
-                                                                        101
-                                                                    ) {
-                                                                        bg =
-                                                                            "yellow";
-                                                                        // color = "white";
-                                                                    } else {
-                                                                        bg =
-                                                                            "green";
-                                                                        // color = "white";
-                                                                    }
-                                                                } else {
-                                                                    if (
-                                                                        percentage >=
-                                                                        100
-                                                                    ) {
-                                                                        bg =
-                                                                            "green";
-                                                                        // color = "white";
-                                                                    } else if (
-                                                                        percentage >=
-                                                                        75
-                                                                    ) {
-                                                                        bg =
-                                                                            "yellow";
-                                                                        // color = "white";
-                                                                    } else {
-                                                                        bg =
-                                                                            "red";
-                                                                        // color = "white";
-                                                                    }
-                                                                }
-                                                            } else if (
-                                                                cId ===
-                                                                "HKtncMjp06U" &&
-                                                                !actual
-                                                            ) {
-                                                                bg = "#AAAAAA";
-                                                            }
-                                                            if (
-                                                                cId ===
-                                                                "Px8Lqkxy2si" &&
-                                                                actual
-                                                            ) {
-                                                            } else if (
-                                                                cId ===
-                                                                "Px8Lqkxy2si"
-                                                            ) {
-                                                            }
-                                                            return {
-                                                                key: `${row.id}${fy.value}${cId}`,
-                                                                value:
-                                                                    pd[
-                                                                    `${fy.value}${cId}`
-                                                                    ] ||
-                                                                    processed[
-                                                                    `${row.id}${fy.value}${cId}`
-                                                                    ],
-                                                                bg,
-                                                                color,
-                                                            };
-                                                        }
-                                                    );
-                                                }
-
-                                                const value =
+                                        {store.realColumns.map(
+                                            ({ id, fy, fullId, ...rest }) => {
+                                                let bg = "";
+                                                let color = "black";
+                                                const actual =
                                                     processed[
-                                                    `${row.id}${fy.value}`
+                                                        `${row.id}${fy}HKtncMjp06U`
+                                                    ];
+                                                const target =
+                                                    processed[
+                                                        `${row.id}${fy}Px8Lqkxy2si`
                                                     ];
 
-                                                let bg = "#AAAAAA";
-                                                let color = "black";
-                                                if (value) {
-                                                    const realValue =
-                                                        Number(value);
-                                                    if (realValue >= 100) {
-                                                        bg = "green";
-                                                    } else if (
-                                                        realValue >= 75
-                                                    ) {
-                                                        bg = "yellow";
-                                                    } else if (realValue < 75) {
-                                                        bg = "red";
+                                                const value =
+                                                    String(pd[fullId]) ||
+                                                    processed[
+                                                        `${row.id}${fullId}`
+                                                    ];
+
+                                                console.log(pd[fullId]);
+                                                let percentage: any = null;
+                                                if (
+                                                    id === "HKtncMjp06U" &&
+                                                    actual &&
+                                                    target
+                                                ) {
+                                                    const isDecreasing =
+                                                        store.decreasing.indexOf(
+                                                            row.id
+                                                        ) !== -1;
+                                                    percentage =
+                                                        (Number(actual) * 100) /
+                                                        Number(target);
+                                                    if (isDecreasing) {
+                                                        if (percentage >= 175) {
+                                                            bg = "red";
+                                                        } else if (
+                                                            percentage >= 101
+                                                        ) {
+                                                            bg = "yellow";
+                                                        } else {
+                                                            bg = "green";
+                                                        }
+                                                    } else {
+                                                        if (percentage >= 100) {
+                                                            bg = "green";
+                                                        } else if (
+                                                            percentage >= 75
+                                                        ) {
+                                                            bg = "yellow";
+                                                        } else {
+                                                            bg = "red";
+                                                        }
                                                     }
+                                                } else if (
+                                                    id === "HKtncMjp06U" &&
+                                                    !actual
+                                                ) {
+                                                    bg = "#AAAAAA";
                                                 }
-                                                return {
-                                                    key: `${row.id}${fy.value}`,
-                                                    value: value,
-                                                    bg,
-                                                    color,
-                                                };
-                                            })
-                                            .map(
-                                                ({ key, value, bg, color }) => (
+                                                if (
+                                                    id === "Px8Lqkxy2si" &&
+                                                    actual
+                                                ) {
+                                                } else if (
+                                                    id === "Px8Lqkxy2si"
+                                                ) {
+                                                }
+
+                                                return (
                                                     <Td
                                                         borderColor="#DDDDDD"
                                                         borderStyle="solid"
                                                         borderWidth="thin"
-                                                        key={key}
-                                                        bg={bg}
-                                                        color={color}
-                                                        // fontWeight="bold"
+                                                        key={`${row.id}${fullId}`}
                                                         textAlign="center"
+                                                        bg={bg}
                                                     >
                                                         {value}
                                                     </Td>
-                                                )
-                                            )}
+                                                );
+                                            }
+                                        )}
                                     </Tr>
                                 );
                             })}
