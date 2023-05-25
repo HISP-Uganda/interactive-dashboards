@@ -1,3 +1,4 @@
+
 import Plot from "react-plotly.js";
 import { ChartProps } from "../../interfaces";
 import { useStore } from "effector-react";
@@ -19,9 +20,14 @@ const RadarGraph = ({ visualization }: RadarGraphProps) => {
     return {
       type: "scatterpolar",
       r: [data.value],
-      theta: [metadata?.name || ""], 
+      theta: [metadata?.name || ""],
       fill: "toself",
       name: visualizationMetadata[data.dx]?.name || "",
+      // Add color and marker size properties
+      marker: {
+       // color: visualization.properties.color, // Set the desired color
+        size: visualization.properties.markerSize, // Set the desired marker size
+      },
     };
   });
 
@@ -35,6 +41,8 @@ const RadarGraph = ({ visualization }: RadarGraphProps) => {
             range: [0, Math.max(...Object.values(visualizationData || {}).map((data) => +data.value)) * 1.1],
           },
         },
+        // Add title property
+        title: visualization.showTitle ? 'Radar Graph' : '', // Set the desired title
       }}
     />
   );

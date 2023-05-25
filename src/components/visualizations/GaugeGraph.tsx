@@ -15,14 +15,19 @@ const GaugeGraph = ({ visualization,category, series }: GaugeGraphProps) => {
   const value = visualizationData?.find(
     (data) => data.category === category && data.series === series
   )?.value || 0;
-
+  const color = visualization.properties?.color?.[0] || "blue"
+  const titleText = visualization.showTitle ? 'Gauge Graph' : '';
   const data = [
     {
       domain: { x: [0, 1], y: [0, 1] },
       value: value,
-      title: { text: "data" },
+      title: { text: titleText },
       type: "indicator",
       mode: "gauge+number",
+      gauge: {
+        //axis: { range: [null, value] },
+        bar: { color: color }, // Set the color of the gauge bar
+      },
     },
   ];
 

@@ -14,7 +14,6 @@ const Histogram = ({ visualization }: HistogramProps) => {
   // Get the visualization data and metadata from the store
   const visualizationData = useStore($visualizationData)?.[visualization.id];
   const metadata = useStore($visualizationMetadata)?.[visualization.id];
-
   // Map the data to an array of objects with name and value properties
   const data = Object.values(visualizationData || {}).map((item) => ({
     name: metadata?.[item.pe]?.name || '',
@@ -32,7 +31,7 @@ const Histogram = ({ visualization }: HistogramProps) => {
     x: values,
     type: "histogram",
     marker: {
-      color: '#4287f5', // set the color of the bars
+      color: visualization.properties?.color?.[0] || '#4287f5', // set the color of the bars
     },
     text: labels, // Set the labels for each bar
     hoverinfo: 'text', // Show the labels when hovering over a bar
@@ -49,16 +48,22 @@ const Histogram = ({ visualization }: HistogramProps) => {
         margin: { l: 40, r: 10, b: 50, t: 30 }, // Add margin to make room for axis labels
         width: 600,
         height: 350,
-        title: 'Histogram',
+        title: visualization.showTitle? 'Histogram': '',
         xaxis: {
           title: 'Values',
           tickformat: '.2f', // set the format of the tick labels
+        
         },
         yaxis: {
           title: 'Frequency',
         },
         showlegend: true, // Display the legend
         bargap: 0.001, // Add a small gap between each bar
+        legend: {
+          orientation: visualization.properties?.orientation || 'v', // Set the legend orientation to horizontal
+          xanchor: visualization.properties.legendXanchor, // Set the X anchor position of the legend to the center
+          yanchor: visualization.properties.legendYanchor, // Set the Y anchor position of the legend to the bottom
+        },
       }}
       style={{ width: "100%", height: "100%" }}
       config={{ displayModeBar: false, responsive: true }}
@@ -67,3 +72,4 @@ const Histogram = ({ visualization }: HistogramProps) => {
 };
 
 export default Histogram;
+
