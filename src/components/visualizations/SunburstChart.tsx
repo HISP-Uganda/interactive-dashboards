@@ -38,15 +38,16 @@ const SunburstChart = ({ visualization }: SunBurstProps) => {
     labels: [],
     parents: [],
     values: [],
-    outsidetextfont: { size: 20, color: "#377eb8" },
+    outsidetextfont: { size: 20, color:visualization.properties?.color?.[0] || 'green' },
     leaf: { opacity: 0.4 },
     marker: { line: { width: 2 } },
   };
   // use map to iterate over the data and metadata to populate the sunburst chart
   visualizationData?.map((dataItem) => {
     const metadataItem = visualizationMetadata?.[dataItem.dx];
+    console.log(visualization)
     data.labels.push(metadataItem?.name);
-    data.parents.push("");
+    data.parents.push("Doses Given");
     data.values.push(parseFloat(dataItem?.value));
   });
 
@@ -54,6 +55,7 @@ const SunburstChart = ({ visualization }: SunBurstProps) => {
     <Plot
       data={[data]}
       layout={{
+        title:visualization.showTitle ? "Sunburst chart": '',
         margin: { l: 0, r: 0, b: 0, t: 50 },
         width: 500,
         height: 500,

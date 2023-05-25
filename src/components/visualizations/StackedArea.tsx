@@ -16,7 +16,7 @@ const StackedArea = ({ visualization }: StackedAreaProps) => {
   const traces = visualizationData?.reduce((acc: any, data: any, i: number) => {
     const monthData = metadata?.[data.pe];
     const seriesName = data.series;
-    const category = data.category;
+    //const category = data.category;
     const value = parseFloat(data.value);
 
     if (!acc[seriesName]) {
@@ -27,6 +27,7 @@ const StackedArea = ({ visualization }: StackedAreaProps) => {
         mode: 'lines',
         name: seriesName,
         stackgroup: 'one',
+        marker: { color: visualization.properties?.fillColor?.[0] || 'blue' }, 
       };
     }
 
@@ -40,7 +41,7 @@ const StackedArea = ({ visualization }: StackedAreaProps) => {
     <Plot
       data={Object.values(traces)}
       layout={{
-        title: 'Stacked Area Chart',
+        title: visualization.showTitle?'Stacked Area Chart':'',
         xaxis: {
           title: 'Month',
         },

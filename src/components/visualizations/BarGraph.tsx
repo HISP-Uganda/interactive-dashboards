@@ -98,6 +98,7 @@ const BarGraph = ({
                                 format: "svg",
                                 scale: 1,
                             },
+                            
                             modeBarButtonsToRemove: exclusions,
                             displaylogo: false,
                         }}
