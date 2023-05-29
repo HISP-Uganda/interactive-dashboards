@@ -1,4 +1,3 @@
-s
 import React, { useEffect, ChangeEvent } from "react";
 import { Input, Radio, RadioGroup, Stack, Text, Checkbox } from "@chakra-ui/react";
 import { useStore } from "effector-react";
@@ -17,10 +16,10 @@ const ScatterProperties = ({ visualization }: { visualization: IVisualization })
   const visualizationData = useStore($visualizationData);
   const columns = visualizationData[visualization.id]
     ? Object.keys(visualizationData[visualization.id][0]).map<Option>(
-        (o) => {
-          return { value: o, label: o };
-        }
-      )
+      (o) => {
+        return { value: o, label: o };
+      }
+    )
     : [];
 
   useEffect(() => {
@@ -123,4 +122,4 @@ const ScatterProperties = ({ visualization }: { visualization: IVisualization })
 export default ScatterProperties;
 
 
-     
+
