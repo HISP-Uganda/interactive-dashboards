@@ -21,16 +21,12 @@ import {
     Storage,
 } from "./interfaces";
 import {
-    $categories,
     $category,
     $dashboard,
-    $dashboards,
     $dashboardType,
     $dataSets,
     $dataSource,
-    $dataSources,
     $indicator,
-    $indicators,
     $paginations,
     $section,
     $settings,
@@ -38,6 +34,10 @@ import {
     $store,
     $visualizationData,
     $visualizationMetadata,
+    $dataSources,
+    $indicators,
+    $categories,
+    $dashboards,
 } from "./Store";
 
 export const loadDefaults = domain.createEvent<{
@@ -203,9 +203,6 @@ export const dataSourceApi = createApi($dataSource, {
 
 export const dashboardApi = createApi($dashboard, {
     addSection: (state, section: ISection) => {
-        if (section.isBottomSection) {
-            return { ...state, bottomSection: section };
-        }
         const isNew = state.sections.find((s) => s.id === section.id);
         let sections: ISection[] = state.sections;
         if (isNew) {
@@ -334,6 +331,36 @@ export const dashboardApi = createApi($dashboard, {
         produce(state, (draft) => {
             draft.bg = bg;
         }),
+    changeVisualizationOrder: (
+        state,
+        { section, order }: { section: ISection; order: string }
+    ) => {
+        const sections = state.sections.map((s) => {
+            if (s.id === section.id) {
+                const visualizations = section.visualizations.map((viz) => {
+                    return { ...viz, order };
+                });
+                return { ...section, visualizations };
+            }
+            return s;
+        });
+        return { ...state, sections };
+    },
+    changeVisualizationShow: (
+        state,
+        { section, show }: { section: ISection; show: number }
+    ) => {
+        const sections = state.sections.map((s) => {
+            if (s.id === section.id) {
+                const visualizations = section.visualizations.map((viz) => {
+                    return { ...viz, show };
+                });
+                return { ...section, visualizations };
+            }
+            return s;
+        });
+        return { ...state, sections };
+    },
 });
 
 export const indicatorApi = createApi($indicator, {
@@ -585,6 +612,8 @@ export const sectionApi = createApi($section, {
             overrides: {},
             group: "",
             bg: "",
+            show: 1,
+            order: "1",
         };
         return {
             ...state,
@@ -778,13 +807,13 @@ export const categoryApi = createApi($category, {
 // export const setCategory = domain.createEvent<ICategory>();
 // export const setIndicator = domain.createEvent<IIndicator>();
 
-export const setDataElementGroups = domain.createEvent<string[]>();
-export const setDataElementGroupSets = domain.createEvent<string[]>();
-export const changeVisualizationOrder = domain.createEvent<{
-    order: string;
-    section: ISection;
-}>();
-export const changeVisualizationShow = domain.createEvent<{
-    show: number;
-    section: ISection;
-}>();
+// export const setDataElementGroups = domain.createEvent<string[]>();
+// export const setDataElementGroupSets = domain.createEvent<string[]>();
+// export const changeVisualizationOrder = domain.createEvent<{
+//     order: string;
+//     section: ISection;
+// }>();
+// export const changeVisualizationShow = domain.createEvent<{
+//     show: number;
+//     section: ISection;
+// }>();

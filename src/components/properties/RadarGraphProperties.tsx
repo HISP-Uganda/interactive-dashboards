@@ -3,10 +3,7 @@ import { ChangeEvent } from "react";
 import { useStore } from "effector-react";
 import { Select, GroupBase } from "chakra-react-select";
 import { isArray } from "lodash";
-import {
-    changeVisualizationAttribute,
-    changeVisualizationProperties,
-} from "../../Events";
+import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { customComponents } from "../../utils/components";
@@ -34,7 +31,7 @@ const RadarGraphProperties = ({
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
                     console.log(e.target.checked);
 
-                    changeVisualizationAttribute({
+                    sectionApi.changeVisualizationAttribute({
                         visualization: visualization.id,
                         attribute: "showTitle",
                         value: e.target.checked,
@@ -47,7 +44,7 @@ const RadarGraphProperties = ({
             <Input
                 value={visualization.properties["markerSize"]}
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: "markerSize",
                         value: e.target.value,

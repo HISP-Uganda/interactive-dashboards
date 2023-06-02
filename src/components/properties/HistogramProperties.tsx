@@ -3,10 +3,7 @@ import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { isArray } from "lodash";
 import { ChangeEvent } from "react";
-import {
-    changeVisualizationProperties,
-    changeVisualizationAttribute,
-} from "../../Events";
+import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData } from "../../Store";
 import { customComponents } from "../../utils/components";
@@ -30,8 +27,8 @@ const HistogramProperties = ({
             <Checkbox
                 isChecked={visualization.showTitle}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                    console.log(e.target.checked);
-                    changeVisualizationAttribute({
+                    e.persist();
+                    sectionApi.changeVisualizationAttribute({
                         visualization: visualization.id,
                         attribute: "showTitle",
                         value: e.target.checked,
@@ -56,7 +53,7 @@ const HistogramProperties = ({
                 })}
                 onChange={(e) => {
                     const val = e?.value || "";
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: "color",
                         value: val.split(","),
@@ -72,7 +69,7 @@ const HistogramProperties = ({
                 <Text>Orientation</Text>
                 <RadioGroup
                     onChange={(e: string) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "orientation",
                             value: e,
@@ -90,7 +87,7 @@ const HistogramProperties = ({
                 <Text>X-Anchor</Text>
                 <RadioGroup
                     onChange={(e: string) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "legendXanchor",
                             value: e,
@@ -111,7 +108,7 @@ const HistogramProperties = ({
                 <Text>Y-Anchor</Text>
                 <RadioGroup
                     onChange={(e: string) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "legendYanchor",
                             value: e,

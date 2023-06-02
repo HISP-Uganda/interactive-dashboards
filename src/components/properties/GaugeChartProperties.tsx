@@ -4,8 +4,9 @@ import { useStore } from "effector-react";
 import { Select, GroupBase } from "chakra-react-select";
 import { isArray } from "lodash";
 import {
-    changeVisualizationAttribute,
-    changeVisualizationProperties,
+    // changeVisualizationAttribute,
+    // changeVisualizationProperties,
+    sectionApi,
 } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
@@ -35,7 +36,7 @@ const GaugeChartProperties = ({
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
                     console.log(e.target.checked);
 
-                    changeVisualizationAttribute({
+                    sectionApi.changeVisualizationAttribute({
                         visualization: visualization.id,
                         attribute: "showTitle",
                         value: e.target.checked,
@@ -76,7 +77,7 @@ const GaugeChartProperties = ({
                 })}
                 onChange={(e) => {
                     const val = e?.value || "";
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: "color",
                         value: val.split(","),

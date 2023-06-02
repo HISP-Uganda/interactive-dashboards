@@ -1,6 +1,3 @@
-import { useStore } from "effector-react";
-import { $dashboard, $store, isOpenApi } from "../../Store";
-
 import {
     DeleteIcon,
     EditIcon,
@@ -8,49 +5,39 @@ import {
     HamburgerIcon,
 } from "@chakra-ui/icons";
 import {
+    FormControl,
+    FormLabel,
     IconButton,
+    Input,
     Menu,
     MenuButton,
     MenuItem,
     MenuList,
     Modal,
     ModalBody,
+    ModalCloseButton,
     ModalContent,
+    ModalHeader,
     ModalOverlay,
     Stack,
     useDisclosure,
-    ModalHeader,
-    ModalCloseButton,
-    FormControl,
-    FormLabel,
-    Input,
-    ModalFooter,
-    Button,
 } from "@chakra-ui/react";
+import { useNavigate, useSearch } from "@tanstack/react-location";
+import { GroupBase, Select } from "chakra-react-select";
+import { useStore } from "effector-react";
+import { ChangeEvent } from "react";
 import {
+    AiFillFilter,
     AiOutlineBarChart,
     AiOutlineLineChart,
     AiOutlineNumber,
-    AiFillFilter,
 } from "react-icons/ai";
 import { FaGlobeAfrica } from "react-icons/fa";
-import { ChangeEvent } from "react";
-import { Select, GroupBase } from "chakra-react-select";
-import { useNavigate, useSearch } from "@tanstack/react-location";
-import {
-    // changeVisualizationType,
-    // deleteSection,
-    // setCurrentSection,
-    sectionApi,
-    dashboardApi,
-} from "../../Events";
-import { LocationGenerics, ISection } from "../../interfaces";
+import { dashboardApi, sectionApi } from "../../Events";
+import { ISection, LocationGenerics, Option } from "../../interfaces";
+import { $dashboard, $store, isOpenApi } from "../../Store";
 import Visualization from "./Visualization";
-import {
-    changeVisualizationOrder,
-    changeVisualizationShow,
-} from "../../Events";
-import { IVisualization, Option } from "../../interfaces";
+
 const sortingOptions: Option[] = [
     { label: "Top", value: "desc" },
     { label: "Bottom", value: "asc" },
@@ -229,7 +216,7 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
                                             section.visualizations[0].order
                                     )}
                                     onChange={(e) =>
-                                        changeVisualizationOrder({
+                                        dashboardApi.changeVisualizationOrder({
                                             section,
                                             order: e?.value || "",
                                         })
@@ -244,7 +231,7 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
                                 placeholder="Enter your Choice"
                                 value={section.visualizations[0].show}
                                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                    changeVisualizationShow({
+                                    dashboardApi.changeVisualizationShow({
                                         section,
                                         show: Number(e.target.value),
                                     })
