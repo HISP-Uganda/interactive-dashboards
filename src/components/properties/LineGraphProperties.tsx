@@ -3,7 +3,7 @@ import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { isArray } from "lodash";
 import { ChangeEvent } from "react";
-import { changeVisualizationProperties } from "../../Events";
+import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData } from "../../Store";
 import { customComponents } from "../../utils/components";
@@ -31,7 +31,7 @@ const LineGraphProperties = ({
                     (pt) => pt.value === visualization.properties["category"]
                 )}
                 onChange={(e) =>
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: "category",
                         value: e?.value,
@@ -46,7 +46,7 @@ const LineGraphProperties = ({
                     (pt) => pt.value === visualization.properties["series"]
                 )}
                 onChange={(e) =>
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: "series",
                         value: e?.value,
@@ -73,7 +73,7 @@ const LineGraphProperties = ({
                 })}
                 onChange={(e) => {
                     const val = e?.value || "";
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: "layout.colorway",
                         value: val.split(","),
@@ -89,7 +89,7 @@ const LineGraphProperties = ({
                 <Text>X-Anchor</Text>
                 <RadioGroup
                     onChange={(e: string) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "layout.legend.xanchor",
                             value: e,
@@ -110,7 +110,7 @@ const LineGraphProperties = ({
                 <Text>Y-Anchor</Text>
                 <RadioGroup
                     onChange={(e: string) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "layout.legend.yanchor",
                             value: e,
@@ -132,7 +132,7 @@ const LineGraphProperties = ({
                 <Input
                     value={visualization.properties["layout.yaxis.title"]}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "layout.yaxis.title",
                             value: e.target.value,

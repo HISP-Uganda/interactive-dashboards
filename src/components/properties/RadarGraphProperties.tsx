@@ -3,16 +3,17 @@ import { ChangeEvent } from "react";
 import { useStore } from "effector-react";
 import { Select, GroupBase } from "chakra-react-select";
 import { isArray } from "lodash";
-import {
-    changeVisualizationAttribute,
-    changeVisualizationProperties,
-} from "../../Events";
+import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { customComponents } from "../../utils/components";
 import { colors } from "../../utils/utils";
 
-const RadarGraphProperties = ({ visualization }: { visualization: IVisualization }) => {
+const RadarGraphProperties = ({
+    visualization,
+}: {
+    visualization: IVisualization;
+}) => {
     const visualizationData = useStore($visualizationData);
     const metadata = useStore($visualizationMetadata)[visualization.id];
     const columns = visualizationData[visualization.id]
@@ -30,7 +31,7 @@ const RadarGraphProperties = ({ visualization }: { visualization: IVisualization
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
                     console.log(e.target.checked);
 
-                    changeVisualizationAttribute({
+                    sectionApi.changeVisualizationAttribute({
                         visualization: visualization.id,
                         attribute: "showTitle",
                         value: e.target.checked,
@@ -38,21 +39,20 @@ const RadarGraphProperties = ({ visualization }: { visualization: IVisualization
                 }}
             >
                 Show Title
-            </Checkbox>        
+            </Checkbox>
             <Text>Marker Size</Text>
-          <Input
-        value={visualization.properties["markerSize"]}
-        onChange={(e: ChangeEvent<HTMLInputElement>) =>
-          changeVisualizationProperties({
-            visualization: visualization.id,
-            attribute: "markerSize",
-            value: e.target.value,
-          })
-        }
-      />
+            <Input
+                value={visualization.properties["markerSize"]}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    sectionApi.changeVisualizationProperties({
+                        visualization: visualization.id,
+                        attribute: "markerSize",
+                        value: e.target.value,
+                    })
+                }
+            />
         </Stack>
     );
 };
 
 export default RadarGraphProperties;
-

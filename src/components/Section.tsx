@@ -22,40 +22,32 @@ import { useStore } from "effector-react";
 import { ChangeEvent, DragEvent, useEffect, useRef, useState } from "react";
 import { BiDuplicate } from "react-icons/bi";
 import {
-    addVisualization2Section,
-    changeSectionAttribute,
-    changeVisualizationAttribute,
-    changeVisualizationOverride,
-    changeVisualizationProperties,
-    deleteSectionVisualization,
-    duplicateVisualization,
-    setShowSider,
-    setVisualizations,
+    // sectionApi.changeVisualizationOverride,
+    // sectionApi.changeVisualizationProperties,
+    // sectionApi.deleteSectionVisualization,
+    // sectionApi.duplicateVisualization,
+    // setShowSider,
+    // sectionApi.setVisualizations,
+    sectionApi,
+    storeApi,
+    indicatorApi,
 } from "../Events";
 import { IVisualization, Option } from "../interfaces";
 import { useVisualizationData } from "../Queries";
 import { $indicators, $section, $store, $settings } from "../Store";
 import { generateUid } from "../utils/uid";
-import { chartTypes } from "../utils/utils";
+import {
+    chartTypes,
+    createOptions,
+    alignItemsOptions,
+    justifyContentOptions,
+} from "../utils/utils";
 import ColorPalette from "./ColorPalette";
 import LoadingIndicator from "./LoadingIndicator";
 import SectionColorPalette from "./SectionColorPalette";
 import SectionImages from "./SectionImages";
 import SectionVisualization from "./SectionVisualization";
 import VisualizationProperties from "./visualizations/VisualizationProperties";
-
-const alignmentOptions: Option[] = [
-    { label: "flex-start", value: "flex-start" },
-    { label: "flex-end", value: "flex-end" },
-    { label: "center", value: "center" },
-    { label: "space-between", value: "space-between" },
-    { label: "space-around", value: "space-around" },
-    { label: "space-evenly", value: "space-evenly" },
-    { label: "stretch", value: "stretch" },
-    { label: "start", value: "start" },
-    { label: "end", value: "end" },
-    { label: "baseline", value: "baseline" },
-];
 
 const VisualizationTypes = ({
     visualization,
@@ -70,7 +62,7 @@ const VisualizationTypes = ({
                     (d: Option) => d.value === visualization.type
                 )}
                 onChange={(e) =>
-                    changeVisualizationAttribute({
+                    sectionApi.changeVisualizationAttribute({
                         attribute: "type",
                         value: e?.value,
                         visualization: visualization.id,
@@ -116,7 +108,7 @@ const VisualizationQuery = ({
                                     .indexOf(d.value) !== -1
                         )}
                     onChange={(e) => {
-                        changeVisualizationAttribute({
+                        sectionApi.changeVisualizationAttribute({
                             attribute: "indicator",
                             value: e.map((ex) => ex.value).join(","),
                             visualization: visualization.id,
@@ -154,7 +146,7 @@ const VisualizationOverride = ({
                         <RadioGroup
                             value={visualization.overrides["dx"]}
                             onChange={(e: string) =>
-                                changeVisualizationOverride({
+                                sectionApi.changeVisualizationOverride({
                                     override: "dx",
                                     value: e,
                                     visualization: visualization.id,
@@ -172,7 +164,7 @@ const VisualizationOverride = ({
                         <RadioGroup
                             value={visualization.overrides["ou"]}
                             onChange={(e: string) =>
-                                changeVisualizationOverride({
+                                sectionApi.changeVisualizationOverride({
                                     override: "ou",
                                     value: e,
                                     visualization: visualization.id,
@@ -190,7 +182,7 @@ const VisualizationOverride = ({
                         <RadioGroup
                             value={visualization.overrides["oul"]}
                             onChange={(e: string) =>
-                                changeVisualizationOverride({
+                                sectionApi.changeVisualizationOverride({
                                     override: "oul",
                                     value: e,
                                     visualization: visualization.id,
@@ -208,7 +200,7 @@ const VisualizationOverride = ({
                         <RadioGroup
                             value={visualization.overrides["oug"]}
                             onChange={(e: string) =>
-                                changeVisualizationOverride({
+                                sectionApi.changeVisualizationOverride({
                                     override: "oug",
                                     value: e,
                                     visualization: visualization.id,
@@ -226,7 +218,7 @@ const VisualizationOverride = ({
                         <RadioGroup
                             value={visualization.overrides["pe"]}
                             onChange={(e: string) =>
-                                changeVisualizationOverride({
+                                sectionApi.changeVisualizationOverride({
                                     override: "pe",
                                     value: e,
                                     visualization: visualization.id,
@@ -250,7 +242,7 @@ const Section = () => {
     const [active, setActive] = useState<string>("title");
 
     useEffect(() => {
-        setShowSider(false);
+        storeApi.setShowSider(false);
     }, []);
 
     const dragItem = useRef<number | undefined | null>();
@@ -277,7 +269,7 @@ const Section = () => {
             copyListItems.splice(dragOverItem.current, 0, dragItemContent);
             dragItem.current = null;
             dragOverItem.current = null;
-            setVisualizations(copyListItems);
+            sectionApi.setVisualizations(copyListItems);
         }
     };
 
@@ -328,7 +320,7 @@ const Section = () => {
                         size="sm"
                         onClick={() => {
                             const id = generateUid();
-                            addVisualization2Section(id);
+                            sectionApi.addVisualization2Section(id);
                             setActive(id);
                         }}
                     >
@@ -342,7 +334,7 @@ const Section = () => {
                             <Input
                                 value={section.title}
                                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                    changeSectionAttribute({
+                                    sectionApi.changeSectionAttribute({
                                         attribute: "title",
                                         value: e.target.value,
                                     })
@@ -355,7 +347,7 @@ const Section = () => {
                                 max={24}
                                 min={1}
                                 onChange={(value1: string, value2: number) =>
-                                    changeSectionAttribute({
+                                    sectionApi.changeSectionAttribute({
                                         attribute: "rowSpan",
                                         value: value2,
                                     })
@@ -374,7 +366,7 @@ const Section = () => {
                                 max={24}
                                 min={1}
                                 onChange={(value1: string, value2: number) =>
-                                    changeSectionAttribute({
+                                    sectionApi.changeSectionAttribute({
                                         attribute: "colSpan",
                                         value: value2,
                                     })
@@ -391,7 +383,7 @@ const Section = () => {
                             <Input
                                 value={section.height}
                                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                    changeSectionAttribute({
+                                    sectionApi.changeSectionAttribute({
                                         attribute: "height",
                                         value: e.target.value,
                                     })
@@ -402,7 +394,7 @@ const Section = () => {
                             <Text>Arrangement</Text>
                             <RadioGroup
                                 onChange={(e: string) =>
-                                    changeSectionAttribute({
+                                    sectionApi.changeSectionAttribute({
                                         attribute: "direction",
                                         value: e,
                                     })
@@ -415,26 +407,92 @@ const Section = () => {
                                 </Stack>
                             </RadioGroup>
 
-                            <Text>Content Alignment</Text>
+                            <Text> Align Items</Text>
                             <Select<Option, false, GroupBase<Option>>
-                                value={alignmentOptions.find(
+                                value={alignItemsOptions.find(
+                                    (d: Option) =>
+                                        d.value === section.alignItems
+                                )}
+                                onChange={(e) =>
+                                    sectionApi.changeSectionAttribute({
+                                        attribute: "alignItems",
+                                        value: e?.value,
+                                    })
+                                }
+                                options={alignItemsOptions}
+                                isClearable
+                            />
+                            {/* <Text> Align Content</Text>
+                            <Select<Option, false, GroupBase<Option>>
+                                value={alignContentOptions.find(
+                                    (d: Option) =>
+                                        d.value === section.alignContent
+                                )}
+                                onChange={(e) =>
+                                    sectionApi.changeSectionAttribute({
+                                        attribute: "alignContent",
+                                        value: e?.value,
+                                    })
+                                }
+                                options={alignContentOptions}
+                                isClearable
+                            />
+                            <Text>Justify Items</Text>
+                            <Select<Option, false, GroupBase<Option>>
+                                value={justifyItemsOptions.find(
+                                    (d: Option) =>
+                                        d.value === section.justifyItems
+                                )}
+                                onChange={(e) =>
+                                    sectionApi.changeSectionAttribute({
+                                        attribute: "justifyItems",
+                                        value: e?.value,
+                                    })
+                                }
+                                options={justifyItemsOptions}
+                                isClearable
+                            /> */}
+                            <Text>Justify Content</Text>
+                            <Select<Option, false, GroupBase<Option>>
+                                value={justifyContentOptions.find(
                                     (d: Option) =>
                                         d.value === section.justifyContent
                                 )}
                                 onChange={(e) =>
-                                    changeSectionAttribute({
+                                    sectionApi.changeSectionAttribute({
                                         attribute: "justifyContent",
                                         value: e?.value,
                                     })
                                 }
-                                options={alignmentOptions}
+                                options={justifyContentOptions}
                                 isClearable
+                            />
+
+                            <Text>Padding</Text>
+                            <Input
+                                value={String(section.padding)}
+                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                    sectionApi.changeSectionAttribute({
+                                        attribute: "padding",
+                                        value: e.target.value,
+                                    })
+                                }
+                            />
+                            <Text>Spacing (Between Items)</Text>
+                            <Input
+                                value={String(section.spacing)}
+                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                    sectionApi.changeSectionAttribute({
+                                        attribute: "spacing",
+                                        value: e.target.value,
+                                    })
+                                }
                             />
                             <Text>Display Style</Text>
                             <RadioGroup
                                 value={section.display}
                                 onChange={(e: string) =>
-                                    changeSectionAttribute({
+                                    sectionApi.changeSectionAttribute({
                                         attribute: "display",
                                         value: e,
                                     })
@@ -452,7 +510,7 @@ const Section = () => {
                             <RadioGroup
                                 value={section.carouselOver}
                                 onChange={(e: string) =>
-                                    changeSectionAttribute({
+                                    sectionApi.changeSectionAttribute({
                                         attribute: "carouselOver",
                                         value: e,
                                     })
@@ -488,10 +546,12 @@ const Section = () => {
                                             variant="ghost"
                                             onClick={() => {
                                                 const id = generateUid();
-                                                duplicateVisualization({
-                                                    ...visualization,
-                                                    id,
-                                                });
+                                                sectionApi.duplicateVisualization(
+                                                    {
+                                                        ...visualization,
+                                                        id,
+                                                    }
+                                                );
                                                 setActive(() => id);
                                             }}
                                             icon={
@@ -505,7 +565,7 @@ const Section = () => {
                                         <IconButton
                                             variant="ghost"
                                             onClick={() => {
-                                                deleteSectionVisualization(
+                                                sectionApi.deleteSectionVisualization(
                                                     visualization.id
                                                 );
                                                 if (
@@ -534,12 +594,14 @@ const Section = () => {
                                             onChange={(
                                                 e: ChangeEvent<HTMLInputElement>
                                             ) =>
-                                                changeVisualizationAttribute({
-                                                    attribute: "name",
-                                                    value: e.target.value,
-                                                    visualization:
-                                                        visualization.id,
-                                                })
+                                                sectionApi.changeVisualizationAttribute(
+                                                    {
+                                                        attribute: "name",
+                                                        value: e.target.value,
+                                                        visualization:
+                                                            visualization.id,
+                                                    }
+                                                )
                                             }
                                         />
                                         <Text>Title font size</Text>
@@ -556,13 +618,15 @@ const Section = () => {
                                                 value1: string,
                                                 value2: number
                                             ) =>
-                                                changeVisualizationProperties({
-                                                    visualization:
-                                                        visualization?.id,
-                                                    attribute:
-                                                        "data.title.fontSize",
-                                                    value: value2,
-                                                })
+                                                sectionApi.changeVisualizationProperties(
+                                                    {
+                                                        visualization:
+                                                            visualization?.id,
+                                                        attribute:
+                                                            "data.title.fontSize",
+                                                        value: value2,
+                                                    }
+                                                )
                                             }
                                         >
                                             <NumberInputField />
@@ -585,13 +649,15 @@ const Section = () => {
                                                 value1: string,
                                                 value2: number
                                             ) =>
-                                                changeVisualizationProperties({
-                                                    visualization:
-                                                        visualization.id,
-                                                    attribute:
-                                                        "data.title.fontWeight",
-                                                    value: value2,
-                                                })
+                                                sectionApi.changeVisualizationProperties(
+                                                    {
+                                                        visualization:
+                                                            visualization.id,
+                                                        attribute:
+                                                            "data.title.fontWeight",
+                                                        value: value2,
+                                                    }
+                                                )
                                             }
                                         >
                                             <NumberInputField />
@@ -615,12 +681,14 @@ const Section = () => {
                                             onChange={(
                                                 e: ChangeEvent<HTMLTextAreaElement>
                                             ) =>
-                                                changeVisualizationAttribute({
-                                                    attribute: "expression",
-                                                    value: e.target.value,
-                                                    visualization:
-                                                        visualization.id,
-                                                })
+                                                sectionApi.changeVisualizationAttribute(
+                                                    {
+                                                        attribute: "expression",
+                                                        value: e.target.value,
+                                                        visualization:
+                                                            visualization.id,
+                                                    }
+                                                )
                                             }
                                         />
                                         <VisualizationOverride

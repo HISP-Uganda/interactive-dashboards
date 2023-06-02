@@ -3,7 +3,7 @@ import { Box, Stack, Text, useDisclosure, IconButton } from "@chakra-ui/react";
 import React from "react";
 import { SwatchesPicker } from "react-color";
 import useOnClickOutside from "use-onclickoutside";
-import { changeSectionAttribute } from "../Events";
+import { sectionApi } from "../Events";
 import { ISection } from "../interfaces";
 import { swatchColors } from "../utils/utils";
 
@@ -29,7 +29,7 @@ const SectionColorPalette = ({ section }: ColorPalletProps) => {
                 borderRadius="none"
                 icon={<DeleteIcon w={3} h={3} />}
                 onClick={() =>
-                    changeSectionAttribute({
+                    sectionApi.changeSectionAttribute({
                         attribute: "bg",
                         value: "",
                     })
@@ -41,7 +41,7 @@ const SectionColorPalette = ({ section }: ColorPalletProps) => {
                         colors={swatchColors}
                         color={section.bg}
                         onChangeComplete={(color) => {
-                            changeSectionAttribute({
+                            sectionApi.changeSectionAttribute({
                                 attribute: "bg",
                                 value: color.hex,
                             });

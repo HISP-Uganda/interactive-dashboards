@@ -20,9 +20,10 @@ import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { ChangeEvent } from "react";
 import {
-    changeDenominatorAttribute,
-    changeDenominatorDimension,
-    changeDenominatorExpressionValue,
+    // changeDenominatorAttribute,
+    // changeDenominatorDimension,
+    // changeDenominatorExpressionValue,
+    indicatorApi,
 } from "../../Events";
 import { LocationGenerics, Option } from "../../interfaces";
 import { saveDocument } from "../../Queries";
@@ -57,7 +58,7 @@ const Denominator = () => {
                 <Input
                     value={indicator.denominator?.name || ""}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        changeDenominatorAttribute({
+                        indicatorApi.changeDenominatorAttribute({
                             attribute: "name",
                             value: e.target.value,
                         })
@@ -69,7 +70,7 @@ const Denominator = () => {
                 <Textarea
                     value={indicator.denominator?.description || ""}
                     onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-                        changeDenominatorAttribute({
+                        indicatorApi.changeDenominatorAttribute({
                             attribute: "description",
                             value: e.target.value,
                         })
@@ -84,7 +85,7 @@ const Denominator = () => {
                             (pt) => pt.value === indicator.denominator?.type
                         )}
                         onChange={(e) =>
-                            changeDenominatorAttribute({
+                            indicatorApi.changeDenominatorAttribute({
                                 attribute: "resource",
                                 value: e?.value,
                             })
@@ -97,9 +98,9 @@ const Denominator = () => {
 
             {displayDataSourceType({
                 dataSourceType,
-                onChange: changeDenominatorDimension,
+                onChange: indicatorApi.changeDenominatorDimension,
                 denNum: indicator.denominator,
-                changeQuery: changeDenominatorAttribute,
+                changeQuery: indicatorApi.changeDenominatorAttribute,
             })}
 
             {indicator.denominator?.type === "SQL_VIEW" && (
@@ -140,7 +141,7 @@ const Denominator = () => {
                                             onChange={(
                                                 e: ChangeEvent<HTMLInputElement>
                                             ) =>
-                                                changeDenominatorExpressionValue(
+                                                indicatorApi.changeDenominatorExpressionValue(
                                                     {
                                                         attribute: record,
                                                         value: "",
@@ -169,7 +170,7 @@ const Denominator = () => {
                                                         ]?.value
                                                 )}
                                                 onChange={(e) =>
-                                                    changeDenominatorExpressionValue(
+                                                    indicatorApi.changeDenominatorExpressionValue(
                                                         {
                                                             attribute: record,
                                                             value:
@@ -191,7 +192,7 @@ const Denominator = () => {
                                                 onChange={(
                                                     e: ChangeEvent<HTMLInputElement>
                                                 ) =>
-                                                    changeDenominatorExpressionValue(
+                                                    indicatorApi.changeDenominatorExpressionValue(
                                                         {
                                                             attribute: record,
                                                             value: e.target

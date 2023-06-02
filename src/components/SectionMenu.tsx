@@ -1,7 +1,7 @@
 import { Button, Spacer, Stack, Text } from "@chakra-ui/react";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { addSection, setRefresh } from "../Events";
+import { dashboardApi, storeApi } from "../Events";
 import { LocationGenerics } from "../interfaces";
 import { $dashboard, $section } from "../Store";
 
@@ -12,8 +12,8 @@ const SectionMenu = () => {
     const section = useStore($section);
 
     const onApply = () => {
-        addSection(section);
-        setRefresh(false);
+        dashboardApi.addSection(section);
+        storeApi.setRefresh(false);
         navigate({
             to: `/dashboards/${dashboard.id}`,
             search,

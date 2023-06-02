@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { useRef, ChangeEvent } from "react";
-import { changeSectionAttribute } from "../Events";
+import { sectionApi } from "../Events";
 import { $section } from "../Store";
 import { generateUid } from "../utils/uid";
 
@@ -23,7 +23,7 @@ export default function () {
     const ref = useRef(null);
     const section = useStore($section);
     const addImage = (src: string) => {
-        changeSectionAttribute({
+        sectionApi.changeSectionAttribute({
             attribute: "images",
             value: [
                 ...section.images,
@@ -35,7 +35,7 @@ export default function () {
         });
     };
     const removeImage = (imageId: string) => {
-        changeSectionAttribute({
+        sectionApi.changeSectionAttribute({
             attribute: "images",
             value: section.images.filter(({ id }) => id !== imageId),
         });

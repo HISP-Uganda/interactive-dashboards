@@ -1187,3 +1187,63 @@ export const computeGlobalParams = (
 
     return { previousType, selected, isGlobal };
 };
+
+export const common = createOptions(["baseline", "normal", "stretch"]);
+export const contentPosition = createOptions([
+    "center",
+    "end",
+    "flex-end",
+    "flex-start",
+    "start",
+]);
+
+export const selfPositions = createOptions([
+    "center",
+    "end",
+    "flex-end",
+    "flex-start",
+    "self-end",
+    "self-start",
+    "start",
+]);
+
+export const justifySelf = createOptions([
+    "auto",
+    "baseline",
+    "left",
+    "normal",
+    "right",
+    "stretch",
+]);
+
+export const alignment = createOptions(["left", "normal", "right"]);
+
+export const contentDistribution = createOptions([
+    "space-around",
+    "space-between",
+    "space-evenly",
+    "stretch",
+]);
+
+export const justifyItemsOptions = [
+    ...createOptions([
+        "baseline",
+        "left",
+        "legacy",
+        "normal",
+        "right",
+        "stretch",
+    ]),
+    ...selfPositions,
+];
+export const alignItemsOptions = [...selfPositions, ...common];
+
+export const justifyContentOptions = [
+    ...contentDistribution,
+    ...contentPosition,
+];
+export const alignContentOptions = [
+    ...contentDistribution,
+    ...contentPosition,
+    ...createOptions(["baseline", "normal"]),
+];

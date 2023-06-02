@@ -16,7 +16,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useStore } from "effector-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { setDataSource } from "../../Events";
+import { dataSourceApi } from "../../Events";
 import { IDataSource, LocationGenerics } from "../../interfaces";
 import { saveDocument } from "../../Queries";
 import { $dataSource, $store, createDataSource, $settings } from "../../Store";
@@ -214,7 +214,7 @@ const DataSource = () => {
                         <Button
                             colorScheme="red"
                             onClick={() => {
-                                setDataSource(createDataSource());
+                                dataSourceApi.setDataSource(createDataSource());
                                 navigate({ to: "/settings/data-sources" });
                             }}
                         >
