@@ -3,16 +3,17 @@ import { ChangeEvent } from "react";
 import { useStore } from "effector-react";
 import { Select, GroupBase } from "chakra-react-select";
 import { isArray } from "lodash";
-import {
-    changeVisualizationAttribute,
-    changeVisualizationProperties,
-} from "../../Events";
+import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { customComponents } from "../../utils/components";
 import { colors } from "../../utils/utils";
 
-const StackedAreaChartProperties = ({ visualization }: { visualization: IVisualization }) => {
+const StackedAreaChartProperties = ({
+    visualization,
+}: {
+    visualization: IVisualization;
+}) => {
     const visualizationData = useStore($visualizationData);
     const metadata = useStore($visualizationMetadata)[visualization.id];
     const columns = visualizationData[visualization.id]
@@ -28,9 +29,8 @@ const StackedAreaChartProperties = ({ visualization }: { visualization: IVisuali
             <Checkbox
                 isChecked={visualization.showTitle}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                    console.log(e.target.checked);
-
-                    changeVisualizationAttribute({
+                    e.persist();
+                    sectionApi.changeVisualizationAttribute({
                         visualization: visualization.id,
                         attribute: "showTitle",
                         value: e.target.checked,
@@ -47,16 +47,15 @@ const StackedAreaChartProperties = ({ visualization }: { visualization: IVisuali
                         isArray(visualization.properties["fillColor"])
                     ) {
                         return (
-                            visualization.properties["fillColor"].join(
-                                ","
-                            ) === pt.value
+                            visualization.properties["fillColor"].join(",") ===
+                            pt.value
                         );
                     }
                     return false;
                 })}
                 onChange={(e) => {
                     const val = e?.value || "";
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: "fillColor",
                         value: val.split(","),

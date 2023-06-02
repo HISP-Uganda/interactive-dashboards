@@ -4,15 +4,20 @@ import { useStore } from "effector-react";
 import { Select, GroupBase } from "chakra-react-select";
 import { isArray } from "lodash";
 import {
-    changeVisualizationAttribute,
-    changeVisualizationProperties,
+    // changeVisualizationAttribute,
+    // changeVisualizationProperties,
+    sectionApi,
 } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { customComponents } from "../../utils/components";
 import { colors } from "../../utils/utils";
 
-const GaugeChartProperties = ({ visualization }: { visualization: IVisualization }) => {
+const GaugeChartProperties = ({
+    visualization,
+}: {
+    visualization: IVisualization;
+}) => {
     const visualizationData = useStore($visualizationData);
     const metadata = useStore($visualizationMetadata)[visualization.id];
     const columns = visualizationData[visualization.id]
@@ -22,7 +27,7 @@ const GaugeChartProperties = ({ visualization }: { visualization: IVisualization
               }
           )
         : [];
-        console.log("visualisation:",visualization)
+    console.log("visualisation:", visualization);
 
     return (
         <Stack>
@@ -31,7 +36,7 @@ const GaugeChartProperties = ({ visualization }: { visualization: IVisualization
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
                     console.log(e.target.checked);
 
-                    changeVisualizationAttribute({
+                    sectionApi.changeVisualizationAttribute({
                         visualization: visualization.id,
                         attribute: "showTitle",
                         value: e.target.checked,
@@ -64,16 +69,15 @@ const GaugeChartProperties = ({ visualization }: { visualization: IVisualization
                         isArray(visualization.properties["color"])
                     ) {
                         return (
-                            visualization.properties["color"].join(
-                                ","
-                            ) === pt.value
+                            visualization.properties["color"].join(",") ===
+                            pt.value
                         );
                     }
                     return false;
                 })}
                 onChange={(e) => {
                     const val = e?.value || "";
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: "color",
                         value: val.split(","),

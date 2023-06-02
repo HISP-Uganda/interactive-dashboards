@@ -19,11 +19,7 @@ import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { ChangeEvent } from "react";
 
-import {
-    changeNumeratorAttribute,
-    changeNumeratorDimension,
-    changeNumeratorExpressionValue,
-} from "../../Events";
+import { indicatorApi } from "../../Events";
 import { Option, LocationGenerics } from "../../interfaces";
 import { saveDocument } from "../../Queries";
 import { $dataSourceType, $indicator, $store, $settings } from "../../Store";
@@ -58,7 +54,7 @@ const Numerator = () => {
                 <Input
                     value={indicator.numerator?.name || ""}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        changeNumeratorAttribute({
+                        indicatorApi.changeNumeratorAttribute({
                             attribute: "name",
                             value: e.target.value,
                         })
@@ -70,7 +66,7 @@ const Numerator = () => {
                 <Textarea
                     value={indicator.numerator?.description || ""}
                     onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-                        changeNumeratorAttribute({
+                        indicatorApi.changeNumeratorAttribute({
                             attribute: "description",
                             value: e.target.value,
                         })
@@ -85,7 +81,7 @@ const Numerator = () => {
                             (pt) => pt.value === indicator.numerator?.type
                         )}
                         onChange={(e) =>
-                            changeNumeratorAttribute({
+                            indicatorApi.changeNumeratorAttribute({
                                 attribute: "resource",
                                 value: e?.value,
                             })
@@ -98,9 +94,9 @@ const Numerator = () => {
 
             {displayDataSourceType({
                 dataSourceType,
-                onChange: changeNumeratorDimension,
+                onChange: indicatorApi.changeNumeratorDimension,
                 denNum: indicator.numerator,
-                changeQuery: changeNumeratorAttribute,
+                changeQuery: indicatorApi.changeNumeratorAttribute,
             })}
 
             {indicator.numerator?.type === "SQL_VIEW" && (
@@ -142,11 +138,14 @@ const Numerator = () => {
                                             onChange={(
                                                 e: ChangeEvent<HTMLInputElement>
                                             ) =>
-                                                changeNumeratorExpressionValue({
-                                                    attribute: record,
-                                                    value: "",
-                                                    isGlobal: e.target.checked,
-                                                })
+                                                indicatorApi.changeNumeratorExpressionValue(
+                                                    {
+                                                        attribute: record,
+                                                        value: "",
+                                                        isGlobal:
+                                                            e.target.checked,
+                                                    }
+                                                )
                                             }
                                         />
                                     </Td>
@@ -168,7 +167,7 @@ const Numerator = () => {
                                                         ]?.value
                                                 )}
                                                 onChange={(e) =>
-                                                    changeNumeratorExpressionValue(
+                                                    indicatorApi.changeNumeratorExpressionValue(
                                                         {
                                                             attribute: record,
                                                             value:
@@ -190,7 +189,7 @@ const Numerator = () => {
                                                 onChange={(
                                                     e: ChangeEvent<HTMLInputElement>
                                                 ) =>
-                                                    changeNumeratorExpressionValue(
+                                                    indicatorApi.changeNumeratorExpressionValue(
                                                         {
                                                             attribute: record,
                                                             value: e.target

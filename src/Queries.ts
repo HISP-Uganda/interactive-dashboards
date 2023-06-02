@@ -4,36 +4,36 @@ import axios, { AxiosRequestConfig, AxiosInstance } from "axios";
 import { fromPairs, groupBy, isEmpty, max, min, uniq } from "lodash";
 import { evaluate } from "mathjs";
 import { db } from "./db";
-import {
-    addPagination,
-    changeAdministration,
-    changeSelectedCategory,
-    changeSelectedDashboard,
-    setCategories,
-    setCategory,
-    setCurrentDashboard,
-    setCurrentPage,
-    setDataElementGroups,
-    setDataElementGroupSets,
-    setDataSets,
-    setDataSource,
-    setDataSources,
-    setDefaultDashboard,
-    setIndicator,
-    setInstanceBaseUrl,
-    setLevels,
-    setMaxLevel,
-    setMinSublevel,
-    setOrganisations,
-    setShowFooter,
-    setShowSider,
-    setSystemId,
-    setSystemName,
-    setTargetCategoryOptionCombos,
-    setVisualizationQueries,
-    updateVisualizationData,
-    updateVisualizationMetadata,
-} from "./Events";
+// import {
+//     addPagination,
+//     changeAdministration,
+//     changeSelectedCategory,
+//     changeSelectedDashboard,
+//     setCategories,
+//     setCategory,
+//     setCurrentDashboard,
+//     setCurrentPage,
+//     setDataElementGroups,
+//     setDataElementGroupSets,
+//     setDataSets,
+//     setDataSource,
+//     setDataSources,
+//     setDefaultDashboard,
+//     setIndicator,
+//     setInstanceBaseUrl,
+//     setLevels,
+//     setMaxLevel,
+//     setMinSublevel,
+//     setOrganisations,
+//     setShowFooter,
+//     setShowSider,
+//     setSystemId,
+//     setSystemName,
+//     setTargetCategoryOptionCombos,
+//     setVisualizationQueries,
+//     updateVisualizationData,
+//     updateVisualizationMetadata,
+// } from "./Events";
 import {
     DataNode,
     ICategory,
@@ -54,9 +54,23 @@ import {
     createDashboard,
     createDataSource,
     createIndicator,
+} from "./Store";
+import {
     settingsApi,
     dashboardTypeApi,
-} from "./Store";
+    storeApi,
+    dataSetsApi,
+    visualizationDataApi,
+    dataSourceApi,
+    categoriesApi,
+    dataSourcesApi,
+    indicatorsApi,
+    categoryApi,
+    indicatorApi,
+    paginationApi,
+    visualizationMetadataApi,
+    dashboardApi,
+} from "./Events";
 import { getSearchParams, processMap } from "./utils/utils";
 
 type QueryProps = {
@@ -313,29 +327,31 @@ export const useInitials = (storage: "data-store" | "es") => {
                 (s: any) => s.id === systemId && s.default
             );
             if (defaultDashboard) {
-                changeSelectedDashboard(defaultDashboard.defaultDashboard);
-                setDefaultDashboard(defaultDashboard.defaultDashboard);
+                storeApi.changeSelectedDashboard(
+                    defaultDashboard.defaultDashboard
+                );
+                storeApi.setDefaultDashboard(defaultDashboard.defaultDashboard);
                 if (defaultDashboard.storage) {
                     settingsApi.changeStorage(defaultDashboard.storage);
                 }
             }
             if (minSublevel && minSublevel + 1 <= maxLevel) {
-                setMinSublevel(minSublevel + 1);
+                storeApi.setMinSublevel(minSublevel + 1);
             } else {
-                setMinSublevel(maxLevel);
+                storeApi.setMinSublevel(maxLevel);
             }
-            setSystemId(systemId);
-            setSystemName(systemName);
-            setDataSets(dataSets);
-            setInstanceBaseUrl(instanceBaseUrl);
-            setOrganisations(facilities);
-            setMaxLevel(maxLevel);
-            changeAdministration(isAdmin);
-            setLevels([
+            storeApi.setSystemId(systemId);
+            storeApi.setSystemName(systemName);
+            dataSetsApi.setDataSets(dataSets);
+            storeApi.setInstanceBaseUrl(instanceBaseUrl);
+            storeApi.setOrganisations(facilities);
+            storeApi.setMaxLevel(maxLevel);
+            storeApi.changeAdministration(isAdmin);
+            storeApi.setLevels([
                 minLevel === 1 ? "3" : `${minLevel ? minLevel + 1 : 4}`,
             ]);
 
-            updateVisualizationData({
+            visualizationDataApi.updateVisualizationData({
                 visualizationId: "outputs",
                 data: [{ value: 0 }],
             });
@@ -362,9 +378,9 @@ export const useDataSources = (
         ["i-data-sources"],
         async ({ signal }) => {
             try {
-                setCurrentPage("data-sources");
-                setShowFooter(false);
-                setShowSider(true);
+                storeApi.setCurrentPage("data-sources");
+                storeApi.setShowFooter(false);
+                storeApi.setShowSider(true);
                 return await getIndex<IDataSource>(storage, {
                     namespace: "i-data-sources",
                     systemId,
@@ -393,7 +409,7 @@ export const useDataSource = (storage: "data-store" | "es", id: string) => {
             if (isEmpty(dataSource)) {
                 dataSource = createDataSource(id);
             }
-            setDataSource(dataSource);
+            dataSourceApi.setDataSource(dataSource);
             return true;
         }
     );
@@ -470,7 +486,9 @@ export const useDashboard = (
                             },
                         },
                     });
-                    setTargetCategoryOptionCombos(categoryOptionCombos);
+                    dashboardApi.setTargetCategoryOptionCombos(
+                        categoryOptionCombos
+                    );
                 }
                 dashboardTypeApi.set(dashboard.type);
                 const queries = await getIndex<IIndicator>(storage, {
@@ -494,12 +512,12 @@ export const useDashboard = (
                     signal,
                     engine,
                 });
-                setCategories(categories);
-                setDataSources(dataSources);
-                setCurrentDashboard(dashboard);
-                changeSelectedDashboard(dashboard.id);
-                changeSelectedCategory(dashboard.category || "");
-                setVisualizationQueries(queries);
+                categoriesApi.setCategories(categories);
+                dataSourcesApi.setDataSources(dataSources);
+                dashboardApi.setCurrentDashboard(dashboard);
+                storeApi.changeSelectedDashboard(dashboard.id);
+                storeApi.changeSelectedCategory(dashboard.category || "");
+                indicatorsApi.setVisualizationQueries(queries);
 
                 if (
                     dashboard.nodeSource &&
@@ -510,7 +528,7 @@ export const useDashboard = (
                     const dataElementGroups = uniq(
                         data.map(({ degId }) => degId)
                     );
-                    setDataElementGroups(dataElementGroups);
+                    storeApi.setDataElementGroups(dataElementGroups);
                 }
                 if (
                     dashboard.nodeSource &&
@@ -521,7 +539,7 @@ export const useDashboard = (
                     const dataElementGroupSets = uniq(
                         data.map(({ degsId }) => degsId)
                     );
-                    setDataElementGroupSets(dataElementGroupSets);
+                    storeApi.setDataElementGroupSets(dataElementGroupSets);
                 }
 
                 const current = {
@@ -584,11 +602,10 @@ export const useCategory = (storage: "data-store" | "es", id: string) => {
                     signal,
                     engine,
                 });
-                console.log(category);
                 if (!category) {
                     category = createCategory(id);
                 }
-                setCategory(category);
+                categoryApi.setCategory(category);
                 return true;
             } catch (error) {
                 console.error(error);
@@ -650,8 +667,8 @@ export const useVisualizationDatum = (
                 if (isEmpty(indicator)) {
                     indicator = createIndicator(id);
                 }
-                setDataSources(dataSources);
-                setIndicator(indicator);
+                dataSourcesApi.setDataSources(dataSources);
+                indicatorApi.setIndicator(indicator);
             } catch (error) {
                 console.error(error);
             }
@@ -763,7 +780,7 @@ export const useDataElements = (
                         params,
                     },
                 });
-                addPagination({ totalDataElements });
+                paginationApi.addPagination({ totalDataElements });
                 return dataElements;
             } else if (currentDataSource) {
                 const {
@@ -774,7 +791,7 @@ export const useDataElements = (
                 } = await currentDataSource.get("dataElements.json", {
                     params,
                 });
-                addPagination({ totalDataElements });
+                paginationApi.addPagination({ totalDataElements });
                 return dataElements;
             }
             return [];
@@ -818,7 +835,7 @@ export const useDataElementGroups = (
                         params,
                     },
                 });
-                addPagination({ totalDataElementGroups });
+                paginationApi.addPagination({ totalDataElementGroups });
                 return dataElementGroups;
             } else if (currentDataSource) {
                 const {
@@ -829,7 +846,7 @@ export const useDataElementGroups = (
                 } = await currentDataSource.get("dataElementGroups.json", {
                     params,
                 });
-                addPagination({ totalDataElementGroups });
+                paginationApi.addPagination({ totalDataElementGroups });
                 return dataElementGroups;
             }
             return [];
@@ -874,7 +891,7 @@ export const useDataElementGroupSets = (
                         pager: { total: totalDataElementGroupSets },
                     },
                 }: any = await engine.query(namespaceQuery);
-                addPagination({ totalDataElementGroupSets });
+                paginationApi.addPagination({ totalDataElementGroupSets });
                 return dataElementGroupSets;
             } else if (currentDataSource) {
                 const {
@@ -885,7 +902,7 @@ export const useDataElementGroupSets = (
                 } = await currentDataSource.get("dataElementGroupSets.json", {
                     params,
                 });
-                addPagination({ totalDataElementGroupSets });
+                paginationApi.addPagination({ totalDataElementGroupSets });
                 return dataElementGroupSets;
             }
             return [];
@@ -932,7 +949,7 @@ export const useIndicators = (
                         pager: { total: totalIndicators },
                     },
                 }: any = await engine.query(query);
-                addPagination({ totalIndicators });
+                paginationApi.addPagination({ totalIndicators });
                 return indicators;
             } else if (currentDataSource) {
                 const {
@@ -943,7 +960,7 @@ export const useIndicators = (
                 } = await currentDataSource.get("indicators.json", {
                     params,
                 });
-                addPagination({ totalIndicators });
+                paginationApi.addPagination({ totalIndicators });
                 return indicators;
             }
 
@@ -1024,7 +1041,7 @@ export const useProgramIndicators = (
                         pager: { total: totalProgramIndicators },
                     },
                 }: any = await engine.query(query);
-                addPagination({ totalProgramIndicators });
+                paginationApi.addPagination({ totalProgramIndicators });
                 return programIndicators;
             } else if (currentDataSource) {
                 const {
@@ -1035,7 +1052,7 @@ export const useProgramIndicators = (
                 } = await currentDataSource.get("programIndicators.json", {
                     params,
                 });
-                addPagination({ totalProgramIndicators });
+                paginationApi.addPagination({ totalProgramIndicators });
                 return programIndicators;
             }
 
@@ -1076,7 +1093,7 @@ export const useOrganisationUnitGroups = (
                         pager: { total: totalOrganisationUnitGroups },
                     },
                 }: any = await engine.query(query);
-                addPagination({ totalOrganisationUnitGroups });
+                paginationApi.addPagination({ totalOrganisationUnitGroups });
                 return organisationUnitGroups;
             } else if (currentDataSource) {
                 const {
@@ -1087,7 +1104,7 @@ export const useOrganisationUnitGroups = (
                 } = await currentDataSource.get("organisationUnitGroups.json", {
                     params,
                 });
-                addPagination({ totalOrganisationUnitGroups });
+                paginationApi.addPagination({ totalOrganisationUnitGroups });
                 return organisationUnitGroups;
             }
 
@@ -1128,7 +1145,7 @@ export const useOrganisationUnitGroupSets = (
                         pager: { total: totalOrganisationUnitGroupSets },
                     },
                 }: any = await engine.query(query);
-                addPagination({ totalOrganisationUnitGroupSets });
+                paginationApi.addPagination({ totalOrganisationUnitGroupSets });
                 return organisationUnitGroupSets;
             } else if (currentDataSource) {
                 const {
@@ -1142,7 +1159,7 @@ export const useOrganisationUnitGroupSets = (
                         params,
                     }
                 );
-                addPagination({ totalOrganisationUnitGroupSets });
+                paginationApi.addPagination({ totalOrganisationUnitGroupSets });
                 return organisationUnitGroupSets;
             }
 
@@ -1183,7 +1200,7 @@ export const useOrganisationUnitLevels = (
                         pager: { total: totalOrganisationUnitLevels },
                     },
                 }: any = await engine.query(query);
-                addPagination({ totalOrganisationUnitLevels });
+                paginationApi.addPagination({ totalOrganisationUnitLevels });
                 return organisationUnitLevels;
             } else if (currentDataSource) {
                 const {
@@ -1194,7 +1211,7 @@ export const useOrganisationUnitLevels = (
                 } = await currentDataSource.get("organisationUnitLevels.json", {
                     params,
                 });
-                addPagination({ totalOrganisationUnitLevels });
+                paginationApi.addPagination({ totalOrganisationUnitLevels });
                 return organisationUnitLevels;
             }
 
@@ -1866,11 +1883,11 @@ export const useVisualization = (
                             metadata = items;
                         }
                     }
-                    updateVisualizationData({
+                    visualizationDataApi.updateVisualizationData({
                         visualizationId: visualization.id,
                         data: processed,
                     });
-                    updateVisualizationMetadata({
+                    visualizationMetadataApi.updateVisualizationMetadata({
                         visualizationId: visualization.id,
                         data: metadata,
                     });

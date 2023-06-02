@@ -1,7 +1,7 @@
 import { Stack, Text } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { changeVisualizationProperties } from "../../Events";
+import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { isArray, uniq, groupBy } from "lodash";
 import { $visualizationData } from "../../Store";
@@ -69,7 +69,7 @@ const PieChartProperties = ({
                     (pt) => pt.value === visualization.properties["labels"]
                 )}
                 onChange={(e) =>
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: "labels",
                         value: e?.value,
@@ -84,7 +84,7 @@ const PieChartProperties = ({
                     (pt) => pt.value === visualization.properties["values"]
                 )}
                 onChange={(e) =>
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: "values",
                         value: e?.value,
@@ -110,7 +110,7 @@ const PieChartProperties = ({
                 })}
                 onChange={(e) => {
                     const val = e?.value || "";
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: "layout.colorway",
                         value: val.split(","),

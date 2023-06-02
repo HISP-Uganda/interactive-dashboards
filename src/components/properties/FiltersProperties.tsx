@@ -8,7 +8,7 @@ import {
     RadioGroup,
 } from "@chakra-ui/react";
 import { IVisualization } from "../../interfaces";
-import { changeVisualizationProperties } from "../../Events";
+import { sectionApi } from "../../Events";
 
 export default function FiltersProperties({
     visualization,
@@ -23,7 +23,7 @@ export default function FiltersProperties({
                     colorScheme="green"
                     onChange={(value) => {
                         console.log(value);
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "layout.items",
                             value,
@@ -35,6 +35,7 @@ export default function FiltersProperties({
                         <Checkbox value="periods">Periods</Checkbox>
                         <Checkbox value="organisations">Organisations</Checkbox>
                         <Checkbox value="attributes">Attributes</Checkbox>
+                        <Checkbox value="dates">Date Ranges</Checkbox>
                     </Stack>
                 </CheckboxGroup>
             </Stack>
@@ -42,7 +43,7 @@ export default function FiltersProperties({
                 <Text>Alignment</Text>
                 <RadioGroup
                     onChange={(e: string) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "layout.alignment",
                             value: e,

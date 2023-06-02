@@ -32,20 +32,25 @@ import { useStore } from "effector-react";
 import { ChangeEvent, useState } from "react";
 import { db } from "../db";
 import {
-    assignDataSet,
-    changeCategory,
-    changeDashboardDescription,
-    changeDashboardName,
-    changePeriods,
-    setCurrentDashboard,
-    setCurrentSection,
-    setDashboards,
-    setDefaultDashboard,
-    setHasChildren,
-    setNodeSource,
-    setOrganisations,
-    setRefresh,
-    setVersion,
+    // assignDataSet,
+    // changeCategory,
+    // changeDashboardDescription,
+    // changeDashboardName,
+    // changePeriods,
+    // setCurrentDashboard,
+    // setCurrentSection,
+    // setDashboards,
+    // setDefaultDashboard,
+    // setHasChildren,
+    // setNodeSource,
+    // setOrganisations,
+    // setRefresh,
+    // setVersion,
+    dashboardApi,
+    dashboardsApi,
+    dataSetsApi,
+    storeApi,
+    sectionApi,
 } from "../Events";
 import { IDashboard, Item, LocationGenerics, Option } from "../interfaces";
 import { saveDocument } from "../Queries";
@@ -113,7 +118,7 @@ const DashboardMenu = () => {
             "create"
         );
         setLoading(() => false);
-        setRefresh(true);
+        storeApi.setRefresh(true);
         onClose();
     };
 
@@ -129,7 +134,7 @@ const DashboardMenu = () => {
             engine,
             "create"
         );
-        setDashboards(
+        dashboardsApi.setDashboards(
             dashboards.map((d) => {
                 if (data.id === d.id) {
                     return { ...d, published: value };
@@ -137,18 +142,18 @@ const DashboardMenu = () => {
                 return d;
             })
         );
-        setCurrentDashboard({ ...data, published: value });
+        dashboardApi.setCurrentDashboard({ ...data, published: value });
     };
 
     const onChangePeriods = (periods: Item[]) => {
-        changePeriods(periods);
+        storeApi.changePeriods(periods);
     };
 
     const changeNodeSource = (
         value: string,
         field: "resource" | "fields" | "search" | "subSearch"
     ) => {
-        setNodeSource({ value, field });
+        dashboardApi.setNodeSource({ value, field });
     };
 
     return (
@@ -174,7 +179,7 @@ const DashboardMenu = () => {
                         type="button"
                         size="sm"
                         onClick={() => {
-                            setCurrentSection(createSection());
+                            sectionApi.setCurrentSection(createSection());
                             navigate({
                                 to: `/dashboards/${dashboard.id}/section`,
                                 search,
@@ -194,6 +199,7 @@ const DashboardMenu = () => {
                             Unpublish
                         </Button>
                     )}
+
                     {!dashboard.published && (
                         <Button
                             size="sm"
@@ -222,7 +228,9 @@ const DashboardMenu = () => {
                         </Text>
                         <OUTree
                             value={store.organisations}
-                            onChange={(value) => setOrganisations(value)}
+                            onChange={(value) =>
+                                storeApi.setOrganisations(value)
+                            }
                         />
                         <PeriodPicker
                             selectedPeriods={store.periods}
@@ -262,7 +270,9 @@ const DashboardMenu = () => {
                                                 d.value === dashboard.dataSet
                                         )}
                                         onChange={(e) =>
-                                            assignDataSet(e?.value || "")
+                                            dashboardApi.assignDataSet(
+                                                e?.value || ""
+                                            )
                                         }
                                         size="sm"
                                     />
@@ -273,7 +283,9 @@ const DashboardMenu = () => {
                                     e: ChangeEvent<HTMLInputElement>
                                 ) => {
                                     e.persist();
-                                    setHasChildren(e.target.checked);
+                                    dashboardApi.setHasChildren(
+                                        e.target.checked
+                                    );
                                 }}
                                 isChecked={dashboard.hasChildren}
                             >
@@ -358,7 +370,7 @@ const DashboardMenu = () => {
                                             hasChildren: dashboard.hasChildren,
                                         },
                                     ]);
-                                    setVersion(generateUid());
+                                    storeApi.setVersion(generateUid());
                                     await updateDashboard(dashboard);
                                     toast({
                                         title: "Dashboard.",
@@ -429,7 +441,9 @@ const DashboardMenu = () => {
                                             d.value === dashboard.category
                                     )}
                                     onChange={(e) =>
-                                        changeCategory(e?.value || "")
+                                        dashboardApi.changeCategory(
+                                            e?.value || ""
+                                        )
                                     }
                                 />
                             </Stack>
@@ -439,9 +453,14 @@ const DashboardMenu = () => {
                                     value={dashboard.name}
                                     onChange={(
                                         e: ChangeEvent<HTMLInputElement>
-                                    ) => changeDashboardName(e.target.value)}
+                                    ) =>
+                                        dashboardApi.changeDashboardName(
+                                            e.target.value
+                                        )
+                                    }
                                 />
                             </Stack>
+
                             <Stack>
                                 <Text>Description</Text>
                                 <Textarea
@@ -449,12 +468,13 @@ const DashboardMenu = () => {
                                     onChange={(
                                         e: ChangeEvent<HTMLTextAreaElement>
                                     ) =>
-                                        changeDashboardDescription(
+                                        dashboardApi.changeDashboardDescription(
                                             e.target.value
                                         )
                                     }
                                 />
                             </Stack>
+
                             <Stack>
                                 <Checkbox
                                     isChecked={
@@ -463,7 +483,7 @@ const DashboardMenu = () => {
                                     onChange={(
                                         e: ChangeEvent<HTMLInputElement>
                                     ) =>
-                                        setDefaultDashboard(
+                                        storeApi.setDefaultDashboard(
                                             e.target.checked ? dashboard.id : ""
                                         )
                                     }

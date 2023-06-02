@@ -20,19 +20,15 @@ import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { SwatchesPicker } from "react-color";
+import { useFullScreenHandle } from "react-full-screen";
 import { FaPlus } from "react-icons/fa";
 import {
-    addSection,
-    changeCategory,
-    changeDashboardDescription,
-    changeDashboardName,
-    setCurrentDashboard,
-    setCurrentSection,
-    setDashboards,
-    setDefaultDashboard,
-    setRefresh,
+    dashboardApi,
+    dashboardsApi,
+    sectionApi,
+    storeApi,
 } from "../../Events";
 import { IDashboard, LocationGenerics, Option } from "../../interfaces";
 import { saveDocument } from "../../Queries";
@@ -40,20 +36,19 @@ import {
     $categoryOptions,
     $dashboard,
     $dashboards,
+    $dashboardType,
     $isOpen,
     $section,
     $settings,
     $store,
     createSection,
-    dashboardApi,
     isOpenApi,
-    $dashboardType,
 } from "../../Store";
 import { swatchColors } from "../../utils/utils";
 import AutoRefreshPicker from "../AutoRefreshPicker";
 import DynamicDashboard from "../DynamicDashboard";
-import Section from "../Section";
 import FixedDashboard from "../FixedDashboard";
+import Section from "../Section";
 
 const Dashboard = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -74,14 +69,33 @@ const Dashboard = () => {
     const dashboardType = useStore($dashboardType);
     const engine = useDataEngine();
     const { storage } = useStore($settings);
+    const handle = useFullScreenHandle();
+
+    useEffect(() => {
+        const callback = async (event: KeyboardEvent) => {
+            if (event.key === "F5" || event.key === "f5") {
+                await handle.enter();
+                if (handle.active) {
+                    storeApi.setIsFullScreen(true);
+                } else {
+                    storeApi.setShowSider(true);
+                    storeApi.setIsFullScreen(true);
+                }
+            }
+        };
+        document.addEventListener("keydown", callback);
+        return () => {
+            document.removeEventListener("keydown", callback);
+        };
+    }, []);
 
     const onClick = () => {
-        setCurrentSection(createSection());
+        sectionApi.setCurrentSection(createSection());
         isOpenApi.onOpen();
     };
 
     const onApply = () => {
-        addSection(section);
+        dashboardApi.addSection(section);
         isOpenApi.onClose();
     };
 
@@ -119,7 +133,7 @@ const Dashboard = () => {
             );
         }
         setLoading(() => false);
-        setRefresh(true);
+        storeApi.setRefresh(true);
         onClose();
         navigate({
             search: (old) => ({ ...old, action: "update" }),
@@ -139,7 +153,7 @@ const Dashboard = () => {
             engine,
             "update"
         );
-        setDashboards(
+        dashboardsApi.setDashboards(
             dashboards.map((d) => {
                 if (data.id === d.id) {
                     return { ...d, published: value };
@@ -147,16 +161,15 @@ const Dashboard = () => {
                 return d;
             })
         );
-        setCurrentDashboard({ ...data, published: value });
+        dashboardApi.setCurrentDashboard({ ...data, published: value });
     };
     return (
         <Stack w="100%" h="100%" p="5px" bg={dashboard.bg}>
             {dashboardType === "dynamic" ? (
-
                 <DynamicDashboard />
             ) : (
-                    <FixedDashboard />
-                )}
+                <FixedDashboard />
+            )}
             <Modal
                 isOpen={isOpen}
                 onClose={() => isOpenApi.onClose()}
@@ -278,7 +291,9 @@ const Dashboard = () => {
                                             d.value === dashboard.category
                                     )}
                                     onChange={(e) =>
-                                        changeCategory(e?.value || "")
+                                        dashboardApi.changeCategory(
+                                            e?.value || ""
+                                        )
                                     }
                                 />
                             </Stack>
@@ -288,7 +303,11 @@ const Dashboard = () => {
                                     value={dashboard.name}
                                     onChange={(
                                         e: ChangeEvent<HTMLInputElement>
-                                    ) => changeDashboardName(e.target.value)}
+                                    ) =>
+                                        dashboardApi.changeDashboardName(
+                                            e.target.value
+                                        )
+                                    }
                                 />
                             </Stack>
                             <Stack>
@@ -307,7 +326,7 @@ const Dashboard = () => {
                                     onChange={(
                                         e: ChangeEvent<HTMLTextAreaElement>
                                     ) =>
-                                        changeDashboardDescription(
+                                        dashboardApi.changeDashboardDescription(
                                             e.target.value
                                         )
                                     }
@@ -322,7 +341,7 @@ const Dashboard = () => {
                                     onChange={(
                                         e: ChangeEvent<HTMLInputElement>
                                     ) =>
-                                        setDefaultDashboard(
+                                        storeApi.setDefaultDashboard(
                                             e.target.checked ? dashboard.id : ""
                                         )
                                     }

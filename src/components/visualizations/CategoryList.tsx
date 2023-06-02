@@ -2,12 +2,15 @@ import { Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { groupBy } from "lodash";
 import { useDashboards } from "../../Queries";
-import { $categoryOptions, $store } from "../../Store";
+import { $categoryOptions, $store, $settings } from "../../Store";
 import LoadingIndicator from "../LoadingIndicator";
 import NavItem from "../NavItem";
 export default function CategoryList() {
     const store = useStore($store);
+    const { storage } = useStore($settings);
+
     const { isLoading, isSuccess, isError, error, data } = useDashboards(
+        storage,
         store.systemId
     );
     const categoryOptions = useStore($categoryOptions);

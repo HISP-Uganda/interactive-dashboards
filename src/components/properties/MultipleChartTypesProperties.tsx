@@ -1,7 +1,7 @@
 import { Stack, Text } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { changeVisualizationProperties } from "../../Events";
+import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData } from "../../Store";
 
@@ -27,7 +27,7 @@ const MultipleChartTypesProperties = ({
                     (pt) => pt.value === visualization.properties["category"]
                 )}
                 onChange={(e) =>
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: "category",
                         value: e?.value,
@@ -42,7 +42,7 @@ const MultipleChartTypesProperties = ({
                     (pt) => pt.value === visualization.properties["series"]
                 )}
                 onChange={(e) =>
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: "series",
                         value: e?.value,

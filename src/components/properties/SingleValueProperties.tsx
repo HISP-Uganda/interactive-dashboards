@@ -15,11 +15,17 @@ import {
 import { GroupBase, Select } from "chakra-react-select";
 import { ChangeEvent } from "react";
 import {
-    changeVisualizationAttribute,
-    changeVisualizationProperties,
+    // changeVisualizationAttribute,
+    // changeVisualizationProperties,
+    sectionApi,
 } from "../../Events";
+
 import { IVisualization, Option } from "../../interfaces";
-import { createOptions } from "../../utils/utils";
+import {
+    createOptions,
+    justifyContentOptions,
+    alignItemsOptions,
+} from "../../utils/utils";
 import ColorPalette from "../ColorPalette";
 import ColorRangePicker from "../ColorRangePicker";
 
@@ -62,7 +68,7 @@ const SingleValueProperties = ({
                             visualization.properties?.["data.alignment"]
                     )}
                     onChange={(e) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "data.alignment",
                             value: e?.value,
@@ -72,12 +78,47 @@ const SingleValueProperties = ({
                     isClearable
                 />
             </Stack>
+            <Text>Justify Content</Text>
+            <Select<Option, false, GroupBase<Option>>
+                value={justifyContentOptions.find(
+                    (d: Option) =>
+                        d.value ===
+                        visualization.properties?.["data.justifyContent"]
+                )}
+                onChange={(e) =>
+                    sectionApi.changeVisualizationProperties({
+                        visualization: visualization.id,
+                        attribute: "data.justifyContent",
+                        value: e?.value,
+                    })
+                }
+                options={justifyContentOptions}
+                isClearable
+            />
+
+            <Text> Align Items</Text>
+            <Select<Option, false, GroupBase<Option>>
+                value={alignItemsOptions.find(
+                    (d: Option) =>
+                        d.value ===
+                        visualization.properties?.["data.alignItems"]
+                )}
+                onChange={(e) =>
+                    sectionApi.changeVisualizationProperties({
+                        visualization: visualization.id,
+                        attribute: "data.alignItems",
+                        value: e?.value,
+                    })
+                }
+                options={alignItemsOptions}
+                isClearable
+            />
             <Stack>
                 <Text>Prefix</Text>
                 <Input
                     value={visualization.properties?.["data.prefix"] || ""}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "data.prefix",
                             value: e.target.value,
@@ -90,7 +131,7 @@ const SingleValueProperties = ({
                 <Input
                     value={visualization.properties?.["data.suffix"] || ""}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "data.suffix",
                             value: e.target.value,
@@ -108,7 +149,7 @@ const SingleValueProperties = ({
                             visualization.properties["data.format.style"]
                     )}
                     onChange={(e) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "data.format.style",
                             value: e?.value,
@@ -128,7 +169,7 @@ const SingleValueProperties = ({
                             visualization.properties["data.format.notation"]
                     )}
                     onChange={(e) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "data.format.notation",
                             value: e?.value,
@@ -153,7 +194,7 @@ const SingleValueProperties = ({
                     min={0}
                     step={1}
                     onChange={(value1: string, value2: number) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "data.border",
                             value: value2,
@@ -178,7 +219,7 @@ const SingleValueProperties = ({
                     max={4}
                     min={0}
                     onChange={(value1: string, value2: number) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "data.format.maximumFractionDigits",
                             value: value2,
@@ -203,7 +244,7 @@ const SingleValueProperties = ({
                     min={1}
                     step={0.1}
                     onChange={(value1: string, value2: number) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "data.format.fontSize",
                             value: value2,
@@ -229,7 +270,7 @@ const SingleValueProperties = ({
                     min={100}
                     step={50}
                     onChange={(value1: string, value2: number) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "data.format.fontWeight",
                             value: value2,
@@ -252,7 +293,7 @@ const SingleValueProperties = ({
                     min={0}
                     step={1}
                     onChange={(value1: string, value2: number) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "data.format.spacing",
                             value: value2,
@@ -274,7 +315,7 @@ const SingleValueProperties = ({
                 <Input
                     value={visualization.properties?.["data.target"] || ""}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "data.target",
                             value: e.target.value,
@@ -291,7 +332,7 @@ const SingleValueProperties = ({
                             visualization.properties?.["data.targetgraph"]
                     )}
                     onChange={(e) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "data.targetgraph",
                             value: e?.value,
@@ -311,7 +352,7 @@ const SingleValueProperties = ({
                             visualization.properties?.["data.direction"]
                     )}
                     onChange={(e) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "data.direction",
                             value: e?.value,
@@ -329,7 +370,7 @@ const SingleValueProperties = ({
                     min={0}
                     step={1}
                     onChange={(value1: string, value2: number) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "data.targetspacing",
                             value: value2,
@@ -361,7 +402,7 @@ const SingleValueProperties = ({
                     min={0}
                     step={1}
                     onChange={(value1: string, value2: number) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "data.targetthickness",
                             value: value2,
@@ -383,7 +424,7 @@ const SingleValueProperties = ({
                     min={30}
                     step={1}
                     onChange={(value1: string, value2: number) =>
-                        changeVisualizationProperties({
+                        sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "data.targetradius",
                             value: value2,
@@ -402,7 +443,7 @@ const SingleValueProperties = ({
                 <Input
                     value={visualization.group}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        changeVisualizationAttribute({
+                        sectionApi.changeVisualizationAttribute({
                             visualization: visualization.id,
                             attribute: "group",
                             value: e.target.value,

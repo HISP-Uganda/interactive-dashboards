@@ -3,7 +3,7 @@ import { Box, IconButton, Stack, Text, useDisclosure } from "@chakra-ui/react";
 import React from "react";
 import { SwatchesPicker } from "react-color";
 import useOnClickOutside from "use-onclickoutside";
-import { changeVisualizationProperties } from "../Events";
+import { sectionApi } from "../Events";
 import { IVisualization } from "../interfaces";
 import { swatchColors } from "../utils/utils";
 
@@ -34,7 +34,7 @@ const ColorPalette = ({ visualization, attribute }: ColorPalletProps) => {
                 borderRadius="none"
                 icon={<DeleteIcon w={3} h={3} />}
                 onClick={() =>
-                    changeVisualizationProperties({
+                    sectionApi.changeVisualizationProperties({
                         visualization: visualization.id,
                         attribute: attribute,
                         value: "",
@@ -47,7 +47,7 @@ const ColorPalette = ({ visualization, attribute }: ColorPalletProps) => {
                         colors={swatchColors}
                         color={visualization.properties?.[attribute] || ""}
                         onChangeComplete={(color) => {
-                            changeVisualizationProperties({
+                            sectionApi.changeVisualizationProperties({
                                 visualization: visualization.id,
                                 attribute: attribute,
                                 value: color.hex,

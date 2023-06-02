@@ -1,15 +1,12 @@
-import { Stack, Text } from "@chakra-ui/react";
+import { Stack } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { Tree } from "antd";
 import arrayToTree from "array-to-tree";
-import { GroupBase, Select } from "chakra-react-select";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useStore } from "effector-react";
 import { flatten } from "lodash";
 import React, { useState } from "react";
 import { db } from "../db";
-import { setGroups, setLevels } from "../Events";
-import { Option } from "../interfaces";
 import { $store } from "../Store";
 
 const OUTree = ({

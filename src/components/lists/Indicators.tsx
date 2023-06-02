@@ -7,28 +7,27 @@ import {
     Table,
     Tbody,
     Td,
+    Text,
     Th,
     Thead,
     Tr,
-    Text,
 } from "@chakra-ui/react";
+import { useDataEngine } from "@dhis2/app-runtime";
 import { Link, useNavigate } from "@tanstack/react-location";
 import { useQueryClient } from "@tanstack/react-query";
 import { useStore } from "effector-react";
 import { ChangeEvent, useEffect, useState } from "react";
-import { setIndicator } from "../../Events";
+import { indicatorApi } from "../../Events";
 import { IIndicator, LocationGenerics } from "../../interfaces";
 import {
     deleteDocument,
     saveDocument,
     useVisualizationData,
 } from "../../Queries";
-import { $store, createIndicator, $settings } from "../../Store";
+import { $settings, $store, createIndicator } from "../../Store";
 import { generateUid } from "../../utils/uid";
-import { generalPadding, otherHeight } from "../constants";
-import PaginatedTable from "./PaginatedTable";
 import LoadingIndicator from "../LoadingIndicator";
-import { useDataEngine } from "@dhis2/app-runtime";
+import PaginatedTable from "./PaginatedTable";
 
 const Indicators = () => {
     const navigate = useNavigate<LocationGenerics>();
@@ -98,7 +97,7 @@ const Indicators = () => {
                 <Button
                     onClick={() => {
                         const indicator = createIndicator();
-                        setIndicator(indicator);
+                        indicatorApi.setIndicator(indicator);
                         navigate({
                             to: `/settings/indicators/${indicator.id}`,
                             search: { action: "create" },

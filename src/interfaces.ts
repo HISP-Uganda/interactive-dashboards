@@ -1,8 +1,10 @@
+import { padding } from "./components/constants";
 import { MakeGenerics } from "@tanstack/react-location";
 import { OptionBase } from "chakra-react-select";
 import type { DataNode as IDataNode } from "antd/es/tree";
 
 import { Event } from "effector";
+import { FlexboxProps, SpaceProps, StackProps } from "@chakra-ui/react";
 
 export type Storage = "data-store" | "es";
 export type ScreenSize = "xs" | "sm" | "md" | "lg";
@@ -114,28 +116,22 @@ export interface IVisualization extends INamed {
     show:number;
     order:string;
 }
-export interface ISection {
+export interface ISection
+    extends Pick<
+            FlexboxProps,
+            "justifyContent" | "alignItems" | "justifyItems" | "alignContent"
+        >,
+        Pick<SpaceProps, "padding">,
+        Pick<StackProps, "spacing"> {
     id: string;
     title: string;
     visualizations: IVisualization[];
     direction: "row" | "column";
-    justifyContent:
-        | "flex-start"
-        | "flex-end"
-        | "center"
-        | "space-between"
-        | "space-around"
-        | "space-evenly"
-        | "stretch"
-        | "start"
-        | "end"
-        | "baseline";
     display: "normal" | "carousel" | "marquee" | "grid";
     carouselOver: string;
     colSpan: number;
     rowSpan: number;
     images: IImage[];
-    isBottomSection: boolean;
     bg: string;
     height: string;
     headerBg: string;
@@ -348,4 +344,22 @@ type PlaylistItem = {
 export interface Playlist {
     items: Array<PlaylistItem>;
     interval: number;
+}
+
+export interface IPagination {
+    totalDataElements: number;
+    totalSQLViews: number;
+    totalIndicators: number;
+    totalProgramIndicators: number;
+    totalOrganisationUnitLevels: number;
+    totalOrganisationUnitGroups: number;
+    totalOrganisationUnitGroupSets: number;
+    totalDataElementGroups: number;
+    totalDataElementGroupSets: number;
+}
+
+export interface IExpressionValue {
+    attribute: string;
+    value: string;
+    isGlobal: boolean;
 }

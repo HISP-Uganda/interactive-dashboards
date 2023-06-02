@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-
 import {
     Box,
     CircularProgress,
@@ -8,43 +6,11 @@ import {
     Text,
 } from "@chakra-ui/react";
 import { Progress } from "antd";
-import { ChartProps } from "../../interfaces";
-import { processSingleValue } from "../processors";
 import { useStore } from "effector-react";
+import { useEffect, useState } from "react";
+import { ChartProps } from "../../interfaces";
 import { $visualizationData } from "../../Store";
-
-const ProgressBar = ({
-    bgColor,
-    completed,
-}: {
-    bgColor: string;
-    completed: number;
-}) => {
-    return (
-        <Box
-            height="20px"
-            width="100%"
-            minWidth="200px"
-            backgroundColor="#e0e0de"
-            borderRadius="50px"
-        >
-            <Box
-                height="100%"
-                width={`${completed > 100 ? "100" : completed}%`}
-                bgColor={bgColor}
-                borderRadius="inherit"
-                textAlign="right"
-            >
-                <Box
-                    as="span"
-                    padding="5px"
-                    color="white"
-                    fontWeight="bold"
-                >{`${completed.toFixed(1)}%`}</Box>
-            </Box>
-        </Box>
-    );
-};
+import { processSingleValue } from "../processors";
 
 const SingleValue = ({
     visualization,
@@ -79,6 +45,8 @@ const SingleValue = ({
     const titleFontWeight = dataProperties?.["data.title.fontWeight"] || 300;
     const titleCase = dataProperties?.["data.title.case"] || "";
     const titleColor = dataProperties?.["data.title.color"] || "black";
+    const alignItems = dataProperties?.["data.alignItems"] || "center";
+    const justifyContent = dataProperties?.["data.justifyContent"] || "center";
     const singleValueBackground = "none";
     // const singleValueBackground = dataProperties?.["data.backgroundColor"] || "";
     const singleValueBorder = dataProperties?.["data.border"] || 0;
@@ -128,21 +96,15 @@ const SingleValue = ({
 
     return (
         <Stack
-            alignItems="center"
-            justifyItems="center"
-            alignContent="center"
-            justifyContent="center"
+            alignItems={alignItems}
+            justifyContent={justifyContent}
             direction={alignment}
             backgroundColor={singleValueBackground}
             border={`${singleValueBorder}px`}
             borderRadius="3px"
-            // padding="4px"
-            textAlign="center"
+            padding="4px"
             bg={bg}
-            flex={1}
             spacing={`${spacing}px`}
-            h="100%"
-            w="100%"
         >
             {visualization.name && (
                 <Text
@@ -157,10 +119,10 @@ const SingleValue = ({
             )}
             <Stack
                 direction={direction}
-                alignItems="center"
-                alignContent="center"
-                justifyContent="center"
-                justifyItems="center"
+                // alignItems="center"
+                // alignContent="center"
+                // justifyContent="center"
+                // justifyItems="center"
                 spacing={`${targetSpacing}px`}
             >
                 {targetGraph === "circular" && targetValue && target ? (

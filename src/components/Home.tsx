@@ -1,9 +1,7 @@
-import { useEffect } from "react";
-import { Key } from "react";
-import { Stack, Flex, Text } from "@chakra-ui/react";
+import { Flex, Stack, Text } from "@chakra-ui/react";
 import { Navigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { setShowSider } from "../Events";
+import { Key } from "react";
 import { $store } from "../Store";
 
 export default function Home() {

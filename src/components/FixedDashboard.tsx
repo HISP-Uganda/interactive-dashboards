@@ -1,7 +1,7 @@
 import { Grid, GridItem, useBreakpointValue } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { DragEvent, MouseEvent, useRef } from "react";
-import { setCurrentSection, setSections } from "../Events";
+import { sectionApi, dashboardApi } from "../Events";
 import { ISection } from "../interfaces";
 import { $dashboard, $dimensions, $store, isOpenApi } from "../Store";
 import SectionVisualization from "./SectionVisualization";
@@ -45,7 +45,7 @@ export default function FixedDashboard() {
             copyListItems.splice(dragOverItem.current, 0, dragItemContent);
             dragItem.current = null;
             dragOverItem.current = null;
-            setSections(copyListItems);
+            dashboardApi.setSections(copyListItems);
         }
     };
     return (
@@ -83,7 +83,7 @@ export default function FixedDashboard() {
                     }
                     onClick={(e: MouseEvent<HTMLElement>) => {
                         if (e.detail === 2 && store.isAdmin) {
-                            setCurrentSection(section);
+                            sectionApi.setCurrentSection(section);
                             isOpenApi.onOpen();
                         }
                     }}
