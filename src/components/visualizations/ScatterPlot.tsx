@@ -1,44 +1,47 @@
+import React from "react";
+import { useStore } from "effector-react";
 import Plot from "react-plotly.js";
 import { ChartProps } from "../../interfaces";
+import { $visualizationData } from "../../Store";
+import { $visualizationMetadata } from "../../Store";
 
 interface ScatterPlotProps extends ChartProps {
     category?: string;
     series?: string;
 }
 
-const ScatterPlot = ({}: ScatterPlotProps) => {
-    const trace1 = {
-        x: [1, 2, 3, 4, 5],
-        y: [1, 6, 3, 6, 1],
-        mode: "markers",
-        type: "scatter",
-        name: "Team A",
-        text: ["A-1", "A-2", "A-3", "A-4", "A-5"],
-        marker: { size: 12 },
-    };
-
-    const trace2 = {
-        x: [1.5, 2.5, 3.5, 4.5, 5.5],
-        y: [4, 1, 7, 1, 4],
-        mode: "markers",
-        type: "scatter",
-        name: "Team B",
-        text: ["B-a", "B-b", "B-c", "B-d", "B-e"],
-        marker: { size: 12 },
-    };
-
-    const datas: any = [trace1, trace2];
+const ScatterPlot = ({ visualization }: ScatterPlotProps) => {
+    const visualizationData = useStore($visualizationData)?.[visualization.id];
+    const metadata = useStore($visualizationMetadata)?.[visualization.id];
+    console.log("visdata", visualizationData);
+    console.log("metadata", metadata);
+    const traces =
+        visualizationData?.map((data: any, i: number) => {
+            const monthData = metadata?.[data.pe];
+            return {
+                x: [monthData?.name],
+                y: [parseFloat(data.value)],
+                mode: "markers",
+                type: "scatter",
+                marker: {
+                    size: visualization.properties.markerSize,
+                },
+            };
+        }) || [];
+    console.log("visualisation:", visualization);
+    console.log("traces:", traces);
     return (
         <Plot
-            data={datas}
+            data={traces}
             layout={{
+                title: visualization.showTitle ? "Scatter Plot" : "",
                 xaxis: {
-                    range: [0.75, 5.25],
+                    title: "Month",
                 },
                 yaxis: {
-                    range: [0, 8],
+                    title: "Doses Given",
                 },
-                title: "Data Labels Hover",
+                showlegend: false,
             }}
             style={{ width: "100%", height: "100%" }}
             config={{ displayModeBar: false, responsive: true }}

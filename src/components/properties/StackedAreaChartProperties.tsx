@@ -12,11 +12,7 @@ import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { customComponents } from "../../utils/components";
 import { colors } from "../../utils/utils";
 
-const GaugeChartProperties = ({
-    visualization,
-}: {
-    visualization: IVisualization;
-}) => {
+const StackedAreaChartProperties = ({ visualization }: { visualization: IVisualization }) => {
     const visualizationData = useStore($visualizationData);
     const metadata = useStore($visualizationMetadata)[visualization.id];
     const columns = visualizationData[visualization.id]
@@ -26,7 +22,6 @@ const GaugeChartProperties = ({
               }
           )
         : [];
-    console.log("visualisation:", visualization);
 
     return (
         <Stack>
@@ -44,32 +39,17 @@ const GaugeChartProperties = ({
             >
                 Show Title
             </Checkbox>
-            {/* <Text>Value</Text>
-            <Select<Option, false, GroupBase<Option>>
-                value={columns.find(
-                    (pt) => pt.value === visualization.properties["value"]
-                )}
-                onChange={(e) =>
-                    changeVisualizationProperties({
-                        visualization: visualization.id,
-                        attribute: "value",
-                        value: e?.value,
-                    })
-                }
-                options={columns}
-                isClearable
-                menuPlacement="auto"
-            /> */}
-            <Text>Gauge Color</Text>
+            <Text>Fill Color</Text>
             <Select<Option, false, GroupBase<Option>>
                 value={colors.find((pt) => {
                     if (
-                        visualization.properties["color"] &&
-                        isArray(visualization.properties["color"])
+                        visualization.properties["fillColor"] &&
+                        isArray(visualization.properties["fillColor"])
                     ) {
                         return (
-                            visualization.properties["color"].join(",") ===
-                            pt.value
+                            visualization.properties["fillColor"].join(
+                                ","
+                            ) === pt.value
                         );
                     }
                     return false;
@@ -78,7 +58,7 @@ const GaugeChartProperties = ({
                     const val = e?.value || "";
                     changeVisualizationProperties({
                         visualization: visualization.id,
-                        attribute: "color",
+                        attribute: "fillColor",
                         value: val.split(","),
                     });
                 }}
@@ -91,4 +71,4 @@ const GaugeChartProperties = ({
     );
 };
 
-export default GaugeChartProperties;
+export default StackedAreaChartProperties;

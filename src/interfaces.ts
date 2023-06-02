@@ -24,7 +24,11 @@ export interface IColumn {
     title: string;
     id: string;
 }
-
+export interface Option extends OptionBase {
+    label: string;
+    value: string;
+    id?: string;
+}
 export interface IRow {
     title: string;
     id: string;
@@ -108,6 +112,9 @@ export interface IVisualization extends INamed {
     expression?: string;
     showTitle?: boolean;
     bg: string;
+    needFilter?: boolean;
+    show:number;
+    order:string;
 }
 export interface ISection
     extends Pick<

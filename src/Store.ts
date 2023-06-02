@@ -4,90 +4,92 @@ import produce from "immer";
 import { fromPairs, isEqual, sortBy, isEmpty } from "lodash";
 import { headerHeight, padding, sideWidth } from "./components/constants";
 import { domain } from "./Domain";
-// import {
-//     addPagination,
-//     addSection,
-//     addVisualization2Section,
-//     changeDataSource,
-//     changeDefaults,
-//     changeDenominatorAttribute,
-//     changeDenominatorDimension,
-//     changeDenominatorExpressionValue,
-//     changeIndicatorAttribute,
-//     changeNumeratorAttribute,
-//     changeNumeratorDimension,
-//     changeNumeratorExpressionValue,
-//     changePeriods,
-//     changeSectionAttribute,
-//     changeUseIndicators,
-//     changeVisualizationAttribute,
-//     changeVisualizationProperties,
-//     deleteSection,
-//     onChangeOrganisations,
-//     setCategories,
-//     setCategory,
-//     setCurrentDashboard,
-//     setCurrentSection,
-//     setDashboards,
-//     setDataSource,
-//     setDataSources,
-//     setExpandedKeys,
-//     setIndicator,
-//     setOrganisations,
-//     setRefreshInterval,
-//     setShowSider,
-//     setVisualizationQueries,
-//     toggle,
-//     toggleDashboard,
-//     updateVisualizationData,
-//     updateVisualizationMetadata,
-//     changeCategory,
-//     changeDashboardName,
-//     changeDashboardDescription,
-//     changeSelectedDashboard,
-//     changeSelectedCategory,
-//     changeDataSourceId,
-//     changeCategoryId,
-//     changeDashboardId,
-//     changeAdministration,
-//     changeHasDashboards,
-//     changeVisualizationOverride,
-//     changeVisualizationType,
-//     setDefaultDashboard,
-//     setCurrentPage,
-//     setDataSets,
-//     assignDataSet,
-//     setCategorization,
-//     setAvailableCategories,
-//     setAvailableCategoryOptionCombos,
-//     setTargetCategoryOptionCombos,
-//     setSystemId,
-//     setCheckedKeys,
-//     setLevels,
-//     setGroups,
-//     setShowFooter,
-//     setSystemName,
-//     setMinSublevel,
-//     setMaxLevel,
-//     deleteSectionVisualization,
-//     setInstanceBaseUrl,
-//     setIsNotDesktop,
-//     setIsFullScreen,
-//     duplicateVisualization,
-//     setRefresh,
-//     setThemes,
-//     setDataElements,
-//     setHasChildren,
-//     setNodeSource,
-//     setVersion,
-//     setRows,
-//     setColumns,
-//     setOriginalColumns,
-//     setSections,
-//     setVisualizations,
-//     setDataElementGroups,
-//     setDataElementGroupSets,
-// } from "./Events";
+import {
+    addPagination,
+    addSection,
+    addVisualization2Section,
+    changeDataSource,
+    changeDefaults,
+    changeDenominatorAttribute,
+    changeDenominatorDimension,
+    changeDenominatorExpressionValue,
+    changeIndicatorAttribute,
+    changeNumeratorAttribute,
+    changeNumeratorDimension,
+    changeNumeratorExpressionValue,
+    changePeriods,
+    changeSectionAttribute,
+    changeUseIndicators,
+    changeVisualizationAttribute,
+    changeVisualizationProperties,
+    deleteSection,
+    onChangeOrganisations,
+    setCategories,
+    setCategory,
+    setCurrentDashboard,
+    setCurrentSection,
+    setDashboards,
+    setDataSource,
+    setDataSources,
+    setExpandedKeys,
+    setIndicator,
+    setOrganisations,
+    setRefreshInterval,
+    setShowSider,
+    setVisualizationQueries,
+    toggle,
+    toggleDashboard,
+    updateVisualizationData,
+    updateVisualizationMetadata,
+    changeCategory,
+    changeDashboardName,
+    changeDashboardDescription,
+    changeSelectedDashboard,
+    changeSelectedCategory,
+    changeDataSourceId,
+    changeCategoryId,
+    changeDashboardId,
+    changeAdministration,
+    changeHasDashboards,
+    changeVisualizationOverride,
+    changeVisualizationType,
+    setDefaultDashboard,
+    setCurrentPage,
+    setDataSets,
+    assignDataSet,
+    setCategorization,
+    setAvailableCategories,
+    setAvailableCategoryOptionCombos,
+    setTargetCategoryOptionCombos,
+    setSystemId,
+    setCheckedKeys,
+    setLevels,
+    setGroups,
+    setShowFooter,
+    setSystemName,
+    setMinSublevel,
+    setMaxLevel,
+    deleteSectionVisualization,
+    setInstanceBaseUrl,
+    setIsNotDesktop,
+    setIsFullScreen,
+    duplicateVisualization,
+    setRefresh,
+    setThemes,
+    setDataElements,
+    setHasChildren,
+    setNodeSource,
+    setVersion,
+    setRows,
+    setColumns,
+    setOriginalColumns,
+    setSections,
+    setVisualizations,
+    setDataElementGroups,
+    setDataElementGroupSets,
+    changeVisualizationOrder,
+    changeVisualizationShow,
+} from "./Events";
 import {
     ICategory,
     IDashboard,
@@ -501,7 +503,120 @@ export const $dashboard = domain.createStore<IDashboard>(createDashboard());
 //     return { ...state, sections };
 // });
 
-// export const dashboardApi = createApi($dashboard, {
+export const $dashboard = domain
+    .createStore<IDashboard>(createDashboard())
+    .on(addSection, (state, section) => {
+        if (section.isBottomSection) {
+            return { ...state, bottomSection: section };
+        }
+        const isNew = state.sections.find((s) => s.id === section.id);
+        let sections: ISection[] = state.sections;
+        if (isNew) {
+            sections = sections.map((s) => {
+                if (s.id === section.id) {
+                    return section;
+                }
+                return s;
+            });
+        } else {
+            sections = [...sections, section];
+        }
+        const currentDashboard = { ...state, sections };
+        return currentDashboard;
+    })
+    .on(deleteSection, (state, section) => {
+        const sections = state.sections.filter((s) => s.id !== section);
+        return {
+            ...state,
+            sections,
+        };
+    })
+    .on(setCurrentDashboard, (_, dashboard) => dashboard)
+    .on(changeDefaults, (state) => {
+        return { ...state, hasDashboards: true, hasDefaultDashboard: true };
+    })
+    .on(toggleDashboard, (state, published) => {
+        return { ...state, published };
+    })
+    .on(setRefreshInterval, (state, refreshInterval) => {
+        return { ...state, refreshInterval };
+    })
+    .on(changeCategory, (state, category) => {
+        return { ...state, category };
+    })
+    .on(changeDashboardName, (state, name) => {
+        return { ...state, name };
+    })
+    .on(changeDashboardDescription, (state, description) => {
+        return { ...state, description };
+    })
+    .on(changeDashboardId, (state, id) => {
+        return { ...state, id };
+    })
+    .on(changeVisualizationType, (state, { section, visualization }) => {
+        const sections = state.sections.map((s) => {
+            if (s.id === section.id) {
+                const visualizations = section.visualizations.map((viz) => {
+                    return { ...viz, type: visualization };
+                });
+                return { ...section, visualizations };
+            }
+            return s;
+        });
+        return { ...state, sections };
+    })
+    .on(assignDataSet, (state, dataSet) => {
+        return { ...state, dataSet };
+    })
+    .on(setCategorization, (state, categorization) => {
+        return { ...state, categorization };
+    })
+    .on(setAvailableCategories, (state, availableCategories) => {
+        return { ...state, availableCategories };
+    })
+    .on(
+        setAvailableCategoryOptionCombos,
+        (state, availableCategoryOptionCombos) => {
+            return { ...state, availableCategoryOptionCombos };
+        }
+    )
+    .on(setTargetCategoryOptionCombos, (state, targetCategoryOptionCombos) => {
+        return { ...state, targetCategoryOptionCombos };
+    })
+    .on(setHasChildren, (state, hasChildren) => {
+        return { ...state, hasChildren };
+    })
+    .on(setNodeSource, (state, { field, value }) => {
+        const nodeSource = state.nodeSource || {};
+        return { ...state, nodeSource: { ...nodeSource, [field]: value } };
+    })
+    .on(setSections, (state, sections) => {
+        return { ...state, sections };
+    })
+    .on(changeVisualizationOrder, (state, { order, section }) => {
+        const sections = state.sections.map((s) => {
+            if (s.id === section.id) {
+                const visualizations = section.visualizations.map((viz) => {
+                    return { ...viz, order };
+                });
+                return { ...section, visualizations };
+            }
+            return s;
+        });
+        return { ...state, sections };
+    })
+    .on(changeVisualizationShow, (state, { show, section }) => {
+        const sections = state.sections.map((s) => {
+            if (s.id === section.id) {
+                const visualizations = section.visualizations.map((viz) => {
+                    return { ...viz, show };
+                });
+                return { ...section, visualizations };
+            }
+            return s;
+        });
+        return { ...state, sections };
+    });
 
 // });
 
@@ -823,14 +938,97 @@ export const $section = domain.createStore<ISection>(createSection());
 //     return { ...state, visualizations };
 // });
 
-export const $dataSources = domain.createStore<IDataSource[]>([]);
-// .on(setDataSources, (_, dataSources) => dataSources);
-export const $indicators = domain.createStore<IIndicator[]>([]);
-// .on(setVisualizationQueries, (_, indicators) => indicators);
-export const $categories = domain.createStore<ICategory[]>([]);
-// .on(setCategories, (_, categories) => categories);
-export const $dashboards = domain.createStore<IDashboard[]>([]);
-// .on(setDashboards, (_, dashboards) => dashboards);
+export const $section = domain
+    .createStore<ISection>(createSection())
+    .on(setCurrentSection, (_, section) => {
+        return { ...section, images: section.images ? section.images : [] };
+    })
+    .on(addVisualization2Section, (state, id) => {
+        const visualization: IVisualization = {
+            id,
+            indicator: "",
+            type: "",
+            show: 0,
+            order: "desc",
+            name: `Visualization ${state.visualizations.length + 1}`,
+            properties: {},
+            overrides: {},
+            group: "",
+            bg: "",
+        };
+        return {
+            ...state,
+            visualizations: [...state.visualizations, visualization],
+        };
+    })
+    .on(duplicateVisualization, (state, visualization) => {
+        return {
+            ...state,
+            visualizations: [...state.visualizations, visualization],
+        };
+    })
+    .on(deleteSectionVisualization, (state, visualizationId) => {
+        return {
+            ...state,
+            visualizations: state.visualizations.filter(
+                ({ id }) => id !== visualizationId
+            ),
+        };
+    })
+    .on(
+        changeVisualizationAttribute,
+        (state, { attribute, value, visualization }) => {
+            const visualizations = state.visualizations.map(
+                (v: IVisualization) => {
+                    if (v.id === visualization) {
+                        return { ...v, [attribute]: value };
+                    }
+                    return v;
+                }
+            );
+            return { ...state, visualizations };
+        }
+    )
+    .on(changeSectionAttribute, (state, { attribute, value }) => {
+        return { ...state, [attribute]: value };
+    })
+    .on(
+        changeVisualizationOverride,
+        (state, { visualization, override, value }) => {
+            const visualizations: IVisualization[] = state.visualizations.map(
+                (v: IVisualization) => {
+                    if (v.id === visualization) {
+                        return {
+                            ...v,
+                            overrides: { ...v.overrides, [override]: value },
+                        };
+                    }
+                    return v;
+                }
+            );
+            return { ...state, visualizations };
+        }
+    )
+    .on(
+        changeVisualizationProperties,
+        (state, { attribute, value, visualization }) => {
+            const visualizations: IVisualization[] = state.visualizations.map(
+                (v: IVisualization) => {
+                    if (v.id === visualization) {
+                        return {
+                            ...v,
+                            properties: { ...v.properties, [attribute]: value },
+                        };
+                    }
+                    return v;
+                }
+            );
+            return { ...state, visualizations };
+        }
+    )
+    .on(setVisualizations, (state, visualizations) => {
+        return { ...state, visualizations };
+    });
 
 export const $dataSets = domain.createStore<Option[]>([]);
 // .on(setDataSets, (_, dataSets) => dataSets);

@@ -34,6 +34,7 @@ import SingleValue from "./SingleValue";
 import SunburstChart from "./SunburstChart";
 import Tables from "./Tables";
 import TreeMaps from "./TreeMaps";
+import StackedArea from "./StackedArea";
 import DashboardTitle from "./DashboardTitle";
 
 type VisualizationProps = {
@@ -212,6 +213,16 @@ const getVisualization = (
         ),
         funnelplot: (
             <FunnelGraph
+                section={section}
+                data={data}
+                visualization={visualization}
+                {...otherProperties}
+                layoutProperties={layoutProperties}
+                dataProperties={dataProperties}
+            />
+        ),
+        stackedarea: (
+            <StackedArea
                 section={section}
                 data={data}
                 visualization={visualization}
