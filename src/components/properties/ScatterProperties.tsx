@@ -24,10 +24,10 @@ const ScatterProperties = ({
     const visualizationData = useStore($visualizationData);
     const columns = visualizationData[visualization.id]
         ? Object.keys(visualizationData[visualization.id][0]).map<Option>(
-              (o) => {
-                  return { value: o, label: o };
-              }
-          )
+            (o) => {
+                return { value: o, label: o };
+            }
+        )
         : [];
 
     useEffect(() => {

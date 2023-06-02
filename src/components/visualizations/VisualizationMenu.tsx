@@ -213,7 +213,7 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
                                     value={sortingOptions.find(
                                         ({ value }) =>
                                             value ===
-                                            section.visualizations[0].order
+                                            section.visualizations[0]?.order
                                     )}
                                     onChange={(e) =>
                                         dashboardApi.changeVisualizationOrder({
@@ -229,7 +229,7 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
                             <FormLabel>Enter Value</FormLabel>
                             <Input
                                 placeholder="Enter your Choice"
-                                value={section.visualizations[0].show}
+                                value={section.visualizations[0]?.show}
                                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                                     dashboardApi.changeVisualizationShow({
                                         section,

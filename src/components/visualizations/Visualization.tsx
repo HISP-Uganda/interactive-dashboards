@@ -339,9 +339,8 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
             {!visualization.expression && (
                 <>
                     {isLoading && <LoadingIndicator />}
-                    {isSuccess &&
-                        getVisualization(visualization, data, section)}
-                    {isError && <pre>{JSON.stringify(visualization.id)}</pre>}
+                    {isSuccess && getVisualization(visualization, data, section)}
+                    {isError && <Text>No data/Error occurred</Text>}
                 </>
             )}
         </>
