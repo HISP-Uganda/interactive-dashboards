@@ -24,21 +24,27 @@ import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
 import { useDataElementGroupSets } from "../../Queries";
-import { $currentDataSource, $hasDHIS2, $paginations } from "../../Store";
+import {
+    $currentDataSource,
+    $hasDHIS2,
+    $paginations,
+    $visualizationQuery,
+} from "../../Store";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import GlobalSearchFilter from "./GlobalSearchFilter";
+import { datumAPi } from "../../Events";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
-const DataElementGroupSets = ({ onChange, denNum }: IndicatorProps) => {
+const DataElementGroupSets = () => {
     const paginations = useStore($paginations);
     const hasDHIS2 = useStore($hasDHIS2);
     const currentDataSource = useStore($currentDataSource);
+    const visualizationQuery = useStore($visualizationQuery);
 
     const { previousType, isGlobal } = computeGlobalParams(
-        denNum,
         "degs",
         "HdiJ61vwqTX"
     );
@@ -81,14 +87,12 @@ const DataElementGroupSets = ({ onChange, denNum }: IndicatorProps) => {
     return (
         <Stack spacing="5px">
             <GlobalSearchFilter
-                denNum={denNum}
                 dimension=""
                 setType={setType}
                 useGlobal={useGlobal}
                 setUseGlobal={setUseGlobal}
                 resource="degs"
                 type={type}
-                onChange={onChange}
                 setQ={setQ}
                 q={q}
                 id={globalIds[13].value}
@@ -130,14 +134,14 @@ const DataElementGroupSets = ({ onChange, denNum }: IndicatorProps) => {
                                             e: ChangeEvent<HTMLInputElement>
                                         ) => {
                                             if (e.target.checked) {
-                                                onChange({
+                                                datumAPi.changeDimension({
                                                     id: record.id,
                                                     type,
                                                     dimension: "",
                                                     resource: "degs",
                                                 });
                                             } else {
-                                                onChange({
+                                                datumAPi.changeDimension({
                                                     id: record.id,
                                                     type,
                                                     dimension: "",
@@ -148,9 +152,8 @@ const DataElementGroupSets = ({ onChange, denNum }: IndicatorProps) => {
                                         }}
                                         isChecked={
                                             !isEmpty(
-                                                denNum?.dataDimensions?.[
-                                                    record.id
-                                                ]
+                                                visualizationQuery
+                                                    .dataDimensions?.[record.id]
                                             )
                                         }
                                     />

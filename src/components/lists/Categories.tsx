@@ -16,7 +16,7 @@ import { Link, useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { useEffect, useState } from "react";
 import { ICategory, LocationGenerics } from "../../interfaces";
-import { deleteDocument, useCategories } from "../../Queries";
+import { deleteDocument, useCategories, useNamespace } from "../../Queries";
 import { $settings, $store } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import LoadingIndicator from "../LoadingIndicator";
@@ -28,10 +28,9 @@ const Categories = () => {
     const engine = useDataEngine();
     const [loading, setLoading] = useState<boolean>(false);
     const [currentId, setCurrentId] = useState<string>("");
-    const { isLoading, isSuccess, isError, error, data } = useCategories(
-        storage,
-        systemId
-    );
+
+    const { isLoading, isSuccess, isError, error, data } =
+        useNamespace<ICategory>("i-categories", storage, systemId, []);
     const [response, setResponse] = useState<ICategory[] | undefined>(data);
     const deleteResource = async (id: string) => {
         setCurrentId(() => id);

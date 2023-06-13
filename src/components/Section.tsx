@@ -15,31 +15,19 @@ import {
     Stack,
     Text,
     Textarea,
-    Checkbox,
 } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { ChangeEvent, DragEvent, useEffect, useRef, useState } from "react";
 import { BiDuplicate } from "react-icons/bi";
-import {
-    // sectionApi.changeVisualizationOverride,
-    // sectionApi.changeVisualizationProperties,
-    // sectionApi.deleteSectionVisualization,
-    // sectionApi.duplicateVisualization,
-    // setShowSider,
-    // sectionApi.setVisualizations,
-    sectionApi,
-    storeApi,
-    indicatorApi,
-} from "../Events";
-import { IVisualization, Option } from "../interfaces";
-import { useVisualizationData } from "../Queries";
-import { $indicators, $section, $store, $settings } from "../Store";
+import { sectionApi, storeApi } from "../Events";
+import { IIndicator, IVisualization, Option } from "../interfaces";
+import { useNamespace } from "../Queries";
+import { $section, $settings, $store } from "../Store";
 import { generateUid } from "../utils/uid";
 import {
-    chartTypes,
-    createOptions,
     alignItemsOptions,
+    chartTypes,
     justifyContentOptions,
 } from "../utils/utils";
 import ColorPalette from "./ColorPalette";
@@ -70,6 +58,7 @@ const VisualizationTypes = ({
                 }
                 options={chartTypes}
                 isClearable
+                menuPlacement="top"
             />
         </Stack>
     );
@@ -79,52 +68,32 @@ const VisualizationQuery = ({
 }: {
     visualization: IVisualization;
 }) => {
-    const indicators = useStore($indicators);
-    const settings = useStore($settings);
     const { systemId } = useStore($store);
-    const { isLoading, isSuccess, isError, error } = useVisualizationData(
-        settings.storage,
-        systemId
-    );
+    const { storage } = useStore($settings);
+    const { isLoading, isSuccess, isError, error, data } =
+        useNamespace<IIndicator>("i-indicators", storage, systemId, []);
     return (
         <Stack>
             <Text>Visualization Query</Text>
             {isLoading && <LoadingIndicator />}
             {isSuccess && (
-                <Select<Option, true, GroupBase<Option>>
+                <Select<IIndicator, true, GroupBase<IIndicator>>
                     isMulti
-                    value={indicators
-                        .map((i) => {
-                            const current: Option = {
-                                value: i.id,
-                                label: i.name || "",
-                            };
-                            return current;
-                        })
-                        .filter(
-                            (d: Option) =>
-                                String(visualization.indicator)
-                                    .split(",")
-                                    .indexOf(d.value) !== -1
-                        )}
-                    onChange={(e) => {
+                    value={visualization.indicators}
+                    getOptionLabel={(v) => String(v.name)}
+                    getOptionValue={(v) => v.id}
+                    onChange={(value) => {
                         sectionApi.changeVisualizationAttribute({
-                            attribute: "indicator",
-                            value: e.map((ex) => ex.value).join(","),
+                            attribute: "indicators",
+                            value,
                             visualization: visualization.id,
                         });
                     }}
-                    options={indicators.map((i) => {
-                        const current: Option = {
-                            value: i.id,
-                            label: i.name || "",
-                        };
-                        return current;
-                    })}
+                    options={data}
                     isClearable
                 />
             )}
-            {isError && <Text>No data/Error occurred</Text>}
+            {isError && <Text>{error?.message}</Text>}
         </Stack>
     );
 };
@@ -134,106 +103,107 @@ const VisualizationOverride = ({
 }: {
     visualization: IVisualization;
 }) => {
-    const indicators = useStore($indicators);
-    const indicator = indicators.find((i) => i.id === visualization.indicator);
+    // const indicators = useStore($indicators);
+    // const indicator = indicators.find((i) => i.id === visualization.indicator);
     return (
-        <>
-            {indicator && indicator.numerator?.type === "ANALYTICS" && (
-                <Stack>
-                    <Text>Overrides</Text>
-                    <Stack direction="row">
-                        <Text>DX</Text>
-                        <RadioGroup
-                            value={visualization.overrides["dx"]}
-                            onChange={(e: string) =>
-                                sectionApi.changeVisualizationOverride({
-                                    override: "dx",
-                                    value: e,
-                                    visualization: visualization.id,
-                                })
-                            }
-                        >
-                            <Stack direction="row">
-                                <Radio value="dimension">Dimension</Radio>
-                                <Radio value="filter">Filter</Radio>
-                            </Stack>
-                        </RadioGroup>
-                    </Stack>
-                    <Stack direction="row">
-                        <Text>OU</Text>
-                        <RadioGroup
-                            value={visualization.overrides["ou"]}
-                            onChange={(e: string) =>
-                                sectionApi.changeVisualizationOverride({
-                                    override: "ou",
-                                    value: e,
-                                    visualization: visualization.id,
-                                })
-                            }
-                        >
-                            <Stack direction="row">
-                                <Radio value="dimension">Dimension</Radio>
-                                <Radio value="filter">Filter</Radio>
-                            </Stack>
-                        </RadioGroup>
-                    </Stack>
-                    <Stack direction="row">
-                        <Text>OU Level</Text>
-                        <RadioGroup
-                            value={visualization.overrides["oul"]}
-                            onChange={(e: string) =>
-                                sectionApi.changeVisualizationOverride({
-                                    override: "oul",
-                                    value: e,
-                                    visualization: visualization.id,
-                                })
-                            }
-                        >
-                            <Stack direction="row">
-                                <Radio value="dimension">Dimension</Radio>
-                                <Radio value="filter">Filter</Radio>
-                            </Stack>
-                        </RadioGroup>
-                    </Stack>
-                    <Stack direction="row">
-                        <Text>OU Group</Text>
-                        <RadioGroup
-                            value={visualization.overrides["oug"]}
-                            onChange={(e: string) =>
-                                sectionApi.changeVisualizationOverride({
-                                    override: "oug",
-                                    value: e,
-                                    visualization: visualization.id,
-                                })
-                            }
-                        >
-                            <Stack direction="row">
-                                <Radio value="dimension">Dimension</Radio>
-                                <Radio value="filter">Filter</Radio>
-                            </Stack>
-                        </RadioGroup>
-                    </Stack>
-                    <Stack direction="row">
-                        <Text>PE</Text>
-                        <RadioGroup
-                            value={visualization.overrides["pe"]}
-                            onChange={(e: string) =>
-                                sectionApi.changeVisualizationOverride({
-                                    override: "pe",
-                                    value: e,
-                                    visualization: visualization.id,
-                                })
-                            }
-                        >
-                            <Stack direction="row">
-                                <Radio value="dimension">Dimension</Radio>
-                                <Radio value="filter">Filter</Radio>
-                            </Stack>
-                        </RadioGroup>
-                    </Stack>
-                </Stack>
-            )}
-        </>
+        <Text>Coming soon</Text>
+        // <>
+        //     {indicator && indicator.numerator?.type === "ANALYTICS" && (
+        //         <Stack>
+        //             <Text>Overrides</Text>
+        //             <Stack direction="row">
+        //                 <Text>DX</Text>
+        //                 <RadioGroup
+        //                     value={visualization.overrides["dx"]}
+        //                     onChange={(e: string) =>
+        //                         sectionApi.changeVisualizationOverride({
+        //                             override: "dx",
+        //                             value: e,
+        //                             visualization: visualization.id,
+        //                         })
+        //                     }
+        //                 >
+        //                     <Stack direction="row">
+        //                         <Radio value="dimension">Dimension</Radio>
+        //                         <Radio value="filter">Filter</Radio>
+        //                     </Stack>
+        //                 </RadioGroup>
+        //             </Stack>
+        //             <Stack direction="row">
+        //                 <Text>OU</Text>
+        //                 <RadioGroup
+        //                     value={visualization.overrides["ou"]}
+        //                     onChange={(e: string) =>
+        //                         sectionApi.changeVisualizationOverride({
+        //                             override: "ou",
+        //                             value: e,
+        //                             visualization: visualization.id,
+        //                         })
+        //                     }
+        //                 >
+        //                     <Stack direction="row">
+        //                         <Radio value="dimension">Dimension</Radio>
+        //                         <Radio value="filter">Filter</Radio>
+        //                     </Stack>
+        //                 </RadioGroup>
+        //             </Stack>
+        //             <Stack direction="row">
+        //                 <Text>OU Level</Text>
+        //                 <RadioGroup
+        //                     value={visualization.overrides["oul"]}
+        //                     onChange={(e: string) =>
+        //                         sectionApi.changeVisualizationOverride({
+        //                             override: "oul",
+        //                             value: e,
+        //                             visualization: visualization.id,
+        //                         })
+        //                     }
+        //                 >
+        //                     <Stack direction="row">
+        //                         <Radio value="dimension">Dimension</Radio>
+        //                         <Radio value="filter">Filter</Radio>
+        //                     </Stack>
+        //                 </RadioGroup>
+        //             </Stack>
+        //             <Stack direction="row">
+        //                 <Text>OU Group</Text>
+        //                 <RadioGroup
+        //                     value={visualization.overrides["oug"]}
+        //                     onChange={(e: string) =>
+        //                         sectionApi.changeVisualizationOverride({
+        //                             override: "oug",
+        //                             value: e,
+        //                             visualization: visualization.id,
+        //                         })
+        //                     }
+        //                 >
+        //                     <Stack direction="row">
+        //                         <Radio value="dimension">Dimension</Radio>
+        //                         <Radio value="filter">Filter</Radio>
+        //                     </Stack>
+        //                 </RadioGroup>
+        //             </Stack>
+        //             <Stack direction="row">
+        //                 <Text>PE</Text>
+        //                 <RadioGroup
+        //                     value={visualization.overrides["pe"]}
+        //                     onChange={(e: string) =>
+        //                         sectionApi.changeVisualizationOverride({
+        //                             override: "pe",
+        //                             value: e,
+        //                             visualization: visualization.id,
+        //                         })
+        //                     }
+        //                 >
+        //                     <Stack direction="row">
+        //                         <Radio value="dimension">Dimension</Radio>
+        //                         <Radio value="filter">Filter</Radio>
+        //                     </Stack>
+        //                 </RadioGroup>
+        //             </Stack>
+        //         </Stack>
+        //     )}
+        // </>
     );
 };
 
@@ -422,36 +392,6 @@ const Section = () => {
                                 options={alignItemsOptions}
                                 isClearable
                             />
-                            {/* <Text> Align Content</Text>
-                            <Select<Option, false, GroupBase<Option>>
-                                value={alignContentOptions.find(
-                                    (d: Option) =>
-                                        d.value === section.alignContent
-                                )}
-                                onChange={(e) =>
-                                    sectionApi.changeSectionAttribute({
-                                        attribute: "alignContent",
-                                        value: e?.value,
-                                    })
-                                }
-                                options={alignContentOptions}
-                                isClearable
-                            />
-                            <Text>Justify Items</Text>
-                            <Select<Option, false, GroupBase<Option>>
-                                value={justifyItemsOptions.find(
-                                    (d: Option) =>
-                                        d.value === section.justifyItems
-                                )}
-                                onChange={(e) =>
-                                    sectionApi.changeSectionAttribute({
-                                        attribute: "justifyItems",
-                                        value: e?.value,
-                                    })
-                                }
-                                options={justifyItemsOptions}
-                                isClearable
-                            /> */}
                             <Text>Justify Content</Text>
                             <Select<Option, false, GroupBase<Option>>
                                 value={justifyContentOptions.find(
@@ -691,28 +631,15 @@ const Section = () => {
                                                 )
                                             }
                                         />
-                                        <VisualizationOverride
+                                        {/* <VisualizationOverride
                                             visualization={visualization}
-                                        />
+                                        /> */}
                                         <VisualizationTypes
                                             visualization={visualization}
                                         />
                                         <VisualizationProperties
                                             visualization={visualization}
                                         />
-                                
-                                    <Checkbox
-                                    isChecked={visualization.needFilter}
-                                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                                        console.log(e.target.checked);
-
-                                        changeVisualizationAttribute({
-                                        visualization: visualization.id,
-                                        attribute: "needFilter",
-                                        value: e.target.checked,
-                                        });
-                                    }}
-                                    > Need Filter</Checkbox>
                                     </Stack>
                                 </Stack>
                             )

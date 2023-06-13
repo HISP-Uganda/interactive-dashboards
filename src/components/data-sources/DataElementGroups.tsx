@@ -22,9 +22,14 @@ import {
 import { useStore } from "effector-react";
 import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
-import { IndicatorProps } from "../../interfaces";
+import { datumAPi } from "../../Events";
 import { useDataElementGroups } from "../../Queries";
-import { $currentDataSource, $hasDHIS2, $paginations } from "../../Store";
+import {
+    $currentDataSource,
+    $hasDHIS2,
+    $paginations,
+    $visualizationQuery,
+} from "../../Store";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import GlobalSearchFilter from "./GlobalSearchFilter";
@@ -32,12 +37,12 @@ import GlobalSearchFilter from "./GlobalSearchFilter";
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
-const DataElementGroups = ({ onChange, denNum }: IndicatorProps) => {
+const DataElementGroups = () => {
     const paginations = useStore($paginations);
     const hasDHIS2 = useStore($hasDHIS2);
     const currentDataSource = useStore($currentDataSource);
+    const visualizationQuery = useStore($visualizationQuery);
     const { previousType, isGlobal } = computeGlobalParams(
-        denNum,
         "deg",
         "JsPfHe1QkJe"
     );
@@ -79,14 +84,12 @@ const DataElementGroups = ({ onChange, denNum }: IndicatorProps) => {
     return (
         <Stack spacing="5px">
             <GlobalSearchFilter
-                denNum={denNum}
                 dimension="dx"
                 setType={setType}
                 useGlobal={useGlobal}
                 setUseGlobal={setUseGlobal}
                 resource="deg"
                 type={type}
-                onChange={onChange}
                 setQ={setQ}
                 q={q}
                 prefix="DE_GROUP-"
@@ -129,7 +132,7 @@ const DataElementGroups = ({ onChange, denNum }: IndicatorProps) => {
                                             e: ChangeEvent<HTMLInputElement>
                                         ) => {
                                             if (e.target.checked) {
-                                                onChange({
+                                                datumAPi.changeDimension({
                                                     id: record.id,
                                                     type,
                                                     dimension: "dx",
@@ -137,7 +140,7 @@ const DataElementGroups = ({ onChange, denNum }: IndicatorProps) => {
                                                     prefix: "DE_GROUP-",
                                                 });
                                             } else {
-                                                onChange({
+                                                datumAPi.changeDimension({
                                                     id: record.id,
                                                     type,
                                                     dimension: "dx",
@@ -149,9 +152,8 @@ const DataElementGroups = ({ onChange, denNum }: IndicatorProps) => {
                                         }}
                                         isChecked={
                                             !isEmpty(
-                                                denNum?.dataDimensions?.[
-                                                    record.id
-                                                ]
+                                                visualizationQuery
+                                                    .dataDimensions?.[record.id]
                                             )
                                         }
                                     />

@@ -3,15 +3,15 @@ import { Event } from "effector";
 import React, { ChangeEvent, Dispatch, SetStateAction } from "react";
 import { Dimension, IData } from "../../interfaces";
 import GlobalAndFilter from "./GlobalAndFilter";
+import { useStore } from "effector-react";
+import { $visualizationQuery } from "../../Store";
 
 type GlobalSearchFilterProps = {
-    denNum?: IData;
     useGlobal: boolean;
     setQ: (value: string) => void;
     setType: Dispatch<SetStateAction<"filter" | "dimension">>;
     setUseGlobal: Dispatch<SetStateAction<boolean>>;
     q: string;
-    onChange: Event<Dimension>;
     type: "filter" | "dimension";
     dimension: string;
     id: string;
@@ -21,13 +21,11 @@ type GlobalSearchFilterProps = {
 };
 
 export default function GlobalSearchFilter({
-    denNum,
     useGlobal,
     q,
     setQ,
     setUseGlobal,
     setType,
-    onChange,
     dimension,
     resource,
     type,
@@ -35,16 +33,15 @@ export default function GlobalSearchFilter({
     prefix,
     suffix,
 }: GlobalSearchFilterProps) {
+    const visualizationQuery = useStore($visualizationQuery);
     return (
         <Stack direction="row" w="100%" flex={1} alignItems="center">
             <GlobalAndFilter
-                denNum={denNum}
                 dimension={dimension}
                 setType={setType}
                 useGlobal={useGlobal}
                 setUseGlobal={setUseGlobal}
                 type={type}
-                onChange={onChange}
                 resource={resource}
                 id={id}
                 prefix={prefix}

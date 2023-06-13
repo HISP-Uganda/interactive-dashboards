@@ -1,42 +1,40 @@
+import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
 import {
     IconButton,
-    Input,
+    NumberDecrementStepper,
+    NumberIncrementStepper,
+    NumberInput,
+    NumberInputField,
+    NumberInputStepper,
     Stack,
     Table,
-    TableContainer,
     Tbody,
     Td,
+    Tfoot,
     Th,
     Thead,
     Tr,
-    useDisclosure,
     Text,
-    Spacer,
 } from "@chakra-ui/react";
-import { ChangeEvent, useRef, useState } from "react";
-import { SwatchesPicker } from "react-color";
-import useOnClickOutside from "use-onclickoutside";
-import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
+import { sum } from "lodash";
+import { useState } from "react";
 import { sectionApi } from "../Events";
 import { IVisualization, Threshold } from "../interfaces";
 import { generateUid } from "../utils/uid";
-import { swatchColors } from "../utils/utils";
+import Picker from "./Picker";
 
 export default function ({ visualization }: { visualization: IVisualization }) {
-    const ref = useRef(null);
-
-    const [id, setId] = useState<string>("");
     const [thresholds, setThresholds] = useState<Threshold[]>(
-        visualization.properties?.["data.thresholds"] || []
+        visualization.properties?.["data.thresholds"] || [
+            { id: "baseline", color: "#444", value: -1 },
+        ]
     );
-    const { isOpen, onClose, onOpen } = useDisclosure();
 
     const addThreshold = () => {
         const threshold: Threshold = {
             id: generateUid(),
             color: "#333",
-            min: "50",
-            max: "100",
+            value: sum(thresholds.map((threshold) => threshold.value)) + 20,
         };
         const all = [...thresholds, threshold];
         sectionApi.changeVisualizationProperties({
@@ -56,11 +54,11 @@ export default function ({ visualization }: { visualization: IVisualization }) {
         });
         setThresholds(() => filtered);
     };
-    useOnClickOutside(ref, onClose);
+
     const changeThreshold = (
         id: string,
-        attribute: "color" | "min" | "max",
-        value: string
+        attribute: keyof Threshold,
+        value: string | number
     ) => {
         const processed = thresholds.map((threshold) => {
             if (threshold.id === id) {
@@ -77,82 +75,59 @@ export default function ({ visualization }: { visualization: IVisualization }) {
     };
     return (
         <Stack>
-            <Stack direction="row" alignItems="center">
-                <Text>Threshold</Text>
-                <Spacer />
-                <IconButton
-                    bgColor="none"
-                    aria-label="add"
-                    icon={<AddIcon w={2} h={2} />}
-                    onClick={() => addThreshold()}
+            <Stack alignItems="center" direction="row">
+                <Picker
+                    color={
+                        thresholds.find(({ id }) => id === "baseline")?.color ||
+                        "red"
+                    }
+                    onChange={(color) =>
+                        changeThreshold("baseline", "color", color)
+                    }
                 />
+                <Text>Baseline</Text>
             </Stack>
-
-            <TableContainer>
-                <Table variant="simple" size="xs">
-                    <Thead>
-                        <Tr>
-                            <Th>Min</Th>
-                            <Th>Max</Th>
-                            <Th>Color</Th>
-                            <Th></Th>
-                        </Tr>
-                    </Thead>
-                    <Tbody ref={ref}>
-                        {thresholds.map((hold) => (
+            <Table variant="unstyled">
+                <Tbody>
+                    {thresholds
+                        .filter(({ id }) => id !== "baseline")
+                        .map((hold) => (
                             <Tr key={hold.id}>
-                                <Td w="35%">
-                                    <Input
-                                        value={hold.min}
-                                        onChange={(
-                                            e: ChangeEvent<HTMLInputElement>
-                                        ) =>
+                                <Td>
+                                    <Picker
+                                        color={hold.color}
+                                        onChange={(color) =>
                                             changeThreshold(
                                                 hold.id,
-                                                "min",
-                                                e.target.value
+                                                "color",
+                                                color
                                             )
                                         }
                                     />
                                 </Td>
-                                <Td w="35%">
-                                    <Input
-                                        value={hold.max}
+
+                                <Td>
+                                    <NumberInput
+                                        value={hold.value}
+                                        min={0}
+                                        size="sm"
                                         onChange={(
-                                            e: ChangeEvent<HTMLInputElement>
+                                            value1: string,
+                                            value2: number
                                         ) =>
                                             changeThreshold(
                                                 hold.id,
-                                                "max",
-                                                e.target.value
+                                                "value",
+                                                value2
                                             )
                                         }
-                                    />
-                                </Td>
-                                <Td
-                                    w="20%"
-                                    bgColor={hold.color}
-                                    position="relative"
-                                    onClick={() => {
-                                        setId(() => hold.id);
-                                        onOpen();
-                                    }}
-                                >
-                                    {isOpen && id === hold.id && (
-                                        <SwatchesPicker
-                                            colors={swatchColors}
-                                            key={hold.id}
-                                            color={hold.color}
-                                            onChangeComplete={(color) => {
-                                                changeThreshold(
-                                                    hold.id,
-                                                    "color",
-                                                    color.hex
-                                                );
-                                                onClose();
-                                            }}
-                                        />
-                                    )}
+                                    >
+                                        <NumberInputField />
+                                        <NumberInputStepper>
+                                            <NumberIncrementStepper />
+                                            <NumberDecrementStepper />
+                                        </NumberInputStepper>
+                                    </NumberInput>
                                 </Td>
                                 <Td textAlign="right" w="10%">
                                     <IconButton
@@ -164,9 +139,20 @@ export default function ({ visualization }: { visualization: IVisualization }) {
                                 </Td>
                             </Tr>
                         ))}
-                    </Tbody>
-                </Table>
-            </TableContainer>
+                </Tbody>
+                <Tfoot>
+                    <Tr>
+                        <Td colSpan={3} textAlign="right">
+                            <IconButton
+                                bgColor="none"
+                                aria-label="add"
+                                icon={<AddIcon w={2} h={2} />}
+                                onClick={() => addThreshold()}
+                            />
+                        </Td>
+                    </Tr>
+                </Tfoot>
+            </Table>
         </Stack>
     );
 }

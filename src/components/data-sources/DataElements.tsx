@@ -24,23 +24,26 @@ import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
 import { useDataElements } from "../../Queries";
-import { $currentDataSource, $hasDHIS2, $paginations } from "../../Store";
+import {
+    $currentDataSource,
+    $hasDHIS2,
+    $paginations,
+    $visualizationQuery,
+} from "../../Store";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import GlobalSearchFilter from "./GlobalSearchFilter";
+import { datumAPi } from "../../Events";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
-const DataElements = ({ onChange, denNum }: IndicatorProps) => {
+const DataElements = () => {
     const paginations = useStore($paginations);
     const hasDHIS2 = useStore($hasDHIS2);
     const currentDataSource = useStore($currentDataSource);
-    const { previousType, isGlobal } = computeGlobalParams(
-        denNum,
-        "de",
-        "h9oh0VhweQM"
-    );
+    const visualizationQuery = useStore($visualizationQuery);
+    const { previousType, isGlobal } = computeGlobalParams("de", "h9oh0VhweQM");
     const [type, setType] = useState<"filter" | "dimension">(previousType);
     const [useGlobal, setUseGlobal] = useState<boolean>(isGlobal);
     const [q, setQ] = useState<string>("");
@@ -79,14 +82,12 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
     return (
         <Stack spacing="5px">
             <GlobalSearchFilter
-                denNum={denNum}
                 dimension="dx"
                 resource="de"
                 setType={setType}
                 useGlobal={useGlobal}
                 setUseGlobal={setUseGlobal}
                 type={type}
-                onChange={onChange}
                 setQ={setQ}
                 q={q}
                 id={globalIds[6].value}
@@ -128,14 +129,14 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
                                             e: ChangeEvent<HTMLInputElement>
                                         ) => {
                                             if (e.target.checked) {
-                                                onChange({
+                                                datumAPi.changeDimension({
                                                     id: record.id,
                                                     type,
                                                     dimension: "dx",
                                                     resource: "de",
                                                 });
                                             } else {
-                                                onChange({
+                                                datumAPi.changeDimension({
                                                     id: record.id,
                                                     type,
                                                     dimension: "dx",
@@ -146,9 +147,8 @@ const DataElements = ({ onChange, denNum }: IndicatorProps) => {
                                         }}
                                         isChecked={
                                             !isEmpty(
-                                                denNum?.dataDimensions?.[
-                                                    record.id
-                                                ]
+                                                visualizationQuery
+                                                    .dataDimensions?.[record.id]
                                             )
                                         }
                                     />

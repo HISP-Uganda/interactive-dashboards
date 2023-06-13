@@ -10,35 +10,36 @@ import {
     Tr,
 } from "@chakra-ui/react";
 import { ChangeEvent, useState } from "react";
+import { datumAPi } from "../../Events";
 import { IndicatorProps } from "../../interfaces";
 import { computeGlobalParams } from "../../utils/utils";
 import GlobalSearchFilter from "./GlobalSearchFilter";
+import { useStore } from "effector-react";
+import { $visualizationQuery } from "../../Store";
 
-interface DimensionProps extends IndicatorProps {
+interface DimensionProps {
     dimensionItem: { [key: string]: any };
 }
 
-const Dimension = ({ denNum, onChange, dimensionItem }: DimensionProps) => {
+const Dimension = ({ dimensionItem }: DimensionProps) => {
     const { previousType, isGlobal } = computeGlobalParams(
-        denNum,
         "dimension",
         "GQhi6pRnTKF"
     );
     const [type, setType] = useState<"filter" | "dimension">(previousType);
+    const visualizationQuery = useStore($visualizationQuery);
     const [useGlobal, setUseGlobal] = useState<boolean>(isGlobal);
     const [q, setQ] = useState<string>("");
 
     return (
         <Stack spacing="5px">
             <GlobalSearchFilter
-                denNum={denNum}
                 dimension={dimensionItem.id}
                 setType={setType}
                 useGlobal={useGlobal}
                 setUseGlobal={setUseGlobal}
                 resource="dimension"
                 type={type}
-                onChange={onChange}
                 setQ={setQ}
                 q={q}
                 id={dimensionItem.id}
@@ -76,14 +77,14 @@ const Dimension = ({ denNum, onChange, dimensionItem }: DimensionProps) => {
                                             e: ChangeEvent<HTMLInputElement>
                                         ) => {
                                             if (e.target.checked) {
-                                                onChange({
+                                                datumAPi.changeDimension({
                                                     id: record.id,
                                                     type,
                                                     dimension: dimensionItem.id,
                                                     resource: "dimension",
                                                 });
                                             } else {
-                                                onChange({
+                                                datumAPi.changeDimension({
                                                     id: record.id,
                                                     type,
                                                     dimension: dimensionItem.id,
@@ -93,9 +94,8 @@ const Dimension = ({ denNum, onChange, dimensionItem }: DimensionProps) => {
                                             }
                                         }}
                                         isChecked={
-                                            !!denNum?.dataDimensions?.[
-                                                record.id
-                                            ]
+                                            !!visualizationQuery
+                                                ?.dataDimensions?.[record.id]
                                         }
                                     />
                                 </Td>

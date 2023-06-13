@@ -59,6 +59,7 @@
         "dexie-react-hooks": "^1.1.1",
         "effector": "^22.5.0",
         "effector-react": "^22.4.0",
+        "ellipsis-tooltip-react-chan": "^1.2.1",
         "express": "^4.18.2",
         "framer-motion": "4.1.17",
         "http-proxy-middleware": "^2.0.6",

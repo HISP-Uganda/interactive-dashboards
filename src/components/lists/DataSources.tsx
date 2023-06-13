@@ -1,27 +1,25 @@
 import { AddIcon } from "@chakra-ui/icons";
-import { useState, useEffect } from "react";
 import {
     Button,
-    Divider,
     Spacer,
     Stack,
     Table,
     Tbody,
     Td,
+    Text,
     Th,
     Thead,
     Tr,
-    Text,
 } from "@chakra-ui/react";
+import { useDataEngine } from "@dhis2/app-runtime";
 import { Link, useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
+import { useEffect, useState } from "react";
 import { IDataSource, LocationGenerics } from "../../interfaces";
 import { deleteDocument, useDataSources } from "../../Queries";
-import { $store, $settings } from "../../Store";
+import { $settings, $store } from "../../Store";
 import { generateUid } from "../../utils/uid";
-import { generalPadding, otherHeight } from "../constants";
 import LoadingIndicator from "../LoadingIndicator";
-import { useDataEngine } from "@dhis2/app-runtime";
 const DataSources = () => {
     const navigate = useNavigate<LocationGenerics>();
     const [loading, setLoading] = useState<boolean>(false);
@@ -93,12 +91,6 @@ const DataSources = () => {
                                     <Td>{dataSource.description}</Td>
                                     <Td>
                                         <Stack direction="row" spacing="5px">
-                                            <Button
-                                                colorScheme="green"
-                                                size="xs"
-                                            >
-                                                Edit
-                                            </Button>
                                             <Button size="xs">Duplicate</Button>
                                             <Button
                                                 colorScheme="red"

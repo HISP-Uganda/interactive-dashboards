@@ -1,39 +1,24 @@
 import { Input, Stack, Text, Textarea } from "@chakra-ui/react";
-import { Event } from "effector";
+import { useStore } from "effector-react";
 import { ChangeEvent } from "react";
-import { DataValueAttribute, IndicatorProps } from "../../interfaces";
+import { datumAPi } from "../../Events";
+import { $visualizationQuery } from "../../Store";
 import DHIS2 from "./DHIS2";
-interface DHIS2Props extends IndicatorProps {
-    dataSourceType?: string;
-    changeQuery?: Event<DataValueAttribute>;
-}
-export const displayDataSourceType = ({
-    denNum,
-    onChange,
-    dataSourceType,
-    changeQuery,
-}: DHIS2Props) => {
+export const DisplayDataSourceType = () => {
+    const visualizationQuery = useStore($visualizationQuery);
     const allTypes: { [key: string]: any } = {
-        DHIS2: (
-            <DHIS2
-                denNum={denNum}
-                onChange={onChange}
-                changeQuery={changeQuery}
-            />
-        ),
+        DHIS2: <DHIS2 />,
         ELASTICSEARCH: (
             <Stack>
                 <Text>Query</Text>
                 <Textarea
                     rows={10}
-                    value={denNum?.query}
+                    value={visualizationQuery.query}
                     onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-                        changeQuery
-                            ? changeQuery({
-                                  attribute: "query",
-                                  value: e.target.value,
-                              })
-                            : null
+                        datumAPi.changeAttribute({
+                            attribute: "query",
+                            value: e.target.value,
+                        })
                     }
                 />
             </Stack>
@@ -42,21 +27,19 @@ export const displayDataSourceType = ({
             <Stack>
                 <Text>Accessor</Text>
                 <Input
-                    value={denNum?.accessor || ""}
+                    value={visualizationQuery.accessor}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        changeQuery
-                            ? changeQuery({
-                                  attribute: "accessor",
-                                  value: e.target.value,
-                              })
-                            : null
+                        datumAPi.changeAttribute({
+                            attribute: "accessor",
+                            value: e.target.value,
+                        })
                     }
                 />
             </Stack>
         ),
     };
-    if (dataSourceType) {
-        return allTypes[dataSourceType] || null;
+    if (visualizationQuery.dataSource?.type) {
+        return allTypes[visualizationQuery.dataSource.type] || null;
     }
     return null;
 };

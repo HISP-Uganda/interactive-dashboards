@@ -24,17 +24,22 @@ import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
 import { useOrganisationUnitLevels } from "../../Queries";
-import { $currentDataSource, $hasDHIS2, $paginations } from "../../Store";
+import {
+    $currentDataSource,
+    $hasDHIS2,
+    $paginations,
+    $visualizationQuery,
+} from "../../Store";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import GlobalSearchFilter from "./GlobalSearchFilter";
+import { datumAPi } from "../../Events";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
-const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
+const OrganizationUnitLevels = () => {
     const { previousType, isGlobal } = computeGlobalParams(
-        denNum,
         "oul",
         "GQhi6pRnTKF"
     );
@@ -44,6 +49,7 @@ const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
     const paginations = useStore($paginations);
     const hasDHIS2 = useStore($hasDHIS2);
     const currentDataSource = useStore($currentDataSource);
+    const visualizationQuery = useStore($visualizationQuery);
     const {
         pages,
         pagesCount,
@@ -79,7 +85,6 @@ const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
     return (
         <Stack spacing="30px">
             <GlobalSearchFilter
-                denNum={denNum}
                 dimension="ou"
                 setType={setType}
                 useGlobal={useGlobal}
@@ -87,7 +92,6 @@ const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
                 resource="oul"
                 prefix="LEVEL-"
                 type={type}
-                onChange={onChange}
                 setQ={setQ}
                 q={q}
                 id={globalIds[4].value}
@@ -130,7 +134,7 @@ const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
                                             e: ChangeEvent<HTMLInputElement>
                                         ) => {
                                             if (e.target.checked) {
-                                                onChange({
+                                                datumAPi.changeDimension({
                                                     id: record.level,
                                                     type,
                                                     dimension: "ou",
@@ -138,7 +142,7 @@ const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
                                                     prefix: "LEVEL-",
                                                 });
                                             } else {
-                                                onChange({
+                                                datumAPi.changeDimension({
                                                     id: record.level,
                                                     type,
                                                     dimension: "ou",
@@ -150,7 +154,8 @@ const OrganizationUnitLevels = ({ denNum, onChange }: IndicatorProps) => {
                                         }}
                                         isChecked={
                                             !isEmpty(
-                                                denNum?.dataDimensions?.[
+                                                visualizationQuery
+                                                    .dataDimensions?.[
                                                     record.level
                                                 ]
                                             )

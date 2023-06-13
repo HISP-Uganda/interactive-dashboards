@@ -1,7 +1,5 @@
-import { useStore } from "effector-react";
 import Plot from "react-plotly.js";
 import { ChartProps } from "../../interfaces";
-import { $visualizationData, $visualizationMetadata } from "../../Store";
 
 interface FunnelGraphProps extends ChartProps {
     category?: string;

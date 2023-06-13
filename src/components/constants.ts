@@ -7,3 +7,10 @@ export const generalPadding = 10;
 export const otherHeight = `calc(100vh - ${
     headerHeight + otherHeaders * 2 + padding * 4
 }px)`;
+
+export const SPECIAL_COLUMNS = [
+    "rowCount",
+    "rowTotal",
+    "columnCount",
+    "columnTotal",
+];

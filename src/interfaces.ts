@@ -1,10 +1,8 @@
-import { padding } from "./components/constants";
-import { MakeGenerics } from "@tanstack/react-location";
-import { OptionBase } from "chakra-react-select";
-import type { DataNode as IDataNode } from "antd/es/tree";
-
-import { Event } from "effector";
 import { FlexboxProps, SpaceProps, StackProps } from "@chakra-ui/react";
+import { MakeGenerics } from "@tanstack/react-location";
+import type { DataNode as IDataNode } from "antd/es/tree";
+import { OptionBase } from "chakra-react-select";
+import { Event } from "effector";
 
 export type Storage = "data-store" | "es";
 export type ScreenSize = "xs" | "sm" | "md" | "lg";
@@ -40,6 +38,7 @@ export interface DataValueAttribute {
         | "dimension"
         | "query"
         | "accessor"
+        | "type"
         | "resource";
     value: any;
 }
@@ -64,9 +63,10 @@ export interface IExpressions {
     };
 }
 export interface IDataSource extends INamed {
-    type: "DHIS2" | "ELASTICSEARCH" | "API";
+    type: "DHIS2" | "ELASTICSEARCH" | "API" | "INDEX_DB";
     authentication: Authentication;
     isCurrentDHIS2: boolean;
+    indexDb?: { programStage: string };
 }
 export type Dimension = {
     id: string;
@@ -86,9 +86,13 @@ export interface IDimension {
 export interface IData extends INamed {
     query?: string;
     expressions?: IExpressions;
-    type: "SQL_VIEW" | "ANALYTICS" | "OTHER";
+    type: "SQL_VIEW" | "ANALYTICS" | "API";
     accessor?: string;
     dataDimensions: IDimension;
+    dataSource?: IDataSource;
+    joinTo?: IData;
+    // joinColumn?: string;
+    // joinToColumn?: string;
 }
 
 export interface IIndicator extends INamed {
@@ -96,14 +100,11 @@ export interface IIndicator extends INamed {
     denominator?: IData;
     factor: string;
     custom: boolean;
-    dataSource?: string;
-    realDataSource?: IDataSource;
-    useInBuildIndicators: boolean;
     query?: string;
 }
 
 export interface IVisualization extends INamed {
-    indicator: string;
+    indicators: Array<IIndicator>;
     type: string;
     refreshInterval?: number;
     overrides: { [key: string]: any };
@@ -113,8 +114,8 @@ export interface IVisualization extends INamed {
     showTitle?: boolean;
     bg: string;
     needFilter?: boolean;
-    show:number;
-    order:string;
+    show: number;
+    order: string;
 }
 export interface ISection
     extends Pick<
@@ -206,14 +207,14 @@ export type Item = {
 };
 
 export type PickerProps = {
-    selectedPeriods: Item[];
-    onChange: (periods: Item[]) => void;
+    selectedPeriods: Period[];
+    onChange: (periods: Period[]) => void;
 };
 export interface IStore {
     showSider: boolean;
     showFooter: boolean;
     organisations: string[];
-    periods: Item[];
+    periods: Period[];
     groups: string[];
     levels: string[];
     expandedKeys: React.Key[];
@@ -268,6 +269,7 @@ export type LocationGenerics = MakeGenerics<{
         categoryId: string;
         dataSourceId: string;
         dashboardId: string;
+        visualizationQueryId: string;
     };
     Search: {
         category: string;
@@ -296,8 +298,7 @@ export interface ChartProps {
 
 export interface Threshold {
     id: string;
-    min: string;
-    max: string;
+    value: number;
     color: string;
 }
 
@@ -362,4 +363,64 @@ export interface IExpressionValue {
     attribute: string;
     value: string;
     isGlobal: boolean;
+}
+
+export type VizProps = {
+    visualization: IVisualization;
+    attribute: string;
+    title?: string;
+};
+
+export type Column = {
+    label: string;
+    value: string;
+    span: number;
+    actual: string;
+};
+
+export type RelativePeriodType =
+    | "DAILY"
+    | "WEEKLY"
+    | "BIWEEKLY"
+    | "WEEKS_THIS_YEAR"
+    | "MONTHLY"
+    | "BIMONTHLY"
+    | "QUARTERLY"
+    | "SIXMONTHLY"
+    | "FINANCIAL"
+    | "YEARLY";
+
+export type FixedPeriodType =
+    | "DAILY"
+    | "WEEKLY"
+    | "WEEKLYWED"
+    | "WEEKLYTHU"
+    | "WEEKLYSAT"
+    | "WEEKLYSUN"
+    | "BIWEEKLY"
+    | "MONTHLY"
+    | "BIMONTHLY"
+    | "QUARTERLY"
+    | "QUARTERLYNOV"
+    | "SIXMONTHLY"
+    | "SIXMONTHLYAPR"
+    | "SIXMONTHLYNOV"
+    | "YEARLY"
+    | "FYNOV"
+    | "FYOCT"
+    | "FYJUL"
+    | "FYAPR";
+
+export type FixedPeriod = {
+    id: string;
+    iso?: string;
+    name: string;
+    startDate: string;
+    endDate: string;
+};
+
+export interface Period extends Option {
+    startDate?: string;
+    endDate?: string;
+    type: "fixed" | "relative" | "range";
 }
