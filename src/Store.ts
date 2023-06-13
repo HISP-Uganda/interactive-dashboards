@@ -1,12 +1,13 @@
 import axios from "axios";
 import { combine, createApi } from "effector";
-import { fromPairs, isEmpty, isEqual, sortBy } from "lodash";
+import { isEmpty, isEqual, sortBy } from "lodash";
 import { headerHeight, padding, sideWidth } from "./components/constants";
 import { domain } from "./Domain";
 import {
     ICategory,
     IDashboard,
     IDashboardSetting,
+    IData,
     IDataSource,
     IIndicator,
     IPagination,
@@ -91,25 +92,30 @@ export const createDataSource = (id = generateUid()): IDataSource => {
     };
 };
 
+export const createVisualizationQuery = (id = generateUid()): IData => {
+    return {
+        id,
+        type: "ANALYTICS",
+        name: "Example Query",
+        description: "",
+        dataDimensions: {},
+        dataSource: undefined,
+    };
+};
+
+export const $visualizationQuery = domain.createStore<IData>(
+    createVisualizationQuery()
+);
+
 export const createIndicator = (id = generateUid()): IIndicator => {
     return {
         id,
-        numerator: {
-            id: generateUid(),
-            type: "ANALYTICS",
-            dataDimensions: {},
-        },
-        denominator: {
-            id: generateUid(),
-            type: "ANALYTICS",
-            dataDimensions: {},
-        },
+        numerator: undefined,
+        denominator: undefined,
         name: "",
-        dataSource: "",
         description: "",
         factor: "1",
         query: "",
-        useInBuildIndicators: false,
         custom: false,
     };
 };
@@ -214,53 +220,66 @@ export const $dataSources = domain.createStore<IDataSource[]>([]);
 export const $indicator = domain.createStore<IIndicator>(createIndicator());
 export const $section = domain.createStore<ISection>(createSection());
 export const $dataSets = domain.createStore<Option[]>([]);
-export const $hasDHIS2 = combine(
-    $indicator,
-    $dataSources,
-    (indicator, dataSources) => {
-        return dataSources.find((ds) => ds.id === indicator.dataSource)
-            ?.isCurrentDHIS2;
-    }
-);
 
-export const $dataSourceType = combine(
-    $indicator,
-    $dataSources,
-    (indicator, dataSources) => {
-        const dataSource: IDataSource | undefined = dataSources.find(
-            (ds) => ds.id === indicator.dataSource
-        );
-        if (dataSource) {
-            return dataSource.type;
-        }
-        return "";
-    }
-);
+// export const $hasDHIS2 = combine(
+//     $visualizationQuery,
+//     $dataSources,
+//     (indicator, dataSources) => {
+//         return dataSources.find((ds) => ds.id === indicator.dataSource)
+//             ?.isCurrentDHIS2;
+//     }
+// );
+
+export const $hasDHIS2 = $visualizationQuery.map((state) => {
+    return state.dataSource?.isCurrentDHIS2;
+});
+
+// export const $dataSourceType = combine(
+//     $visualizationQuery,
+//     $dataSources,
+//     (indicator, dataSources) => {
+//         const dataSource: IDataSource | undefined = dataSources.find(
+//             (ds) => ds.id === indicator.dataSource
+//         );
+//         if (dataSource) {
+//             return dataSource.type;
+//         }
+//         return "";
+//     }
+// );
+
+export const $dataSourceType = $visualizationQuery.map((state) => {
+    return state.dataSource?.type || "";
+});
 
 export const $currentDataSource = combine(
-    $indicator,
-    $dataSources,
-    (indicator, dataSources) => {
-        const ds = dataSources.find((ds) => ds.id === indicator.dataSource);
-        if (ds && !isEmpty(ds.authentication)) {
+    $visualizationQuery,
+    (visualizationQuery) => {
+        if (
+            visualizationQuery.dataSource &&
+            !isEmpty(visualizationQuery.dataSource.authentication)
+        ) {
             return axios.create({
-                baseURL: `${ds.authentication.url}/api/`,
+                baseURL: `${visualizationQuery.dataSource.authentication.url}/api/`,
                 auth: {
-                    username: ds.authentication.username,
-                    password: ds.authentication.password,
+                    username:
+                        visualizationQuery.dataSource.authentication.username,
+                    password:
+                        visualizationQuery.dataSource.authentication.password,
                 },
             });
         }
+        return undefined;
     }
 );
 
-export const $ds = combine(
-    $indicator,
-    $dataSources,
-    (indicator, dataSources) => {
-        return dataSources.find((ds) => ds.id === indicator.dataSource);
-    }
-);
+// export const $ds = combine(
+//     $visualizationDatum,
+//     $dataSources,
+//     (indicator, dataSources) => {
+//         return dataSources.find((ds) => ds.id === indicator.dataSource);
+//     }
+// );
 
 export const $categoryDashboards = combine(
     $dashboards,
@@ -299,19 +318,19 @@ export const $categoryOptions = $categories.map((state) => {
     });
 });
 
-export const $indicatorDataSourceTypes = combine(
-    $indicators,
-    $dataSources,
-    (indicators, dataSources) => {
-        const allIndicators: string[][] = indicators.map((indicator) => {
-            const dataSource = dataSources.find(
-                (ds) => ds.id === indicator.dataSource
-            );
-            return [indicator.id, dataSource?.type || ""];
-        });
-        return fromPairs(allIndicators);
-    }
-);
+// export const $indicatorDataSourceTypes = combine(
+//     $indicators,
+//     $dataSources,
+//     (indicators, dataSources) => {
+//         const allIndicators: string[][] = indicators.map((indicator) => {
+//             const dataSource = dataSources.find(
+//                 (ds) => ds.id === indicator.dataSource
+//             );
+//             return [indicator.id, dataSource?.type || ""];
+//         });
+//         return fromPairs(allIndicators);
+//     }
+// );
 
 export const $visualizationData = domain.createStore<{ [key: string]: any[] }>(
     {}

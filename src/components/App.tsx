@@ -1,4 +1,11 @@
-import { Box, Flex, Spinner, useMediaQuery } from "@chakra-ui/react";
+import {
+    Box,
+    Flex,
+    Spinner,
+    useMediaQuery,
+    Stack,
+    Text,
+} from "@chakra-ui/react";
 import {
     createHashHistory,
     Outlet,
@@ -15,15 +22,15 @@ import {
     DashboardForm,
     DataSourceForm,
     IndicatorForm,
+    VisualizationQueryForm,
 } from "../components/forms";
-import Denominator from "../components/forms/Denominator";
-import Numerator from "../components/forms/Numerator";
 import Home from "../components/Home";
 import {
     Categories,
     Dashboards,
     DataSources,
     Indicators,
+    VisualizationQueries,
 } from "../components/lists";
 import Section from "../components/Section";
 import { sizeApi, storeApi } from "../Events";
@@ -33,6 +40,7 @@ import { $settings } from "../Store";
 import { decodeFromBinary, encodeToBinary } from "../utils/utils";
 import Panel from "./Panel";
 import Settings from "./Settings";
+// import IndicatorForm from "./forms/IndicatorForm";
 
 const history = createHashHistory();
 const location = new ReactLocation<LocationGenerics>({
@@ -54,7 +62,7 @@ const sizes: { [k: number]: ScreenSize } = {
 
 const App = () => {
     const { storage } = useStore($settings);
-    const { isLoading, isSuccess, isError, error } = useInitials(storage);
+    const { isLoading, isSuccess, isError, error, data } = useInitials(storage);
     const [isNotDesktop] = useMediaQuery(["(max-width: 992px)"]);
 
     const [phone, tablet, laptop, desktop] = useMediaQuery([
@@ -174,10 +182,39 @@ const App = () => {
                                         return {};
                                     },
                                 },
-                                { path: "/numerator", element: <Numerator /> },
+                            ],
+                        },
+                    ],
+                },
+                {
+                    path: "/visualization-queries",
+                    children: [
+                        {
+                            path: "/",
+                            element: <VisualizationQueries />,
+                            loader: () => {
+                                storeApi.setCurrentPage(
+                                    "visualization-queries"
+                                );
+                                storeApi.setShowFooter(false);
+                                storeApi.setShowSider(true);
+                                return {};
+                            },
+                        },
+                        {
+                            path: ":visualizationQueryId",
+                            children: [
                                 {
-                                    path: "/denominator",
-                                    element: <Denominator />,
+                                    path: "/",
+                                    element: <VisualizationQueryForm />,
+                                    loader: () => {
+                                        storeApi.setShowFooter(false);
+                                        storeApi.setCurrentPage(
+                                            "visualization-query"
+                                        );
+                                        storeApi.setShowSider(true);
+                                        return {};
+                                    },
                                 },
                             ],
                         },

@@ -1,4 +1,4 @@
-import { Stack, Text } from "@chakra-ui/react";
+import { Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { fromPairs, isEmpty } from "lodash";
 import { ISection, IVisualization } from "../../interfaces";
@@ -18,6 +18,7 @@ import BoxPlot from "./BoxPlot";
 import BubbleMaps from "./BubbleMaps";
 import CategoryList from "./CategoryList";
 import DashboardList from "./DashboardList";
+import DashboardTitle from "./DashboardTitle";
 import DashboardTree from "./DashboardTree";
 import Filters from "./Filters";
 import FunnelGraph from "./FunnelGraph";
@@ -31,11 +32,10 @@ import PieChart from "./PieChart";
 import RadarGraph from "./RadarGraph";
 import ScatterPlot from "./ScatterPlot";
 import SingleValue from "./SingleValue";
+import StackedArea from "./StackedArea";
 import SunburstChart from "./SunburstChart";
 import Tables from "./Tables";
 import TreeMaps from "./TreeMaps";
-import StackedArea from "./StackedArea";
-import DashboardTitle from "./DashboardTitle";
 
 type VisualizationProps = {
     visualization: IVisualization;
@@ -301,27 +301,12 @@ const getVisualization = (
 };
 
 const Visualization = ({ visualization, section }: VisualizationProps) => {
-    const indicators = useStore($indicators);
     const globalFilters = useStore($globalFilters);
-    const dataSources = useStore($dataSources);
     const dashboard = useStore($dashboard);
     const visualizationData = useStore($visualizationData);
 
-    const currentIndicators = indicators.filter(
-        (v) => String(visualization.indicator).split(",").indexOf(v.id) !== -1
-    );
-    const currentDataSources = dataSources.filter((d) => {
-        return (
-            currentIndicators
-                .map(({ dataSource }) => dataSource)
-                .indexOf(d.id) !== -1
-        );
-    });
-
     const { isLoading, isSuccess, data, isError, error } = useVisualization(
         visualization,
-        currentIndicators,
-        currentDataSources,
         dashboard.refreshInterval,
         globalFilters
     );
@@ -339,8 +324,9 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
             {!visualization.expression && (
                 <>
                     {isLoading && <LoadingIndicator />}
-                    {isSuccess && getVisualization(visualization, data, section)}
-                    {isError && <Text>No data/Error occurred</Text>}
+                    {isSuccess &&
+                        getVisualization(visualization, data, section)}
+                    {isError && <Text>{JSON.stringify(error)}</Text>}
                 </>
             )}
         </>

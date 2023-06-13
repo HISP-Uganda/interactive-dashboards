@@ -6,22 +6,29 @@ import {
     FormErrorMessage,
     FormLabel,
     Input,
-    Select,
     Spacer,
     Stack,
     Textarea,
 } from "@chakra-ui/react";
+import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useQueryClient } from "@tanstack/react-query";
+import { Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { dataSourceApi } from "../../Events";
-import { IDataSource, LocationGenerics } from "../../interfaces";
+import { IDataSource, LocationGenerics, Option } from "../../interfaces";
 import { saveDocument } from "../../Queries";
-import { $dataSource, $store, createDataSource, $settings } from "../../Store";
+import { $dataSource, $settings, $store, createDataSource } from "../../Store";
 import { generalPadding, otherHeight } from "../constants";
-import { useDataEngine } from "@dhis2/app-runtime";
+
+const dataSourceTypes: Option[] = [
+    { label: "DHIS2", value: "DHIS2" },
+    { label: "Elasticsearch", value: "ELASTICSEARCH" },
+    { label: "API", value: "API" },
+    { label: "Index DB", value: "INDEX_DB" },
+];
 
 const DataSource = () => {
     const navigate = useNavigate();
@@ -37,6 +44,7 @@ const DataSource = () => {
         watch,
         setValue,
         formState: { errors, isSubmitting },
+        control,
     } = useForm<IDataSource, any>({
         defaultValues: dataSource,
     });
@@ -98,17 +106,55 @@ const DataSource = () => {
                     </FormControl>
                     <FormControl isInvalid={!!errors.type} isRequired={true}>
                         <FormLabel htmlFor="type">Data Source Type</FormLabel>
-                        <Select
-                            id="type"
-                            placeholder="Data Source Type"
-                            {...register("type", {
-                                required: "This is required",
-                            })}
-                        >
-                            <option value="DHIS2">DHIS2</option>
-                            <option value="ELASTICSEARCH">Elasticsearch</option>
-                            <option value="API">API</option>
-                        </Select>
+                        <Controller
+                            name="type"
+                            control={control}
+                            render={({
+                                field: { value, onChange, ...others },
+                            }) => {
+                                return (
+                                    <Select
+                                        {...others}
+                                        isClearable
+                                        options={dataSourceTypes}
+                                        placeholder={"Choose..."}
+                                        onChange={(currentValue) => {
+                                            if (currentValue) {
+                                                onChange(currentValue.value);
+                                            } else {
+                                                onChange(null);
+                                            }
+                                        }}
+                                        value={dataSourceTypes.find(
+                                            (option: {
+                                                value: string;
+                                                label: string;
+                                            }) => {
+                                                if (value) {
+                                                    return value?.includes(
+                                                        option.value
+                                                    );
+                                                }
+                                                return false;
+                                            }
+                                        )}
+                                        defaultValue={dataSourceTypes.find(
+                                            (option: {
+                                                value: string;
+                                                label: string;
+                                            }) => {
+                                                if (value) {
+                                                    return value?.includes(
+                                                        option.value
+                                                    );
+                                                }
+                                                return false;
+                                            }
+                                        )}
+                                    />
+                                );
+                            }}
+                        />
                         <FormErrorMessage>
                             {errors.type && errors.type.message}
                         </FormErrorMessage>
@@ -148,57 +194,68 @@ const DataSource = () => {
                         </FormErrorMessage>
                     </FormControl>
 
-                    {!isCurrentDHIS2 && (
-                        <>
-                            <FormControl
-                                isInvalid={!!errors.authentication?.url}
-                            >
-                                <FormLabel htmlFor="authentication.url">
-                                    URL
-                                </FormLabel>
-                                <Input
-                                    id="authentication.url"
-                                    placeholder="url"
-                                    {...register("authentication.url")}
-                                />
-                                <FormErrorMessage>
-                                    {errors.authentication?.url?.message}
-                                </FormErrorMessage>
-                            </FormControl>
+                    {!isCurrentDHIS2 &&
+                        ["API", "ELASTICSEARCH"].indexOf(type) !== -1 && (
+                            <>
+                                <FormControl
+                                    isInvalid={!!errors.authentication?.url}
+                                >
+                                    <FormLabel htmlFor="authentication.url">
+                                        URL
+                                    </FormLabel>
+                                    <Input
+                                        id="authentication.url"
+                                        placeholder="url"
+                                        {...register("authentication.url")}
+                                    />
+                                    <FormErrorMessage>
+                                        {errors.authentication?.url?.message}
+                                    </FormErrorMessage>
+                                </FormControl>
 
-                            <FormControl
-                                isInvalid={!!errors.authentication?.username}
-                            >
-                                <FormLabel htmlFor="authentication.username">
-                                    Username
-                                </FormLabel>
-                                <Input
-                                    id="authentication.username"
-                                    placeholder="username"
-                                    {...register("authentication.username")}
-                                />
-                                <FormErrorMessage>
-                                    {errors.authentication?.username?.message}
-                                </FormErrorMessage>
-                            </FormControl>
+                                <FormControl
+                                    isInvalid={
+                                        !!errors.authentication?.username
+                                    }
+                                >
+                                    <FormLabel htmlFor="authentication.username">
+                                        Username
+                                    </FormLabel>
+                                    <Input
+                                        id="authentication.username"
+                                        placeholder="username"
+                                        {...register("authentication.username")}
+                                    />
+                                    <FormErrorMessage>
+                                        {
+                                            errors.authentication?.username
+                                                ?.message
+                                        }
+                                    </FormErrorMessage>
+                                </FormControl>
 
-                            <FormControl
-                                isInvalid={!!errors.authentication?.password}
-                            >
-                                <FormLabel htmlFor="authentication.password">
-                                    Password
-                                </FormLabel>
-                                <Input
-                                    id="authentication.password"
-                                    placeholder="password"
-                                    {...register("authentication.password")}
-                                />
-                                <FormErrorMessage>
-                                    {errors.authentication?.password?.message}
-                                </FormErrorMessage>
-                            </FormControl>
-                        </>
-                    )}
+                                <FormControl
+                                    isInvalid={
+                                        !!errors.authentication?.password
+                                    }
+                                >
+                                    <FormLabel htmlFor="authentication.password">
+                                        Password
+                                    </FormLabel>
+                                    <Input
+                                        id="authentication.password"
+                                        placeholder="password"
+                                        {...register("authentication.password")}
+                                    />
+                                    <FormErrorMessage>
+                                        {
+                                            errors.authentication?.password
+                                                ?.message
+                                        }
+                                    </FormErrorMessage>
+                                </FormControl>
+                            </>
+                        )}
                     <FormControl isInvalid={!!errors.description}>
                         <FormLabel htmlFor="description">Description</FormLabel>
                         <Textarea
@@ -210,6 +267,21 @@ const DataSource = () => {
                             {errors.name && errors.name.message}
                         </FormErrorMessage>
                     </FormControl>
+
+                    {type === "INDEX_DB" && (
+                        <FormControl isInvalid={!!errors.indexDb}>
+                            <FormLabel htmlFor="indexDb.programStage">
+                                Program Stage
+                            </FormLabel>
+                            <Input
+                                id="indexDb.programStage"
+                                {...register("indexDb.programStage")}
+                            />
+                            <FormErrorMessage>
+                                {errors.indexDb && errors.indexDb.message}
+                            </FormErrorMessage>
+                        </FormControl>
+                    )}
                     <Stack spacing="30px" direction="row">
                         <Button
                             colorScheme="red"

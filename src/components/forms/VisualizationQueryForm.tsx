@@ -1,31 +1,28 @@
 import { Stack, Text } from "@chakra-ui/react";
 import { useMatch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { indicatorApi } from "../../Events";
-import { IIndicator, LocationGenerics } from "../../interfaces";
+import { datumAPi } from "../../Events";
+import { IData, LocationGenerics } from "../../interfaces";
 import { useSingleNamespace } from "../../Queries";
-import { $settings, $store, createIndicator } from "../../Store";
+import { $settings, $store, createVisualizationQuery } from "../../Store";
 import { generalPadding, otherHeight } from "../constants";
 import LoadingIndicator from "../LoadingIndicator";
-import Indicator from "./Indicator";
+import VisualizationQuery from "./VisualizationQuery";
 
-export default function IndicatorForm() {
+export default function VisualizationQueryForm() {
     const {
-        params: { indicatorId },
+        params: { visualizationQueryId },
     } = useMatch<LocationGenerics>();
     const store = useStore($store);
     const { storage } = useStore($settings);
-
-    const { isLoading, isSuccess, isError, error } =
-        useSingleNamespace<IIndicator>(
-            storage,
-            indicatorId,
-            store.systemId,
-            "i-indicators",
-            indicatorApi.setIndicator,
-            createIndicator()
-        );
-
+    const { isLoading, isSuccess, isError, error } = useSingleNamespace<IData>(
+        storage,
+        visualizationQueryId,
+        store.systemId,
+        "i-visualization-queries",
+        datumAPi.set,
+        createVisualizationQuery(visualizationQueryId)
+    );
     return (
         <Stack
             p={`${generalPadding}px`}
@@ -40,7 +37,7 @@ export default function IndicatorForm() {
             w="100%"
         >
             {isLoading && <LoadingIndicator />}
-            {isSuccess && <Indicator />}
+            {isSuccess && <VisualizationQuery />}
             {isError && <Text>{error?.message}</Text>}
         </Stack>
     );

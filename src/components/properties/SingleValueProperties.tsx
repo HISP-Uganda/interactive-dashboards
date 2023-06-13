@@ -1,33 +1,27 @@
 import {
-    Box,
-    Flex,
     Input,
     NumberDecrementStepper,
     NumberIncrementStepper,
     NumberInput,
     NumberInputField,
     NumberInputStepper,
-    Radio,
-    RadioGroup,
     Stack,
     Text,
 } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { ChangeEvent } from "react";
-import {
-    // changeVisualizationAttribute,
-    // changeVisualizationProperties,
-    sectionApi,
-} from "../../Events";
-
+import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import {
+    alignItemsOptions,
     createOptions,
     justifyContentOptions,
-    alignItemsOptions,
 } from "../../utils/utils";
 import ColorPalette from "../ColorPalette";
 import ColorRangePicker from "../ColorRangePicker";
+import SelectProperty from "./SelectProperty";
+import TextProperty from "./TextProperty";
+import NumberProperty from "./NumberProperty";
 
 const progressAlignments: Option[] = [
     {
@@ -59,126 +53,48 @@ const SingleValueProperties = ({
 }) => {
     return (
         <Stack spacing="20px" pb="10px">
-            <Stack>
-                <Text>Label Alignment</Text>
-                <Select<Option, false, GroupBase<Option>>
-                    value={progressAlignments.find(
-                        (pt) =>
-                            pt.value ===
-                            visualization.properties?.["data.alignment"]
-                    )}
-                    onChange={(e) =>
-                        sectionApi.changeVisualizationProperties({
-                            visualization: visualization.id,
-                            attribute: "data.alignment",
-                            value: e?.value,
-                        })
-                    }
-                    options={progressAlignments}
-                    isClearable
-                />
-            </Stack>
-            <Text>Justify Content</Text>
-            <Select<Option, false, GroupBase<Option>>
-                value={justifyContentOptions.find(
-                    (d: Option) =>
-                        d.value ===
-                        visualization.properties?.["data.justifyContent"]
-                )}
-                onChange={(e) =>
-                    sectionApi.changeVisualizationProperties({
-                        visualization: visualization.id,
-                        attribute: "data.justifyContent",
-                        value: e?.value,
-                    })
-                }
+            <SelectProperty
+                visualization={visualization}
+                title="Label Alignment"
+                attribute="data.alignment"
+                options={progressAlignments}
+            />
+            <SelectProperty
+                visualization={visualization}
+                title="Justify Content"
+                attribute="data.justifyContent"
                 options={justifyContentOptions}
-                isClearable
             />
-
-            <Text> Align Items</Text>
-            <Select<Option, false, GroupBase<Option>>
-                value={alignItemsOptions.find(
-                    (d: Option) =>
-                        d.value ===
-                        visualization.properties?.["data.alignItems"]
-                )}
-                onChange={(e) =>
-                    sectionApi.changeVisualizationProperties({
-                        visualization: visualization.id,
-                        attribute: "data.alignItems",
-                        value: e?.value,
-                    })
-                }
+            <SelectProperty
+                visualization={visualization}
+                title="Align Items"
+                attribute="data.alignItems"
                 options={alignItemsOptions}
-                isClearable
             />
-            <Stack>
-                <Text>Prefix</Text>
-                <Input
-                    value={visualization.properties?.["data.prefix"] || ""}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        sectionApi.changeVisualizationProperties({
-                            visualization: visualization.id,
-                            attribute: "data.prefix",
-                            value: e.target.value,
-                        })
-                    }
-                />
-            </Stack>
-            <Stack>
-                <Text>Suffix</Text>
-                <Input
-                    value={visualization.properties?.["data.suffix"] || ""}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        sectionApi.changeVisualizationProperties({
-                            visualization: visualization.id,
-                            attribute: "data.suffix",
-                            value: e.target.value,
-                        })
-                    }
-                />
-            </Stack>
+            <TextProperty
+                visualization={visualization}
+                title="Prefix"
+                attribute="data.prefix"
+            />
 
-            <Stack>
-                <Text>Number format style</Text>
-                <Select<Option, false, GroupBase<Option>>
-                    value={formatStyleOptions.find(
-                        (pt) =>
-                            pt.value ===
-                            visualization.properties["data.format.style"]
-                    )}
-                    onChange={(e) =>
-                        sectionApi.changeVisualizationProperties({
-                            visualization: visualization.id,
-                            attribute: "data.format.style",
-                            value: e?.value,
-                        })
-                    }
-                    options={formatStyleOptions}
-                    isClearable
-                />
-            </Stack>
+            <TextProperty
+                visualization={visualization}
+                title="Suffix"
+                attribute="data.suffix"
+            />
 
-            <Stack>
-                <Text>Number format notation</Text>
-                <Select<Option, false, GroupBase<Option>>
-                    value={numberFormatNotationOptions.find(
-                        (pt) =>
-                            pt.value ===
-                            visualization.properties["data.format.notation"]
-                    )}
-                    onChange={(e) =>
-                        sectionApi.changeVisualizationProperties({
-                            visualization: visualization.id,
-                            attribute: "data.format.notation",
-                            value: e?.value,
-                        })
-                    }
-                    options={numberFormatNotationOptions}
-                    isClearable
-                />
-            </Stack>
+            <SelectProperty
+                visualization={visualization}
+                title="Number format style"
+                attribute="data.format.style"
+                options={formatStyleOptions}
+            />
+            <SelectProperty
+                visualization={visualization}
+                title="Number format notation"
+                attribute="data.format.notation"
+                options={numberFormatNotationOptions}
+            />
             <Stack>
                 <Text>Single Value Background Color</Text>
                 <ColorPalette
@@ -186,130 +102,55 @@ const SingleValueProperties = ({
                     attribute="layout.bg"
                 />
             </Stack>
-            <Stack>
-                <Text>Single Value Border and Border Radius</Text>
-                <NumberInput
-                    value={visualization.properties["data.border"] || 0}
-                    max={2}
-                    min={0}
-                    step={1}
-                    onChange={(value1: string, value2: number) =>
-                        sectionApi.changeVisualizationProperties({
-                            visualization: visualization.id,
-                            attribute: "data.border",
-                            value: value2,
-                        })
-                    }
-                >
-                    <NumberInputField />
-                    <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                    </NumberInputStepper>
-                </NumberInput>
-            </Stack>
-            <Stack>
-                <Text>Number format decimal places</Text>
-                <NumberInput
-                    value={
-                        visualization.properties[
-                            "data.format.maximumFractionDigits"
-                        ] || 0
-                    }
-                    max={4}
-                    min={0}
-                    onChange={(value1: string, value2: number) =>
-                        sectionApi.changeVisualizationProperties({
-                            visualization: visualization.id,
-                            attribute: "data.format.maximumFractionDigits",
-                            value: value2,
-                        })
-                    }
-                >
-                    <NumberInputField />
-                    <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                    </NumberInputStepper>
-                </NumberInput>
-            </Stack>
 
-            <Stack>
-                <Text>Value Font Size</Text>
-                <NumberInput
-                    value={
-                        visualization.properties["data.format.fontSize"] || 2
-                    }
-                    max={10}
-                    min={1}
-                    step={0.1}
-                    onChange={(value1: string, value2: number) =>
-                        sectionApi.changeVisualizationProperties({
-                            visualization: visualization.id,
-                            attribute: "data.format.fontSize",
-                            value: value2,
-                        })
-                    }
-                >
-                    <NumberInputField />
-                    <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                    </NumberInputStepper>
-                </NumberInput>
-            </Stack>
+            <NumberProperty
+                visualization={visualization}
+                max={2}
+                min={0}
+                step={1}
+                attribute="data.border"
+                title="Single Value Border and Border Radius"
+            />
 
-            <Stack>
-                <Text>Value Font Weight</Text>
-                <NumberInput
-                    value={
-                        visualization.properties["data.format.fontWeight"] ||
-                        400
-                    }
-                    max={1000}
-                    min={100}
-                    step={50}
-                    onChange={(value1: string, value2: number) =>
-                        sectionApi.changeVisualizationProperties({
-                            visualization: visualization.id,
-                            attribute: "data.format.fontWeight",
-                            value: value2,
-                        })
-                    }
-                >
-                    <NumberInputField />
-                    <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                    </NumberInputStepper>
-                </NumberInput>
-            </Stack>
+            <NumberProperty
+                visualization={visualization}
+                max={4}
+                min={0}
+                step={1}
+                attribute="data.format.maximumFractionDigits"
+                title="Number format decimal places"
+            />
+            <NumberProperty
+                visualization={visualization}
+                max={4}
+                min={0}
+                step={1}
+                attribute="data.format.fontSize"
+                title="Value Font Size"
+            />
+            <NumberProperty
+                visualization={visualization}
+                max={4}
+                min={0}
+                step={1}
+                attribute="data.format.fontWeight"
+                title="Value Font Weight"
+            />
+            <NumberProperty
+                visualization={visualization}
+                max={4}
+                min={0}
+                step={1}
+                attribute="data.format.spacing"
+                title="Label Value Spacing"
+            />
 
-            <Stack>
-                <Text>Label Value Spacing</Text>
-                <NumberInput
-                    value={visualization.properties["data.format.spacing"] || 0}
-                    max={100}
-                    min={0}
-                    step={1}
-                    onChange={(value1: string, value2: number) =>
-                        sectionApi.changeVisualizationProperties({
-                            visualization: visualization.id,
-                            attribute: "data.format.spacing",
-                            value: value2,
-                        })
-                    }
-                >
-                    <NumberInputField />
-                    <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                    </NumberInputStepper>
-                </NumberInput>
-            </Stack>
-            <Stack>
-                <ColorRangePicker visualization={visualization} />
-            </Stack>
+            <ColorRangePicker visualization={visualization} />
+            <TextProperty
+                visualization={visualization}
+                title="Suffix"
+                attribute="data.suffix"
+            />
             <Stack>
                 <Text>Target</Text>
                 <Input

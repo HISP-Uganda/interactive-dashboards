@@ -19,18 +19,13 @@ import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { ChangeEvent } from "react";
-import {
-    // changeDenominatorAttribute,
-    // changeDenominatorDimension,
-    // changeDenominatorExpressionValue,
-    indicatorApi,
-} from "../../Events";
+import { indicatorApi } from "../../Events";
 import { LocationGenerics, Option } from "../../interfaces";
 import { saveDocument } from "../../Queries";
 import { $dataSourceType, $indicator, $settings, $store } from "../../Store";
 import { getSearchParams, globalIds } from "../../utils/utils";
 import { generalPadding, otherHeight } from "../constants";
-import { displayDataSourceType } from "../data-sources";
+// import { displayDataSourceType } from "../data-sources";
 
 const availableOptions: Option[] = [
     { value: "SQL_VIEW", label: "SQL Views" },
@@ -96,12 +91,12 @@ const Denominator = () => {
                 </Stack>
             )}
 
-            {displayDataSourceType({
+            {/* {displayDataSourceType({
                 dataSourceType,
                 onChange: indicatorApi.changeDenominatorDimension,
                 denNum: indicator.denominator,
                 changeQuery: indicatorApi.changeDenominatorAttribute,
-            })}
+            })} */}
 
             {indicator.denominator?.type === "SQL_VIEW" && (
                 <Table size="sm" textTransform="none">

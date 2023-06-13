@@ -24,22 +24,28 @@ import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
 import { useOrganisationUnitGroups } from "../../Queries";
-import { $currentDataSource, $hasDHIS2, $paginations } from "../../Store";
+import {
+    $currentDataSource,
+    $hasDHIS2,
+    $paginations,
+    $visualizationQuery,
+} from "../../Store";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import GlobalSearchFilter from "./GlobalSearchFilter";
+import { datumAPi } from "../../Events";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
-const OrganizationUnitGroups = ({ denNum, onChange }: IndicatorProps) => {
+const OrganizationUnitGroups = () => {
     const paginations = useStore($paginations);
     const hasDHIS2 = useStore($hasDHIS2);
     const currentDataSource = useStore($currentDataSource);
+    const visualizationQuery = useStore($visualizationQuery);
     const [q, setQ] = useState<string>("");
 
     const { previousType, isGlobal } = computeGlobalParams(
-        denNum,
         "oug",
         "of2WvtwqbHR"
     );
@@ -79,14 +85,12 @@ const OrganizationUnitGroups = ({ denNum, onChange }: IndicatorProps) => {
     return (
         <Stack spacing="30px">
             <GlobalSearchFilter
-                denNum={denNum}
                 dimension="ou"
                 setType={setType}
                 useGlobal={useGlobal}
                 setUseGlobal={setUseGlobal}
                 resource="oug"
                 type={type}
-                onChange={onChange}
                 setQ={setQ}
                 prefix="OU_GROUP-"
                 q={q}
@@ -129,7 +133,7 @@ const OrganizationUnitGroups = ({ denNum, onChange }: IndicatorProps) => {
                                             e: ChangeEvent<HTMLInputElement>
                                         ) => {
                                             if (e.target.checked) {
-                                                onChange({
+                                                datumAPi.changeDimension({
                                                     id: record.id,
                                                     type,
                                                     dimension: "ou",
@@ -137,7 +141,7 @@ const OrganizationUnitGroups = ({ denNum, onChange }: IndicatorProps) => {
                                                     prefix: "OU_GROUP-",
                                                 });
                                             } else {
-                                                onChange({
+                                                datumAPi.changeDimension({
                                                     id: record.id,
                                                     type,
                                                     dimension: "ou",
@@ -149,9 +153,8 @@ const OrganizationUnitGroups = ({ denNum, onChange }: IndicatorProps) => {
                                         }}
                                         isChecked={
                                             !isEmpty(
-                                                denNum?.dataDimensions?.[
-                                                    record.id
-                                                ]
+                                                visualizationQuery
+                                                    .dataDimensions?.[record.id]
                                             )
                                         }
                                     />

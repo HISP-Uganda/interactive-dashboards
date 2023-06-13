@@ -3,14 +3,14 @@ import { DropdownButton } from "@dhis2/ui";
 import { useStore } from "effector-react";
 import React from "react";
 import { storeApi } from "../../Events";
-import { Item } from "../../interfaces";
+import { Item, Period } from "../../interfaces";
 import { $store } from "../../Store";
 import OUTree from "../OUTree";
 import PeriodPicker from "../PeriodPicker";
 
 export default function Filters() {
     const store = useStore($store);
-    const onChangePeriods = (periods: Item[]) => {
+    const onChangePeriods = (periods: Period[]) => {
         storeApi.changePeriods(periods);
     };
     return (

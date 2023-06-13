@@ -19,11 +19,7 @@ import { useStore } from "effector-react";
 import { ChangeEvent, useEffect, useState } from "react";
 import { indicatorApi } from "../../Events";
 import { IIndicator, LocationGenerics } from "../../interfaces";
-import {
-    deleteDocument,
-    saveDocument,
-    useVisualizationData,
-} from "../../Queries";
+import { deleteDocument, saveDocument, useNamespace } from "../../Queries";
 import { $settings, $store, createIndicator } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import LoadingIndicator from "../LoadingIndicator";
@@ -35,10 +31,8 @@ const Indicators = () => {
     const { storage } = useStore($settings);
     const engine = useDataEngine();
     const queryClient = useQueryClient();
-    const { isLoading, isSuccess, isError, error, data } = useVisualizationData(
-        storage,
-        systemId
-    );
+    const { isLoading, isSuccess, isError, error, data } =
+        useNamespace<IIndicator>("i-indicators", storage, systemId, []);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [loading, setLoading] = useState<boolean>(false);
     const [currentId, setCurrentId] = useState<string>("");
@@ -78,7 +72,7 @@ const Indicators = () => {
     const deleteResource = async (id: string) => {
         setCurrentId(() => id);
         setLoading(() => true);
-        await deleteDocument(storage, "i-visualization-queries", id, engine);
+        await deleteDocument(storage, "i-indicators", id, engine);
         setCurrentData((prev) => prev?.filter((p) => p.id !== id));
         setLoading(() => false);
     };
@@ -122,7 +116,6 @@ const Indicators = () => {
                             <Thead>
                                 <Tr>
                                     <Th>Name</Th>
-                                    <Th>Data Source</Th>
                                     <Th>Factor</Th>
                                     <Th>Description</Th>
                                     <Th>Actions</Th>
@@ -139,7 +132,6 @@ const Indicators = () => {
                                                 {indicator.name}
                                             </Link>
                                         </Td>
-                                        <Td>{indicator.dataSource}</Td>
                                         <Td>{indicator.factor}</Td>
                                         <Td>{indicator.description}</Td>
                                         <Td>
@@ -164,7 +156,7 @@ const Indicators = () => {
                                                         setLoading2(() => true);
                                                         await saveDocument(
                                                             storage,
-                                                            "i-visualization-queries",
+                                                            "i-indicators",
                                                             systemId,
                                                             {
                                                                 ...indicator,
@@ -174,9 +166,7 @@ const Indicators = () => {
                                                             "create"
                                                         );
                                                         await queryClient.invalidateQueries(
-                                                            [
-                                                                "visualization-queries",
-                                                            ]
+                                                            ["i-indicators"]
                                                         );
                                                         setLoading2(
                                                             () => false

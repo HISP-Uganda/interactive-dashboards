@@ -37,10 +37,22 @@ const Menus = () => {
                 alignContent="center"
                 direction="row"
                 cursor="pointer"
+                onClick={() =>
+                    navigate({ to: "/settings/visualization-queries" })
+                }
+            >
+                <Icon as={MdAddchart} w={8} h={8} color="blue.600" />
+                <Text>Visualization Queries</Text>
+            </Stack>
+            <Stack
+                alignItems="center"
+                alignContent="center"
+                direction="row"
+                cursor="pointer"
                 onClick={() => navigate({ to: "/settings/indicators" })}
             >
                 <Icon as={MdAddchart} w={8} h={8} color="blue.600" />
-                <Text>Visualization Data</Text>
+                <Text>Indicators</Text>
             </Stack>
             <Stack
                 alignItems="center"

@@ -6,6 +6,7 @@ import {
     Option,
     SystemInfo,
 } from "./interfaces";
+import { Dictionary } from "lodash";
 export class CQIDexie extends Dexie {
     organisations!: Table<DataNode>;
     themes!: Table<DataNode>;
@@ -17,6 +18,7 @@ export class CQIDexie extends Dexie {
     dataSets!: Table<Option>;
     systemInfo!: Table<SystemInfo>;
     dashboards!: Table<DataNode>;
+    events!: Table<Dictionary<string>>;
 
     constructor() {
         super("idvt");
@@ -32,6 +34,7 @@ export class CQIDexie extends Dexie {
             dataSets: "++value,label",
             systemInfo: "++id,systemId,systemName",
             dashboards: "++key,value,pId,title,id",
+            events: "++event",
         });
     }
 }

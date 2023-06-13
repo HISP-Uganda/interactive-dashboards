@@ -24,22 +24,28 @@ import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
 import { useOrganisationUnitGroupSets } from "../../Queries";
-import { $currentDataSource, $hasDHIS2, $paginations } from "../../Store";
+import {
+    $currentDataSource,
+    $hasDHIS2,
+    $paginations,
+    $visualizationQuery,
+} from "../../Store";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import GlobalSearchFilter from "./GlobalSearchFilter";
+import { datumAPi } from "../../Events";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
-const OrganizationUnitGroupSets = ({ denNum, onChange }: IndicatorProps) => {
+const OrganizationUnitGroupSets = () => {
     const paginations = useStore($paginations);
     const hasDHIS2 = useStore($hasDHIS2);
     const currentDataSource = useStore($currentDataSource);
+    const visualizationQuery = useStore($visualizationQuery);
     const [q, setQ] = useState<string>("");
 
     const { previousType, isGlobal } = computeGlobalParams(
-        denNum,
         "ougs",
         "GQhi6pRnTKF"
     );
@@ -78,14 +84,12 @@ const OrganizationUnitGroupSets = ({ denNum, onChange }: IndicatorProps) => {
     return (
         <Stack spacing="30px">
             <GlobalSearchFilter
-                denNum={denNum}
                 dimension=""
                 setType={setType}
                 useGlobal={useGlobal}
                 setUseGlobal={setUseGlobal}
                 resource="ougs"
                 type={type}
-                onChange={onChange}
                 setQ={setQ}
                 q={q}
                 id={globalIds[3].value}
@@ -127,14 +131,14 @@ const OrganizationUnitGroupSets = ({ denNum, onChange }: IndicatorProps) => {
                                             e: ChangeEvent<HTMLInputElement>
                                         ) => {
                                             if (e.target.checked) {
-                                                onChange({
+                                                datumAPi.changeDimension({
                                                     id: record.id,
                                                     type,
                                                     dimension: "",
                                                     resource: "ougs",
                                                 });
                                             } else {
-                                                onChange({
+                                                datumAPi.changeDimension({
                                                     id: record.id,
                                                     type,
                                                     dimension: "",
@@ -145,7 +149,8 @@ const OrganizationUnitGroupSets = ({ denNum, onChange }: IndicatorProps) => {
                                         }}
                                         isChecked={
                                             !isEmpty(
-                                                denNum?.dataDimensions?.[
+                                                visualizationQuery
+                                                    ?.dataDimensions?.[
                                                     record.id
                                                 ]
                                             )

@@ -24,26 +24,29 @@ import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
 import { IndicatorProps } from "../../interfaces";
 import { useIndicators } from "../../Queries";
-import { $currentDataSource, $hasDHIS2, $paginations } from "../../Store";
+import {
+    $currentDataSource,
+    $hasDHIS2,
+    $paginations,
+    $visualizationQuery,
+} from "../../Store";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import GlobalSearchFilter from "./GlobalSearchFilter";
+import { datumAPi } from "../../Events";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
-const Indicators = ({ denNum, onChange }: IndicatorProps) => {
-    const { previousType, isGlobal } = computeGlobalParams(
-        denNum,
-        "i",
-        "JRDOr08JWSW"
-    );
+const Indicators = () => {
+    const { previousType, isGlobal } = computeGlobalParams("i", "JRDOr08JWSW");
     const [type, setType] = useState<"filter" | "dimension">(previousType);
     const [useGlobal, setUseGlobal] = useState<boolean>(isGlobal);
     const [q, setQ] = useState<string>("");
     const paginations = useStore($paginations);
     const hasDHIS2 = useStore($hasDHIS2);
     const currentDataSource = useStore($currentDataSource);
+    const visualizationQuery = useStore($visualizationQuery);
     const {
         pages,
         pagesCount,
@@ -65,7 +68,7 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
     });
 
     const selectedIndicators = Object.entries(
-        denNum?.dataDimensions || {}
+        visualizationQuery.dataDimensions || {}
     ).flatMap(([i, { resource }]) => {
         if (resource === "i") {
             return i;
@@ -89,14 +92,12 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
     return (
         <Stack spacing="30px">
             <GlobalSearchFilter
-                denNum={denNum}
                 dimension="dx"
                 setType={setType}
                 useGlobal={useGlobal}
                 setUseGlobal={setUseGlobal}
                 resource="i"
                 type={type}
-                onChange={onChange}
                 setQ={setQ}
                 q={q}
                 id={globalIds[2].value}
@@ -138,14 +139,14 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
                                             e: ChangeEvent<HTMLInputElement>
                                         ) => {
                                             if (e.target.checked) {
-                                                onChange({
+                                                datumAPi.changeDimension({
                                                     id: record.id,
                                                     type,
                                                     dimension: "dx",
                                                     resource: "i",
                                                 });
                                             } else {
-                                                onChange({
+                                                datumAPi.changeDimension({
                                                     id: record.id,
                                                     type,
                                                     dimension: "dx",
@@ -156,9 +157,8 @@ const Indicators = ({ denNum, onChange }: IndicatorProps) => {
                                         }}
                                         isChecked={
                                             !isEmpty(
-                                                denNum?.dataDimensions?.[
-                                                    record.id
-                                                ]
+                                                visualizationQuery
+                                                    .dataDimensions?.[record.id]
                                             )
                                         }
                                     />

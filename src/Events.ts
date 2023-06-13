@@ -4,10 +4,10 @@ import { fromPairs } from "lodash";
 import { domain } from "./Domain";
 import {
     DataNode,
-    DataValueAttribute,
     Dimension,
     ICategory,
     IDashboard,
+    IData,
     IDataElement,
     IDataSource,
     IExpressionValue,
@@ -15,18 +15,22 @@ import {
     IIndicator,
     IPagination,
     ISection,
-    Item,
     IVisualization,
+    Period,
     ScreenSize,
     Storage,
 } from "./interfaces";
 import {
+    $categories,
     $category,
     $dashboard,
+    $dashboards,
     $dashboardType,
     $dataSets,
     $dataSource,
+    $dataSources,
     $indicator,
+    $indicators,
     $paginations,
     $section,
     $settings,
@@ -34,10 +38,7 @@ import {
     $store,
     $visualizationData,
     $visualizationMetadata,
-    $dataSources,
-    $indicators,
-    $categories,
-    $dashboards,
+    $visualizationQuery,
 } from "./Store";
 
 export const loadDefaults = domain.createEvent<{
@@ -59,6 +60,23 @@ export const paginationApi = createApi($paginations, {
 export const sizeApi = createApi($size, {
     set: (_, val: ScreenSize) => val,
 });
+
+export const changeObjectAttribute = <T>(
+    state: T,
+    {
+        attribute,
+        value,
+    }: {
+        attribute: keyof T;
+        value: any;
+    }
+) => {
+    return { ...state, [attribute]: value };
+};
+
+export const updateObject = <T>(state: T, update: Partial<T>) => {
+    return { ...state, ...update };
+};
 
 export const settingsApi = createApi($settings, {
     changeDefaultDashboard: (state, defaultDashboard: string) =>
@@ -106,7 +124,7 @@ export const storeApi = createApi($store, {
             checkedKeys,
         };
     },
-    changePeriods: (state, periods: Item[]) => {
+    changePeriods: (state, periods: Period[]) => {
         return { ...state, periods };
     },
     changeSelectedCategory: (state, selectedCategory: string) => {
@@ -370,225 +388,11 @@ export const indicatorApi = createApi($indicator, {
             attribute,
             value,
         }: {
-            attribute: "name" | "description" | "factor" | "query" | "custom";
+            attribute: keyof IIndicator;
             value: any;
         }
     ) => {
-        return { ...state, [attribute]: value };
-    },
-    changeDenominatorExpressionValue: (
-        state,
-        { attribute, value, isGlobal }: IExpressionValue
-    ) => {
-        if (state.denominator) {
-            return {
-                ...state,
-                denominator: {
-                    ...state.denominator,
-                    expressions: {
-                        ...state.denominator.expressions,
-                        [attribute]: { value, isGlobal },
-                    },
-                },
-            };
-        }
-    },
-    changeNumeratorExpressionValue: (
-        state,
-        { attribute, value, isGlobal }: IExpressionValue
-    ) => {
-        if (state.numerator) {
-            return {
-                ...state,
-                numerator: {
-                    ...state.numerator,
-                    expressions: {
-                        ...state.numerator.expressions,
-                        [attribute]: { value, isGlobal },
-                    },
-                },
-            };
-        }
-    },
-    changeDenominatorAttribute: (
-        state,
-        { attribute, value }: DataValueAttribute
-    ) => {
-        if (state.denominator) {
-            return {
-                ...state,
-                denominator: {
-                    ...state.denominator,
-                    [attribute]: value,
-                },
-            };
-        }
-    },
-    changeNumeratorAttribute: (
-        state,
-        { attribute, value }: DataValueAttribute
-    ) => {
-        if (state.numerator) {
-            return {
-                ...state,
-                numerator: {
-                    ...state.numerator,
-                    [attribute]: value,
-                },
-            };
-        }
-    },
-    changeDataSource: (state, dataSource: string | undefined) => {
-        return {
-            ...state,
-            dataSource: dataSource,
-        };
-    },
-    changeNumeratorDimension: (
-        state,
-        {
-            id,
-            dimension,
-            type,
-            resource,
-            replace,
-            remove,
-            prefix,
-            suffix,
-            label = "",
-        }: Dimension
-    ) => {
-        if (state.numerator) {
-            if (remove) {
-                const { [id]: removed, ...others } =
-                    state.numerator.dataDimensions;
-                return {
-                    ...state,
-                    numerator: {
-                        ...state.numerator,
-                        dataDimensions: others,
-                    },
-                };
-            }
-
-            if (replace) {
-                const working = fromPairs(
-                    Object.entries(state.numerator.dataDimensions).filter(
-                        ([i, d]) => d.resource !== resource
-                    )
-                );
-
-                return {
-                    ...state,
-                    numerator: {
-                        ...state.numerator,
-                        dataDimensions: {
-                            ...working,
-                            [id]: {
-                                id,
-                                resource,
-                                type,
-                                dimension,
-                                label,
-                                prefix,
-                                suffix,
-                            },
-                        },
-                    },
-                };
-            }
-            const computedState = {
-                ...state,
-                numerator: {
-                    ...state.numerator,
-                    dataDimensions: {
-                        ...state.numerator.dataDimensions,
-                        [id]: {
-                            id,
-                            resource,
-                            type,
-                            dimension,
-                            prefix,
-                            suffix,
-                            label,
-                        },
-                    },
-                },
-            };
-            return computedState;
-        }
-    },
-    changeDenominatorDimension: (
-        state,
-        {
-            id,
-            dimension,
-            resource,
-            type,
-            replace,
-            remove,
-            prefix,
-            suffix,
-            label = "",
-        }: Dimension
-    ) => {
-        if (state.denominator) {
-            if (remove) {
-                const { [id]: removed, ...rest } =
-                    state.denominator.dataDimensions;
-                return {
-                    ...state,
-                    denominator: {
-                        ...state.denominator,
-                        dataDimensions: rest,
-                    },
-                };
-            }
-
-            if (replace) {
-                const working = fromPairs(
-                    Object.entries(state.denominator.dataDimensions).filter(
-                        ([_, d]) => d.resource !== resource
-                    )
-                );
-                return {
-                    ...state,
-                    denominator: {
-                        ...state.denominator,
-                        dataDimensions: {
-                            ...working,
-                            [id]: {
-                                id,
-                                dimension,
-                                type,
-                                prefix,
-                                suffix,
-                                resource,
-                                label,
-                            },
-                        },
-                    },
-                };
-            }
-            return {
-                ...state,
-                denominator: {
-                    ...state.denominator,
-                    dataDimensions: {
-                        ...state.denominator.dataDimensions,
-                        [id]: {
-                            id,
-                            type,
-                            dimension,
-                            prefix,
-                            suffix,
-                            resource,
-                            label,
-                        },
-                    },
-                },
-            };
-        }
+        return changeObjectAttribute<IIndicator>(state, { attribute, value });
     },
     changeUseIndicators: (state, useInBuildIndicators: boolean) => {
         return { ...state, useInBuildIndicators };
@@ -605,7 +409,7 @@ export const sectionApi = createApi($section, {
     addVisualization2Section: (state, id: string) => {
         const visualization: IVisualization = {
             id,
-            indicator: "",
+            indicators: [],
             type: "",
             name: `Visualization ${state.visualizations.length + 1}`,
             properties: {},
@@ -779,6 +583,101 @@ export const categoryApi = createApi($category, {
     setCategory: (_, category: ICategory) => category,
     changeCategoryId: (state, id: string) => {
         return { ...state, id };
+    },
+});
+
+export const datumAPi = createApi($visualizationQuery, {
+    changeAttribute: (
+        state,
+        {
+            attribute,
+            value,
+        }: {
+            attribute: keyof IData;
+            value: any;
+        }
+    ) => {
+        return { ...state, [attribute]: value };
+    },
+
+    set: (_, data: IData) => {
+        return data;
+    },
+
+    changeExpressionValue: (
+        state,
+        { attribute, value, isGlobal }: IExpressionValue
+    ) => {
+        return {
+            ...state,
+            expressions: {
+                ...state.expressions,
+                [attribute]: { value, isGlobal },
+            },
+        };
+    },
+
+    changeDimension: (
+        state,
+        {
+            id,
+            dimension,
+            type,
+            resource,
+            replace,
+            remove,
+            prefix,
+            suffix,
+            label = "",
+        }: Dimension
+    ) => {
+        if (remove) {
+            const { [id]: removed, ...others } = state.dataDimensions || {};
+            return {
+                ...state,
+                dataDimensions: others,
+            };
+        }
+
+        if (replace) {
+            const working = fromPairs(
+                Object.entries(state.dataDimensions || {}).filter(
+                    ([i, d]) => d.resource !== resource
+                )
+            );
+
+            return {
+                ...state,
+                dataDimensions: {
+                    ...working,
+                    [id]: {
+                        id,
+                        resource,
+                        type,
+                        dimension,
+                        label,
+                        prefix,
+                        suffix,
+                    },
+                },
+            };
+        }
+        const computedState = {
+            ...state,
+            dataDimensions: {
+                ...state.dataDimensions,
+                [id]: {
+                    id,
+                    resource,
+                    type,
+                    dimension,
+                    prefix,
+                    suffix,
+                    label,
+                },
+            },
+        };
+        return computedState;
     },
 });
 

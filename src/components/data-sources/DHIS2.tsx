@@ -2,9 +2,8 @@ import { Button, Flex, Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { useState } from "react";
 import { useElementSize } from "usehooks-ts";
-import { IndicatorProps } from "../../interfaces";
 import { useDimensions } from "../../Queries";
-import { $currentDataSource, $hasDHIS2 } from "../../Store";
+import { $currentDataSource, $visualizationQuery } from "../../Store";
 import LoadingIndicator from "../LoadingIndicator";
 import DataElementGroups from "./DataElementGroups";
 import DataElementGroupSets from "./DataElementGroupSets";
@@ -18,12 +17,13 @@ import OrgUnitTree from "./OrgUnitTree";
 import Periods from "./Periods";
 import ProgramIndicators from "./ProgramIndicators";
 import SQLViews from "./SQLViews";
+import DHIS2API from "./DHIS2API";
 
-const DHIS2 = ({ onChange, denNum, changeQuery }: IndicatorProps) => {
-    const hasDHIS2 = useStore($hasDHIS2);
+const DHIS2 = () => {
     const currentDataSource = useStore($currentDataSource);
+    const visualizationQuery = useStore($visualizationQuery);
     const { error, data, isError, isLoading, isSuccess } = useDimensions(
-        hasDHIS2,
+        visualizationQuery.dataSource?.isCurrentDHIS2 || false,
         currentDataSource
     );
     const [active, setActive] = useState<string>("");
@@ -32,7 +32,7 @@ const DHIS2 = ({ onChange, denNum, changeQuery }: IndicatorProps) => {
         {
             id: "1",
             name: "Indicators",
-            element: <Indicators denNum={denNum} onChange={onChange} />,
+            element: <Indicators />,
         },
         {
             id: "2",
@@ -47,58 +47,47 @@ const DHIS2 = ({ onChange, denNum, changeQuery }: IndicatorProps) => {
         {
             id: "4",
             name: "Program Indicators",
-            element: <ProgramIndicators denNum={denNum} onChange={onChange} />,
+            element: <ProgramIndicators />,
         },
         {
             id: "5",
             name: "Data Elements",
-            element: <DataElements denNum={denNum} onChange={onChange} />,
+            element: <DataElements />,
         },
         {
             id: "6",
             name: "Data Element Groups",
-            element: <DataElementGroups denNum={denNum} onChange={onChange} />,
+            element: <DataElementGroups />,
         },
         {
             id: "7",
             name: "Data Element Group Sets",
-            element: (
-                <DataElementGroupSets denNum={denNum} onChange={onChange} />
-            ),
+            element: <DataElementGroupSets />,
         },
         {
             id: "8",
             name: "Organisations",
-            element: <OrgUnitTree denNum={denNum} onChange={onChange} />,
+            element: <OrgUnitTree />,
         },
         {
             id: "9",
             name: "Organisation Groups",
-            element: (
-                <OrganizationUnitGroups denNum={denNum} onChange={onChange} />
-            ),
+            element: <OrganizationUnitGroups />,
         },
         {
             id: "10",
             name: "Organisation Group Sets",
-            element: (
-                <OrganizationUnitGroupSets
-                    denNum={denNum}
-                    onChange={onChange}
-                />
-            ),
+            element: <OrganizationUnitGroupSets />,
         },
         {
             id: "11",
             name: "Organisation Level",
-            element: (
-                <OrganizationUnitLevels denNum={denNum} onChange={onChange} />
-            ),
+            element: <OrganizationUnitLevels />,
         },
         {
             id: "12",
             name: "Period",
-            element: <Periods denNum={denNum} onChange={onChange} />,
+            element: <Periods />,
         },
     ];
     const [squareRef, { width, height }] = useElementSize();
@@ -106,7 +95,7 @@ const DHIS2 = ({ onChange, denNum, changeQuery }: IndicatorProps) => {
     return (
         <Stack w="100%" h="100%">
             {isLoading && <LoadingIndicator />}
-            {isSuccess && denNum?.type === "ANALYTICS" && (
+            {isSuccess && visualizationQuery.type === "ANALYTICS" && (
                 <Stack w="100%" h="100%">
                     <Flex
                         gap="5px"
@@ -149,8 +138,6 @@ const DHIS2 = ({ onChange, denNum, changeQuery }: IndicatorProps) => {
                                 item.id === active && (
                                     <Dimension
                                         key={item.id}
-                                        denNum={denNum}
-                                        onChange={onChange}
                                         dimensionItem={item}
                                     />
                                 )
@@ -158,14 +145,8 @@ const DHIS2 = ({ onChange, denNum, changeQuery }: IndicatorProps) => {
                     </Stack>
                 </Stack>
             )}
-            {denNum?.type === "SQL_VIEW" && (
-                <SQLViews
-                    denNum={denNum}
-                    onChange={onChange}
-                    changeQuery={changeQuery}
-                />
-            )}
-            {/* {denNum?.type === "OTHER" && <Text>Coming soon</Text>} */}
+            {visualizationQuery.type === "SQL_VIEW" && <SQLViews />}
+            {visualizationQuery.type === "API" && <DHIS2API />}
             {isError && <Text>{error?.message}</Text>}
         </Stack>
     );

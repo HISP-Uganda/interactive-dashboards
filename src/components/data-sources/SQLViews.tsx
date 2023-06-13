@@ -1,13 +1,19 @@
 import { Box, Progress, Stack, Text } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { IndicatorProps, Option } from "../../interfaces";
+import { datumAPi } from "../../Events";
+import { Option } from "../../interfaces";
 import { useSQLViews } from "../../Queries";
-import { $currentDataSource, $hasDHIS2 } from "../../Store";
+import {
+    $currentDataSource,
+    $hasDHIS2,
+    $visualizationQuery,
+} from "../../Store";
 
-const SQLViews = ({ denNum, onChange, changeQuery }: IndicatorProps) => {
+const SQLViews = () => {
     const hasDHIS2 = useStore($hasDHIS2);
     const currentDataSource = useStore($currentDataSource);
+    const visualizationQuery = useStore($visualizationQuery);
     const { isLoading, isSuccess, isError, error, data } = useSQLViews(
         hasDHIS2,
         currentDataSource
@@ -30,25 +36,25 @@ const SQLViews = ({ denNum, onChange, changeQuery }: IndicatorProps) => {
                             .find(
                                 (pt) =>
                                     Object.keys(
-                                        denNum?.dataDimensions || {}
+                                        visualizationQuery.dataDimensions || {}
                                     ).indexOf(pt.value) !== -1
                             )}
                         onChange={(e) => {
-                            onChange({
+                            datumAPi.changeDimension({
                                 id: e?.value || "",
                                 type: "dimension",
                                 resource: "v",
                                 dimension: "",
                                 replace: true,
                             });
-                            if (changeQuery) {
-                                changeQuery({
-                                    attribute: "query",
-                                    value: data.find(
-                                        (d: any) => d.id === e?.value
-                                    )?.sqlQuery,
-                                });
-                            }
+                            // if (changeQuery) {
+                            //     datumAPi.changeAttribute({
+                            //         attribute: "query",
+                            //         value: data.find(
+                            //             (d: any) => d.id === e?.value
+                            //         )?.sqlQuery,
+                            //     });
+                            // }
                         }}
                         options={data.map((d) => {
                             const o: Option = {

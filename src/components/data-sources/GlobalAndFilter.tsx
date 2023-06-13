@@ -1,19 +1,18 @@
 import { Checkbox, Radio, RadioGroup, Stack } from "@chakra-ui/react";
-import { Event } from "effector";
+import { useStore } from "effector-react";
 import { ChangeEvent, Dispatch, SetStateAction } from "react";
-import { Dimension, IData } from "../../interfaces";
+import { datumAPi } from "../../Events";
+import { $visualizationQuery } from "../../Store";
 
 type GlobalAndFilterProps = {
     dimension: string;
     type: string;
     useGlobal: boolean;
-    denNum: IData | undefined;
     setType: Dispatch<SetStateAction<"filter" | "dimension">>;
     setUseGlobal: Dispatch<SetStateAction<boolean>>;
     resource: string;
     prefix?: string;
     suffix?: string;
-    onChange: Event<Dimension>;
     id: string;
 };
 
@@ -22,23 +21,22 @@ const GlobalAndFilter = ({
     useGlobal,
     setType,
     setUseGlobal,
-    onChange,
     resource,
     type,
     prefix,
     suffix,
     id,
-    denNum,
 }: GlobalAndFilterProps) => {
+    const visualizationQuery = useStore($visualizationQuery);
     return (
         <Stack direction="row" flex={1}>
             <RadioGroup
                 onChange={(type: "filter" | "dimension") => {
                     setType(type);
-                    Object.entries(denNum?.dataDimensions || {})
+                    Object.entries(visualizationQuery.dataDimensions || {})
                         .filter(([k, { resource: r }]) => r === resource)
                         .forEach(([key, dim]) => {
-                            onChange({
+                            datumAPi.changeDimension({
                                 id: key,
                                 dimension: dimension,
                                 type: type,
@@ -60,10 +58,10 @@ const GlobalAndFilter = ({
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
                     e.persist();
                     setUseGlobal(() => e.target.checked);
-                    Object.entries(denNum?.dataDimensions || {})
+                    Object.entries(visualizationQuery.dataDimensions || {})
                         .filter(([k, { resource: r }]) => r === resource)
                         .forEach(([key]) => {
-                            onChange({
+                            datumAPi.changeDimension({
                                 id: key,
                                 dimension: dimension,
                                 type: type,
@@ -74,7 +72,7 @@ const GlobalAndFilter = ({
                             });
                         });
                     if (e.target?.checked) {
-                        onChange({
+                        datumAPi.changeDimension({
                             id,
                             dimension: dimension,
                             type: type,
@@ -83,7 +81,7 @@ const GlobalAndFilter = ({
                             suffix: suffix,
                         });
                     } else {
-                        onChange({
+                        datumAPi.changeDimension({
                             id,
                             dimension: dimension,
                             type: type,

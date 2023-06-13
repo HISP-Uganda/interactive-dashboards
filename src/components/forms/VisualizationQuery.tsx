@@ -13,33 +13,34 @@ import {
     Th,
     Thead,
     Tr,
+    Box,
 } from "@chakra-ui/react";
+import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { ChangeEvent } from "react";
-
-import { indicatorApi } from "../../Events";
-import { Option, LocationGenerics } from "../../interfaces";
+import { datumAPi } from "../../Events";
+import { IData, IDataSource, LocationGenerics, Option } from "../../interfaces";
 import { saveDocument } from "../../Queries";
-import { $dataSourceType, $indicator, $store, $settings } from "../../Store";
+import { $settings, $store, $visualizationQuery } from "../../Store";
 import { getSearchParams, globalIds } from "../../utils/utils";
 import { generalPadding, otherHeight } from "../constants";
-import { displayDataSourceType } from "../data-sources";
-import { useDataEngine } from "@dhis2/app-runtime";
+import { DisplayDataSourceType } from "../data-sources";
+import NamespaceDropdown from "../NamespaceDropdown";
 
 const availableOptions: Option[] = [
     { value: "SQL_VIEW", label: "SQL Views" },
     { value: "ANALYTICS", label: "Analytics" },
+    { value: "API", label: "API" },
 ];
-const Numerator = () => {
-    const indicator = useStore($indicator);
+export default function VisualizationQuery() {
     const search = useSearch<LocationGenerics>();
-    const dataSourceType = useStore($dataSourceType);
     const store = useStore($store);
     const navigate = useNavigate<LocationGenerics>();
     const engine = useDataEngine();
     const { storage } = useStore($settings);
+    const visualizationQuery = useStore($visualizationQuery);
     return (
         <Stack
             p={`${generalPadding}px`}
@@ -48,13 +49,14 @@ const Numerator = () => {
             w="100%"
             overflow="auto"
             bgColor="white"
+            spacing="30px"
         >
             <Stack>
-                <Text>Numerator Name</Text>
+                <Text>Name</Text>
                 <Input
-                    value={indicator.numerator?.name || ""}
+                    value={visualizationQuery.name || ""}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        indicatorApi.changeNumeratorAttribute({
+                        datumAPi.changeAttribute({
                             attribute: "name",
                             value: e.target.value,
                         })
@@ -62,44 +64,59 @@ const Numerator = () => {
                 />
             </Stack>
             <Stack>
-                <Text>Numerator Description</Text>
+                <Text>Description</Text>
                 <Textarea
-                    value={indicator.numerator?.description || ""}
+                    value={visualizationQuery.description || ""}
                     onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-                        indicatorApi.changeNumeratorAttribute({
+                        datumAPi.changeAttribute({
                             attribute: "description",
                             value: e.target.value,
                         })
                     }
                 />
             </Stack>
-            {dataSourceType === "DHIS2" && (
-                <Stack>
-                    <Text>Type</Text>
-                    <Select<Option, false, GroupBase<Option>>
-                        value={availableOptions.find(
-                            (pt) => pt.value === indicator.numerator?.type
-                        )}
-                        onChange={(e) =>
-                            indicatorApi.changeNumeratorAttribute({
-                                attribute: "resource",
-                                value: e?.value,
-                            })
-                        }
-                        options={availableOptions}
-                        isClearable
-                    />
+            <Stack direction="row" spacing="40px">
+                <Stack direction="row" alignItems="center" flex={1}>
+                    <Text>Data Source</Text>
+                    <Box flex={1}>
+                        <NamespaceDropdown<IDataSource>
+                            namespace="i-data-sources"
+                            value={visualizationQuery.dataSource}
+                            onChange={(value) =>
+                                datumAPi.changeAttribute({
+                                    attribute: "dataSource",
+                                    value,
+                                })
+                            }
+                        />
+                    </Box>
                 </Stack>
-            )}
+                {visualizationQuery.dataSource?.type === "DHIS2" && (
+                    <Stack direction="row" alignItems="center" flex={1}>
+                        <Text>Type</Text>
+                        <Box flex={1}>
+                            <Select<Option, false, GroupBase<Option>>
+                                value={availableOptions.find(
+                                    (pt) => pt.value === visualizationQuery.type
+                                )}
+                                onChange={(e) =>
+                                    datumAPi.changeAttribute({
+                                        attribute: "type",
+                                        value: e?.value,
+                                    })
+                                }
+                                options={availableOptions}
+                                isClearable
+                            />
+                        </Box>
+                    </Stack>
+                )}
+            </Stack>
 
-            {displayDataSourceType({
-                dataSourceType,
-                onChange: indicatorApi.changeNumeratorDimension,
-                denNum: indicator.numerator,
-                changeQuery: indicatorApi.changeNumeratorAttribute,
-            })}
-
-            {indicator.numerator?.type === "SQL_VIEW" && (
+            <Box>
+                <DisplayDataSourceType />
+            </Box>
+            {visualizationQuery.type === "SQL_VIEW" && (
                 <Table size="sm" textTransform="none">
                     <Thead>
                         <Tr py={1}>
@@ -121,7 +138,7 @@ const Numerator = () => {
                         </Tr>
                     </Thead>
                     <Tbody py={10}>
-                        {getSearchParams(indicator.numerator.query).map(
+                        {getSearchParams(visualizationQuery.query).map(
                             (record) => (
                                 <Tr key={record}>
                                     <Td>
@@ -131,26 +148,23 @@ const Numerator = () => {
                                     <Td textAlign="center">
                                         <Checkbox
                                             isChecked={
-                                                indicator.numerator
+                                                visualizationQuery
                                                     ?.expressions?.[record]
                                                     ?.isGlobal
                                             }
                                             onChange={(
                                                 e: ChangeEvent<HTMLInputElement>
                                             ) =>
-                                                indicatorApi.changeNumeratorExpressionValue(
-                                                    {
-                                                        attribute: record,
-                                                        value: "",
-                                                        isGlobal:
-                                                            e.target.checked,
-                                                    }
-                                                )
+                                                datumAPi.changeExpressionValue({
+                                                    attribute: record,
+                                                    value: "",
+                                                    isGlobal: e.target.checked,
+                                                })
                                             }
                                         />
                                     </Td>
                                     <Td>
-                                        {indicator.numerator?.expressions?.[
+                                        {visualizationQuery?.expressions?.[
                                             record
                                         ]?.isGlobal ? (
                                             <Select<
@@ -161,13 +175,13 @@ const Numerator = () => {
                                                 value={globalIds.find(
                                                     (pt) =>
                                                         pt.value ===
-                                                        indicator.numerator
+                                                        visualizationQuery
                                                             ?.expressions?.[
                                                             record
                                                         ]?.value
                                                 )}
                                                 onChange={(e) =>
-                                                    indicatorApi.changeNumeratorExpressionValue(
+                                                    datumAPi.changeExpressionValue(
                                                         {
                                                             attribute: record,
                                                             value:
@@ -182,14 +196,14 @@ const Numerator = () => {
                                         ) : (
                                             <Input
                                                 value={
-                                                    indicator.numerator
+                                                    visualizationQuery
                                                         ?.expressions?.[record]
                                                         ?.value || "NULL"
                                                 }
                                                 onChange={(
                                                     e: ChangeEvent<HTMLInputElement>
                                                 ) =>
-                                                    indicatorApi.changeNumeratorExpressionValue(
+                                                    datumAPi.changeExpressionValue(
                                                         {
                                                             attribute: record,
                                                             value: e.target
@@ -207,20 +221,66 @@ const Numerator = () => {
                     </Tbody>
                 </Table>
             )}
+
+            <Stack direction="row" alignItems="center" spacing="50px">
+                <Stack direction="row" flex={1} alignItems="center">
+                    <Text>Join To</Text>
+                    <Box flex={1}>
+                        <NamespaceDropdown<IData>
+                            namespace="i-visualization-queries"
+                            value={visualizationQuery.joinTo}
+                            onChange={(value) =>
+                                datumAPi.changeAttribute({
+                                    attribute: "joinTo",
+                                    value,
+                                })
+                            }
+                        />
+                    </Box>
+                </Stack>
+
+                {/* <Stack direction="row" flex={1} alignItems="center">
+                    <Text>Join To Column</Text>
+                    <Input
+                        flex={1}
+                        value={visualizationQuery.joinToColumn}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                            datumAPi.changeAttribute({
+                                attribute: "joinToColumn",
+                                value: e.target.value,
+                            })
+                        }
+                    />
+                </Stack>
+
+                <Stack direction="row" flex={1} alignItems="center">
+                    <Text>Join Column</Text>
+                    <Input
+                        flex={1}
+                        value={visualizationQuery.joinColumn}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                            datumAPi.changeAttribute({
+                                attribute: "joinColumn",
+                                value: e.target.value,
+                            })
+                        }
+                    />
+                </Stack> */}
+            </Stack>
             <Stack direction="row">
                 <Spacer />
                 <Button
                     onClick={async () => {
-                        await saveDocument(
+                        await saveDocument<IData>(
                             storage,
                             "i-visualization-queries",
                             store.systemId,
-                            indicator,
+                            visualizationQuery,
                             engine,
                             search.action || "create"
                         );
                         navigate({
-                            to: `/settings/indicators/${indicator.id}`,
+                            to: `/settings/visualization-queries`,
                             search: { action: "update" },
                         });
                     }}
@@ -230,6 +290,4 @@ const Numerator = () => {
             </Stack>
         </Stack>
     );
-};
-
-export default Numerator;
+}
