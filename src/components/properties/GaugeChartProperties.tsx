@@ -2,16 +2,12 @@ import { Input, Stack, Text, Checkbox } from "@chakra-ui/react";
 import { ChangeEvent } from "react";
 import { useStore } from "effector-react";
 import { Select, GroupBase } from "chakra-react-select";
-import { isArray } from "lodash";
-import {
-    // changeVisualizationAttribute,
-    // changeVisualizationProperties,
-    sectionApi,
-} from "../../Events";
+import { isArray, uniq, flatten } from "lodash";
+import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { customComponents } from "../../utils/components";
-import { colors } from "../../utils/utils";
+import { colors, createOptions } from "../../utils/utils";
 
 const GaugeChartProperties = ({
     visualization,
@@ -20,14 +16,15 @@ const GaugeChartProperties = ({
 }) => {
     const visualizationData = useStore($visualizationData);
     const metadata = useStore($visualizationMetadata)[visualization.id];
-    const columns = visualizationData[visualization.id]
-        ? Object.keys(visualizationData[visualization.id][0]).map<Option>(
-              (o) => {
-                  return { value: o, label: o };
-              }
-          )
-        : [];
-    console.log("visualisation:", visualization);
+    const columns: Option[] = createOptions(
+        uniq(
+            flatten(
+                flatten(visualizationData[visualization.id]).map((d) =>
+                    Object.keys(d)
+                )
+            )
+        )
+    );
 
     return (
         <Stack>

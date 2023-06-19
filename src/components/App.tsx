@@ -1,11 +1,4 @@
-import {
-    Box,
-    Flex,
-    Spinner,
-    useMediaQuery,
-    Stack,
-    Text,
-} from "@chakra-ui/react";
+import { Box, Flex, Spinner, useMediaQuery } from "@chakra-ui/react";
 import {
     createHashHistory,
     Outlet,

@@ -6,6 +6,7 @@ import { $store } from "../Store";
 
 export default function Home() {
     const store = useStore($store);
+
     return (
         <Stack>
             {store.isAdmin ? (

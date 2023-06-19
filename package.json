@@ -80,6 +80,7 @@
         "react-icons": "^4.7.1",
         "react-leaflet": "^4.1.0",
         "react-marquee-slider": "^1.1.5",
+        "react-pdf": "^7.1.2",
         "react-plotly.js": "^2.6.0",
         "react-spring": "^9.6.1",
         "react-spring-dnd": "^0.2.0",

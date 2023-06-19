@@ -194,68 +194,57 @@ const DataSource = () => {
                         </FormErrorMessage>
                     </FormControl>
 
-                    {!isCurrentDHIS2 &&
-                        ["API", "ELASTICSEARCH"].indexOf(type) !== -1 && (
-                            <>
-                                <FormControl
-                                    isInvalid={!!errors.authentication?.url}
-                                >
-                                    <FormLabel htmlFor="authentication.url">
-                                        URL
-                                    </FormLabel>
-                                    <Input
-                                        id="authentication.url"
-                                        placeholder="url"
-                                        {...register("authentication.url")}
-                                    />
-                                    <FormErrorMessage>
-                                        {errors.authentication?.url?.message}
-                                    </FormErrorMessage>
-                                </FormControl>
+                    {!isCurrentDHIS2 && (
+                        <>
+                            <FormControl
+                                isInvalid={!!errors.authentication?.url}
+                            >
+                                <FormLabel htmlFor="authentication.url">
+                                    URL
+                                </FormLabel>
+                                <Input
+                                    id="authentication.url"
+                                    placeholder="url"
+                                    {...register("authentication.url")}
+                                />
+                                <FormErrorMessage>
+                                    {errors.authentication?.url?.message}
+                                </FormErrorMessage>
+                            </FormControl>
 
-                                <FormControl
-                                    isInvalid={
-                                        !!errors.authentication?.username
-                                    }
-                                >
-                                    <FormLabel htmlFor="authentication.username">
-                                        Username
-                                    </FormLabel>
-                                    <Input
-                                        id="authentication.username"
-                                        placeholder="username"
-                                        {...register("authentication.username")}
-                                    />
-                                    <FormErrorMessage>
-                                        {
-                                            errors.authentication?.username
-                                                ?.message
-                                        }
-                                    </FormErrorMessage>
-                                </FormControl>
+                            <FormControl
+                                isInvalid={!!errors.authentication?.username}
+                            >
+                                <FormLabel htmlFor="authentication.username">
+                                    Username
+                                </FormLabel>
+                                <Input
+                                    id="authentication.username"
+                                    placeholder="username"
+                                    {...register("authentication.username")}
+                                />
+                                <FormErrorMessage>
+                                    {errors.authentication?.username?.message}
+                                </FormErrorMessage>
+                            </FormControl>
 
-                                <FormControl
-                                    isInvalid={
-                                        !!errors.authentication?.password
-                                    }
-                                >
-                                    <FormLabel htmlFor="authentication.password">
-                                        Password
-                                    </FormLabel>
-                                    <Input
-                                        id="authentication.password"
-                                        placeholder="password"
-                                        {...register("authentication.password")}
-                                    />
-                                    <FormErrorMessage>
-                                        {
-                                            errors.authentication?.password
-                                                ?.message
-                                        }
-                                    </FormErrorMessage>
-                                </FormControl>
-                            </>
-                        )}
+                            <FormControl
+                                isInvalid={!!errors.authentication?.password}
+                            >
+                                <FormLabel htmlFor="authentication.password">
+                                    Password
+                                </FormLabel>
+                                <Input
+                                    id="authentication.password"
+                                    placeholder="password"
+                                    {...register("authentication.password")}
+                                />
+                                <FormErrorMessage>
+                                    {errors.authentication?.password?.message}
+                                </FormErrorMessage>
+                            </FormControl>
+                        </>
+                    )}
                     <FormControl isInvalid={!!errors.description}>
                         <FormLabel htmlFor="description">Description</FormLabel>
                         <Textarea

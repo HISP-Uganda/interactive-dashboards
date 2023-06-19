@@ -63,43 +63,6 @@ const getVisualization = (
         )
     );
 
-    const processData = () => {
-        if (!isEmpty(data)) {
-            const columns = Object.keys(data[0]);
-            if (columns.length === 2) {
-                const all: string[] = data.map((a: any) => {
-                    const value = parseInt(a.value, 10);
-
-                    if (value >= 100) {
-                        return "a";
-                    }
-
-                    if (value >= 75) {
-                        return "b";
-                    }
-
-                    return "c";
-                });
-
-                return [
-                    {
-                        indicator: "Achieved",
-                        value: all.filter((v) => v === "a").length,
-                    },
-                    {
-                        indicator: "Moderately Achieved",
-                        value: all.filter((v) => v === "b").length,
-                    },
-                    {
-                        indicator: "Not Achieved",
-                        value: all.filter((v) => v === "c").length,
-                    },
-                ];
-            }
-        }
-        return [];
-    };
-
     const allTypes: any = {
         single: (
             <SingleValue
@@ -123,7 +86,7 @@ const getVisualization = (
         ),
         pie: (
             <PieChart
-                data={processData()}
+                data={data}
                 section={section}
                 visualization={visualization}
                 {...otherProperties}

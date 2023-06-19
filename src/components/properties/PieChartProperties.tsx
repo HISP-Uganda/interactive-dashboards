@@ -1,12 +1,18 @@
-import { Stack, Text } from "@chakra-ui/react";
+import { Stack, Text, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
+import { flatten, isArray, uniq } from "lodash";
 import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
-import { isArray, uniq, groupBy } from "lodash";
 import { $visualizationData } from "../../Store";
 import { customComponents } from "../../utils/components";
-import { chartTypes, colors, createOptions } from "../../utils/utils";
+import { colors, createOptions } from "../../utils/utils";
+import SelectProperty from "./SelectProperty";
+import SwitchProperty from "./SwitchProperty";
+import Scrollable from "../Scrollable";
+import NumberProperty from "./NumberProperty";
+import ColorProperty from "./ColorProperty";
+import TextProperty from "./TextProperty";
 
 const PieChartProperties = ({
     visualization,
@@ -14,84 +20,88 @@ const PieChartProperties = ({
     visualization: IVisualization;
 }) => {
     const visualizationData = useStore($visualizationData);
-    // const columns = visualizationData[visualization.id]
-    //   ? Object.keys(visualizationData[visualization.id][0]).map<Option>((o) => {
-    //       return { value: o, label: o };
-    //     })
-    //   : [];
-    const processData = () => {
-        const columns = Object.keys(visualizationData[visualization.id][0]);
+    const columns: Option[] = createOptions(
+        uniq(
+            flatten(
+                flatten(visualizationData[visualization.id]).map((d) =>
+                    Object.keys(d)
+                )
+            )
+        )
+    );
 
-        if (columns.length === 2) {
-            const all: string[] = visualizationData[visualization.id].map(
-                (a: any) => {
-                    const value = parseInt(a.value, 10);
-
-                    if (value >= 100) {
-                        return "a";
-                    }
-
-                    if (value >= 75) {
-                        return "b";
-                    }
-
-                    return "c";
-                }
-            );
-
-            return [
-                {
-                    indicator: "Achieved",
-                    value: all.filter((v) => v === "a").length,
-                },
-                {
-                    indicator: "Moderately Achieved",
-                    value: all.filter((v) => v === "b").length,
-                },
-                {
-                    indicator: "Not Achieved",
-                    value: all.filter((v) => v === "c").length,
-                },
-            ];
-        }
-        return [];
+    const findUniqValue = (key: string) => {
+        return uniq(visualizationData[visualization.id].map((d) => d[key]));
     };
-
-    const columns = Object.keys(processData()[0]).map<Option>((o) => {
-        return { value: o, label: o };
-    });
 
     return (
         <Stack>
-            <Text>Labels Column</Text>
-            <Select<Option, false, GroupBase<Option>>
-                value={columns.find(
-                    (pt) => pt.value === visualization.properties["labels"]
-                )}
-                onChange={(e) =>
-                    sectionApi.changeVisualizationProperties({
-                        visualization: visualization.id,
-                        attribute: "labels",
-                        value: e?.value,
-                    })
-                }
+            <SelectProperty
+                attribute="labels"
+                visualization={visualization}
                 options={columns}
-                isClearable
+                title="Labels Column"
             />
-            <Text>Values Column</Text>
-            <Select<Option, false, GroupBase<Option>>
-                value={columns.find(
-                    (pt) => pt.value === visualization.properties["values"]
-                )}
-                onChange={(e) =>
-                    sectionApi.changeVisualizationProperties({
-                        visualization: visualization.id,
-                        attribute: "values",
-                        value: e?.value,
-                    })
-                }
+
+            <SwitchProperty
+                attribute="summarize"
+                visualization={visualization}
+                title="Summarize Selected Column"
+            />
+
+            {visualization.properties["labels"] && (
+                <Scrollable height={300}>
+                    <Table variant="unstyled">
+                        <Thead>
+                            <Tr>
+                                <Th>Column</Th>
+                                <Th>Width</Th>
+                                <Th>BG</Th>
+                                <Th>Rename</Th>
+                            </Tr>
+                        </Thead>
+                        <Tbody>
+                            {findUniqValue(
+                                visualization.properties["labels"]
+                            ).map((row) => (
+                                <Tr key={row}>
+                                    <Td>{row}</Td>
+                                    <Td w="50px">
+                                        <NumberProperty
+                                            visualization={visualization}
+                                            title=""
+                                            attribute={`${row}.width`}
+                                            min={50}
+                                            max={500}
+                                            step={1}
+                                        />
+                                    </Td>
+                                    <Td w="50px">
+                                        <ColorProperty
+                                            visualization={visualization}
+                                            title=""
+                                            attribute={`${row}.bg`}
+                                        />
+                                    </Td>
+                                    <Td w="300px">
+                                        <TextProperty
+                                            visualization={visualization}
+                                            title=""
+                                            attribute={`${row}.name`}
+                                        />
+                                    </Td>
+                                </Tr>
+                            ))}
+                        </Tbody>
+                    </Table>
+                </Scrollable>
+            )}
+
+            <SelectProperty
+                attribute="values"
+                visualization={visualization}
                 options={columns}
-                isClearable
+                title="Values Column"
             />
             <Text>PieChart Colors</Text>
             <Select<Option, false, GroupBase<Option>>

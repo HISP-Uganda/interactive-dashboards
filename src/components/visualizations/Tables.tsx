@@ -125,7 +125,9 @@ const Tables = ({
                                                     ]
                                                 }
                                             >
-                                                {col.actual}
+                                                {visualization.properties[
+                                                    `${col.actual}.name`
+                                                ] || col.actual}
                                             </Th>
                                         ))}
                                     </Tr>
@@ -151,7 +153,9 @@ const Tables = ({
                                                         ]
                                                     }
                                                 >
-                                                    {r[index].actual}
+                                                    {visualization.properties[
+                                                        `${r[index].actual}.name`
+                                                    ] || r[index].actual}
                                                 </Td>
                                             );
                                         })}
@@ -225,7 +229,6 @@ const Tables = ({
                     </Table>
                 </Box>
             </Box>
-            <pre>{JSON.stringify(visualization.properties, null, 2)}</pre>
         </Stack>
     );
 };

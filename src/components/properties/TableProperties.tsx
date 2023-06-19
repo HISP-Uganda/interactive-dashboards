@@ -177,9 +177,6 @@ const TableProperties = ({
                                         visualization={visualization}
                                         title=""
                                         attribute={`${row}.name`}
-                                        disabled={
-                                            SPECIAL_COLUMNS.indexOf(row) === -1
-                                        }
                                     />
                                 </Td>
                             </Tr>
@@ -211,6 +208,50 @@ const TableProperties = ({
                     isMulti
                 />
             </Stack>
+
+            <Scrollable height={300}>
+                <Table variant="unstyled">
+                    <Thead>
+                        <Tr>
+                            <Th>Column</Th>
+                            <Th>Width</Th>
+                            <Th>BG</Th>
+                            <Th>Rename</Th>
+                        </Tr>
+                    </Thead>
+                    <Tbody>
+                        {lastRow.map((row) => (
+                            <Tr key={row}>
+                                <Td>{row}</Td>
+                                <Td w="50px">
+                                    <NumberProperty
+                                        visualization={visualization}
+                                        title=""
+                                        attribute={`${row}.width`}
+                                        min={50}
+                                        max={500}
+                                        step={1}
+                                    />
+                                </Td>
+                                <Td w="50px">
+                                    <ColorProperty
+                                        visualization={visualization}
+                                        title=""
+                                        attribute={`${row}.bg`}
+                                    />
+                                </Td>
+                                <Td w="300px">
+                                    <TextProperty
+                                        visualization={visualization}
+                                        title=""
+                                        attribute={`${row}.name`}
+                                    />
+                                </Td>
+                            </Tr>
+                        ))}
+                    </Tbody>
+                </Table>
+            </Scrollable>
             <SelectProperty
                 visualization={visualization}
                 title="Aggregation"

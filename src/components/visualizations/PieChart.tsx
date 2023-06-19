@@ -6,6 +6,7 @@ import { $visualizationMetadata } from "../../Store";
 import { exclusions } from "../../utils/utils";
 import { processPieChart } from "../processors";
 import VisualizationTitle from "./VisualizationTitle";
+import { flatten } from "lodash";
 
 interface PieChartProps extends ChartProps {
     labels?: string;
@@ -27,25 +28,9 @@ const PieChart = ({
         layout: {
             legend: { x: 0.5, y: -0.3, orientation: "h" },
             yaxis: { automargin: true },
-            // colorway: [
-            //   "green",
-            //   "#ff7f0e",
-            //   "#2ca02c",
-            //   "#d62728",
-            //   "#9467bd",
-            //   "#8c564b",
-            //   "#e377c2",
-            //   "#7f7f7f",
-            //   "#bcbd22",
-            // ],
         },
     };
-    // Object.entries(layoutProperties || {}).forEach(([property, value]) => {
-    //   update(availableProperties, property, () => value);
-    // });
-    const titleFontSize = dataProperties?.["data.title.fontsize"] || "1.5vh";
-    const titleCase = dataProperties?.["data.title.case"] || "";
-    const titleColor = dataProperties?.["data.title.color"] || "black";
+    const summarize = visualization.properties["summarize"] || false;
     return (
         <Stack w="100%" h="100%" spacing={0}>
             {visualization.name && (
@@ -57,10 +42,11 @@ const PieChart = ({
             <Stack h="100%" w="100%" flex={1}>
                 <Plot
                     data={processPieChart(
-                        data,
+                        flatten(data),
+                        summarize,
                         labels,
                         values,
-                        metadata[visualization.id]
+                        visualization.properties
                     )}
                     layout={{
                         margin: {
