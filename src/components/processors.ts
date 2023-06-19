@@ -515,40 +515,51 @@ export const processGraphs = (
 
 export const processPieChart = (
     data: any[],
+    summarize: boolean,
     labels?: string,
     values?: string,
     metadata?: any
-) => {
-    let chartData: any = [];
-    if (data && data.length > 0 && labels && values) {
-        const x = data.map((num: any) => {
+): any => {
+    let x = [];
+    let y = [];
+    if (data && data.length > 0 && summarize) {
+        const processed = fromPairs(
+            Object.entries(groupBy(data, labels)).map(([key, values]) => [
+                metadata[`${key}.name`] || key,
+                values.length,
+            ])
+        );
+
+        x = Object.keys(processed);
+        y = Object.values(processed);
+    } else if (data && data.length > 0 && labels && values) {
+        x = data.map((num: any) => {
             return (
                 metadata?.[num[labels]]?.name ||
                 allMetadata[labels] ||
                 num[labels]
             );
         });
-        const y = data.map((num: any) => num[values]);
-        chartData = [
-            {
-                labels: x,
-                values: y,
-                type: "pie",
-                textinfo: "label+percent+name",
-                hoverinfo: "label+percent+name",
-                textposition: "inside",
-                textfont: {
-                    size: [16, 16, 16],
-                    color: ["black", "black", "black"],
-                },
-                hole: 0.1,
-                marker: {
-                    colors: ["green", "yellow", "red"],
-                },
-            },
-        ];
+        y = data.map((num: any) => num[values]);
     }
-    return chartData;
+    return [
+        {
+            labels: x,
+            values: y,
+            type: "pie",
+            textinfo: "label+percent+name",
+            hoverinfo: "label+percent+name",
+            textposition: "inside",
+            textfont: {
+                size: [16, 16, 16],
+                color: ["black", "black", "black"],
+            },
+            hole: 0.1,
+            marker: {
+                colors: ["green", "yellow", "red"],
+            },
+        },
+    ];
 };
 
 export const processGaugeChart = (

@@ -1,26 +1,28 @@
 import { Checkbox, Radio, RadioGroup, Stack, Text } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { isArray } from "lodash";
+import { isArray, uniq, flatten } from "lodash";
 import { ChangeEvent } from "react";
 import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData } from "../../Store";
 import { customComponents } from "../../utils/components";
-import { colors } from "../../utils/utils";
+import { colors, createOptions } from "../../utils/utils";
 const HistogramProperties = ({
     visualization,
 }: {
     visualization: IVisualization;
 }) => {
     const visualizationData = useStore($visualizationData);
-    const columns = visualizationData[visualization.id]
-        ? Object.keys(visualizationData[visualization.id][0]).map<Option>(
-              (o) => {
-                  return { value: o, label: o };
-              }
-          )
-        : [];
+    const columns: Option[] = createOptions(
+        uniq(
+            flatten(
+                flatten(visualizationData[visualization.id]).map((d) =>
+                    Object.keys(d)
+                )
+            )
+        )
+    );
 
     return (
         <Stack>

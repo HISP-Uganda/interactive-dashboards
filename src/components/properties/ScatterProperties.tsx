@@ -9,7 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { GroupBase, Select } from "chakra-react-select";
-import { isArray, uniq } from "lodash";
+import { isArray, uniq, flatten } from "lodash";
 import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
@@ -22,14 +22,15 @@ const ScatterProperties = ({
     visualization: IVisualization;
 }) => {
     const visualizationData = useStore($visualizationData);
-    const columns = visualizationData[visualization.id]
-        ? Object.keys(visualizationData[visualization.id][0]).map<Option>(
-            (o) => {
-                return { value: o, label: o };
-            }
+    const columns: Option[] = createOptions(
+        uniq(
+            flatten(
+                flatten(visualizationData[visualization.id]).map((d) =>
+                    Object.keys(d)
+                )
+            )
         )
-        : [];
-
+    );
     useEffect(() => {
         if (visualizationData && visualizationData[visualization.id]) {
             const initialX = columns[0]?.value;

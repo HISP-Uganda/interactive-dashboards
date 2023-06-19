@@ -8,3 +8,15 @@
 .ant-tree-node-selected{
     background-color:#FEE300 !important
 }
+
+.pdf{
+	/* background-color: beige; */
+	border: 1px solid red;
+
+	margin: 0;
+	padding: 20px;
+	overflow: auto;
+	display: flex;
+	flex-direction: row;
+	/* height: 700px; */
+}

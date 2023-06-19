@@ -2,7 +2,7 @@ import { useDataEngine } from "@dhis2/app-runtime";
 import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import { Event } from "effector";
-import { fromPairs, groupBy, isEmpty, max, min, uniq } from "lodash";
+import { fromPairs, groupBy, isEmpty, max, min, uniq, flatten } from "lodash";
 import { evaluate } from "mathjs";
 import { db } from "./db";
 import {
@@ -1426,7 +1426,7 @@ const generateDHIS2Query = (
             if (params) {
                 query = {
                     ...query,
-                    numerator: `analytics.json?${params}&aggregationType=MAX`,
+                    numerator: `analytics.json?${params}`,
                 };
             }
         } else if (
@@ -1538,22 +1538,20 @@ const processDHIS2Data = (data: any, joinData?: any[]) => {
             headers = data.headers;
             rows = data.rows;
         }
-        const processed =
-            rows?.map((row: string[]) => {
-                return fromPairs(
-                    headers?.map((h: any, i: number) => {
-                        if (data.factor && data.factor !== "1") {
-                            return [
-                                h.name,
-                                evaluate(`${row[i]}${data.factor}`),
-                            ];
-                        }
-                        return [h.name, row[i]];
-                    })
-                );
-            }) || [];
-        if (joinData) {
-            return mergeWithEvents(processed, joinData);
+        if (headers !== undefined && rows !== undefined) {
+            const processed =
+                rows.map((row: string[]) => {
+                    return fromPairs(
+                        row.map((value, index) => {
+                            const header = headers?.[index];
+                            return [header.name, value];
+                        })
+                    );
+                }) || [];
+            if (joinData) {
+                return mergeWithEvents(processed, joinData);
+            }
+            return processed;
         }
     }
     if (joinData) {
@@ -1766,14 +1764,9 @@ const processVisualization = async (
 
     visualizationDataApi.updateVisualizationData({
         visualizationId: visualization.id,
-        data,
+        data: flatten(data),
     });
-    return data;
-    // return [{ value: 200 }];
-    //  visualizationMetadataApi.updateVisualizationMetadata({
-    //      visualizationId: visualization.id,
-    //      data: metadata,
-    //  });
+    return flatten(data);
 };
 
 export const useVisualization = (

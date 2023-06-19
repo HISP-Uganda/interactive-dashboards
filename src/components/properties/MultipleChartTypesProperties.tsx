@@ -4,6 +4,8 @@ import { useStore } from "effector-react";
 import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData } from "../../Store";
+import { createOptions } from "../../utils/utils";
+import { uniq, flatten } from "lodash";
 
 const MultipleChartTypesProperties = ({
     visualization,
@@ -11,14 +13,15 @@ const MultipleChartTypesProperties = ({
     visualization: IVisualization;
 }) => {
     const visualizationData = useStore($visualizationData);
-    const columns = visualizationData[visualization.id]
-        ? Object.keys(visualizationData[visualization.id][0]).map<Option>(
-              (o) => {
-                  return { value: o, label: o };
-              }
-          )
-        : [];
-
+    const columns: Option[] = createOptions(
+        uniq(
+            flatten(
+                flatten(visualizationData[visualization.id]).map((d) =>
+                    Object.keys(d)
+                )
+            )
+        )
+    );
     return (
         <Stack>
             <Text>Category</Text>
