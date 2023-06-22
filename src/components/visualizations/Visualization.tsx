@@ -1,15 +1,9 @@
 import { Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { fromPairs, isEmpty } from "lodash";
-import { ISection, IVisualization } from "../../interfaces";
+import { fromPairs } from "lodash";
+import { ISection, IVisualization, LocationGenerics } from "../../interfaces";
 import { useVisualization } from "../../Queries";
-import {
-    $dashboard,
-    $dataSources,
-    $globalFilters,
-    $indicators,
-    $visualizationData,
-} from "../../Store";
+import { $dashboard, $globalFilters, $visualizationData } from "../../Store";
 import { deriveSingleValues } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import AreaGraph from "./AreaGraph";
@@ -28,6 +22,7 @@ import ImageVisualization from "./ImageVisualization";
 import LineGraph from "./LineGraph";
 import MapChartLeaflet from "./MapChartLeaflet";
 import MultipleChartTypes from "./MultipleChartTypes";
+import OptionSet from "./OptionSet";
 import PieChart from "./PieChart";
 import RadarGraph from "./RadarGraph";
 import ScatterPlot from "./ScatterPlot";
@@ -36,6 +31,7 @@ import StackedArea from "./StackedArea";
 import SunburstChart from "./SunburstChart";
 import Tables from "./Tables";
 import TreeMaps from "./TreeMaps";
+import { useSearch } from "@tanstack/react-location";
 
 type VisualizationProps = {
     visualization: IVisualization;
@@ -259,19 +255,25 @@ const getVisualization = (
         ),
         filters: <Filters />,
         dashboardTitle: <DashboardTitle />,
+        optionSet: (
+            <OptionSet visualization={visualization} section={section} />
+        ),
     };
     return allTypes[visualization.type];
 };
 
 const Visualization = ({ visualization, section }: VisualizationProps) => {
+    const search = useSearch<LocationGenerics>();
     const globalFilters = useStore($globalFilters);
     const dashboard = useStore($dashboard);
     const visualizationData = useStore($visualizationData);
+    const { affected, optionSet } = search;
 
     const { isLoading, isSuccess, data, isError, error } = useVisualization(
         visualization,
         dashboard.refreshInterval,
-        globalFilters
+        globalFilters,
+        affected && optionSet ? { [affected]: optionSet } : {}
     );
     return (
         <>

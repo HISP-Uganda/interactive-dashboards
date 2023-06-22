@@ -19,15 +19,6 @@ import { uniq } from "lodash";
 import { useEffect, useState } from "react";
 import { db } from "../../db";
 import {
-    // changeSelectedCategory,
-    // changeSelectedDashboard,
-    // setColumns,
-    // setCurrentDashboard,
-    // setDataElements,
-    // setOriginalColumns,
-    // setRefresh,
-    // setRows,
-    // updateVisualizationData,
     dashboardTypeApi,
     storeApi,
     dashboardApi,
@@ -102,7 +93,7 @@ const Dashboards = () => {
                             search: {
                                 action: "create",
                                 periods: store.periods
-                                    .map((i) => i.id)
+                                    .map((i) => i.value)
                                     .join("-"),
                                 organisations: store.organisations.join("-"),
                                 groups: store.groups.join("-"),
@@ -145,127 +136,13 @@ const Dashboards = () => {
                                         storeApi.changeSelectedCategory(
                                             dashboard.category || ""
                                         );
-                                        const node: EventDataNode<DataNode> = {
-                                            isLeaf: !dashboard.hasChildren,
-                                            id: dashboard.id,
-                                            pId: "",
-                                            key: dashboard.id,
-                                            title: dashboard.name || "",
-                                            checkable: false,
-                                            nodeSource: dashboard.nodeSource,
-                                            hasChildren: dashboard.hasChildren,
-
-                                            expanded: false,
-                                            selected: false,
-                                            checked: false,
-                                            loaded: false,
-                                            loading: false,
-                                            halfChecked: false,
-                                            dragOver: false,
-                                            dragOverGapTop: false,
-                                            dragOverGapBottom: false,
-                                            pos: "",
-                                            active: false,
-                                        };
-                                        const children = await loadData(
-                                            node,
-                                            engine
-                                        );
-                                        storeApi.setOriginalColumns([
-                                            {
-                                                id: "title",
-                                                title: "Indicator",
-                                            },
-                                            {
-                                                id: "totalIndicators",
-                                                title: "Indicators",
-                                            },
-                                        ]);
-                                        storeApi.setColumns([
-                                            { id: "a", title: "A" },
-                                            { id: "b", title: "MA" },
-                                            { id: "c", title: "NA" },
-                                        ]);
-                                        const elements =
-                                            await db.dataElements.toArray();
-                                        storeApi.setDataElements(elements);
-                                        storeApi.setRows(
-                                            children.map((c: any) => {
-                                                const filteredElements =
-                                                    elements.filter(
-                                                        (e) =>
-                                                            e.interventionCode ===
-                                                                c.key ||
-                                                            e.themeCode ===
-                                                                c.key ||
-                                                            e.programCode ===
-                                                                c.key
-                                                    );
-                                                return {
-                                                    ...c,
-                                                    child: false,
-                                                    totalIndicators:
-                                                        filteredElements.length,
-                                                    elements:
-                                                        filteredElements.map(
-                                                            ({ id }) => id
-                                                        ),
-                                                };
-                                            })
-                                        );
-                                        visualizationDataApi.updateVisualizationData(
-                                            {
-                                                visualizationId:
-                                                    "keyResultAreas",
-                                                data: [
-                                                    {
-                                                        value: uniq(
-                                                            elements.map(
-                                                                (e) =>
-                                                                    e.keyResultAreaCode
-                                                            )
-                                                        ).length,
-                                                    },
-                                                ],
-                                            }
-                                        );
-                                        visualizationDataApi.updateVisualizationData(
-                                            {
-                                                visualizationId: "indicators",
-                                                data: [
-                                                    { value: elements.length },
-                                                ],
-                                            }
-                                        );
-                                        visualizationDataApi.updateVisualizationData(
-                                            {
-                                                visualizationId:
-                                                    "interventions",
-                                                data: [
-                                                    {
-                                                        value: uniq(
-                                                            elements.map(
-                                                                (e) =>
-                                                                    e.interventionCode
-                                                            )
-                                                        ).length,
-                                                    },
-                                                ],
-                                            }
-                                        );
-                                        visualizationDataApi.updateVisualizationData(
-                                            {
-                                                visualizationId: "outputs",
-                                                data: [{ value: 0 }],
-                                            }
-                                        );
                                         navigate({
                                             to: `/dashboards/${dashboard.id}`,
                                             search: {
                                                 action: "update",
                                                 category: dashboard.category,
                                                 periods: store.periods
-                                                    .map((i) => i.id)
+                                                    .map((i) => i.value)
                                                     .join("-"),
                                                 organisations:
                                                     store.organisations.join(

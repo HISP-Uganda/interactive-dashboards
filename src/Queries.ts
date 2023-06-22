@@ -2,7 +2,16 @@ import { useDataEngine } from "@dhis2/app-runtime";
 import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import { Event } from "effector";
-import { fromPairs, groupBy, isEmpty, max, min, uniq, flatten } from "lodash";
+import {
+    fromPairs,
+    groupBy,
+    isEmpty,
+    max,
+    min,
+    uniq,
+    flatten,
+    every,
+} from "lodash";
 import { evaluate } from "mathjs";
 import { db } from "./db";
 import {
@@ -1527,7 +1536,11 @@ const generateKeys = (
     return uniq(all);
 };
 
-const processDHIS2Data = (data: any, joinData?: any[]) => {
+const processDHIS2Data = (
+    data: any,
+    joinData?: any[],
+    otherFilters?: { [key: string]: any }
+) => {
     if (data.headers || data.listGrid) {
         let rows: string[][] | undefined = undefined;
         let headers: any[] | undefined = undefined;
@@ -1539,15 +1552,14 @@ const processDHIS2Data = (data: any, joinData?: any[]) => {
             rows = data.rows;
         }
         if (headers !== undefined && rows !== undefined) {
-            const processed =
-                rows.map((row: string[]) => {
-                    return fromPairs(
-                        row.map((value, index) => {
-                            const header = headers?.[index];
-                            return [header.name, value];
-                        })
-                    );
-                }) || [];
+            const processed = rows.map((row: string[]) => {
+                return fromPairs(
+                    row.map((value, index) => {
+                        const header = headers?.[index];
+                        return [header.name, value];
+                    })
+                );
+            });
             if (joinData) {
                 return mergeWithEvents(processed, joinData);
             }
@@ -1555,7 +1567,18 @@ const processDHIS2Data = (data: any, joinData?: any[]) => {
         }
     }
     if (joinData) {
-        return mergeWithEvents(flattenDHIS2Data(data), joinData);
+        const merged = mergeWithEvents(flattenDHIS2Data(data), joinData);
+        console.log(merged, otherFilters);
+        if (otherFilters) {
+            return merged.filter((data: any) => {
+                const values = Object.entries(otherFilters).map(
+                    ([key, value]) =>
+                        data[key] === String(value).padStart(2, "0")
+                );
+                return every(values);
+            });
+        }
+        return merged;
     }
 
     return flattenDHIS2Data(data);
@@ -1596,13 +1619,15 @@ const getDHIS2Query = (
 const queryDHIS2 = async (
     engine: any,
     vq: IData | undefined,
-    globalFilters: { [key: string]: any } = {}
+    globalFilters: { [key: string]: any } = {},
+    otherFilters: { [key: string]: any } = {}
 ) => {
     if (vq) {
         const joinerData: any = await queryDHIS2(
             engine,
             vq.joinTo,
-            globalFilters
+            globalFilters,
+            otherFilters
         );
         if (vq.dataSource && vq.dataSource.type === "DHIS2") {
             const query = getDHIS2Query(vq, globalFilters);
@@ -1612,7 +1637,7 @@ const queryDHIS2 = async (
                         resource: query,
                     },
                 });
-                return processDHIS2Data(data, joinerData);
+                return processDHIS2Data(data, joinerData, otherFilters);
             }
             const { data } = await axios.get(
                 `${vq.dataSource.authentication.url}/api/${query}`,
@@ -1624,7 +1649,7 @@ const queryDHIS2 = async (
                 }
             );
 
-            return processDHIS2Data(data, joinerData);
+            return processDHIS2Data(data, joinerData, otherFilters);
         }
 
         if (vq.dataSource && vq.dataSource.type === "API") {
@@ -1704,17 +1729,20 @@ const computeIndicator = (
 const queryIndicator = async (
     engine: any,
     indicator: IIndicator,
-    globalFilters: { [key: string]: any } = {}
+    globalFilters: { [key: string]: any } = {},
+    otherFilters: { [key: string]: any } = {}
 ) => {
     const numerator = await queryDHIS2(
         engine,
         indicator.numerator,
-        globalFilters
+        globalFilters,
+        otherFilters
     );
     const denominator = await queryDHIS2(
         engine,
         indicator.denominator,
-        globalFilters
+        globalFilters,
+        otherFilters
     );
 
     if (numerator && denominator) {
@@ -1754,11 +1782,12 @@ const queryIndicator = async (
 const processVisualization = async (
     engine: any,
     visualization: IVisualization,
-    globalFilters: { [key: string]: any } = {}
+    globalFilters: { [key: string]: any } = {},
+    otherFilters: { [key: string]: any } = {}
 ) => {
     const data = await Promise.all(
         visualization.indicators.map((indicator) =>
-            queryIndicator(engine, indicator, globalFilters)
+            queryIndicator(engine, indicator, globalFilters, otherFilters)
         )
     );
 
@@ -1772,7 +1801,8 @@ const processVisualization = async (
 export const useVisualization = (
     visualization: IVisualization,
     refreshInterval?: string,
-    globalFilters?: { [key: string]: any }
+    globalFilters?: { [key: string]: any },
+    otherFilters?: { [key: string]: any }
 ) => {
     const engine = useDataEngine();
     let currentInterval: boolean | number = false;
@@ -1788,9 +1818,15 @@ export const useVisualization = (
             ...visualization.indicators.map(({ id }) => id),
             ...otherKeys,
             ...Object.values(overrides),
+            ...Object.values(otherFilters || {}),
         ],
         async ({ signal }) => {
-            return processVisualization(engine, visualization, globalFilters);
+            return processVisualization(
+                engine,
+                visualization,
+                globalFilters,
+                otherFilters
+            );
         },
         {
             refetchInterval: currentInterval,
@@ -1908,10 +1944,13 @@ export const useOptionSet = (optionSetId: string) => {
     return useQuery<{ code: string; name: string }[], Error>(
         ["optionSet", optionSetId],
         async () => {
-            const {
-                optionSet: { options },
-            }: any = await engine.query(query);
-            return options;
+            if (optionSetId) {
+                const {
+                    optionSet: { options },
+                }: any = await engine.query(query);
+                return options;
+            }
+            return [];
         }
     );
 };

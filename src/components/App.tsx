@@ -33,6 +33,7 @@ import { $settings } from "../Store";
 import { decodeFromBinary, encodeToBinary } from "../utils/utils";
 import Panel from "./Panel";
 import Settings from "./Settings";
+import PDF from "./PDF";
 // import IndicatorForm from "./forms/IndicatorForm";
 
 const history = createHashHistory();
@@ -83,7 +84,7 @@ const App = () => {
                 return {};
             },
             path: "/",
-            element: <Home />,
+            element: <PDF />,
         },
         {
             loader: async () => {

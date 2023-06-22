@@ -1,10 +1,6 @@
-import React from "react";
-import { Flex, Stack, Text } from "@chakra-ui/react";
-import { Navigate } from "@tanstack/react-location";
-import { useStore } from "effector-react";
-import { useState } from "react";
-import { Key } from "react";
-import { Document, Page, pdfjs, Outline } from "react-pdf";
+import { Stack } from "@chakra-ui/react";
+import React, { useState } from "react";
+import { Document, Outline, Page, pdfjs } from "react-pdf";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     "pdfjs-dist/build/pdf.worker.min.js",
