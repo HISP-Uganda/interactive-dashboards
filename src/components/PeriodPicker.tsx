@@ -1,5 +1,4 @@
 import {
-    Button,
     IconButton,
     NumberDecrementStepper,
     NumberIncrementStepper,
@@ -20,7 +19,6 @@ import { DatePicker } from "antd";
 import { GroupBase, Select } from "chakra-react-select";
 import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
-import EllipsisTooltip from "ellipsis-tooltip-react-chan";
 import { useEffect, useState } from "react";
 import { BiArrowToLeft, BiArrowToRight } from "react-icons/bi";
 import {
@@ -71,8 +69,10 @@ const fixedPeriodTypeOptions = createOptions2(
         "Monthly",
         "Bi-Monthly",
         "Quarterly",
+        "Quarterly-Nov",
         "Six-Monthly",
         "Six-Monthly-April",
+        "Six-Monthly-Nov",
         "Yearly",
         "Financial-Year (Start November)",
         "Financial-Year (Start October)",
@@ -129,285 +129,219 @@ const PeriodPicker = ({ selectedPeriods, onChange }: PickerProps) => {
     }, [fixedPeriodType, year, selectedPeriods]);
 
     return (
-        <Stack position="relative">
-            <Button
-                onClick={onToggle}
-                maxW="200px"
-                variant="outline"
-                _hover={{ backgroundColor: "none" }}
+        <Stack direction="row" p="2px" w="800px">
+            <Stack
+                flex={1}
+                borderColor="gray.200"
+                borderStyle="solid"
+                borderWidth="1px"
             >
-                <EllipsisTooltip>
-                    {selectedPeriods.map((i) => i.label).join(", ")}
-                </EllipsisTooltip>
-            </Button>
-
-            {isOpen && (
-                <Stack
-                    position="absolute"
-                    top="36px"
-                    zIndex={100}
-                    backgroundColor="white"
-                    boxShadow="xl"
-                    minW="800px"
-                    minH="660px"
-                    maxH="660px"
-                    right={-10}
-                >
-                    <Stack direction="row" p="5px">
-                        <Stack
-                            w="55%"
-                            borderColor="gray.200"
-                            borderStyle="solid"
-                            borderWidth="1px"
-                        >
-                            <Tabs onChange={(index) => setTabIndex(index)}>
-                                <TabList>
-                                    <Tab fontSize="xs">Relative Periods</Tab>
-                                    <Tab fontSize="xs">Fixed Periods</Tab>
-                                    <Tab fontSize="xs">Date Range</Tab>
-                                </TabList>
-                                <TabPanels>
-                                    <TabPanel>
-                                        <Stack spacing="20px">
-                                            <Stack>
-                                                <Text>Period Type</Text>
-                                                <Select<
-                                                    Option,
-                                                    false,
-                                                    GroupBase<Option>
-                                                >
-                                                    isClearable
-                                                    onChange={(e) =>
-                                                        setRelativePeriodType(
-                                                            () =>
-                                                                (e?.value as RelativePeriodType) ||
-                                                                "MONTHLY"
-                                                        )
-                                                    }
-                                                    value={relativePeriodTypeOptions.find(
-                                                        ({ value }) =>
-                                                            value ===
-                                                            relativePeriodType
-                                                    )}
-                                                    options={
-                                                        relativePeriodTypeOptions
-                                                    }
-                                                    size="sm"
-                                                />
-                                            </Stack>
-                                            <Stack>
-                                                {availableRelativePeriods.map(
-                                                    ({ label, value }) => (
-                                                        <Text
-                                                            key={value}
-                                                            cursor="pointer"
-                                                            onClick={() =>
-                                                                onChange([
-                                                                    ...selectedPeriods,
-                                                                    {
-                                                                        label,
-                                                                        value,
-                                                                        type: "relative",
-                                                                    },
-                                                                ])
-                                                            }
-                                                        >
-                                                            {label}
-                                                        </Text>
-                                                    )
-                                                )}
-                                            </Stack>
-                                        </Stack>
-                                    </TabPanel>
-                                    <TabPanel>
-                                        <Stack>
-                                            <Stack direction="row">
-                                                <Stack flex={1}>
-                                                    <Text>Period Type</Text>
-                                                    <Select<
-                                                        Option,
-                                                        false,
-                                                        GroupBase<Option>
-                                                    >
-                                                        isClearable
-                                                        onChange={(e) => {
-                                                            setFixedPeriodType(
-                                                                () =>
-                                                                    (e?.value as FixedPeriodType) ||
-                                                                    "MONTHLY"
-                                                            );
-                                                        }}
-                                                        value={fixedPeriodTypeOptions.find(
-                                                            ({ value }) =>
-                                                                value ===
-                                                                fixedPeriodType
-                                                        )}
-                                                        options={
-                                                            fixedPeriodTypeOptions
-                                                        }
-                                                        size="sm"
-                                                    />
-                                                </Stack>
-                                                <Stack w="100px">
-                                                    <Text>Year</Text>
-
-                                                    <NumberInput
-                                                        size="sm"
-                                                        min={1900}
-                                                        value={year}
-                                                        onChange={(_, val) => {
-                                                            setYear(() => val);
-                                                        }}
-                                                    >
-                                                        <NumberInputField />
-                                                        <NumberInputStepper>
-                                                            <NumberIncrementStepper />
-                                                            <NumberDecrementStepper />
-                                                        </NumberInputStepper>
-                                                    </NumberInput>
-                                                </Stack>
-                                            </Stack>
-                                            <Stack overflow="auto" maxH="400px">
-                                                {availableFixedPeriods.map(
-                                                    (val) => (
-                                                        <Text
-                                                            key={val.id}
-                                                            cursor="pointer"
-                                                            onClick={() =>
-                                                                onChange([
-                                                                    ...selectedPeriods,
-                                                                    {
-                                                                        value: val.id,
-                                                                        label: val.name,
-                                                                        type: "fixed",
-                                                                    },
-                                                                ])
-                                                            }
-                                                        >
-                                                            {val.name}
-                                                        </Text>
-                                                    )
-                                                )}
-                                            </Stack>
-                                        </Stack>
-                                    </TabPanel>
-                                    <TabPanel zIndex={1000}>
-                                        <Stack>
-                                            <Text>Select Date Range</Text>
-                                            <RangePicker
-                                                presets={rangePresets}
-                                                onChange={onRangeChange}
-                                            />
-                                        </Stack>
-                                    </TabPanel>
-                                </TabPanels>
-                            </Tabs>
-                        </Stack>
-                        <Stack
-                            w="10%"
-                            alignItems="center"
-                            justifyContent="center"
-                            spacing={1}
-                        >
-                            <IconButton
-                                aria-label="Search database"
-                                icon={<BiArrowToRight />}
-                                onClick={() => {
-                                    const others: Period[] =
-                                        tabIndex === 0
-                                            ? availableRelativePeriods.map(
-                                                  (val) => {
-                                                      const opt: Period = {
-                                                          ...val,
-                                                          type: "relative",
-                                                      };
-                                                      return opt;
-                                                  }
-                                              )
-                                            : tabIndex === 1
-                                            ? availableFixedPeriods.map(
-                                                  ({
-                                                      id,
-                                                      name,
-                                                      startDate,
-                                                      endDate,
-                                                  }) => {
-                                                      return {
-                                                          value: id,
-                                                          label: name,
-                                                          startDate,
-                                                          endDate,
-                                                          type: "fixed",
-                                                      };
-                                                  }
-                                              )
-                                            : [];
-                                    onChange([...selectedPeriods, ...others]);
-                                }}
-                            />
-
-                            <IconButton
-                                aria-label="Search database"
-                                icon={<BiArrowToLeft />}
-                                onClick={() => onChange([])}
-                            />
-                            {/* <Button>1</Button>
-                            <Button
-                                onClick={() => setSelectedPeriods(() => [])}
-                            >
-                                3
-                            </Button> */}
-                        </Stack>
-                        <Stack
-                            w="35%"
-                            borderColor="gray.200"
-                            borderStyle="solid"
-                            borderWidth="1px"
-                        >
-                            <Tabs>
-                                <TabList>
-                                    <Tab fontSize="xs">Selected Periods</Tab>
-                                </TabList>
-                                <TabPanels>
-                                    <TabPanel>
-                                        <Stack overflow="auto" h="530px">
-                                            {selectedPeriods.map(
-                                                ({ value, label }) => (
-                                                    <Text
-                                                        key={value}
-                                                        cursor="pointer"
-                                                        onClick={() =>
-                                                            onChange(
-                                                                selectedPeriods.filter(
-                                                                    (v) =>
-                                                                        v.value !==
-                                                                        value
-                                                                )
-                                                            )
-                                                        }
-                                                    >
-                                                        {label}
-                                                    </Text>
-                                                )
+                <Tabs onChange={(index) => setTabIndex(index)}>
+                    <TabList>
+                        <Tab fontSize="xs">Relative Periods</Tab>
+                        <Tab fontSize="xs">Fixed Periods</Tab>
+                        <Tab fontSize="xs">Date Range</Tab>
+                    </TabList>
+                    <TabPanels>
+                        <TabPanel>
+                            <Stack spacing="20px">
+                                <Stack>
+                                    <Text>Period Type</Text>
+                                    <Select<Option, false, GroupBase<Option>>
+                                        isClearable
+                                        onChange={(e) =>
+                                            setRelativePeriodType(
+                                                () =>
+                                                    (e?.value as RelativePeriodType) ||
+                                                    "MONTHLY"
+                                            )
+                                        }
+                                        value={relativePeriodTypeOptions.find(
+                                            ({ value }) =>
+                                                value === relativePeriodType
+                                        )}
+                                        options={relativePeriodTypeOptions}
+                                        size="sm"
+                                    />
+                                </Stack>
+                                <Stack>
+                                    {availableRelativePeriods.map(
+                                        ({ label, value }) => (
+                                            <Text
+                                                key={value}
+                                                cursor="pointer"
+                                                onClick={() =>
+                                                    onChange([
+                                                        ...selectedPeriods,
+                                                        {
+                                                            label,
+                                                            value,
+                                                            type: "relative",
+                                                        },
+                                                    ])
+                                                }
+                                            >
+                                                {label}
+                                            </Text>
+                                        )
+                                    )}
+                                </Stack>
+                            </Stack>
+                        </TabPanel>
+                        <TabPanel>
+                            <Stack>
+                                <Stack direction="row">
+                                    <Stack flex={1}>
+                                        <Text>Period Type</Text>
+                                        <Select<
+                                            Option,
+                                            false,
+                                            GroupBase<Option>
+                                        >
+                                            isClearable
+                                            onChange={(e) => {
+                                                setFixedPeriodType(
+                                                    () =>
+                                                        (e?.value as FixedPeriodType) ||
+                                                        "MONTHLY"
+                                                );
+                                            }}
+                                            value={fixedPeriodTypeOptions.find(
+                                                ({ value }) =>
+                                                    value === fixedPeriodType
                                             )}
-                                        </Stack>
-                                    </TabPanel>
-                                </TabPanels>
-                            </Tabs>
-                        </Stack>
-                    </Stack>
-                    {/* <Box px="5px" alignSelf="flex-end" mb="-5px">
-                        <Button
-                            onClick={() => {
-                                onToggle();
-                                changePeriod(selectedPeriods);
-                            }}
-                        >
-                            Update
-                        </Button>
-                    </Box> */}
-                </Stack>
-            )}
+                                            options={fixedPeriodTypeOptions}
+                                            size="sm"
+                                        />
+                                    </Stack>
+                                    <Stack w="100px">
+                                        <Text>Year</Text>
+
+                                        <NumberInput
+                                            size="sm"
+                                            min={1900}
+                                            value={year}
+                                            onChange={(_, val) => {
+                                                setYear(() => val);
+                                            }}
+                                        >
+                                            <NumberInputField />
+                                            <NumberInputStepper>
+                                                <NumberIncrementStepper />
+                                                <NumberDecrementStepper />
+                                            </NumberInputStepper>
+                                        </NumberInput>
+                                    </Stack>
+                                </Stack>
+                                <Stack overflow="auto" maxH="400px">
+                                    {availableFixedPeriods.map((val) => (
+                                        <Text
+                                            key={val.id}
+                                            cursor="pointer"
+                                            onClick={() =>
+                                                onChange([
+                                                    ...selectedPeriods,
+                                                    {
+                                                        value: val.id,
+                                                        label: val.name,
+                                                        type: "fixed",
+                                                    },
+                                                ])
+                                            }
+                                        >
+                                            {val.name}
+                                        </Text>
+                                    ))}
+                                </Stack>
+                            </Stack>
+                        </TabPanel>
+                        <TabPanel zIndex={1000}>
+                            <Stack>
+                                <Text>Select Date Range</Text>
+                                <RangePicker
+                                    presets={rangePresets}
+                                    onChange={onRangeChange}
+                                />
+                            </Stack>
+                        </TabPanel>
+                    </TabPanels>
+                </Tabs>
+            </Stack>
+            <Stack
+                w="48px"
+                alignItems="center"
+                justifyContent="center"
+                spacing={1}
+            >
+                <IconButton
+                    aria-label="Search database"
+                    icon={<BiArrowToRight />}
+                    onClick={() => {
+                        const others: Period[] =
+                            tabIndex === 0
+                                ? availableRelativePeriods.map((val) => {
+                                      const opt: Period = {
+                                          ...val,
+                                          type: "relative",
+                                      };
+                                      return opt;
+                                  })
+                                : tabIndex === 1
+                                ? availableFixedPeriods.map(
+                                      ({ id, name, startDate, endDate }) => {
+                                          return {
+                                              value: id,
+                                              label: name,
+                                              startDate,
+                                              endDate,
+                                              type: "fixed",
+                                          };
+                                      }
+                                  )
+                                : [];
+                        onChange([...selectedPeriods, ...others]);
+                    }}
+                />
+
+                <IconButton
+                    aria-label="Search database"
+                    icon={<BiArrowToLeft />}
+                    onClick={() => onChange([])}
+                />
+            </Stack>
+            <Stack
+                flex={1}
+                borderColor="gray.200"
+                borderStyle="solid"
+                borderWidth="1px"
+            >
+                <Tabs>
+                    <TabList>
+                        <Tab fontSize="xs">Selected Periods</Tab>
+                    </TabList>
+                    <TabPanels>
+                        <TabPanel>
+                            <Stack overflow="auto">
+                                {selectedPeriods.map(({ value, label }) => (
+                                    <Text
+                                        key={value}
+                                        cursor="pointer"
+                                        onClick={() =>
+                                            onChange(
+                                                selectedPeriods.filter(
+                                                    (v) => v.value !== value
+                                                )
+                                            )
+                                        }
+                                    >
+                                        {label}
+                                    </Text>
+                                ))}
+                            </Stack>
+                        </TabPanel>
+                    </TabPanels>
+                </Tabs>
+            </Stack>
         </Stack>
     );
 };

@@ -16,11 +16,9 @@ const OUTree = ({
     value: string[];
     onChange: (value: string[]) => void;
 }) => {
-    const store = useStore($store);
     const engine = useDataEngine();
     const organisations = useLiveQuery(() => db.organisations.toArray());
     const levels = useLiveQuery(() => db.levels.toArray());
-    const groups = useLiveQuery(() => db.groups.toArray());
     const expandedKeys = useLiveQuery(() => db.expandedKeys.get("1"));
     const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
     const [checkedKeys, setCheckedKeys] = useState<

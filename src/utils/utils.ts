@@ -7,14 +7,13 @@ import {
     eachYearOfInterval,
     format,
 } from "date-fns";
+import dayjs from "dayjs";
+import isoWeek from "dayjs/plugin/isoWeek";
 import { useStore } from "effector-react";
 import { fromPairs, isArray, uniq } from "lodash";
 import { evaluate } from "mathjs";
-import moment from "moment";
 import { Option, Threshold } from "../interfaces";
 import { $visualizationQuery } from "../Store";
-import dayjs from "dayjs";
-import isoWeek from "dayjs/plugin/isoWeek";
 
 type periodType = "days" | "weeks" | "months" | "years" | "quarters";
 
@@ -625,6 +624,7 @@ export const chartTypes: Option[] = [
     { value: "filters", label: "Dashboard Filter" },
     { value: "imageVisualization", label: "Image" },
     { value: "dashboardTitle", label: "Dashboard Title" },
+    { value: "optionSet", label: "Option Set" },
 ];
 
 export const createOptions = (options: string[]): Option[] => {

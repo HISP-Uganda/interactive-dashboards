@@ -280,6 +280,8 @@ export type LocationGenerics = MakeGenerics<{
         dataSourceId: string;
         action: "create" | "update";
         type: "fixed" | "dynamic";
+        optionSet: string;
+        affected: string;
     };
 }>;
 
@@ -293,7 +295,7 @@ export interface ChartProps {
     layoutProperties?: { [key: string]: any };
     dataProperties?: { [key: string]: any };
     section: ISection;
-    data: any;
+    data?: any;
 }
 
 export interface Threshold {

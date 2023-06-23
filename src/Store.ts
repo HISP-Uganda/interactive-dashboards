@@ -174,11 +174,11 @@ export const $settings = domain.createStore<IDashboardSetting>({
 export const $store = domain.createStore<IStore>({
     showSider: false,
     periods: [
-        { id: "2020July", name: "July 2020 - June 2021" },
-        { id: "2021July", name: "July 2021 - June 2022" },
-        { id: "2022July", name: "July 2022 - June 2023" },
-        { id: "2023July", name: "July 2023 - June 2024" },
-        { id: "2024July", name: "July 2024 - June 2025" },
+        { value: "2020July", label: "July 2020 - June 2021", type: "fixed" },
+        { value: "2021July", label: "July 2021 - June 2022", type: "fixed" },
+        { value: "2022July", label: "July 2022 - June 2023", type: "fixed" },
+        { value: "2023July", label: "July 2023 - June 2024", type: "fixed" },
+        { value: "2024July", label: "July 2024 - June 2025", type: "fixed" },
     ],
     organisations: [],
     levels: [],
@@ -461,11 +461,11 @@ export const $globalFilters = combine(
     $dashboard,
     $targetCategoryOptionCombo,
     (store, categoryOptionCombo, dashboard, target) => {
-        const periods = store.periods.flatMap(({ id }) => {
-            if (relativePeriodTypes.indexOf(id) !== -1) {
-                return getRelativePeriods(id);
+        const periods = store.periods.flatMap((period) => {
+            if (period.type === "relative") {
+                return getRelativePeriods(period.value).map((x) => x.value);
             }
-            return [id];
+            return [period.value];
         });
         let filters: { [key: string]: any } = {
             m5D13FqKZwN: periods,
