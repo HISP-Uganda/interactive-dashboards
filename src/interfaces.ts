@@ -141,12 +141,16 @@ export interface ISection
     sm: ReactGridLayout.Layout;
     xs: ReactGridLayout.Layout;
 }
-
-export interface IFilter {}
+export interface IFilter {
+    id: string;
+    resource: string;
+    resourceKey: string;
+    child?: IFilter;
+}
 
 export interface IDashboard extends INamed {
     category?: string;
-    filters?: string[];
+    filters?: IFilter[];
     sections: ISection[];
     published: boolean;
     isDefault?: boolean;
@@ -177,10 +181,6 @@ export interface Pagination {
     pageSize: number;
 }
 export interface DataNode extends IDataNode {
-    // title: string;
-    // key: string;
-    // isLeaf?: boolean;
-    // level?: string;
     id?: string;
     value?: string;
     pId: string;

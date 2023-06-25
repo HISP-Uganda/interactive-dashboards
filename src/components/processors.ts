@@ -4,6 +4,7 @@ import update from "lodash/update";
 import { Column, Threshold } from "../interfaces";
 import { allMetadata } from "../utils/utils";
 import { SPECIAL_COLUMNS } from "./constants";
+import { visualizationDataApi } from "../Events";
 
 function padZero(str: string, len: number = 2) {
     var zeros = new Array(len).join("0");
@@ -258,6 +259,7 @@ const findMerged = (list: string[], data: Array<any>) => {
             .map((d) => {
                 return { label: d, value: d, span: 1, actual: d };
             });
+        currentValues = orderBy(currentValues, ["value"], ["desc"]);
         if (index === 0) {
             finalColumns[0] = currentValues;
         } else {
@@ -390,14 +392,37 @@ export const processTable = (
     };
 };
 
-export const processSingleValue = (data: any[]): any => {
+export const processSingleValue = (
+    data: any[],
+    aggregate: boolean,
+    aggregationColumn: string,
+    key: string
+): any => {
     if (data.length > 0) {
-        const values = Object.values(data[0]);
-        if (data.length === 1 && Object.keys(data[0]).length === 1) {
-            return values[0];
-        }
-        if (data.length === 1 && Object.keys(data[0]).length > 1) {
-            return values[values.length - 1];
+        if (aggregate) {
+            if (aggregationColumn) {
+                const grouped = groupBy(data, aggregationColumn);
+                if (key) {
+                    const value = grouped[key]?.length;
+                    return value;
+                } else {
+                    let all = Object.entries(grouped).map(([k, values]) => [
+                        k,
+                        values.length,
+                    ]);
+                    return fromPairs(all);
+                }
+            } else {
+                return data.length;
+            }
+        } else {
+            const values = Object.values(data[0]);
+            if (data.length === 1 && Object.keys(data[0]).length === 1) {
+                return values[0];
+            }
+            if (data.length === 1 && Object.keys(data[0]).length > 1) {
+                return values[values.length - 1];
+            }
         }
     }
     return "-";

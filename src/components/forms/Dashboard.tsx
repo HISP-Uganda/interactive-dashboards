@@ -49,6 +49,7 @@ import AutoRefreshPicker from "../AutoRefreshPicker";
 import DynamicDashboard from "../DynamicDashboard";
 import FixedDashboard from "../FixedDashboard";
 import Section from "../Section";
+import DashboardFilter from "../DashboardFilter";
 
 const Dashboard = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -261,7 +262,7 @@ const Dashboard = () => {
             <Modal isOpen={isOpenBg} onClose={onCloseBg} size="2xl">
                 <ModalOverlay />
                 <ModalContent>
-                    <ModalHeader>Dashboard Options</ModalHeader>
+                    <ModalHeader>Dashboard Background</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
                         <SwatchesPicker
@@ -275,7 +276,7 @@ const Dashboard = () => {
                     </ModalBody>
                 </ModalContent>
             </Modal>
-            <Modal isOpen={isOpenDialog} onClose={onClose} size="2xl">
+            <Modal isOpen={isOpenDialog} onClose={onClose} size="4xl">
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>Dashboard Options</ModalHeader>
@@ -348,6 +349,10 @@ const Dashboard = () => {
                                 >
                                     Default Dashboard
                                 </Checkbox>
+                            </Stack>
+                            <Stack>
+                                <Text>Filters</Text>
+                                <DashboardFilter />
                             </Stack>
                         </Stack>
                     </ModalBody>

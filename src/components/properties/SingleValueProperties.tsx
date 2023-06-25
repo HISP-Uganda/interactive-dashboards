@@ -22,6 +22,10 @@ import ColorRangePicker from "../ColorRangePicker";
 import SelectProperty from "./SelectProperty";
 import TextProperty from "./TextProperty";
 import NumberProperty from "./NumberProperty";
+import SwitchProperty from "./SwitchProperty";
+import { useStore } from "effector-react";
+import { $visualizationData } from "../../Store";
+import { uniq, flatten } from "lodash";
 
 const progressAlignments: Option[] = [
     {
@@ -51,8 +55,46 @@ const SingleValueProperties = ({
 }: {
     visualization: IVisualization;
 }) => {
+    const visualizationData = useStore($visualizationData);
+
+    const columns: Option[] = createOptions(
+        uniq(
+            flatten(
+                flatten(visualizationData[visualization.id]).map((d) =>
+                    Object.keys(d)
+                )
+            )
+        )
+    );
+
+    let currentValues: Array<Option> = uniq(
+        visualizationData[visualization.id].map(
+            (d) => d[visualization.properties["aggregateColumn"] || ""]
+        )
+    )
+        .filter((d) => !!d)
+        .map((d) => {
+            return { label: d, value: d, span: 1, actual: d };
+        });
     return (
         <Stack spacing="20px" pb="10px">
+            <SwitchProperty
+                visualization={visualization}
+                title="Aggregate"
+                attribute="aggregate"
+            />
+            <SelectProperty
+                visualization={visualization}
+                title="Aggregation Column"
+                attribute="aggregateColumn"
+                options={columns}
+            />
+            <SelectProperty
+                visualization={visualization}
+                title="Specific Key"
+                attribute="key"
+                options={currentValues}
+            />
             <SelectProperty
                 visualization={visualization}
                 title="Label Alignment"

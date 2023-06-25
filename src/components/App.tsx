@@ -84,7 +84,7 @@ const App = () => {
                 return {};
             },
             path: "/",
-            element: <PDF />,
+            element: <Home />,
         },
         {
             loader: async () => {

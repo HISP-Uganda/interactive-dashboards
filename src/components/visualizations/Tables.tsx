@@ -32,6 +32,7 @@ const Tables = ({
     const columns = String(visualization.properties["columns"] || "").split(
         ","
     );
+    console.log(rows);
     const thresholds: Threshold[] =
         visualization.properties["data.thresholds"] || [];
     const aggregation = visualization.properties["aggregation"] || "count";
@@ -54,15 +55,17 @@ const Tables = ({
                 <Box
                     position="relative"
                     overflow="auto"
+                    whiteSpace="nowrap"
                     h={`${height}px`}
                     w="100%"
                 >
                     <Table
-                        variant="unstyled"
+                        // variant="unstyled"
                         w="100%"
                         bg="white"
                         size={visualization.properties["cellHeight"]}
                         style={{ borderSpacing: 0, borderCollapse: "collapse" }}
+                        textTransform="none"
                     >
                         {visualization.properties["showHeaders"] && (
                             <Thead>

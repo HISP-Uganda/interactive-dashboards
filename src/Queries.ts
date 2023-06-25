@@ -42,6 +42,7 @@ import {
     IVisualization,
     Storage,
     Threshold,
+    IFilter,
 } from "./interfaces";
 import { createCategory, createDashboard, createDataSource } from "./Store";
 import {
@@ -1568,7 +1569,6 @@ const processDHIS2Data = (
     }
     if (joinData) {
         const merged = mergeWithEvents(flattenDHIS2Data(data), joinData);
-        console.log(merged, otherFilters);
         if (otherFilters) {
             return merged.filter((data: any) => {
                 const values = Object.entries(otherFilters).map(
@@ -1986,4 +1986,58 @@ export const useTheme = (optionSetId: string) => {
         }
         return true;
     });
+};
+
+export const useFilterResources = (dashboards: IDashboard[]) => {
+    let parents: DataNode[] = dashboards.map((dashboard) => ({
+        pId: "",
+        nodeSource: {},
+        key: dashboard.id,
+        value: dashboard.id,
+        title: dashboard.name,
+        id: dashboard.id,
+    }));
+    const engine = useDataEngine();
+    return useQuery<DataNode[], Error>(
+        ["filters", dashboards.map(({ id }) => id).join() || ""],
+        async () => {
+            for (const dashboard of dashboards) {
+                if (dashboard.filters) {
+                    const queries = fromPairs(
+                        dashboard.filters.map(({ id, resource }) => [
+                            id,
+                            {
+                                resource,
+                            },
+                        ])
+                    );
+                    const response: any = await engine.query(queries);
+                    const children = dashboard.filters.flatMap(
+                        ({ id, resourceKey }) => {
+                            const data = response[id];
+                            if (data) {
+                                return data.options.map(
+                                    ({ code, id, name }: any) => {
+                                        const node: DataNode = {
+                                            pId: dashboard.id,
+                                            nodeSource: { search: resourceKey },
+                                            key: id,
+                                            value: code,
+                                            title: name,
+                                            id,
+                                        };
+                                        return node;
+                                    }
+                                );
+                            }
+                            return [];
+                        }
+                    );
+                    parents = [...parents, ...children];
+                }
+            }
+
+            return parents;
+        }
+    );
 };
