@@ -10,6 +10,7 @@ import { useStore } from "effector-react";
 import { useEffect, useState } from "react";
 import { ChartProps } from "../../interfaces";
 import { $visualizationData } from "../../Store";
+import { visualizationDataApi } from "../../Events";
 import { processSingleValue } from "../processors";
 
 const SingleValue = ({
@@ -21,7 +22,13 @@ const SingleValue = ({
     const [color, setColor] = useState<string>("");
     const [targetValue, setTargetValue] = useState<number | undefined | null>();
     const visualizationData = useStore($visualizationData);
-    const value = processSingleValue(data);
+    console.log(visualizationData);
+    const value = processSingleValue(
+        data,
+        visualization.properties["aggregate"] || false,
+        visualization.properties["aggregateColumn"] || "",
+        visualization.properties["key"] || ""
+    );
     const colorSearch = dataProperties?.["data.thresholds"]?.find(
         ({ max, min }: any) => {
             if (max && min) {
@@ -91,6 +98,14 @@ const SingleValue = ({
             }
         }
     }, [target, visualizationData]);
+    useEffect(() => {
+        if (value) {
+            visualizationDataApi.updateVisualizationData({
+                visualizationId: visualization.id,
+                data: [{ value }],
+            });
+        }
+    }, [value]);
 
     const numberFormatter = Intl.NumberFormat("en-US", format);
 
@@ -151,7 +166,7 @@ const SingleValue = ({
                     fontWeight={fontWeight}
                 >
                     {prefix}
-                    {numberFormatter.format(value)}
+                    {!!value ? numberFormatter.format(value) : "-"}
                     {suffix}
                 </Text>
             </Stack>

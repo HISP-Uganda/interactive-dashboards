@@ -606,7 +606,6 @@ const Section = () => {
                                                 <NumberDecrementStepper />
                                             </NumberInputStepper>
                                         </NumberInput>
-
                                         <Text>Title font color</Text>
                                         <ColorPalette
                                             visualization={visualization}
@@ -631,15 +630,13 @@ const Section = () => {
                                                 )
                                             }
                                         />
-                                        {/* <VisualizationOverride
-                                            visualization={visualization}
-                                        /> */}
                                         <VisualizationTypes
                                             visualization={visualization}
                                         />
                                         <VisualizationProperties
                                             visualization={visualization}
                                         />
+                                        x
                                     </Stack>
                                 </Stack>
                             )

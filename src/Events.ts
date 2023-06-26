@@ -19,6 +19,7 @@ import {
     Period,
     ScreenSize,
     Storage,
+    IFilter,
 } from "./interfaces";
 import {
     $categories,
@@ -378,6 +379,33 @@ export const dashboardApi = createApi($dashboard, {
             return s;
         });
         return { ...state, sections };
+    },
+
+    processFilters: (
+        state,
+        { key, id, value }: { key: keyof IFilter; value: string; id: string }
+    ) => {
+        const filters = state.filters?.map((filter) => {
+            if (filter.id === id) {
+                return { ...filter, [key]: value };
+            }
+            return filter;
+        });
+        return { ...state, filters };
+    },
+    addFilter: (state, filter: IFilter) => {
+        if (state.filters) {
+            return { ...state, filters: [...state.filters, filter] };
+        }
+        return { ...state, filters: [filter] };
+    },
+    removeFilter: (state, filter: IFilter) => {
+        if (state.filters) {
+            return {
+                ...state,
+                filters: state.filters.filter(({ id }) => filter.id === id),
+            };
+        }
     },
 });
 
