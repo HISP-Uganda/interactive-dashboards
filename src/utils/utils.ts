@@ -625,6 +625,8 @@ export const chartTypes: Option[] = [
     { value: "imageVisualization", label: "Image" },
     { value: "dashboardTitle", label: "Dashboard Title" },
     { value: "optionSet", label: "Option Set" },
+    { value: "text", label: "Text" },
+    { value: "clock", label: "Clock" },
 ];
 
 export const createOptions = (options: string[]): Option[] => {
@@ -1215,6 +1217,24 @@ export const flattenDHIS2Data = (data: any) => {
     return actualData;
 };
 
+// export const generatePeriods = (date: string) => {
+//     const period = dayjs(date);
+//     const month = period.format("YYYYMM");
+//     const quarter = period.format("YYYY[Q]Q");
+//     const year = period.format("YYYY");
+//     const week = period.format("YYYY[W]W");
+//     let financialYear = "";
+//     const currentMonth = period.month();
+//     const currentYear = period.year();
+//     const nextYear = currentYear + 1;
+//     if (currentMonth > 5) {
+//         financialYear = `FY ${currentYear}/${nextYear}`;
+//     } else {
+//         financialYear = `FY ${currentYear - 1}/${nextYear}`;
+//     }
+//     return { month, quarter, year, week, financialYear };
+// };
+
 export const generatePeriods = (date: string) => {
     const period = dayjs(date);
     const month = period.format("YYYYMM");
@@ -1224,11 +1244,19 @@ export const generatePeriods = (date: string) => {
     let financialYear = "";
     const currentMonth = period.month();
     const currentYear = period.year();
-    if (currentMonth > 5) {
-        financialYear = `FY ${currentYear}`;
+    const nextYear = currentYear + 1;
+
+    const isAfterFinancialYearStart = period.isAfter(
+        dayjs().month(5).date(30).subtract(1, "year")
+    );
+    const isBeforeFinancialYearEnd = period.isBefore(dayjs().month(5).date(30));
+
+    if (isAfterFinancialYearStart && isBeforeFinancialYearEnd) {
+        financialYear = `FY ${currentYear - 1}/${currentYear}`;
     } else {
-        financialYear = `FY ${currentYear - 1}`;
+        financialYear = `FY ${currentYear}/${nextYear}`;
     }
+
     return { month, quarter, year, week, financialYear };
 };
 

@@ -7,16 +7,18 @@ export default function ColorProperty({
     attribute,
     visualization,
     title,
-}: VizProps) {
+    disabled
+}: VizProps & { disabled?: boolean }) {
     return (
         <Picker
             color={visualization.properties[attribute]}
-            onChange={(color) =>
+            onChange={(color) => {
                 sectionApi.changeVisualizationProperties({
                     visualization: visualization.id,
                     attribute: attribute,
                     value: color,
                 })
+            }
             }
         />
     );

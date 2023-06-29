@@ -11,7 +11,7 @@ function padZero(str: string, len: number = 2) {
     return (zeros + str).slice(-len);
 }
 
-function invertHex(hex: string, bw: boolean = true) {
+export function invertHex(hex: string, bw: boolean = true) {
     if (hex.indexOf("#") === 0) {
         hex = hex.slice(1);
     }
@@ -545,8 +545,10 @@ export const processPieChart = (
     values?: string,
     metadata?: any
 ): any => {
+    console.log(metadata);
     let x = [];
     let y = [];
+    let colors = [];
     if (data && data.length > 0 && summarize) {
         const processed = fromPairs(
             Object.entries(groupBy(data, labels)).map(([key, values]) => [
@@ -554,7 +556,9 @@ export const processPieChart = (
                 values.length,
             ])
         );
-
+        colors = Object.entries(groupBy(data, labels)).map(
+            ([key, values]) => metadata[`${key}.bg`]
+        );
         x = Object.keys(processed);
         y = Object.values(processed);
     } else if (data && data.length > 0 && labels && values) {
@@ -577,11 +581,14 @@ export const processPieChart = (
             textposition: "inside",
             textfont: {
                 size: [16, 16, 16],
-                color: ["black", "black", "black"],
+                color:
+                    colors.length > 0
+                        ? colors.map((c) => invertHex(c, true))
+                        : undefined,
             },
             hole: 0.1,
             marker: {
-                colors: ["green", "yellow", "red"],
+                colors: colors.length > 0 ? colors : undefined,
             },
         },
     ];

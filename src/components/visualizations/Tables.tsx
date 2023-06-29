@@ -1,14 +1,14 @@
-import { Box, Stack, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
+import { Box, Stack, Table, Tbody, Td, Th, Thead, Tr, background } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { flatten } from "lodash";
 import { useElementSize } from "usehooks-ts";
 import { ChartProps, Column, Threshold } from "../../interfaces";
 import { $store } from "../../Store";
 import { createOptions } from "../../utils/utils";
-import { processTable } from "../processors";
+import { processTable, invertHex } from "../processors";
 import { SPECIAL_COLUMNS } from "../constants";
 
-interface TableProps extends ChartProps {}
+interface TableProps extends ChartProps { }
 
 const getColumns = (data: any[]) => {
     if (data.length > 0) {
@@ -25,6 +25,7 @@ const Tables = ({
     data,
 }: TableProps) => {
     const store = useStore($store);
+    console.log(visualization.properties)
     const [squareRef, { width, height }] = useElementSize();
     const flattenedData = flatten(data);
 
@@ -32,7 +33,7 @@ const Tables = ({
     const columns = String(visualization.properties["columns"] || "").split(
         ","
     );
-    console.log(rows);
+    // console.log(rows);
     const thresholds: Threshold[] =
         visualization.properties["data.thresholds"] || [];
     const aggregation = visualization.properties["aggregation"] || "count";
@@ -55,7 +56,7 @@ const Tables = ({
                 <Box
                     position="relative"
                     overflow="auto"
-                    whiteSpace="nowrap"
+                    // whiteSpace="nowrap"
                     h={`${height}px`}
                     w="100%"
                 >
@@ -63,28 +64,32 @@ const Tables = ({
                         // variant="unstyled"
                         w="100%"
                         bg="white"
+
                         size={visualization.properties["cellHeight"]}
                         style={{ borderSpacing: 0, borderCollapse: "collapse" }}
-                        textTransform="none"
                     >
                         {visualization.properties["showHeaders"] && (
-                            <Thead>
+                            <Thead >
                                 {finalColumns.map((col, index) => (
                                     <Tr key={index}>
                                         {index === 0 && (
                                             <Th
+                                                textTransform="none"
                                                 borderColor="#DDDDDD"
                                                 borderWidth="thin"
+                                                fontWeight="extrabold"
                                                 borderStyle="solid"
                                                 rowSpan={finalColumns.length}
                                                 colSpan={finalRows.length}
-                                                bg="yellow.200"
+                                                //bg="yellow.200"
                                                 textAlign={
                                                     visualization.properties[
-                                                        "columnAlignment"
+                                                    "columnAlignment"
                                                     ]
                                                 }
-                                            ></Th>
+                                            >
+                                                {visualization.properties["rowName"]}
+                                            </Th>
                                         )}
                                         {index === 0 &&
                                             columns
@@ -96,14 +101,17 @@ const Tables = ({
                                                 )
                                                 .map((c) => (
                                                     <Th
+                                                        textTransform="none"
+                                                        fontWeight="extrabold"
                                                         borderColor="#DDDDDD"
                                                         borderWidth="thin"
                                                         borderStyle="solid"
+
                                                         key={c}
                                                         textAlign={
                                                             visualization
                                                                 .properties[
-                                                                "columnAlignment"
+                                                            "columnAlignment"
                                                             ]
                                                         }
                                                         rowSpan={
@@ -118,13 +126,19 @@ const Tables = ({
                                                 ))}
                                         {col.map((col) => (
                                             <Th
+                                                bg={visualization.properties[`${col.actual}.bg`]}
+                                                color={invertHex(visualization.properties[`${col.actual}.bg`] || "#ffffff", true)}
+
+                                                className="font-bold"
                                                 borderColor="#DDDDDD"
                                                 borderWidth="thin"
+                                                fontWeight="extrabold"
+                                                textTransform="none"
                                                 borderStyle="solid"
                                                 colSpan={col.span}
                                                 textAlign={
                                                     visualization.properties[
-                                                        "columnAlignment"
+                                                    "columnAlignment"
                                                     ]
                                                 }
                                             >
@@ -149,12 +163,8 @@ const Tables = ({
                                                     borderColor="#DDDDDD"
                                                     borderWidth="thin"
                                                     borderStyle="solid"
-                                                    textAlign={
-                                                        visualization
-                                                            .properties[
-                                                            "columnAlignment"
-                                                        ]
-                                                    }
+                                                //bg="blue"
+                                                //fontWeight="extrabold"
                                                 >
                                                     {visualization.properties[
                                                         `${r[index].actual}.name`
@@ -178,13 +188,13 @@ const Tables = ({
                                                     textAlign={
                                                         visualization
                                                             .properties[
-                                                            "columnAlignment"
+                                                        "columnAlignment"
                                                         ]
                                                     }
                                                 >
                                                     {
                                                         finalData[
-                                                            `${row.value}${c}`
+                                                        `${row.value}${c}`
                                                         ]?.["value"]
                                                     }
                                                 </Td>
@@ -202,26 +212,27 @@ const Tables = ({
                                                         textAlign={
                                                             visualization
                                                                 .properties[
-                                                                "columnAlignment"
+                                                            "columnAlignment"
                                                             ]
                                                         }
                                                         {...findOthers(col)}
-                                                        bg={
-                                                            finalData[
-                                                                `${row.value}${col.value}`
-                                                            ]?.["bg"]
-                                                        }
-                                                        color={
-                                                            finalData[
-                                                                `${row.value}${col.value}`
-                                                            ]?.["color"]
-                                                        }
+                                                        // bg={
+                                                        //     visualization.properties[`${col.actual}.bg`] || finalData[
+                                                        //     `${row.value}${col.value}`
+                                                        //     ]?.["bg"]
+                                                        // }
+                                                        bg={""}
+                                                    // color={invertHex(visualization.properties[`${col.actual}.bg`] || finalData[
+                                                    //     `${row.value}${col.value}`
+                                                    // ]?.["bg"] || "#000000", false)}
+
                                                     >
                                                         {
                                                             finalData[
-                                                                `${row.value}${col.value}`
+                                                            `${row.value}${col.value}`
                                                             ]?.["value"]
                                                         }
+                                                        {/* {col.value} */}
                                                     </Td>
                                                 );
                                             })}

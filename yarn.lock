@@ -8199,6 +8199,11 @@ diff-sequences@^27.5.1:
   resolved "https://registry.yarnpkg.com/diff-sequences/-/diff-sequences-27.5.1.tgz#eaecc0d327fd68c8d9672a1e64ab8dccb2ef5327"
   integrity sha512-k1gCAXAsNgLwEL+Y8Wvl+M6oEFj5bgazfZULpS5CneoPPXRaCCW7dm+q21Ky2VEE5X+VeRDBVg1Pcvvsr4TtNQ==
 
+digital-digit@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/digital-digit/-/digital-digit-2.0.0.tgz#9a775108e07ed3a99f0c7542e11ea3548da1de8d"
+  integrity sha512-iHzUnnvXDzImDIgUC3uRlsvXVIYc4in3UxVDzy/DsGw1JTvdVOoZ3+HfmTWjmRBH6n7yQGzav4bpeFanRmRfnQ==
+
 dir-glob@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/dir-glob/-/dir-glob-3.0.1.tgz#56dbf73d992a4a93ba1584f4534063fd2e41717f"
@@ -12408,7 +12413,14 @@ mobius1-selectr@^2.4.13:
   resolved "https://registry.yarnpkg.com/mobius1-selectr/-/mobius1-selectr-2.4.13.tgz#0019dfd9f984840d6e40f70683ab3ec78ce3b5df"
   integrity sha512-Mk9qDrvU44UUL0EBhbAA1phfQZ7aMZPjwtL7wkpiBzGh8dETGqfsh50mWoX9EkjDlkONlErWXArHCKfoxVg0Bw==
 
-moment@^2.24.0, moment@^2.29.1:
+moment-timezone@^0.5.40:
+  version "0.5.43"
+  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.43.tgz#3dd7f3d0c67f78c23cd1906b9b2137a09b3c4790"
+  integrity sha512-72j3aNyuIsDxdF1i7CEgV2FfxM1r6aaqJyLB2vwb33mXYyoyLly+F1zbWqhA3/bVIoJ4szlUoMbUnVdid32NUQ==
+  dependencies:
+    moment "^2.29.4"
+
+moment@^2.24.0, moment@^2.29.1, moment@^2.29.4:
   version "2.29.4"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
   integrity sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==
@@ -16486,6 +16498,15 @@ text-table@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==
+
+themed-digital-clock@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/themed-digital-clock/-/themed-digital-clock-2.0.0.tgz#bd108aa13cb10055b8e090e026c7bceaeb243a20"
+  integrity sha512-i/i5BRfFr2VU0QumNceI+3VeWzfnaXzavNvJ8iHBrJqIV2GJHCrvgj9opNvjiMIxgH2RR1aayW0886iI5+xFFg==
+  dependencies:
+    digital-digit "^2.0.0"
+    moment "^2.29.4"
+    moment-timezone "^0.5.40"
 
 thenify-all@^1.0.0:
   version "1.6.0"
