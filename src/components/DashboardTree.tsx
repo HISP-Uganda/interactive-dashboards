@@ -8,11 +8,11 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useStore } from "effector-react";
 import { uniq } from "lodash";
 import React, { useState } from "react";
-import { db } from "../../db";
-import { storeApi, visualizationDataApi } from "../../Events";
-import { DataNode, IDataElement, LocationGenerics } from "../../interfaces";
-import { $store } from "../../Store";
-import { loadData } from "../helpers";
+import { db } from "../db";
+import { storeApi, visualizationDataApi } from "../Events";
+import { DataNode, IDataElement, LocationGenerics } from "../interfaces";
+import { $store } from "../Store";
+import { loadData } from "./helpers";
 
 const labels: { [key: string]: string } = {
     M0ACvr6Coqn: "Commitments",

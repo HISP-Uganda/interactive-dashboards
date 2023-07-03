@@ -13,7 +13,7 @@ import BubbleMaps from "./BubbleMaps";
 import CategoryList from "./CategoryList";
 import DashboardList from "./DashboardList";
 import DashboardTitle from "./DashboardTitle";
-import DashboardTree from "./DashboardTree";
+import DashboardTree from "../DashboardTree";
 import Filters from "./Filters";
 import FunnelGraph from "./FunnelGraph";
 import GaugeGraph from "./GaugeGraph";

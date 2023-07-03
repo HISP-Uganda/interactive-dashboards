@@ -568,7 +568,6 @@ export const categoriesApi = createApi($categories, {
 export const dashboardsApi = createApi($dashboards, {
     setDashboards: (_, dashboards: IDashboard[]) => dashboards,
 });
-
 export const dataSetsApi = createApi($dataSets, {
     setDataSets: (_, dataSets) => dataSets,
 });
@@ -709,6 +708,11 @@ export const datumAPi = createApi($visualizationQuery, {
     },
 });
 
+// export const updateVisualizationData = domain.createEvent<{
+//     visualizationId: string;
+//     data: any;
+// }>();
+//export const setDecreasing = domain.createEvent<string[]>();
 // export const setShowSider = domain.createEvent<boolean>();
 // export const setDataSources = domain.createEvent<IDataSource[]>();
 // export const setCategories = domain.createEvent<ICategory[]>();
