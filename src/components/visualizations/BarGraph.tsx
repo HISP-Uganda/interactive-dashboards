@@ -49,10 +49,11 @@ const BarGraph = ({
         data,
         visualization.order,
         visualization.show,
+        visualization.properties["summarize"] || false,
         dataProperties,
         category,
         series,
-        metadata[visualization.id]
+        visualization.properties
     );
     return (
         <Stack h="100%" spacing={0} w="100%">
@@ -69,7 +70,7 @@ const BarGraph = ({
             <Stack flex={1} direction="column">
                 <Stack flex={1}>
                     <Plot
-                        data={chartData}
+                        data={chartData as any}
                         layout={{
                             margin: {
                                 pad: 5,
@@ -98,7 +99,7 @@ const BarGraph = ({
                                 format: "svg",
                                 scale: 1,
                             },
-                            
+
                             modeBarButtonsToRemove: exclusions,
                             displaylogo: false,
                         }}
@@ -107,7 +108,7 @@ const BarGraph = ({
                 <Stack direction="row" spacing="20px" justify="center">
                     {allSeries
                         .filter((v) => !isEmpty(v))
-                        .map((series, index) => (
+                        .map((series: any, index) => (
                             <Stack
                                 direction="row"
                                 spacing="2px"
@@ -117,10 +118,7 @@ const BarGraph = ({
                                 <Text bgColor={colors[index]} w="10px" h="10px">
                                     &nbsp;
                                 </Text>
-                                <Text noOfLines={[1, 2, 3]}>
-                                    {metadata[visualization.id][series]?.name ||
-                                        series}
-                                </Text>
+                                <Text noOfLines={[1, 2, 3]}>{series}</Text>
                             </Stack>
                         ))}
                 </Stack>

@@ -432,6 +432,7 @@ export const processGraphs = (
     data: any[],
     order: string,
     show: number,
+    summarize: boolean,
     dataProperties = {},
     category?: string,
     series?: string,
@@ -449,93 +450,146 @@ export const processGraphs = (
             () => value
         );
     });
+
     if (data && data.length > 0 && category) {
-        if (order) {
-            data = orderBy(data, "value", [order as "asc" | "desc"]);
-        }
-        if (show) {
-            data = data.slice(0, show);
-        }
+        if (summarize) {
+            if (series) {
+                const grouped = groupBy(data, series);
+                chartData = Object.entries(grouped).map(([key, values]) => {
+                    const groupedByTheme = groupBy(values, category);
+                    return {
+                        x: Object.keys(groupedByTheme).map(
+                            (k) => metadata[`${k}.name`] || k
+                        ),
+                        y: Object.entries(groupedByTheme).map(
+                            ([k, val]) => val.length
+                        ),
+                        name: key,
+                        type: "bar",
+                        ...availableProperties.data,
+                        textposition: "auto",
+                        texttemplate:
+                            availableProperties?.data?.orientation === "v"
+                                ? "%{y:.0f}"
+                                : "%{x:.0f}",
+                    };
+                });
+                allSeries = Object.keys(groupBy(data, series)).map(
+                    (k) => metadata[`${k}.name`] || k
+                );
+            } else {
+                const grouped2 = groupBy(data, category);
 
-        const x = uniq(data.map((num: any) => num[category]));
-        const columns = x.map((c: any) => {
-            return {
-                id: c,
-                name: allMetadata[c] || metadata?.[c]?.name || c,
-            };
-        });
+                chartData = [
+                    {
+                        x: Object.keys(grouped2).map(
+                            (k) => metadata[`${k}.name`] || k
+                        ),
+                        y: Object.values(grouped2).map((x) => x.length),
+                        type: "bar",
+                        ...availableProperties.data,
+                        textposition: "auto",
+                        texttemplate:
+                            availableProperties?.data?.orientation === "v"
+                                ? "%{y:.0f}"
+                                : "%{x:.0f}",
+                    },
+                ];
+                allSeries = Object.keys(grouped2).map(
+                    (k) => metadata[`${k}.name`] || k
+                );
+            }
+        } else {
+            if (order) {
+                data = orderBy(data, "value", [order as "asc" | "desc"]);
+            }
+            if (show) {
+                data = data.slice(0, show);
+            }
 
-        const realColumns = columns.map(({ name }) => name);
-        if (series) {
-            allSeries = uniq(data.map((num: any) => num[series]));
-            chartData = allSeries.map((se: any) => {
+            const x = uniq(data.map((num: any) => num[category]));
+            const columns = x.map((c: any) => {
                 return {
-                    x:
-                        availableProperties?.data?.orientation === "v"
-                            ? realColumns
-                            : columns.map(({ id }) => {
-                                  const r = data.find(
-                                      (num: any) =>
-                                          num[series] === se &&
-                                          num[category] === id
-                                  );
-                                  return r?.count || r?.value || r?.total;
-                              }),
-                    y:
-                        availableProperties?.data?.orientation === "v"
-                            ? columns.map(({ id }) => {
-                                  const r = data.find(
-                                      (num: any) =>
-                                          num[series] === se &&
-                                          num[category] === id
-                                  );
-                                  return r?.count || r?.value || r?.total;
-                              })
-                            : realColumns,
-                    name: metadata?.[se]?.name || se,
-                    type: availableProperties?.data?.[se] || type,
-                    ...availableProperties.data,
-                    textposition: "auto",
-                    texttemplate:
-                        availableProperties?.data?.orientation === "v"
-                            ? "%{y:.0f}"
-                            : "%{x:.0f}",
+                    id: c,
+                    name: allMetadata[c] || metadata?.[c]?.name || c,
                 };
             });
-        } else {
-            allSeries = [];
-            chartData = [
-                {
-                    x:
-                        availableProperties?.data?.orientation === "v"
-                            ? realColumns
-                            : columns.map(({ id }) => {
-                                  const r = data.find(
-                                      (num: any) => num[category] === id
-                                  );
-                                  return r?.count || r?.value || r?.total;
-                              }),
-                    y:
-                        availableProperties?.data?.orientation === "v"
-                            ? columns.map(({ id }) => {
-                                  const r = data.find(
-                                      (num: any) => num[category] === id
-                                  );
-                                  return r?.count || r?.value || r?.total;
-                              })
-                            : realColumns,
-                    type,
-                    ...availableProperties.data,
-                    textposition: "auto",
-                    texttemplate:
-                        availableProperties?.data?.orientation === "v"
-                            ? "%{y:.0f}"
-                            : "%{x:.0f}",
-                },
-            ];
+
+            const realColumns = columns.map(({ name }) => name);
+            if (series) {
+                allSeries = uniq(data.map((num: any) => num[series]));
+                chartData = allSeries.map((se: any) => {
+                    return {
+                        x:
+                            availableProperties?.data?.orientation === "v"
+                                ? realColumns
+                                : columns.map(({ id }) => {
+                                      const r = data.find(
+                                          (num: any) =>
+                                              num[series] === se &&
+                                              num[category] === id
+                                      );
+                                      return r?.count || r?.value || r?.total;
+                                  }),
+                        y:
+                            availableProperties?.data?.orientation === "v"
+                                ? columns.map(({ id }) => {
+                                      const r = data.find(
+                                          (num: any) =>
+                                              num[series] === se &&
+                                              num[category] === id
+                                      );
+                                      return r?.count || r?.value || r?.total;
+                                  })
+                                : realColumns,
+                        name: metadata?.[se]?.name || se,
+                        type: availableProperties?.data?.[se] || type,
+                        ...availableProperties.data,
+                        textposition: "auto",
+                        texttemplate:
+                            availableProperties?.data?.orientation === "v"
+                                ? "%{y:.0f}"
+                                : "%{x:.0f}",
+                    };
+                });
+            } else {
+                allSeries = [];
+                chartData = [
+                    {
+                        x:
+                            availableProperties?.data?.orientation === "v"
+                                ? realColumns
+                                : columns.map(({ id }) => {
+                                      const r = data.find(
+                                          (num: any) => num[category] === id
+                                      );
+                                      return r?.count || r?.value || r?.total;
+                                  }),
+                        y:
+                            availableProperties?.data?.orientation === "v"
+                                ? columns.map(({ id }) => {
+                                      const r = data.find(
+                                          (num: any) => num[category] === id
+                                      );
+                                      return r?.count || r?.value || r?.total;
+                                  })
+                                : realColumns,
+                        type,
+                        ...availableProperties.data,
+                        textposition: "auto",
+                        texttemplate:
+                            availableProperties?.data?.orientation === "v"
+                                ? "%{y:.0f}"
+                                : "%{x:.0f}",
+                    },
+                ];
+            }
         }
     }
-    return { chartData, allSeries };
+    return {
+        chartData,
+        allSeries,
+    };
 };
 
 export const processPieChart = (
@@ -545,7 +599,6 @@ export const processPieChart = (
     values?: string,
     metadata?: any
 ): any => {
-    console.log(metadata);
     let x = [];
     let y = [];
     let colors = [];

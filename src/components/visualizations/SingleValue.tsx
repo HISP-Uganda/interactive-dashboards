@@ -22,7 +22,6 @@ const SingleValue = ({
     const [color, setColor] = useState<string>("");
     const [targetValue, setTargetValue] = useState<number | undefined | null>();
     const visualizationData = useStore($visualizationData);
-    console.log(visualizationData);
     const value = processSingleValue(
         data,
         visualization.properties["aggregate"] || false,

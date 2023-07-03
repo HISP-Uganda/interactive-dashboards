@@ -6,7 +6,7 @@ import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData } from "../../Store";
 import { customComponents } from "../../utils/components";
-import { colors, createOptions } from "../../utils/utils";
+import { colors, createOptions, findUniqValue } from "../../utils/utils";
 import SelectProperty from "./SelectProperty";
 import SwitchProperty from "./SwitchProperty";
 import Scrollable from "../Scrollable";
@@ -19,20 +19,12 @@ const PieChartProperties = ({
 }: {
     visualization: IVisualization;
 }) => {
-    const visualizationData = useStore($visualizationData);
-    const columns: Option[] = createOptions(
-        uniq(
-            flatten(
-                flatten(visualizationData[visualization.id]).map((d) =>
-                    Object.keys(d)
-                )
-            )
-        )
+    const visualizationData = flatten(
+        useStore($visualizationData)[visualization.id] || []
     );
-
-    const findUniqValue = (key: string) => {
-        return uniq(visualizationData[visualization.id].map((d) => d[key]));
-    };
+    const columns: Option[] = createOptions(
+        uniq(flatten(visualizationData.map((d) => Object.keys(d))))
+    );
 
     return (
         <Stack>
@@ -62,6 +54,7 @@ const PieChartProperties = ({
                         </Thead>
                         <Tbody>
                             {findUniqValue(
+                                visualizationData,
                                 visualization.properties["labels"]
                             ).map((row) => (
                                 <Tr key={row}>

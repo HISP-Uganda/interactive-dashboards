@@ -1,25 +1,40 @@
 import {
+    Checkbox,
     Input,
     Radio,
     RadioGroup,
     Stack,
-    Text,
-    Tabs,
-    TabList,
-    TabPanels,
     Tab,
+    Table,
+    TabList,
     TabPanel,
-    Checkbox,
+    TabPanels,
+    Tabs,
+    Tbody,
+    Td,
+    Text,
+    Th,
+    Thead,
+    Tr,
 } from "@chakra-ui/react";
-import { ChangeEvent } from "react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { isArray, uniq, flatten } from "lodash";
+import { flatten, isArray, uniq } from "lodash";
+import { ChangeEvent } from "react";
 import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
 import { customComponents } from "../../utils/components";
-import { chartTypes, colors, createOptions } from "../../utils/utils";
+import {
+    chartTypes,
+    colors,
+    createOptions,
+    findUniqValue,
+} from "../../utils/utils";
+import Scrollable from "../Scrollable";
+import SelectProperty from "./SelectProperty";
+import SwitchProperty from "./SwitchProperty";
+import TextProperty from "./TextProperty";
 
 const barModes = createOptions(["stack", "group", "overlay", "relative"]);
 
@@ -28,16 +43,12 @@ const BarGraphProperties = ({
 }: {
     visualization: IVisualization;
 }) => {
-    const visualizationData = useStore($visualizationData);
+    const visualizationData = flatten(
+        useStore($visualizationData)[visualization.id] || []
+    );
     const metadata = useStore($visualizationMetadata)[visualization.id];
     const columns: Option[] = createOptions(
-        uniq(
-            flatten(
-                flatten(visualizationData[visualization.id]).map((d) =>
-                    Object.keys(d)
-                )
-            )
-        )
+        uniq(flatten(visualizationData.map((d) => Object.keys(d))))
     );
 
     return (
@@ -54,55 +65,92 @@ const BarGraphProperties = ({
             >
                 Show Title
             </Checkbox>
-            <Text>Category</Text>
-            <Select<Option, false, GroupBase<Option>>
-                value={columns.find(
-                    (pt) => pt.value === visualization.properties["category"]
-                )}
-                onChange={(e) =>
-                    sectionApi.changeVisualizationProperties({
-                        visualization: visualization.id,
-                        attribute: "category",
-                        value: e?.value,
-                    })
-                }
-                options={columns}
-                isClearable
-                menuPlacement="auto"
+            <SwitchProperty
+                attribute="summarize"
+                visualization={visualization}
+                title="Summarize"
             />
-            <Text>Traces</Text>
-            <Select<Option, false, GroupBase<Option>>
-                value={columns.find(
-                    (pt) => pt.value === visualization.properties["series"]
-                )}
-                onChange={(e) =>
-                    sectionApi.changeVisualizationProperties({
-                        visualization: visualization.id,
-                        attribute: "series",
-                        value: e?.value,
-                    })
-                }
+
+            <SelectProperty
+                attribute="category"
+                visualization={visualization}
+                title="Category"
                 options={columns}
-                isClearable
-                menuPlacement="auto"
             />
-            <Text>Bar Mode</Text>
-            <Select<Option, false, GroupBase<Option>>
-                value={barModes.find(
-                    (pt) =>
-                        pt.value === visualization.properties["layout.barmode"]
-                )}
-                onChange={(e) =>
-                    sectionApi.changeVisualizationProperties({
-                        visualization: visualization.id,
-                        attribute: "layout.barmode",
-                        value: e?.value,
-                    })
-                }
+
+            {visualization.properties["category"] && (
+                <Scrollable height={300}>
+                    <Table variant="unstyled">
+                        <Thead>
+                            <Tr>
+                                <Th>Column</Th>
+                                <Th>Rename</Th>
+                            </Tr>
+                        </Thead>
+                        <Tbody>
+                            {findUniqValue(
+                                visualizationData,
+                                visualization.properties["category"]
+                            ).map((row) => (
+                                <Tr key={row}>
+                                    <Td>{row}</Td>
+                                    <Td w="300px">
+                                        <TextProperty
+                                            visualization={visualization}
+                                            title=""
+                                            attribute={`${row}.name`}
+                                        />
+                                    </Td>
+                                </Tr>
+                            ))}
+                        </Tbody>
+                    </Table>
+                </Scrollable>
+            )}
+            <SelectProperty
+                attribute="series"
+                visualization={visualization}
+                title="Traces"
+                options={columns}
+            />
+
+            {visualization.properties["series"] && (
+                <Scrollable height={300}>
+                    <Table variant="unstyled">
+                        <Thead>
+                            <Tr>
+                                <Th>Column</Th>
+                                <Th>Rename</Th>
+                            </Tr>
+                        </Thead>
+                        <Tbody>
+                            {findUniqValue(
+                                visualizationData,
+                                visualization.properties["series"]
+                            ).map((row) => (
+                                <Tr key={row}>
+                                    <Td>{row}</Td>
+                                    <Td w="300px">
+                                        <TextProperty
+                                            visualization={visualization}
+                                            title=""
+                                            attribute={`${row}.name`}
+                                        />
+                                    </Td>
+                                </Tr>
+                            ))}
+                        </Tbody>
+                    </Table>
+                </Scrollable>
+            )}
+
+            <SelectProperty
+                attribute="layout.barmode"
+                visualization={visualization}
+                title="Bar Mode"
                 options={barModes}
-                isClearable
-                menuPlacement="auto"
             />
+
             <Stack>
                 <Text>Orientation</Text>
                 <RadioGroup
@@ -211,7 +259,7 @@ const BarGraphProperties = ({
                 <Tabs>
                     <TabList>
                         {uniq(
-                            visualizationData[visualization.id].map(
+                            visualizationData.map(
                                 (x: any) =>
                                     x[visualization.properties["series"]]
                             )
@@ -222,7 +270,7 @@ const BarGraphProperties = ({
 
                     <TabPanels>
                         {uniq(
-                            visualizationData[visualization.id].map(
+                            visualizationData.map(
                                 (x: any) =>
                                     x[visualization.properties["series"]]
                             )
