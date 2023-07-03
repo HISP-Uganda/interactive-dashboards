@@ -46,7 +46,8 @@ const PieChart = ({
                         summarize,
                         labels,
                         values,
-                        visualization.properties
+                        visualization.properties,
+
                     )}
                     layout={{
                         margin: {
@@ -60,6 +61,7 @@ const PieChart = ({
                         showlegend: false,
                         ...availableProperties.layout,
                     }}
+
                     style={{ width: "100%", height: "100%" }}
                     config={{
                         displayModeBar: true,

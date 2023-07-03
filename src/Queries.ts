@@ -309,6 +309,10 @@ export const useInitials = (storage: "data-store" | "es") => {
         systemInfo: {
             resource: "system/info",
         },
+        directives: {
+            resource:
+                "dataElementGroupSets/G5xzDCd4bhZ.json?fields=dataElementGroups[id,name,code,dataElements[id,code,name,attributeValues[value,attribute[id,name]]],attributeValues[attribute[id,name],value]],id,code,name",
+        },
     };
     return useQuery<string, Error>(
         ["initialing"],
@@ -319,6 +323,7 @@ export const useInitials = (storage: "data-store" | "es") => {
                 levels: { organisationUnitLevels },
                 groups: { organisationUnitGroups },
                 dataSets: { dataSets },
+                directives: { dataElementGroups },
             }: any = await engine.query(ouQuery);
 
             const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
@@ -334,6 +339,7 @@ export const useInitials = (storage: "data-store" | "es") => {
             );
             const minLevel: number | null | undefined = min(levels);
             const minSublevel: number | null | undefined = max(levels);
+
             const availableUnits = organisationUnits.map((unit: any) => {
                 return {
                     id: unit.id,
@@ -382,6 +388,11 @@ export const useInitials = (storage: "data-store" | "es") => {
             visualizationDataApi.updateVisualizationData({
                 visualizationId: "outputs",
                 data: [{ value: 0 }],
+            });
+
+            visualizationDataApi.updateVisualizationData({
+                visualizationId: "directives",
+                data: [{ value: dataElementGroups.length }],
             });
 
             await db.systemInfo.bulkPut([
@@ -528,6 +539,54 @@ export const useDashboard = (
                     signal,
                     engine,
                 });
+                // const processedDirectives = dataElementGroups.flatMap(
+                //     ({
+                //         code: degCode,
+                //         name: degName,
+                //         dataElements,
+                //         id: degId,
+                //         attributeValues,
+                //     }: any) => {
+                //         return dataElements.map(
+                //             ({
+                //                 id,
+                //                 name,
+                //                 code,
+                //                 attributeValues: deav,
+                //             }: any) => {
+                //                 let programCode = "";
+                //                 const attribute = attributeValues.find(
+                //                     ({ attribute }: any) =>
+                //                         attribute.id === "UBWSASWdyfi"
+                //                 );
+                //                 if (attribute) {
+                //                     programCode = attribute.value;
+                //                 }
+
+                //                 const decreasing = deav.find(
+                //                     ({ attribute }: any) =>
+                //                         attribute.id === "wRRYuIS8JKN"
+                //                 );
+                //                 const isDecreasing =
+                //                     decreasing && decreasing.value;
+                //                 return {
+                //                     id,
+                //                     name,
+                //                     code,
+                //                     intervention: degName,
+                //                     interventionCode: degCode,
+                //                     subKeyResultArea: name,
+                //                     subKeyResultAreaCode: code,
+                //                     degId,
+                //                     keyResultArea: name,
+                //                     keyResultAreaCode: code,
+                //                     theme: "",
+
+                //                 };
+                //             }
+                //         );
+                //     }
+                // );
                 const dataSources = await getIndex<IDataSource>(storage, {
                     namespace: "i-data-sources",
                     systemId,
@@ -2015,7 +2074,7 @@ export const useFilterResources = (dashboards: IDashboard[]) => {
                     const children = dashboard.filters.flatMap(
                         ({ id, resourceKey }) => {
                             const data = response[id];
-                            if (data) {
+                            if (data && data.options) {
                                 return data.options.map(
                                     ({ code, id, name }: any) => {
                                         const node: DataNode = {

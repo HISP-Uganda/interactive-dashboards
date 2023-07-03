@@ -94,18 +94,18 @@ const TableProperties = ({
 
     const columns = visualizationData[visualization.id]
         ? createOptions([
-              ...uniq(
-                  flatten(
-                      flatten(visualizationData[visualization.id]).map((d) =>
-                          Object.keys(d)
-                      )
-                  )
-              ),
-              "rowCount",
-              "rowTotal",
-              "columnCount",
-              "columnTotal",
-          ])
+            ...uniq(
+                flatten(
+                    flatten(visualizationData[visualization.id]).map((d) =>
+                        Object.keys(d)
+                    )
+                )
+            ),
+            "rowCount",
+            "rowTotal",
+            "columnCount",
+            "columnTotal",
+        ])
         : [];
     const aggregation = visualization.properties["aggregation"] || "count";
     const { lastRow, lastColumn } = getLast(
@@ -172,7 +172,7 @@ const TableProperties = ({
                                         attribute={`${row}.bg`}
                                     />
                                 </Td>
-                                <Td w="300px">
+                                <Td >
                                     <TextProperty
                                         visualization={visualization}
                                         title=""
@@ -259,6 +259,11 @@ const TableProperties = ({
                 options={aggregations}
             />
             <SimpleAccordion title="Table">
+                <TextProperty
+                    visualization={visualization}
+                    title="Rename Row Header"
+                    attribute="rowName"
+                />
                 <SwitchProperty
                     visualization={visualization}
                     title="Show headers"

@@ -169,7 +169,7 @@ const DashboardMenu = () => {
         >
             <Text
                 fontSize="2.5vh"
-                fontWeight="700"
+                //fontWeight="700"
                 noOfLines={1}
             >{`${dashboard.name}`}</Text>
             <Spacer />
@@ -327,7 +327,7 @@ const DashboardMenu = () => {
                                         (d: Option) =>
                                             dashboard.nodeSource &&
                                             d.value ===
-                                                dashboard.nodeSource.search
+                                            dashboard.nodeSource.search
                                     )}
                                     onChange={(e) =>
                                         changeNodeSource(
@@ -346,7 +346,7 @@ const DashboardMenu = () => {
                                         (d: Option) =>
                                             dashboard.nodeSource &&
                                             d.value ===
-                                                dashboard.nodeSource.subSearch
+                                            dashboard.nodeSource.subSearch
                                     )}
                                     onChange={(e) =>
                                         changeNodeSource(
@@ -401,7 +401,7 @@ const DashboardMenu = () => {
                 isOpen={isOpenSettings}
                 placement="right"
                 onClose={onCloseSettings}
-                // finalFocusRef={btnRef}
+            // finalFocusRef={btnRef}
             >
                 <DrawerOverlay />
                 <DrawerContent>

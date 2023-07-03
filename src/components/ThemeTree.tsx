@@ -156,6 +156,7 @@ function TreeObject() {
         const themes = allChecked.map((v) => String(v));
         setCheckedKeys(checkedKeysValue);
         storeApi.setThemes(themes);
+        console.log(themes)
 
         const elements = await db.dataElements
             .where("keyResultAreaCode")
@@ -171,7 +172,7 @@ function TreeObject() {
     };
 
     const onSelect = (selectedKeysValue: React.Key[], info: any) => {
-        console.log("onSelect", info);
+        //console.log("onSelect", info);
         setSelectedKeys(selectedKeysValue);
     };
 

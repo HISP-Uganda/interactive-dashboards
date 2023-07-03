@@ -14,6 +14,8 @@ import RadarGraphProperties from "../properties/RadarGraphProperties";
 import StackedAreaChartProperties from "../properties/StackedAreaChartProperties";
 import TableProperties from "../properties/TableProperties";
 import OptionSetProperties from "../properties/OptionSetProperties";
+import TextVisualisationProperties from "../properties/TextVisualisationproperties";
+import ClockProperties from "../properties/ClockProperties";
 type VizProps = {
     visualization: IVisualization;
 };
@@ -40,6 +42,9 @@ const VisualizationProperties = ({ visualization }: VizProps) => {
             filters: <FiltersProperties visualization={visualization} />,
             tables: <TableProperties visualization={visualization} />,
             optionSet: <OptionSetProperties visualization={visualization} />,
+            text: <TextVisualisationProperties visualization={visualization} />,
+            clock: <ClockProperties />,
+
         };
         if (visualizationType) {
             return allTypes[visualizationType] || null;
