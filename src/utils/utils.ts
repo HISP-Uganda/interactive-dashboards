@@ -1436,3 +1436,7 @@ export const fixedPeriods = [
     "FYJUL",
     "FYAPR",
 ];
+
+export const findUniqValue = (data: any[], key: string) => {
+    return uniq(data.map((d) => d[key]));
+};
