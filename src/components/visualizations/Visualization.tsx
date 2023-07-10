@@ -260,11 +260,11 @@ const getVisualization = (
         optionSet: (
             <OptionSet visualization={visualization} section={section} />
         ),
-        clock:
+        text:
             (
                 <TextVisualisation visualization={visualization} section={section} />
             ),
-        text: (
+        clock: (
             <ClockVisualisation visualization={visualization} section={section} />
         ),
     };

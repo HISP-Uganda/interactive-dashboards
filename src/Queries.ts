@@ -309,10 +309,6 @@ export const useInitials = (storage: "data-store" | "es") => {
         systemInfo: {
             resource: "system/info",
         },
-        directives: {
-            resource:
-                "dataElementGroupSets/G5xzDCd4bhZ.json?fields=dataElementGroups[id,name,code,dataElements[id,code,name,attributeValues[value,attribute[id,name]]],attributeValues[attribute[id,name],value]],id,code,name",
-        },
     };
     return useQuery<string, Error>(
         ["initialing"],
@@ -323,7 +319,6 @@ export const useInitials = (storage: "data-store" | "es") => {
                 levels: { organisationUnitLevels },
                 groups: { organisationUnitGroups },
                 dataSets: { dataSets },
-                directives: { dataElementGroups },
             }: any = await engine.query(ouQuery);
 
             const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
@@ -389,12 +384,6 @@ export const useInitials = (storage: "data-store" | "es") => {
                 visualizationId: "outputs",
                 data: [{ value: 0 }],
             });
-
-            visualizationDataApi.updateVisualizationData({
-                visualizationId: "directives",
-                data: [{ value: dataElementGroups.length }],
-            });
-
             await db.systemInfo.bulkPut([
                 { id: "1", systemId, systemName, instanceBaseUrl },
             ]);

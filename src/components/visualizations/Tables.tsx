@@ -262,6 +262,12 @@ const Tables = ({
                     >
                         {visualization.properties["showHeaders"] && (
                             <Thead >
+                                <Th
+                                    textTransform="none"
+                                    fontWeight="extrabold"
+                                >
+                                    {visualization.properties["TableCaption"]}
+                                </Th>
                                 {finalColumns.map((col, index) => (
                                     <Tr key={index}>
                                         {index === 0 && (
