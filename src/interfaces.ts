@@ -91,8 +91,9 @@ export interface IData extends INamed {
     dataDimensions: IDimension;
     dataSource?: IDataSource;
     joinTo?: IData;
-    // joinColumn?: string;
-    // joinToColumn?: string;
+    flatteningOption?: string;
+    fromColumn?: string;
+    toColumn?: string;
 }
 
 export interface IIndicator extends INamed {
@@ -174,6 +175,8 @@ export interface IDashboard extends INamed {
     tag: string;
     images: IImage[];
     type: "fixed" | "dynamic";
+    excludeFromList: boolean;
+    child?: string;
 }
 export interface Pagination {
     total: number;
@@ -193,6 +196,7 @@ export interface DataNode extends IDataNode {
     }>;
     hasChildren?: boolean;
     bg?: string;
+    actual?: string;
 }
 
 export interface Option extends OptionBase {

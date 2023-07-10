@@ -10,10 +10,11 @@ import {
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import { useStore } from "effector-react";
-import { fromPairs, isArray, uniq } from "lodash";
+import { fromPairs, isArray, uniq, groupBy } from "lodash";
 import { evaluate } from "mathjs";
 import { Option, Threshold } from "../interfaces";
 import { $visualizationQuery } from "../Store";
+import { uniqBy } from "lodash/fp";
 
 type periodType = "days" | "weeks" | "months" | "years" | "quarters";
 
@@ -39,14 +40,12 @@ export function decodeFromBinary(str: string): string {
     );
 }
 
-/*
- * Get an array of last periods
- *
- * @param n the number to look back e.g n months back
- * @param periodType the type of periods. one of weeks, months, quarters, years
- * @paran includeCurrent whether to include current period. e.g if true last_3_months includes the current month
- * @return a list of relative periods
- */
+const getValue = (value: number) => {
+    if (value >= 75) return "Achieved";
+    if (value >= 50 && value < 75) return "On Track";
+    if (value < 50 && value >= 0) return "Slow Progress";
+    if (value === -1) return "X";
+};
 
 export const globalIds: Option[] = [
     { label: "Period", value: "m5D13FqKZwN", id: "pe" },
@@ -804,7 +803,7 @@ export const processMap = (
 };
 
 export const deriveSingleValues = (
-    data: { [key: string]: any[] },
+    data: { [key: string]: any },
     expression?: string
 ) => {
     if (expression !== undefined) {
@@ -812,16 +811,16 @@ export const deriveSingleValues = (
         const all = expression.match(/\w+/g);
         if (all) {
             all.forEach((s) => {
-                const val = data[s]?.[0].value || 0;
+                const val = data[s] || 0;
                 finalExpression = finalExpression.replace(s, val);
             });
         }
-
         try {
             const evaluation = evaluate(finalExpression);
+            console.log(evaluation);
             return [{ value: evaluation }];
         } catch (error) {
-            return [{ value: "null" }];
+            return [{ value: "" }];
         }
     }
 };
@@ -1130,6 +1129,148 @@ export const computeGlobalParams = (
     return { previousType, selected, isGlobal };
 };
 
+const events = (data: any) => {
+    return data.events.flatMap(({ dataValues, eventDate, ...rest }: any) => {
+        return dataValues.map((dv: any) => {
+            return {
+                ...dv,
+                ...rest,
+                eventDate,
+                ...generatePeriods(eventDate),
+            };
+        });
+    });
+};
+
+const dataElementGroupElements = (data: any) => {
+    const {
+        id: dataElementGroupId,
+        name: dataElementGroupName,
+        code: dataElementGroupCode,
+        dataElements,
+    } = data;
+    return dataElements.flatMap(({ id, name, code }: any) => ({
+        id,
+        name,
+        code,
+        dataElementGroupId,
+        dataElementGroupName,
+        dataElementGroupCode,
+    }));
+};
+
+const dataElements = (data: any) => {
+    return data.dataElements;
+};
+
+export const datElementGroupSetsDataElementGroupsWithAttributes = (
+    data: any
+) => {
+    return data.dataElements.map(({ id, name, dataElementGroups }: any) => {
+        let subKeyResultArea: string = "";
+        let keyResultArea: string = "";
+        let attributeName: string = "";
+        let value: string = "";
+
+        if (dataElementGroups && dataElementGroups.length > 0) {
+            const [{ name: dataElementGroupName, groupSets }] =
+                dataElementGroups;
+
+            subKeyResultArea = dataElementGroupName;
+
+            if (groupSets && groupSets.length > 0) {
+                const [{ name: dataElementGroupSetName, attributeValues }] =
+                    groupSets;
+
+                keyResultArea = dataElementGroupSetName;
+
+                if (attributeValues.length > 0) {
+                    const [
+                        {
+                            value: val1,
+                            attribute: { name },
+                        },
+                    ] = attributeValues;
+                    attributeName = name;
+                    value = val1;
+                }
+            }
+        }
+        return {
+            id,
+            name,
+            subKeyResultArea,
+            keyResultArea,
+            [attributeName]: value,
+        };
+    });
+};
+
+const dataElementGroupsDataElements = (data: any) => {
+    return data.dataElementGroups.flatMap(
+        ({
+            dataElements,
+            id: dataElementGroupId,
+            name: dataElementGroupName,
+            code: dataElementGroupCode,
+        }: any) => {
+            return dataElements.map(({ id, name, code }: any) => {
+                return {
+                    id,
+                    name,
+                    code,
+                    dataElementGroupId,
+                    dataElementGroupName,
+                    dataElementGroupCode,
+                };
+            });
+        }
+    );
+};
+
+export const processDirectives = (data: any) => {
+    return Object.entries(groupBy(data, (d) => `${d["dx"]}${d["pe"]}`)).map(
+        ([_, group]) => {
+            const gp = group[0];
+            let value = -1;
+            const actualValue = group.find(
+                ({ Duw5yep8Vae }: any) => Duw5yep8Vae === "HKtncMjp06U"
+            );
+            const targetValue = group.find(
+                ({ Duw5yep8Vae }: any) => Duw5yep8Vae === "Px8Lqkxy2si"
+            );
+
+            if (actualValue && targetValue) {
+                value =
+                    (Number(actualValue.value) * 100) /
+                    Number(targetValue.value);
+            }
+
+            return {
+                ...gp,
+                value,
+                label: getValue(value),
+            };
+        }
+    );
+};
+
+const allOptions: Partial<{ [key: string]: (data: any) => any[] }> = {
+    events,
+    dataElementGroupElements,
+    datElementGroupSetsDataElementGroupsWithAttributes,
+    dataElements,
+    dataElementGroupsDataElements,
+    processDirectives,
+};
+
+export const flattenDHIS2Data = (data: any, flatteningOption?: string) => {
+    if (flatteningOption) {
+        return allOptions[flatteningOption]?.(data) || data;
+    }
+    return data;
+};
+
 export const common = createOptions(["baseline", "normal", "stretch"]);
 export const contentPosition = createOptions([
     "center",
@@ -1202,39 +1343,6 @@ export const createOptions2 = (labels: string[], values: string[]) => {
     return [];
 };
 
-export const flattenDHIS2Data = (data: any) => {
-    if (isArray(data)) {
-        return data;
-    }
-
-    const [first] = Object.keys(data).filter(
-        (d) => ["pager"].indexOf(d) === -1
-    );
-    const actualData = data[first];
-    if (first && first === "dataElements") {
-        return flattenDataElements(actualData);
-    }
-    return actualData;
-};
-
-// export const generatePeriods = (date: string) => {
-//     const period = dayjs(date);
-//     const month = period.format("YYYYMM");
-//     const quarter = period.format("YYYY[Q]Q");
-//     const year = period.format("YYYY");
-//     const week = period.format("YYYY[W]W");
-//     let financialYear = "";
-//     const currentMonth = period.month();
-//     const currentYear = period.year();
-//     const nextYear = currentYear + 1;
-//     if (currentMonth > 5) {
-//         financialYear = `FY ${currentYear}/${nextYear}`;
-//     } else {
-//         financialYear = `FY ${currentYear - 1}/${nextYear}`;
-//     }
-//     return { month, quarter, year, week, financialYear };
-// };
-
 export const generatePeriods = (date: string) => {
     const period = dayjs(date);
     const month = period.format("YYYYMM");
@@ -1260,66 +1368,22 @@ export const generatePeriods = (date: string) => {
     return { month, quarter, year, week, financialYear };
 };
 
-const flattenEvents = (data: any[]) => {
-    return data.flatMap(({ dataValues, eventDate, ...rest }: any) => {
-        return dataValues.map((dv: any) => {
-            return { ...dv, ...rest, eventDate, ...generatePeriods(eventDate) };
+export const merge2DataSources = (
+    from: any[],
+    to: any[],
+    toColumn: string,
+    fromColumn: string
+) => {
+    return to.flatMap((e) => {
+        const filtered = from.filter((ev) => {
+            return ev[fromColumn] === e[toColumn];
         });
-    });
-};
-
-export const mergeWithEvents = (events: any[], prev: any[]) => {
-    const allEvents = flattenEvents(events);
-    const processed = prev.flatMap((e) => {
-        const filtered = allEvents.filter((ev) => ev.dataElement === e.id);
         if (filtered.length > 0) {
             return filtered.map((f) => {
                 return { ...f, ...e };
             });
         }
         return e;
-    });
-    return processed;
-};
-
-export const flattenDataElements = (data: any[]) => {
-    return data.map(({ id, name, dataElementGroups }: any) => {
-        let subKeyResultArea: string = "";
-        let keyResultArea: string = "";
-        let attributeName: string = "";
-        let value: string = "";
-
-        if (dataElementGroups.length > 0) {
-            const [{ name: dataElementGroupName, groupSets }] =
-                dataElementGroups;
-
-            subKeyResultArea = dataElementGroupName;
-
-            if (groupSets.length > 0) {
-                const [{ name: dataElementGroupSetName, attributeValues }] =
-                    groupSets;
-
-                keyResultArea = dataElementGroupSetName;
-
-                if (attributeValues.length > 0) {
-                    const [
-                        {
-                            value: val1,
-                            attribute: { name },
-                        },
-                    ] = attributeValues;
-                    attributeName = name;
-                    value = val1;
-                }
-            }
-        }
-        return {
-            id,
-            name,
-            subKeyResultArea,
-            keyResultArea,
-            [attributeName]: value,
-        };
     });
 };
 
@@ -1440,3 +1504,39 @@ export const fixedPeriods = [
 export const findUniqValue = (data: any[], key: string) => {
     return uniq(data.map((d) => d[key]));
 };
+
+export const flatteningOptions: Option[] = [
+    { value: "events", label: "Events" },
+    {
+        value: "trackedEntityInstanceAttributes",
+        label: "Tracked EntityInstances Attributes",
+    },
+    {
+        value: "trackedEntityInstanceAttributesWithEvents",
+        label: "Tracked EntityInstances Attributes With Events ",
+    },
+    {
+        value: "trackedEntityInstanceAttributesWithEvents",
+        label: "Tracked EntityInstances Attributes With Events ",
+    },
+    {
+        value: "datElementGroupSetsDataElementGroupsWithAttributes",
+        label: "Data Element Group Sets - Data Element Groups with Attributes ",
+    },
+    {
+        value: "dataElementGroupElements",
+        label: "Data Element Group - Data Elements",
+    },
+    {
+        value: "dataElements",
+        label: "Data Elements",
+    },
+    {
+        value: "dataElementGroupsDataElements",
+        label: "Data Element Groups - Data Elements",
+    },
+    {
+        value: "processDirectives",
+        label: "Directives",
+    },
+];

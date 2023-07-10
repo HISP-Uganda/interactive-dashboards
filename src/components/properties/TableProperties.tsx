@@ -1,34 +1,22 @@
-import {
-    Stack,
-    Text,
-    Table,
-    Tbody,
-    Td,
-    Th,
-    Thead,
-    Tr,
-    Input,
-} from "@chakra-ui/react";
+import { Stack, Table, Tbody, Td, Text, Th, Thead, Tr } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { flatten, uniq } from "lodash";
 import React from "react";
 import { sectionApi } from "../../Events";
-import { IVisualization, Option, Threshold } from "../../interfaces";
+import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData } from "../../Store";
 import { createOptions, createOptions2 } from "../../utils/utils";
+import ColorRangePicker from "../ColorRangePicker";
+import { SPECIAL_COLUMNS } from "../constants";
+import { getLast } from "../processors";
+import Scrollable from "../Scrollable";
 import SimpleAccordion from "../SimpleAccordion";
+import ColorProperty from "./ColorProperty";
 import NumberProperty from "./NumberProperty";
 import SelectProperty from "./SelectProperty";
 import SwitchProperty from "./SwitchProperty";
-import { processTable, getLast } from "../processors";
-import Picker from "../Picker";
-import ColorProperty from "./ColorProperty";
-import ColorRangePicker from "../ColorRangePicker";
-import TableLikeProperty from "./TableLikeProperty";
-import Scrollable from "../Scrollable";
 import TextProperty from "./TextProperty";
-import { SPECIAL_COLUMNS } from "../constants";
 
 const aggregations = createOptions2(
     [
@@ -92,22 +80,17 @@ const TableProperties = ({
         ","
     );
 
+    const normalColumns = uniq(
+        flatten(
+            flatten(visualizationData[visualization.id]).map((d) =>
+                Object.keys(d)
+            )
+        )
+    );
+
     const columns = visualizationData[visualization.id]
-        ? createOptions([
-            ...uniq(
-                flatten(
-                    flatten(visualizationData[visualization.id]).map((d) =>
-                        Object.keys(d)
-                    )
-                )
-            ),
-            "rowCount",
-            "rowTotal",
-            "columnCount",
-            "columnTotal",
-        ])
+        ? createOptions([...normalColumns, ...SPECIAL_COLUMNS])
         : [];
-    const aggregation = visualization.properties["aggregation"] || "count";
     const { lastRow, lastColumn } = getLast(
         flatten(visualizationData[visualization.id]),
         rows,
@@ -172,7 +155,7 @@ const TableProperties = ({
                                         attribute={`${row}.bg`}
                                     />
                                 </Td>
-                                <Td >
+                                <Td>
                                     <TextProperty
                                         visualization={visualization}
                                         title=""
@@ -257,6 +240,12 @@ const TableProperties = ({
                 title="Aggregation"
                 attribute="aggregation"
                 options={aggregations}
+            />
+            <SelectProperty
+                visualization={visualization}
+                title="Aggregation Column"
+                attribute="aggregationColumn"
+                options={createOptions(normalColumns)}
             />
             <SimpleAccordion title="Table">
                 <TextProperty

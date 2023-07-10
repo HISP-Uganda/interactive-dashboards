@@ -35,6 +35,7 @@ import Scrollable from "../Scrollable";
 import SelectProperty from "./SelectProperty";
 import SwitchProperty from "./SwitchProperty";
 import TextProperty from "./TextProperty";
+import ColorProperty from "./ColorProperty";
 
 const barModes = createOptions(["stack", "group", "overlay", "relative"]);
 
@@ -85,6 +86,7 @@ const BarGraphProperties = ({
                             <Tr>
                                 <Th>Column</Th>
                                 <Th>Rename</Th>
+                                <Th>Color</Th>
                             </Tr>
                         </Thead>
                         <Tbody>
@@ -94,11 +96,18 @@ const BarGraphProperties = ({
                             ).map((row) => (
                                 <Tr key={row}>
                                     <Td>{row}</Td>
-                                    <Td w="300px">
+                                    <Td>
                                         <TextProperty
                                             visualization={visualization}
                                             title=""
                                             attribute={`${row}.name`}
+                                        />
+                                    </Td>
+                                    <Td w="50px">
+                                        <ColorProperty
+                                            visualization={visualization}
+                                            title=""
+                                            attribute={`${row}.bg`}
                                         />
                                     </Td>
                                 </Tr>
@@ -121,6 +130,7 @@ const BarGraphProperties = ({
                             <Tr>
                                 <Th>Column</Th>
                                 <Th>Rename</Th>
+                                <Th>Color</Th>
                             </Tr>
                         </Thead>
                         <Tbody>
@@ -135,6 +145,13 @@ const BarGraphProperties = ({
                                             visualization={visualization}
                                             title=""
                                             attribute={`${row}.name`}
+                                        />
+                                    </Td>
+                                    <Td w="50px">
+                                        <ColorProperty
+                                            visualization={visualization}
+                                            title=""
+                                            attribute={`${row}.bg`}
                                         />
                                     </Td>
                                 </Tr>
