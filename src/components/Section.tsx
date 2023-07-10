@@ -74,26 +74,42 @@ const VisualizationQuery = ({
         useNamespace<IIndicator>("i-indicators", storage, systemId, []);
     return (
         <Stack>
-            <Text>Visualization Query</Text>
-            {isLoading && <LoadingIndicator />}
-            {isSuccess && (
-                <Select<IIndicator, true, GroupBase<IIndicator>>
-                    isMulti
-                    value={visualization.indicators}
-                    getOptionLabel={(v) => String(v.name)}
-                    getOptionValue={(v) => v.id}
-                    onChange={(value) => {
+            <Stack>
+                <Text>Visualization Query</Text>
+                {isLoading && <LoadingIndicator />}
+                {isSuccess && (
+                    <Select<IIndicator, true, GroupBase<IIndicator>>
+                        isMulti
+                        value={visualization.indicators}
+                        getOptionLabel={(v) => String(v.name)}
+                        getOptionValue={(v) => v.id}
+                        onChange={(value) => {
+                            sectionApi.changeVisualizationAttribute({
+                                attribute: "indicators",
+                                value,
+                                visualization: visualization.id,
+                            });
+                        }}
+                        options={data}
+                        isClearable
+                    />
+                )}
+                {isError && <Text>{error?.message}</Text>}
+            </Stack>
+
+            <Stack>
+                <Text>Title</Text>
+                <Input
+                    value={visualization.name}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
                         sectionApi.changeVisualizationAttribute({
-                            attribute: "indicators",
-                            value,
+                            attribute: "name",
+                            value: e.target.value,
                             visualization: visualization.id,
-                        });
-                    }}
-                    options={data}
-                    isClearable
+                        })
+                    }
                 />
-            )}
-            {isError && <Text>{error?.message}</Text>}
+            </Stack>
         </Stack>
     );
 };

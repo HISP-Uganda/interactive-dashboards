@@ -24,18 +24,12 @@ import { ChangeEvent, useEffect, useState } from "react";
 import { SwatchesPicker } from "react-color";
 import { useFullScreenHandle } from "react-full-screen";
 import { FaPlus } from "react-icons/fa";
-import {
-    dashboardApi,
-    dashboardsApi,
-    sectionApi,
-    storeApi,
-} from "../../Events";
+import { dashboardApi, sectionApi, storeApi } from "../../Events";
 import { IDashboard, LocationGenerics, Option } from "../../interfaces";
 import { saveDocument } from "../../Queries";
 import {
     $categoryOptions,
     $dashboard,
-    $dashboards,
     $dashboardType,
     $isOpen,
     $section,
@@ -46,14 +40,14 @@ import {
 } from "../../Store";
 import { swatchColors } from "../../utils/utils";
 import AutoRefreshPicker from "../AutoRefreshPicker";
+import DashboardDropDown from "../DashboardDropDown";
+import DashboardFilter from "../DashboardFilter";
 import DynamicDashboard from "../DynamicDashboard";
 import FixedDashboard from "../FixedDashboard";
 import Section from "../Section";
-import DashboardFilter from "../DashboardFilter";
 
 const Dashboard = () => {
     const [loading, setLoading] = useState<boolean>(false);
-    const dashboards = useStore($dashboards);
     const search = useSearch<LocationGenerics>();
     const navigate = useNavigate<LocationGenerics>();
     const { isOpen: isOpenDialog, onOpen, onClose } = useDisclosure();
@@ -154,14 +148,14 @@ const Dashboard = () => {
             engine,
             "update"
         );
-        dashboardsApi.setDashboards(
-            dashboards.map((d) => {
-                if (data.id === d.id) {
-                    return { ...d, published: value };
-                }
-                return d;
-            })
-        );
+        // dashboardsApi.setDashboards(
+        //     dashboards.map((d) => {
+        //         if (data.id === d.id) {
+        //             return { ...d, published: value };
+        //         }
+        //         return d;
+        //     })
+        // );
         dashboardApi.setCurrentDashboard({ ...data, published: value });
     };
     return (
@@ -349,6 +343,29 @@ const Dashboard = () => {
                                 >
                                     Default Dashboard
                                 </Checkbox>
+                            </Stack>
+                            <Stack>
+                                <Checkbox
+                                    isChecked={dashboard.excludeFromList}
+                                    onChange={(
+                                        e: ChangeEvent<HTMLInputElement>
+                                    ) =>
+                                        dashboardApi.changeExcludeFromList(
+                                            e.target.checked
+                                        )
+                                    }
+                                >
+                                    Exclude from List
+                                </Checkbox>
+                            </Stack>
+                            <Stack>
+                                <Text>Child Dashboard</Text>
+                                <DashboardDropDown
+                                    value={dashboard.child || ""}
+                                    onChange={(e) =>
+                                        dashboardApi.changeChild(e)
+                                    }
+                                />
                             </Stack>
                             <Stack>
                                 <Text>Filters</Text>

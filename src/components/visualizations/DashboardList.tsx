@@ -1,20 +1,21 @@
 import { CarryOutOutlined } from "@ant-design/icons";
-import { Spinner, Text } from "@chakra-ui/react";
+import { Stack } from "@chakra-ui/react";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { Tree } from "antd";
 import { EventDataNode } from "antd/es/tree";
 import arrayToTree from "array-to-tree";
 import { useStore } from "effector-react";
 import React from "react";
+import { useElementSize } from "usehooks-ts";
 import { DataNode, IDashboard, LocationGenerics } from "../../interfaces";
 import { useDashboards, useFilterResources } from "../../Queries";
-import { $dashboard, $settings, $store } from "../../Store";
+import { $settings, $store } from "../../Store";
 import LoadingIndicator from "../LoadingIndicator";
 
 function DashboardItem({ dashboards }: { dashboards: IDashboard[] }) {
     const navigate = useNavigate<LocationGenerics>();
     const search = useSearch<LocationGenerics>();
-    const dashboard = useStore($dashboard);
+    const [squareRef, { width, height }] = useElementSize();
 
     const { data, isError, isLoading, isSuccess, error } =
         useFilterResources(dashboards);
@@ -33,6 +34,15 @@ function DashboardItem({ dashboards }: { dashboards: IDashboard[] }) {
             navigate({
                 to: `/dashboards/${info.node.key}`,
                 search: { ...rest },
+            });
+        } else if (info.node.actual) {
+            navigate({
+                to: `/dashboards/${info.node.actual}`,
+                search: (old) => ({
+                    ...old,
+                    affected: info.node.nodeSource.search,
+                    optionSet: info.node.value,
+                }),
             });
         } else {
             navigate({
@@ -62,33 +72,31 @@ function DashboardItem({ dashboards }: { dashboards: IDashboard[] }) {
         );
     };
 
-    return (
-        <>
-            {isLoading && <Spinner />}
-            {isSuccess && data && (
+    if (isLoading) {
+        return <LoadingIndicator />;
+    }
+    if (isSuccess && data) {
+        return (
+            <Stack ref={squareRef} w="100%">
                 <Tree
-                    // checkable
-                    // checkStrictly
+                    checkable
+                    checkStrictly
                     showLine
                     icon={<CarryOutOutlined />}
                     onSelect={onSelect}
-                    autoExpandParent={true}
-                    // onCheck={onCheck}
-                    // checkedKeys={checkedKeys}
-                    // selectedKeys={selectedKeys}
-                    expandedKeys={[dashboard.id]}
+                    autoExpandParent={false}
+                    onCheck={onCheck}
                     style={{
-                        // backgroundColor: "#F7FAFC",
-                        maxHeight: "800px",
+                        height: `${height}px`,
                         overflow: "auto",
-                        fontSize: "18px",
+                        // fontSize: "24px",
                     }}
                     treeData={arrayToTree(data, { parentProperty: "pId" })}
                 />
-            )}
-            {isError && <pre>{JSON.stringify(error)}</pre>}
-        </>
-    );
+            </Stack>
+        );
+    }
+    return <pre>{JSON.stringify(error)}</pre>;
 }
 
 export default function DashboardList() {
@@ -98,11 +106,18 @@ export default function DashboardList() {
         storage,
         store.systemId
     );
-    return (
-        <>
-            {isLoading && <LoadingIndicator />}
-            {isSuccess && data && <DashboardItem dashboards={data} />}
-            {isError && <pre>{JSON.stringify(error)}</pre>}
-        </>
-    );
+
+    if (isLoading) {
+        return <LoadingIndicator />;
+    }
+    if (isSuccess && data) {
+        return (
+            <DashboardItem
+                dashboards={data.filter(
+                    ({ excludeFromList }) => !excludeFromList
+                )}
+            />
+        );
+    }
+    return <pre>{JSON.stringify(error)}</pre>;
 }

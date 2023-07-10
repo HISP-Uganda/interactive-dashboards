@@ -49,7 +49,7 @@ import {
     getSearchParams,
     processMap,
     flattenDHIS2Data,
-    mergeWithEvents,
+    merge2DataSources,
 } from "./utils/utils";
 
 type QueryProps = {
@@ -309,10 +309,6 @@ export const useInitials = (storage: "data-store" | "es") => {
         systemInfo: {
             resource: "system/info",
         },
-        directives: {
-            resource:
-                "dataElementGroupSets/G5xzDCd4bhZ.json?fields=dataElementGroups[id,name,code,dataElements[id,code,name,attributeValues[value,attribute[id,name]]],attributeValues[attribute[id,name],value]],id,code,name",
-        },
     };
     return useQuery<string, Error>(
         ["initialing"],
@@ -323,7 +319,6 @@ export const useInitials = (storage: "data-store" | "es") => {
                 levels: { organisationUnitLevels },
                 groups: { organisationUnitGroups },
                 dataSets: { dataSets },
-                directives: { dataElementGroups },
             }: any = await engine.query(ouQuery);
 
             const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
@@ -384,16 +379,6 @@ export const useInitials = (storage: "data-store" | "es") => {
             storeApi.setLevels([
                 minLevel === 1 ? "3" : `${minLevel ? minLevel + 1 : 4}`,
             ]);
-
-            visualizationDataApi.updateVisualizationData({
-                visualizationId: "outputs",
-                data: [{ value: 0 }],
-            });
-
-            visualizationDataApi.updateVisualizationData({
-                visualizationId: "directives",
-                data: [{ value: dataElementGroups.length }],
-            });
 
             await db.systemInfo.bulkPut([
                 { id: "1", systemId, systemName, instanceBaseUrl },
@@ -471,9 +456,9 @@ export const useDashboards = (
                     signal,
                     engine,
                 });
-                const processed = dashboards.map((d: any) => {
+                const processed = dashboards.map((d) => {
                     const node: DataNode = {
-                        isLeaf: !d.hasChildren,
+                        isLeaf: d.filters ? d.filters.length > 0 : false,
                         id: d.id,
                         pId: "",
                         key: d.id,
@@ -733,7 +718,6 @@ export const useVisualizationData = (
     systemId: string
 ) => {
     const engine = useDataEngine();
-
     return useQuery<IIndicator[], Error>(
         ["i-visualization-queries"],
         async ({ signal }) => {
@@ -1598,8 +1582,13 @@ const generateKeys = (
 
 const processDHIS2Data = (
     data: any,
-    joinData?: any[],
-    otherFilters?: { [key: string]: any }
+    options: Partial<{
+        fromColumn: string;
+        toColumn: string;
+        flatteningOption: string;
+        joinData: any[];
+        otherFilters: { [key: string]: any };
+    }>
 ) => {
     if (data.headers || data.listGrid) {
         let rows: string[][] | undefined = undefined;
@@ -1612,25 +1601,51 @@ const processDHIS2Data = (
             rows = data.rows;
         }
         if (headers !== undefined && rows !== undefined) {
-            const processed = rows.map((row: string[]) => {
-                return fromPairs(
-                    row.map((value, index) => {
-                        const header = headers?.[index];
-                        return [header.name, value];
-                    })
+            const processed = flattenDHIS2Data(
+                rows.map((row: string[]) => {
+                    return fromPairs(
+                        row.map((value, index) => {
+                            const header = headers?.[index];
+                            return [header.name, value];
+                        })
+                    );
+                }),
+                options.flatteningOption
+            );
+            if (options.joinData && options.fromColumn && options.toColumn) {
+                return merge2DataSources(
+                    processed,
+                    options.joinData,
+                    options.fromColumn,
+                    options.toColumn
                 );
-            });
-            if (joinData) {
-                return mergeWithEvents(processed, joinData);
+            }
+
+            if (!isEmpty(options.otherFilters)) {
+                console.log(processed);
+                return processed.filter((data: any) => {
+                    const values = Object.entries(
+                        options.otherFilters || {}
+                    ).map(
+                        ([key, value]) =>
+                            data[key] === String(value).padStart(2, "0")
+                    );
+                    return every(values);
+                });
             }
             return processed;
         }
     }
-    if (joinData) {
-        const merged = mergeWithEvents(flattenDHIS2Data(data), joinData);
-        if (otherFilters) {
+    if (options.joinData && options.fromColumn && options.toColumn) {
+        const merged = merge2DataSources(
+            flattenDHIS2Data(data, options.flatteningOption),
+            options.joinData,
+            options.fromColumn,
+            options.toColumn
+        );
+        if (!isEmpty(options.otherFilters)) {
             return merged.filter((data: any) => {
-                const values = Object.entries(otherFilters).map(
+                const values = Object.entries(options.otherFilters || {}).map(
                     ([key, value]) =>
                         data[key] === String(value).padStart(2, "0")
                 );
@@ -1640,7 +1655,7 @@ const processDHIS2Data = (
         return merged;
     }
 
-    return flattenDHIS2Data(data);
+    return flattenDHIS2Data(data, options.flatteningOption);
 };
 
 const getDHIS2Query = (
@@ -1682,7 +1697,7 @@ const queryDHIS2 = async (
     otherFilters: { [key: string]: any } = {}
 ) => {
     if (vq) {
-        const joinerData: any = await queryDHIS2(
+        const joinData: any = await queryDHIS2(
             engine,
             vq.joinTo,
             globalFilters,
@@ -1696,7 +1711,13 @@ const queryDHIS2 = async (
                         resource: query,
                     },
                 });
-                return processDHIS2Data(data, joinerData, otherFilters);
+                return processDHIS2Data(data, {
+                    flatteningOption: vq.flatteningOption,
+                    joinData,
+                    otherFilters,
+                    fromColumn: vq.fromColumn,
+                    toColumn: vq.toColumn,
+                });
             }
             const { data } = await axios.get(
                 `${vq.dataSource.authentication.url}/api/${query}`,
@@ -1708,7 +1729,13 @@ const queryDHIS2 = async (
                 }
             );
 
-            return processDHIS2Data(data, joinerData, otherFilters);
+            return processDHIS2Data(data, {
+                flatteningOption: vq.flatteningOption,
+                joinData,
+                otherFilters,
+                fromColumn: vq.fromColumn,
+                toColumn: vq.toColumn,
+            });
         }
 
         if (vq.dataSource && vq.dataSource.type === "API") {
@@ -2048,14 +2075,18 @@ export const useTheme = (optionSetId: string) => {
 };
 
 export const useFilterResources = (dashboards: IDashboard[]) => {
-    let parents: DataNode[] = dashboards.map((dashboard) => ({
-        pId: "",
-        nodeSource: {},
-        key: dashboard.id,
-        value: dashboard.id,
-        title: dashboard.name,
-        id: dashboard.id,
-    }));
+    let parents: DataNode[] = dashboards.map((dashboard) => {
+        return {
+            pId: "",
+            nodeSource: {},
+            key: dashboard.id,
+            value: dashboard.id,
+            title: dashboard.name,
+            id: dashboard.id,
+            checkable: false,
+            isLeaf: dashboard.filters ? dashboard.filters.length === 0 : true,
+        };
+    });
     const engine = useDataEngine();
     return useQuery<DataNode[], Error>(
         ["filters", dashboards.map(({ id }) => id).join() || ""],
@@ -2084,6 +2115,30 @@ export const useFilterResources = (dashboards: IDashboard[]) => {
                                             value: code,
                                             title: name,
                                             id,
+                                            isLeaf: true,
+                                            checkable: false,
+                                            hasChildren: false,
+                                            selectable: true,
+                                            actual: dashboard.child,
+                                        };
+                                        return node;
+                                    }
+                                );
+                            } else if (data && data.dataElementGroups) {
+                                return data.dataElementGroups.map(
+                                    ({ code, id, name }: any) => {
+                                        const node: DataNode = {
+                                            pId: dashboard.id,
+                                            nodeSource: { search: resourceKey },
+                                            key: id,
+                                            value: code,
+                                            title: name,
+                                            id,
+                                            isLeaf: true,
+                                            // checkable: true,
+                                            hasChildren: false,
+                                            selectable: true,
+                                            actual: dashboard.child,
                                         };
                                         return node;
                                     }

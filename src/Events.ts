@@ -40,6 +40,7 @@ import {
     $visualizationData,
     $visualizationMetadata,
     $visualizationQuery,
+    $calculated,
 } from "./Store";
 
 export const loadDefaults = domain.createEvent<{
@@ -257,6 +258,9 @@ export const dashboardApi = createApi($dashboard, {
     changeCategory: (state, category: string) => {
         return { ...state, category };
     },
+    changeChild: (state, child: string) => {
+        return { ...state, child };
+    },
     changeDashboardName: (state, name: string) => {
         return { ...state, name };
     },
@@ -407,6 +411,10 @@ export const dashboardApi = createApi($dashboard, {
             };
         }
     },
+    changeExcludeFromList: (state, excludeFromList: boolean) =>
+        produce(state, (draft) => {
+            draft.excludeFromList = excludeFromList;
+        }),
 });
 
 export const indicatorApi = createApi($indicator, {
@@ -705,6 +713,12 @@ export const datumAPi = createApi($visualizationQuery, {
             },
         };
         return computedState;
+    },
+});
+
+export const calculatedApi = createApi($calculated, {
+    add: (state, { id, value }: { id: string; value: any }) => {
+        return { ...state, [id]: value };
     },
 });
 

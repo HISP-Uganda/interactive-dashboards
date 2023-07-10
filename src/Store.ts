@@ -144,6 +144,7 @@ export const createDashboard = (
         tag: "Example tag",
         images: [],
         type,
+        excludeFromList: false,
     };
 };
 export const $dashboardType = domain.createStore<"fixed" | "dynamic">("fixed");
@@ -220,6 +221,7 @@ export const $dataSources = domain.createStore<IDataSource[]>([]);
 export const $indicator = domain.createStore<IIndicator>(createIndicator());
 export const $section = domain.createStore<ISection>(createSection());
 export const $dataSets = domain.createStore<Option[]>([]);
+export const $calculated = domain.createStore<{ [key: string]: any }>({});
 
 // export const $hasDHIS2 = combine(
 //     $visualizationQuery,
