@@ -108,17 +108,29 @@ const BarGraph = ({
                 <Stack direction="row" spacing="20px" justify="center">
                     {allSeries
                         .filter((v) => !isEmpty(v))
-                        .map((series: any, index) => (
+                        .map((series, index) => (
                             <Stack
                                 direction="row"
                                 spacing="2px"
                                 alignItems="center"
                                 key={index}
                             >
-                                <Text bgColor={colors[index]} w="10px" h="10px">
+                                <Text
+                                    bgColor={
+                                        visualization.properties[
+                                            `${series}.bg`
+                                        ] || colors[index]
+                                    }
+                                    w="10px"
+                                    h="10px"
+                                >
                                     &nbsp;
                                 </Text>
-                                <Text noOfLines={[1, 2, 3]}>{series}</Text>
+                                <Text noOfLines={[1, 2, 3]}>
+                                    {visualization.properties[
+                                        `${series}.name`
+                                    ] || series}
+                                </Text>
                             </Stack>
                         ))}
                 </Stack>

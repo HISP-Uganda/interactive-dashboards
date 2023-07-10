@@ -24,7 +24,11 @@ import { datumAPi } from "../../Events";
 import { IData, IDataSource, LocationGenerics, Option } from "../../interfaces";
 import { saveDocument } from "../../Queries";
 import { $settings, $store, $visualizationQuery } from "../../Store";
-import { getSearchParams, globalIds } from "../../utils/utils";
+import {
+    getSearchParams,
+    globalIds,
+    flatteningOptions,
+} from "../../utils/utils";
 import { generalPadding, otherHeight } from "../constants";
 import { DisplayDataSourceType } from "../data-sources";
 import NamespaceDropdown from "../NamespaceDropdown";
@@ -222,7 +226,27 @@ export default function VisualizationQuery() {
                 </Table>
             )}
 
-            <Stack direction="row" alignItems="center" spacing="50px">
+            <Stack direction="row" alignItems="center" spacing="30px">
+                <Stack flex={1} direction="row" alignItems="center">
+                    <Text>Flattening Option</Text>
+                    <Box flex={1}>
+                        <Select<Option, false, GroupBase<Option>>
+                            value={flatteningOptions.find(
+                                (pt) =>
+                                    pt.value ===
+                                    visualizationQuery.flatteningOption
+                            )}
+                            onChange={(e) =>
+                                datumAPi.changeAttribute({
+                                    attribute: "flatteningOption",
+                                    value: e?.value,
+                                })
+                            }
+                            options={flatteningOptions}
+                            isClearable
+                        />
+                    </Box>
+                </Stack>
                 <Stack direction="row" flex={1} alignItems="center">
                     <Text>Join To</Text>
                     <Box flex={1}>
@@ -239,14 +263,14 @@ export default function VisualizationQuery() {
                     </Box>
                 </Stack>
 
-                {/* <Stack direction="row" flex={1} alignItems="center">
-                    <Text>Join To Column</Text>
+                <Stack direction="row" flex={1} alignItems="center">
+                    <Text>To Column</Text>
                     <Input
                         flex={1}
-                        value={visualizationQuery.joinToColumn}
+                        value={visualizationQuery.fromColumn}
                         onChange={(e: ChangeEvent<HTMLInputElement>) =>
                             datumAPi.changeAttribute({
-                                attribute: "joinToColumn",
+                                attribute: "fromColumn",
                                 value: e.target.value,
                             })
                         }
@@ -254,19 +278,20 @@ export default function VisualizationQuery() {
                 </Stack>
 
                 <Stack direction="row" flex={1} alignItems="center">
-                    <Text>Join Column</Text>
+                    <Text>From Column</Text>
                     <Input
                         flex={1}
-                        value={visualizationQuery.joinColumn}
+                        value={visualizationQuery.toColumn}
                         onChange={(e: ChangeEvent<HTMLInputElement>) =>
                             datumAPi.changeAttribute({
-                                attribute: "joinColumn",
+                                attribute: "toColumn",
                                 value: e.target.value,
                             })
                         }
                     />
-                </Stack> */}
+                </Stack>
             </Stack>
+
             <Stack direction="row">
                 <Spacer />
                 <Button

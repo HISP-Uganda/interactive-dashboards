@@ -3,7 +3,12 @@ import { useStore } from "effector-react";
 import { fromPairs } from "lodash";
 import { ISection, IVisualization, LocationGenerics } from "../../interfaces";
 import { useVisualization } from "../../Queries";
-import { $dashboard, $globalFilters, $visualizationData } from "../../Store";
+import {
+    $dashboard,
+    $globalFilters,
+    $visualizationData,
+    $calculated,
+} from "../../Store";
 import { deriveSingleValues } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import AreaGraph from "./AreaGraph";
@@ -260,12 +265,17 @@ const getVisualization = (
         optionSet: (
             <OptionSet visualization={visualization} section={section} />
         ),
-        clock:
-            (
-                <TextVisualisation visualization={visualization} section={section} />
-            ),
+        clock: (
+            <TextVisualisation
+                visualization={visualization}
+                section={section}
+            />
+        ),
         text: (
-            <ClockVisualisation visualization={visualization} section={section} />
+            <ClockVisualisation
+                visualization={visualization}
+                section={section}
+            />
         ),
     };
     return allTypes[visualization.type];
@@ -275,7 +285,7 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
     const search = useSearch<LocationGenerics>();
     const globalFilters = useStore($globalFilters);
     const dashboard = useStore($dashboard);
-    const visualizationData = useStore($visualizationData);
+    const calculated = useStore($calculated);
     const { affected, optionSet } = search;
 
     const { isLoading, isSuccess, data, isError, error } = useVisualization(
@@ -289,10 +299,7 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
             {visualization.expression &&
                 getVisualization(
                     visualization,
-                    deriveSingleValues(
-                        visualizationData,
-                        visualization.expression
-                    ),
+                    deriveSingleValues(calculated, visualization.expression),
                     section
                 )}
             {!visualization.expression && (

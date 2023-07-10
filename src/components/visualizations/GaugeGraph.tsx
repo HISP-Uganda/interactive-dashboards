@@ -34,7 +34,7 @@ const GaugeGraph = ({ visualization, category, series }: GaugeGraphProps) => {
 
     return (
         <Plot
-            data={data}
+            data={data as any}
             layout={{ width: 500, height: 350, margin: { t: 0, b: 0 } }}
             style={{ width: "100%", height: "100%" }}
             config={{ displayModeBar: false, responsive: true }}

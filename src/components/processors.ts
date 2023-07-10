@@ -1,10 +1,35 @@
+import { uniqBy } from "lodash/fp";
 import { fromPairs, groupBy, orderBy, sum } from "lodash";
 import uniq from "lodash/uniq";
 import update from "lodash/update";
 import { Column, Threshold } from "../interfaces";
 import { allMetadata } from "../utils/utils";
 import { SPECIAL_COLUMNS } from "./constants";
-import { visualizationDataApi } from "../Events";
+
+const percentage = Intl.NumberFormat("en-US", {
+    style: "percent",
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+});
+const formatter = Intl.NumberFormat("en-US", {
+    style: "decimal",
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+});
+
+const breakString = (str: string, maxChars: number): string => {
+    if (str.length > maxChars && str.includes(" ")) {
+        let index = str.lastIndexOf(" ", maxChars);
+        if (index === -1) index = str.indexOf(" ", maxChars + 1);
+        return (
+            str.substr(0, index) +
+            "</br></br>" +
+            breakString(str.substr(index + 1), maxChars)
+        );
+    } else {
+        return str;
+    }
+};
 
 function padZero(str: string, len: number = 2) {
     var zeros = new Array(len).join("0");
@@ -54,7 +79,11 @@ const calculation = {
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         const value = data.length;
 
@@ -70,7 +99,11 @@ const calculation = {
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         return { bg: "", value: "", color: "" };
     },
@@ -78,7 +111,11 @@ const calculation = {
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         return { bg: "", value: "", color: "" };
     },
@@ -86,12 +123,19 @@ const calculation = {
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         const total = sum(
             data.map((d) => {
-                if (others.col1 && Number(d[others.col1]) !== NaN) {
-                    return Number(d[others.col1]);
+                if (
+                    others.aggregationColumn &&
+                    Number(d[others.aggregationColumn]) !== NaN
+                ) {
+                    return Number(d[others.aggregationColumn]);
                 }
                 return 0;
             })
@@ -101,14 +145,18 @@ const calculation = {
         return {
             bg: color,
             color: invertHex(color),
-            value: total,
+            value: formatter.format(total),
         };
     },
     integerSum: (
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         return { bg: "", value: "", color: "" };
     },
@@ -116,7 +164,11 @@ const calculation = {
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         return { bg: "", value: "", color: "" };
     },
@@ -124,7 +176,11 @@ const calculation = {
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         return { bg: "", value: "", color: "" };
     },
@@ -132,7 +188,11 @@ const calculation = {
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         return { bg: "", value: "", color: "" };
     },
@@ -140,7 +200,11 @@ const calculation = {
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         return { bg: "", value: "", color: "" };
     },
@@ -148,7 +212,11 @@ const calculation = {
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         return { bg: "", value: "", color: "" };
     },
@@ -156,7 +224,11 @@ const calculation = {
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         return { bg: "", value: "", color: "" };
     },
@@ -164,7 +236,11 @@ const calculation = {
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         return { bg: "", value: "", color: "" };
     },
@@ -172,7 +248,11 @@ const calculation = {
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         return { bg: "", value: "", color: "" };
     },
@@ -180,7 +260,11 @@ const calculation = {
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         return { bg: "", value: "", color: "" };
     },
@@ -188,7 +272,11 @@ const calculation = {
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         return { bg: "", value: "", color: "" };
     },
@@ -196,7 +284,11 @@ const calculation = {
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         return { bg: "", value: "", color: "" };
     },
@@ -204,7 +296,11 @@ const calculation = {
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         return { bg: "", value: "", color: "" };
     },
@@ -212,7 +308,11 @@ const calculation = {
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         return { bg: "", value: "", color: "" };
     },
@@ -220,7 +320,11 @@ const calculation = {
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         return { bg: "", value: "", color: "" };
     },
@@ -228,7 +332,11 @@ const calculation = {
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         return { bg: "", value: "", color: "" };
     },
@@ -236,15 +344,27 @@ const calculation = {
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
-        return { bg: "", value: "", color: "" };
+        let value = data.length;
+        if (others.prevValue) {
+            value = value / others.prevValue;
+        }
+        return { bg: "", value: percentage.format(value), color: "" };
     },
     countFractionColumns: (
         data: any[],
         thresholds: Threshold[],
         defaultValue: string,
-        others: Partial<{ col1: string; col2: string }> = {}
+        others: Partial<{
+            aggregationColumn: string;
+            col2: string;
+            prevValue: number;
+        }> = {}
     ) => {
         return { bg: "", value: "", color: "" };
     },
@@ -326,7 +446,8 @@ export const processTable = (
     rows: string[],
     columns: string[],
     aggregation: keyof typeof calculation,
-    thresholds: Threshold[]
+    thresholds: Threshold[],
+    aggregationColumn: string
 ) => {
     const finalColumns = findMerged(
         columns.filter((c) => SPECIAL_COLUMNS.indexOf(c) === -1),
@@ -354,6 +475,11 @@ export const processTable = (
     const groupedData = groupBy(data, (d) => rows.map((r) => d[r]).join(""));
     const finalData = Object.entries(groupedData)
         .flatMap(([key, values]) => {
+            let rows = values;
+
+            if (aggregationColumn) {
+                rows = uniqBy(aggregationColumn, values);
+            }
             const groupedByColumn = groupBy(values, (d) =>
                 columns
                     .filter((r) => SPECIAL_COLUMNS.indexOf(r) === -1)
@@ -367,7 +493,11 @@ export const processTable = (
                         value: calculation[aggregation](
                             columnData,
                             withoutBaseline,
-                            baseline
+                            baseline,
+                            {
+                                aggregationColumn,
+                                prevValue: rows.length,
+                            }
                         ),
                     };
                 }
@@ -377,7 +507,7 @@ export const processTable = (
                 ...normal,
                 {
                     key: `${key}rowCount`,
-                    value: { bg: "", value: values.length, color: "" },
+                    value: { bg: "", value: rows.length, color: "" },
                 },
             ];
         })
@@ -457,9 +587,23 @@ export const processGraphs = (
                 const grouped = groupBy(data, series);
                 chartData = Object.entries(grouped).map(([key, values]) => {
                     const groupedByTheme = groupBy(values, category);
+
+                    let others = {};
+
+                    if (metadata[`${key}.bg`]) {
+                        others = {
+                            marker: {
+                                color: metadata[`${key}.bg`],
+                            },
+                        };
+                    }
                     return {
-                        x: Object.keys(groupedByTheme).map(
-                            (k) => metadata[`${k}.name`] || k
+                        x: orderBy(
+                            Object.keys(groupedByTheme),
+                            undefined,
+                            "asc"
+                        ).map((k) =>
+                            breakString(metadata[`${k}.name`] || k, 25)
                         ),
                         y: Object.entries(groupedByTheme).map(
                             ([k, val]) => val.length
@@ -472,18 +616,17 @@ export const processGraphs = (
                             availableProperties?.data?.orientation === "v"
                                 ? "%{y:.0f}"
                                 : "%{x:.0f}",
+                        ...others,
                     };
                 });
-                allSeries = Object.keys(groupBy(data, series)).map(
-                    (k) => metadata[`${k}.name`] || k
-                );
+                allSeries = Object.keys(groupBy(data, series));
             } else {
                 const grouped2 = groupBy(data, category);
 
                 chartData = [
                     {
-                        x: Object.keys(grouped2).map(
-                            (k) => metadata[`${k}.name`] || k
+                        x: Object.keys(grouped2).map((k) =>
+                            breakString(metadata[`${k}.name`] || k, 25)
                         ),
                         y: Object.values(grouped2).map((x) => x.length),
                         type: "bar",
@@ -495,9 +638,7 @@ export const processGraphs = (
                                 : "%{x:.0f}",
                     },
                 ];
-                allSeries = Object.keys(grouped2).map(
-                    (k) => metadata[`${k}.name`] || k
-                );
+                allSeries = Object.keys(grouped2);
             }
         } else {
             if (order) {
@@ -587,7 +728,7 @@ export const processGraphs = (
         }
     }
     return {
-        chartData,
+        chartData: orderBy(chartData, "name", "desc"),
         allSeries,
     };
 };

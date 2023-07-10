@@ -57,19 +57,18 @@ const SingleValueProperties = ({
 }) => {
     const visualizationData = useStore($visualizationData);
 
-    const columns: Option[] = createOptions(
-        uniq(
-            flatten(
-                flatten(visualizationData[visualization.id]).map((d) =>
-                    Object.keys(d)
-                )
+    const normalColumns = uniq(
+        flatten(
+            flatten(visualizationData[visualization.id]).map((d) =>
+                Object.keys(d)
             )
         )
     );
+    console.log(visualizationData[visualization.id]);
 
     let currentValues: Array<Option> = uniq(
         visualizationData[visualization.id].map(
-            (d) => d[visualization.properties["aggregateColumn"] || ""]
+            (d) => d[visualization.properties["aggregationColumn"] || ""]
         )
     )
         .filter((d) => !!d)
@@ -86,8 +85,8 @@ const SingleValueProperties = ({
             <SelectProperty
                 visualization={visualization}
                 title="Aggregation Column"
-                attribute="aggregateColumn"
-                options={columns}
+                attribute="aggregationColumn"
+                options={createOptions(normalColumns)}
             />
             <SelectProperty
                 visualization={visualization}

@@ -119,7 +119,6 @@ export default function VisualizationQueries() {
                                 <Tr>
                                     <Th>Name</Th>
                                     <Th>Data Source</Th>
-                                    <Th>Factor</Th>
                                     <Th>Description</Th>
                                     <Th>Actions</Th>
                                 </Tr>

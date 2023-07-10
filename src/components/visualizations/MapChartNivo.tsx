@@ -15,7 +15,7 @@ export default function ({
     data,
 }: ChartProps) {
     const indicators = useStore($indicators);
-    const indicator = indicators.find((v) => v.id === visualization.indicator);
+    const indicator = visualization.indicators[0];
     const { levels, ous } = findLevelsAndOus(indicator);
     const levelIsGlobal = levels.findIndex((l) => l === "GQhi6pRnTKF");
     const ouIsGlobal = ous.findIndex((l) => l === "mclvD0Z9mfT");
@@ -174,11 +174,11 @@ export default function ({
                                     fontWeight="bolder"
                                     height="100%"
                                 >
-                                    {item.max && item.min
+                                    {/* {item.max && item.min
                                         ? `${item.min} - ${item.max}`
                                         : item.min
                                         ? `${item.min}+`
-                                        : item.max}
+                                        : item.max} */}
                                 </Text>
                             ))}
                         </Stack>

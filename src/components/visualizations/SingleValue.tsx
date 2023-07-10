@@ -10,7 +10,7 @@ import { useStore } from "effector-react";
 import { useEffect, useState } from "react";
 import { ChartProps } from "../../interfaces";
 import { $visualizationData } from "../../Store";
-import { visualizationDataApi } from "../../Events";
+import { visualizationDataApi, calculatedApi } from "../../Events";
 import { processSingleValue } from "../processors";
 
 const SingleValue = ({
@@ -25,7 +25,7 @@ const SingleValue = ({
     const value = processSingleValue(
         data,
         visualization.properties["aggregate"] || false,
-        visualization.properties["aggregateColumn"] || "",
+        visualization.properties["aggregationColumn"] || "",
         visualization.properties["key"] || ""
     );
     const colorSearch = dataProperties?.["data.thresholds"]?.find(
@@ -97,11 +97,12 @@ const SingleValue = ({
             }
         }
     }, [target, visualizationData]);
+
     useEffect(() => {
         if (value) {
-            visualizationDataApi.updateVisualizationData({
-                visualizationId: visualization.id,
-                data: [{ value }],
+            calculatedApi.add({
+                id: visualization.id,
+                value,
             });
         }
     }, [value]);

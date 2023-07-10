@@ -17,7 +17,7 @@ const MapChart = ({
     data,
 }: ChartProps) => {
     const indicators = useStore($indicators);
-    const indicator = indicators.find((v) => v.id === visualization.indicator);
+    const indicator = visualization.indicators[0];
     const { levels, ous } = findLevelsAndOus(indicator);
     const levelIsGlobal = levels.findIndex((l) => l === "GQhi6pRnTKF");
     const ouIsGlobal = ous.findIndex((l) => l === "mclvD0Z9mfT");
