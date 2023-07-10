@@ -93,7 +93,6 @@ const Tables = ({
                         style={{ borderSpacing: 0, borderCollapse: "collapse" }}
                     >
                         {visualization.properties["showHeaders"] && (
-                            <Thead>
                                 {finalColumns.map((col, index) => (
                                     <Tr key={index}>
                                         {index === 0 && (

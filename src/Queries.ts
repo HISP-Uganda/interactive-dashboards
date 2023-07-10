@@ -379,7 +379,6 @@ export const useInitials = (storage: "data-store" | "es") => {
             storeApi.setLevels([
                 minLevel === 1 ? "3" : `${minLevel ? minLevel + 1 : 4}`,
             ]);
-
             await db.systemInfo.bulkPut([
                 { id: "1", systemId, systemName, instanceBaseUrl },
             ]);

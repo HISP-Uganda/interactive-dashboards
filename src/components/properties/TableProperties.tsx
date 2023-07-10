@@ -250,6 +250,11 @@ const TableProperties = ({
             <SimpleAccordion title="Table">
                 <TextProperty
                     visualization={visualization}
+                    title="Table Caption"
+                    attribute="TableCaption"
+                />
+                <TextProperty
+                    visualization={visualization}
                     title="Rename Row Header"
                     attribute="rowName"
                 />

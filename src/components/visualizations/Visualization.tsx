@@ -265,17 +265,12 @@ const getVisualization = (
         optionSet: (
             <OptionSet visualization={visualization} section={section} />
         ),
+        text:
+            (
+                <TextVisualisation visualization={visualization} section={section} />
+            ),
         clock: (
-            <TextVisualisation
-                visualization={visualization}
-                section={section}
-            />
-        ),
-        text: (
-            <ClockVisualisation
-                visualization={visualization}
-                section={section}
-            />
+            <ClockVisualisation visualization={visualization} section={section} />
         ),
     };
     return allTypes[visualization.type];
