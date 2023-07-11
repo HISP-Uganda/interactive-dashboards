@@ -14,6 +14,7 @@ import {
     Thead,
     Tr,
     Box,
+    Switch,
 } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
@@ -267,10 +268,10 @@ export default function VisualizationQuery() {
                     <Text>To Column</Text>
                     <Input
                         flex={1}
-                        value={visualizationQuery.fromColumn}
+                        value={visualizationQuery.toColumn}
                         onChange={(e: ChangeEvent<HTMLInputElement>) =>
                             datumAPi.changeAttribute({
-                                attribute: "fromColumn",
+                                attribute: "toColumn",
                                 value: e.target.value,
                             })
                         }
@@ -281,10 +282,23 @@ export default function VisualizationQuery() {
                     <Text>From Column</Text>
                     <Input
                         flex={1}
-                        value={visualizationQuery.toColumn}
+                        value={visualizationQuery.fromColumn}
                         onChange={(e: ChangeEvent<HTMLInputElement>) =>
                             datumAPi.changeAttribute({
-                                attribute: "toColumn",
+                                attribute: "fromColumn",
+                                value: e.target.value,
+                            })
+                        }
+                    />
+                </Stack>
+
+                <Stack direction="row">
+                    <Text>Start With from</Text>
+                    <Switch
+                        isChecked={visualizationQuery.fromFirst}
+                        onChange={(e) =>
+                            datumAPi.changeAttribute({
+                                attribute: "fromFirst",
                                 value: e.target.value,
                             })
                         }

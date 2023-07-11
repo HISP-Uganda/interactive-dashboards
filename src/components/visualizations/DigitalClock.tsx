@@ -1,47 +1,47 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { Stack, Text } from "@chakra-ui/react";
-import moment from 'moment';
+import moment from "moment";
 
 const DigitalClock = () => {
-    const [time, setTime] = useState(moment().format('LTS'));
+    const [time, setTime] = useState(moment().format("LTS"));
     const [one, setOne] = useState(true);
     const [two, setTwo] = useState(false);
     const [three, setThree] = useState(false);
     const [four, setFour] = useState(false);
-    const [cssClass, setCssClass] = useState('');
+    const [cssClass, setCssClass] = useState("");
 
     const clicked = () => {
         if (one) {
-            setCssClass('faded');
+            setCssClass("faded");
             setTimeout(() => {
-                setTime(moment().format('l'));
+                setTime(moment().format("l"));
                 setOne(false);
                 setTwo(true);
-                setCssClass('');
+                setCssClass("");
             }, 200);
         } else if (two) {
-            setCssClass('faded');
+            setCssClass("faded");
             setTimeout(() => {
-                setTime(moment().format('MMMM Do YY'));
+                setTime(moment().format("MMMM Do YY"));
                 setTwo(false);
                 setThree(true);
-                setCssClass('');
+                setCssClass("");
             }, 200);
         } else if (three) {
-            setCssClass('faded');
+            setCssClass("faded");
             setTimeout(() => {
-                setTime(moment().format('LT'));
+                setTime(moment().format("LT"));
                 setThree(false);
                 setFour(true);
-                setCssClass('');
+                setCssClass("");
             }, 200);
         } else if (four) {
-            setCssClass('faded');
+            setCssClass("faded");
             setTimeout(() => {
-                setTime(moment().format('LTS'));
+                setTime(moment().format("LTS"));
                 setFour(false);
                 setOne(true);
-                setCssClass('');
+                setCssClass("");
             }, 200);
         }
     };
@@ -49,9 +49,9 @@ const DigitalClock = () => {
     useEffect(() => {
         const intervalID = setInterval(() => {
             if (one) {
-                setTime(moment().format('LTS'));
+                setTime(moment().format("LTS"));
             } else if (four) {
-                setTime(moment().format('LT'));
+                setTime(moment().format("LT"));
             }
         }, 1000);
 
@@ -62,9 +62,11 @@ const DigitalClock = () => {
 
     return (
         <div id="clock" onClick={clicked}>
-            <Text fontSize="3xl" className={cssClass}>{time}</Text>
+            <Text fontSize="2xl" className={cssClass}>
+                {time}
+            </Text>
         </div>
     );
 };
 
-export default DigitalClock
+export default DigitalClock;

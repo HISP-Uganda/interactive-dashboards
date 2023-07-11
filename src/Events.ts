@@ -98,6 +98,9 @@ export const storeApi = createApi($store, {
     setExpandedKeys: (state, expandedKeys: React.Key[]) => {
         return { ...state, expandedKeys };
     },
+    setSelectedKeys: (state, selectedKeys: React.Key[]) => {
+        return { ...state, selectedKeys };
+    },
     setShowSider: (state, showSider: boolean) => {
         return { ...state, showSider };
     },
@@ -407,7 +410,7 @@ export const dashboardApi = createApi($dashboard, {
         if (state.filters) {
             return {
                 ...state,
-                filters: state.filters.filter(({ id }) => filter.id === id),
+                filters: state.filters.filter(({ id }) => filter.id !== id),
             };
         }
     },

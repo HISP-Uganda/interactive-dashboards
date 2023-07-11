@@ -31,6 +31,7 @@ export default function DashboardDropDown({
                     getOptionLabel={(v) => v.name || ""}
                     value={data.find((d: IDashboard) => d.id === value)}
                     onChange={(e) => onChange(e?.id || "")}
+                    isClearable
                 />
             )}
             {isError && <Text>No data/Error occurred</Text>}

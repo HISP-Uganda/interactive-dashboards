@@ -11,11 +11,13 @@ import { DataNode, IDashboard, LocationGenerics } from "../../interfaces";
 import { useDashboards, useFilterResources } from "../../Queries";
 import { $settings, $store } from "../../Store";
 import LoadingIndicator from "../LoadingIndicator";
+import { storeApi } from "../../Events";
 
 function DashboardItem({ dashboards }: { dashboards: IDashboard[] }) {
     const navigate = useNavigate<LocationGenerics>();
     const search = useSearch<LocationGenerics>();
     const [squareRef, { width, height }] = useElementSize();
+    const store = useStore($store);
 
     const { data, isError, isLoading, isSuccess, error } =
         useFilterResources(dashboards);
@@ -29,6 +31,7 @@ function DashboardItem({ dashboards }: { dashboards: IDashboard[] }) {
             nativeEvent: MouseEvent;
         }
     ) => {
+        storeApi.setSelectedKeys(selectedKeys);
         if (info.node.pId === "") {
             const { optionSet, affected, ...rest } = search;
             navigate({
@@ -46,12 +49,12 @@ function DashboardItem({ dashboards }: { dashboards: IDashboard[] }) {
             });
         } else {
             navigate({
+                to: `/dashboards/${info.node.pId}`,
                 search: (old) => ({
                     ...old,
                     affected: info.node.nodeSource.search,
                     optionSet: info.node.value,
                 }),
-                replace: true,
             });
         }
     };
@@ -84,12 +87,14 @@ function DashboardItem({ dashboards }: { dashboards: IDashboard[] }) {
                     showLine
                     icon={<CarryOutOutlined />}
                     onSelect={onSelect}
+                    selectedKeys={store.selectedKeys}
+                    expandedKeys={store.expandedKeys}
+                    onExpand={(e) => storeApi.setExpandedKeys(e)}
                     autoExpandParent={false}
                     onCheck={onCheck}
                     style={{
                         height: `${height}px`,
                         overflow: "auto",
-                        // fontSize: "24px",
                     }}
                     treeData={arrayToTree(data, { parentProperty: "pId" })}
                 />

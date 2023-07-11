@@ -22,12 +22,15 @@ const SingleValue = ({
     const [color, setColor] = useState<string>("");
     const [targetValue, setTargetValue] = useState<number | undefined | null>();
     const visualizationData = useStore($visualizationData);
+
     const value = processSingleValue(
         data,
         visualization.properties["aggregate"] || false,
         visualization.properties["aggregationColumn"] || "",
-        visualization.properties["key"] || ""
+        visualization.properties["key"] || "",
+        visualization.properties["uniqBy"] || ""
     );
+
     const colorSearch = dataProperties?.["data.thresholds"]?.find(
         ({ max, min }: any) => {
             if (max && min) {

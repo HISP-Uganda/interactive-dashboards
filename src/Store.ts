@@ -210,6 +210,7 @@ export const $store = domain.createStore<IStore>({
     originalColumns: [],
     dataElementGroups: [],
     dataElementGroupSets: [],
+    selectedKeys: [],
 });
 export const $dataSource = domain.createStore<IDataSource>(createDataSource());
 export const $category = domain.createStore<ICategory>(createCategory());
@@ -223,32 +224,9 @@ export const $section = domain.createStore<ISection>(createSection());
 export const $dataSets = domain.createStore<Option[]>([]);
 export const $calculated = domain.createStore<{ [key: string]: any }>({});
 
-// export const $hasDHIS2 = combine(
-//     $visualizationQuery,
-//     $dataSources,
-//     (indicator, dataSources) => {
-//         return dataSources.find((ds) => ds.id === indicator.dataSource)
-//             ?.isCurrentDHIS2;
-//     }
-// );
-
 export const $hasDHIS2 = $visualizationQuery.map((state) => {
     return state.dataSource?.isCurrentDHIS2;
 });
-
-// export const $dataSourceType = combine(
-//     $visualizationQuery,
-//     $dataSources,
-//     (indicator, dataSources) => {
-//         const dataSource: IDataSource | undefined = dataSources.find(
-//             (ds) => ds.id === indicator.dataSource
-//         );
-//         if (dataSource) {
-//             return dataSource.type;
-//         }
-//         return "";
-//     }
-// );
 
 export const $dataSourceType = $visualizationQuery.map((state) => {
     return state.dataSource?.type || "";
@@ -274,14 +252,6 @@ export const $currentDataSource = combine(
         return undefined;
     }
 );
-
-// export const $ds = combine(
-//     $visualizationDatum,
-//     $dataSources,
-//     (indicator, dataSources) => {
-//         return dataSources.find((ds) => ds.id === indicator.dataSource);
-//     }
-// );
 
 export const $categoryDashboards = combine(
     $dashboards,
@@ -319,20 +289,6 @@ export const $categoryOptions = $categories.map((state) => {
         return current;
     });
 });
-
-// export const $indicatorDataSourceTypes = combine(
-//     $indicators,
-//     $dataSources,
-//     (indicators, dataSources) => {
-//         const allIndicators: string[][] = indicators.map((indicator) => {
-//             const dataSource = dataSources.find(
-//                 (ds) => ds.id === indicator.dataSource
-//             );
-//             return [indicator.id, dataSource?.type || ""];
-//         });
-//         return fromPairs(allIndicators);
-//     }
-// );
 
 export const $visualizationData = domain.createStore<{ [key: string]: any[] }>(
     {}

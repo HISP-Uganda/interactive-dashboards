@@ -6,11 +6,12 @@ import {
     fromPairs,
     groupBy,
     isEmpty,
-    max,
     min,
     uniq,
     flatten,
     every,
+    uniqBy,
+    max,
 } from "lodash";
 import { evaluate } from "mathjs";
 import { db } from "./db";
@@ -27,6 +28,7 @@ import {
     settingsApi,
     storeApi,
     visualizationDataApi,
+    calculatedApi,
 } from "./Events";
 import {
     DataNode,
@@ -309,17 +311,48 @@ export const useInitials = (storage: "data-store" | "es") => {
         systemInfo: {
             resource: "system/info",
         },
+        directives: {
+            resource:
+                "analytics.json?dimension=dx:B04qyv8sHLZ;Et0jLLFoPiQ;FJ1pjZ5Edzf;HolY9bB9ndg;I8NkRKchMoU;N7r57cuvssW;PQxdLS3vke3;Q18G7d3DPOg;QYISgIjXTJC;QgvBHBb5xcS;UEDzAaR5GpB;WdilrXx08R4;gjqIp8H7948;gypjprrtiKV;h4lJWKnqnxx;lYoAOhykYUW;m3xNIoQ2esR;nOnQwK1sDaN;tWRpQ8HFWk4;um8prFWwCYU;w6VmDxFste0;wRshJ7SJcHq;wXeABLEj9Vj&dimension=pe:2020July;2021July;2022July;2023July;2024July&dimension=ou:qjk1ujdzlss&aggregationType=MAX",
+        },
     };
     return useQuery<string, Error>(
         ["initialing"],
         async ({ signal }) => {
             const {
+                directives: { rows, headers },
                 systemInfo: { systemId, systemName, instanceBaseUrl },
                 me: { organisationUnits, authorities },
                 levels: { organisationUnitLevels },
                 groups: { organisationUnitGroups },
                 dataSets: { dataSets },
             }: any = await engine.query(ouQuery);
+
+            const processed = flattenDHIS2Data(
+                rows.map((row: string[]) => {
+                    return fromPairs(
+                        row.map((value, index) => {
+                            const header = headers?.[index];
+                            return [header.name, value];
+                        })
+                    );
+                }),
+                "processDirectives"
+            );
+
+            const maxPe = max(processed.map((d: any) => d.pe));
+
+            Object.entries(
+                groupBy(
+                    processed.filter((d: any) => d.pe === maxPe),
+                    "label"
+                )
+            ).forEach(([id, values]) =>
+                calculatedApi.add({
+                    id,
+                    value: uniqBy(values, "dx").length,
+                })
+            );
 
             const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
             const facilities: string[] = organisationUnits.map(
@@ -1587,6 +1620,7 @@ const processDHIS2Data = (
         flatteningOption: string;
         joinData: any[];
         otherFilters: { [key: string]: any };
+        fromFirst: boolean;
     }>
 ) => {
     if (data.headers || data.listGrid) {
@@ -1602,12 +1636,28 @@ const processDHIS2Data = (
         if (headers !== undefined && rows !== undefined) {
             const processed = flattenDHIS2Data(
                 rows.map((row: string[]) => {
-                    return fromPairs(
-                        row.map((value, index) => {
-                            const header = headers?.[index];
-                            return [header.name, value];
-                        })
-                    );
+                    let others = {};
+
+                    if (data.metaData && data.metaData.items) {
+                        row.forEach((r, index) => {
+                            if (index < row.length - 1) {
+                                others = {
+                                    ...others,
+                                    [`${headers?.[index].name}-name`]:
+                                        data.metaData.items[r]?.name || "",
+                                };
+                            }
+                        });
+                    }
+                    return {
+                        ...others,
+                        ...fromPairs(
+                            row.map((value, index) => {
+                                const header = headers?.[index];
+                                return [header.name, value];
+                            })
+                        ),
+                    };
                 }),
                 options.flatteningOption
             );
@@ -1616,12 +1666,12 @@ const processDHIS2Data = (
                     processed,
                     options.joinData,
                     options.fromColumn,
-                    options.toColumn
+                    options.toColumn,
+                    options.fromFirst || false
                 );
             }
 
             if (!isEmpty(options.otherFilters)) {
-                console.log(processed);
                 return processed.filter((data: any) => {
                     const values = Object.entries(
                         options.otherFilters || {}
@@ -1640,7 +1690,8 @@ const processDHIS2Data = (
             flattenDHIS2Data(data, options.flatteningOption),
             options.joinData,
             options.fromColumn,
-            options.toColumn
+            options.toColumn,
+            options.fromFirst || false
         );
         if (!isEmpty(options.otherFilters)) {
             return merged.filter((data: any) => {
@@ -1716,6 +1767,7 @@ const queryDHIS2 = async (
                     otherFilters,
                     fromColumn: vq.fromColumn,
                     toColumn: vq.toColumn,
+                    fromFirst: vq.fromFirst,
                 });
             }
             const { data } = await axios.get(
@@ -1734,6 +1786,7 @@ const queryDHIS2 = async (
                 otherFilters,
                 fromColumn: vq.fromColumn,
                 toColumn: vq.toColumn,
+                fromFirst: vq.fromFirst,
             });
         }
 

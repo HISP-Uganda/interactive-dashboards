@@ -10,13 +10,10 @@ import {
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import { useStore } from "effector-react";
-import { fromPairs, isArray, uniq, groupBy } from "lodash";
+import { fromPairs, groupBy, uniq } from "lodash";
 import { evaluate } from "mathjs";
 import { Option, Threshold } from "../interfaces";
 import { $visualizationQuery } from "../Store";
-import { uniqBy } from "lodash/fp";
-
-type periodType = "days" | "weeks" | "months" | "years" | "quarters";
 
 dayjs.extend(isoWeek);
 
@@ -41,10 +38,13 @@ export function decodeFromBinary(str: string): string {
 }
 
 const getValue = (value: number) => {
-    if (value >= 75) return "Achieved";
-    if (value >= 50 && value < 75) return "On Track";
-    if (value < 50 && value >= 0) return "Slow Progress";
-    if (value === -1) return "X";
+    if (value === NaN) {
+        return "nac";
+    }
+    if (value >= 100) return "aa";
+    if (value >= 75 && value < 100) return "aav";
+    if (value >= 50 && value < 75) return "av";
+    if (value >= 25 && value < 50) return "bav";
 };
 
 export const globalIds: Option[] = [
@@ -817,7 +817,6 @@ export const deriveSingleValues = (
         }
         try {
             const evaluation = evaluate(finalExpression);
-            console.log(evaluation);
             return [{ value: evaluation }];
         } catch (error) {
             return [{ value: "" }];
@@ -1171,12 +1170,19 @@ export const datElementGroupSetsDataElementGroupsWithAttributes = (
         let keyResultArea: string = "";
         let attributeName: string = "";
         let value: string = "";
+        let shortName = "";
 
         if (dataElementGroups && dataElementGroups.length > 0) {
-            const [{ name: dataElementGroupName, groupSets }] =
-                dataElementGroups;
+            const [
+                {
+                    name: dataElementGroupName,
+                    groupSets,
+                    shortName: dataElementGroupShortName,
+                },
+            ] = dataElementGroups;
 
             subKeyResultArea = dataElementGroupName;
+            shortName = dataElementGroupShortName;
 
             if (groupSets && groupSets.length > 0) {
                 const [{ name: dataElementGroupSetName, attributeValues }] =
@@ -1200,6 +1206,7 @@ export const datElementGroupSetsDataElementGroupsWithAttributes = (
             id,
             name,
             subKeyResultArea,
+            shortName,
             keyResultArea,
             [attributeName]: value,
         };
@@ -1232,24 +1239,9 @@ export const processDirectives = (data: any) => {
     return Object.entries(groupBy(data, (d) => `${d["dx"]}${d["pe"]}`)).map(
         ([_, group]) => {
             const gp = group[0];
-            let value = -1;
-            const actualValue = group.find(
-                ({ Duw5yep8Vae }: any) => Duw5yep8Vae === "HKtncMjp06U"
-            );
-            const targetValue = group.find(
-                ({ Duw5yep8Vae }: any) => Duw5yep8Vae === "Px8Lqkxy2si"
-            );
-
-            if (actualValue && targetValue) {
-                value =
-                    (Number(actualValue.value) * 100) /
-                    Number(targetValue.value);
-            }
-
             return {
                 ...gp,
-                value,
-                label: getValue(value),
+                label: getValue(Number(gp.value)),
             };
         }
     );
@@ -1371,11 +1363,34 @@ export const generatePeriods = (date: string) => {
 export const merge2DataSources = (
     from: any[],
     to: any[],
+    fromColumn: string,
     toColumn: string,
-    fromColumn: string
+    fromFirst: boolean
 ) => {
+    if (fromFirst) {
+        return from.flatMap((e) => {
+            const filtered = to.filter((ev) => {
+                return ev[toColumn] === e[fromColumn];
+            });
+            if (filtered.length > 0) {
+                return filtered.map((f) => {
+                    return { ...f, ...e };
+                });
+            }
+            return e;
+        });
+    }
     return to.flatMap((e) => {
         const filtered = from.filter((ev) => {
+            console.log(
+                ev,
+                e,
+                fromColumn,
+                toColumn,
+                ev[fromColumn],
+                e[toColumn],
+                ev[fromColumn] === e[toColumn]
+            );
             return ev[fromColumn] === e[toColumn];
         });
         if (filtered.length > 0) {

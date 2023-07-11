@@ -1,44 +1,12 @@
-import React, { useRef } from "react";
-import { utils, writeFile } from "xlsx";
-import {
-    Box,
-    Stack,
-    Table,
-    Tbody,
-    Td,
-    Th,
-    Thead,
-    Tr,
-    background,
-} from "@chakra-ui/react";
-import { useStore } from "effector-react";
-import { flatten, fromPairs, groupBy, max, mean, sum } from "lodash";
+import { Box, Stack, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
+import { flatten } from "lodash";
+import React from "react";
 import { useElementSize } from "usehooks-ts";
 import { ChartProps, Column, Threshold } from "../../interfaces";
-import { $store } from "../../Store";
-import { createOptions } from "../../utils/utils";
-import { processTable, invertHex } from "../processors";
 import { SPECIAL_COLUMNS } from "../constants";
-import { visualizationDataApi } from "../../Events";
+import { invertHex, processTable } from "../processors";
 
 interface TableProps extends ChartProps {}
-
-const getColumns = (data: any[]) => {
-    if (data.length > 0) {
-        return createOptions(Object.keys(data[0]));
-    }
-    return [];
-};
-
-const previousFinancialYear = () => {
-    const currentDate = new Date();
-    const year = currentDate.getFullYear();
-
-    if (currentDate.getMonth() <= 6) {
-        return `${year - 2}July`;
-    }
-    return `${year - 1}July`;
-};
 
 const Tables = ({
     visualization,
@@ -47,9 +15,7 @@ const Tables = ({
     section,
     data,
 }: TableProps) => {
-    const store = useStore($store);
-    const tbl = useRef(null);
-    const [squareRef, { width, height }] = useElementSize();
+    const [squareRef, { height }] = useElementSize();
     const flattenedData = flatten(data);
 
     const rows = String(visualization.properties["rows"] || "").split(",");
@@ -86,13 +52,14 @@ const Tables = ({
                     w="100%"
                 >
                     <Table
-                        // variant="unstyled"
+                        variant="unstyled"
                         w="100%"
                         bg="white"
                         size={visualization.properties["cellHeight"]}
                         style={{ borderSpacing: 0, borderCollapse: "collapse" }}
                     >
                         {visualization.properties["showHeaders"] && (
+                            <Thead>
                                 {finalColumns.map((col, index) => (
                                     <Tr key={index}>
                                         {index === 0 && (
@@ -104,12 +71,6 @@ const Tables = ({
                                                 borderStyle="solid"
                                                 rowSpan={finalColumns.length}
                                                 colSpan={finalRows.length}
-                                                //bg="yellow.200"
-                                                textAlign={
-                                                    visualization.properties[
-                                                        "columnAlignment"
-                                                    ]
-                                                }
                                             >
                                                 {
                                                     visualization.properties[

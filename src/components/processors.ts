@@ -526,25 +526,20 @@ export const processSingleValue = (
     data: any[],
     aggregate: boolean,
     aggregationColumn: string,
-    key: string
+    key: string,
+    uniqColumn: string
 ): any => {
     if (data.length > 0) {
-        if (aggregate) {
-            if (aggregationColumn) {
-                const grouped = groupBy(data, aggregationColumn);
-                if (key) {
-                    const value = grouped[key]?.length;
-                    return value;
-                } else {
-                    let all = Object.entries(grouped).map(([k, values]) => [
-                        k,
-                        values.length,
-                    ]);
-                    return fromPairs(all);
-                }
-            } else {
-                return data.length;
-            }
+        if (aggregate && aggregationColumn && key) {
+            const grouped = groupBy(data, aggregationColumn);
+            const value = uniqColumn
+                ? uniqBy(uniqColumn, grouped[key]).length
+                : grouped[key]?.length;
+            return value;
+        } else if (aggregate && aggregationColumn) {
+            return Object.keys(groupBy(data, aggregationColumn)).length;
+        } else if (aggregate) {
+            return data.length;
         } else {
             const values = Object.values(data[0]);
             if (data.length === 1 && Object.keys(data[0]).length === 1) {

@@ -8,6 +8,7 @@ import {
     Stack,
     Text,
 } from "@chakra-ui/react";
+import { useState, useEffect } from "react";
 import { GroupBase, Select } from "chakra-react-select";
 import { ChangeEvent } from "react";
 import { sectionApi } from "../../Events";
@@ -56,25 +57,31 @@ const SingleValueProperties = ({
     visualization: IVisualization;
 }) => {
     const visualizationData = useStore($visualizationData);
-
+    const [currentValues, setCurrentValues] = useState<Option[]>([]);
     const normalColumns = uniq(
         flatten(
-            flatten(visualizationData[visualization.id]).map((d) =>
+            flatten(visualizationData[visualization.id] || []).map((d) =>
                 Object.keys(d)
             )
         )
     );
-    console.log(visualizationData[visualization.id]);
+    useEffect(() => {
+        setCurrentValues(() =>
+            uniq(
+                visualizationData[visualization.id]?.map(
+                    (d) =>
+                        d[visualization.properties["aggregationColumn"] || ""]
+                ) || []
+            )
+                .filter((d) => !!d)
+                .map((d) => {
+                    return { label: d, value: d, span: 1, actual: d };
+                })
+        );
 
-    let currentValues: Array<Option> = uniq(
-        visualizationData[visualization.id].map(
-            (d) => d[visualization.properties["aggregationColumn"] || ""]
-        )
-    )
-        .filter((d) => !!d)
-        .map((d) => {
-            return { label: d, value: d, span: 1, actual: d };
-        });
+        return () => {};
+    }, [visualization.properties["aggregationColumn"]]);
+
     return (
         <Stack spacing="20px" pb="10px">
             <SwitchProperty
@@ -93,6 +100,13 @@ const SingleValueProperties = ({
                 title="Specific Key"
                 attribute="key"
                 options={currentValues}
+            />
+
+            <SelectProperty
+                visualization={visualization}
+                title="Uniq By"
+                attribute="uniqBy"
+                options={createOptions(normalColumns)}
             />
             <SelectProperty
                 visualization={visualization}
