@@ -24,7 +24,12 @@ import { ChangeEvent, useEffect, useState } from "react";
 import { SwatchesPicker } from "react-color";
 import { useFullScreenHandle } from "react-full-screen";
 import { FaPlus } from "react-icons/fa";
-import { dashboardApi, sectionApi, storeApi } from "../../Events";
+import {
+    dashboardApi,
+    sectionApi,
+    storeApi,
+    dashboardsApi,
+} from "../../Events";
 import { IDashboard, LocationGenerics, Option } from "../../interfaces";
 import { saveDocument } from "../../Queries";
 import {

@@ -94,6 +94,7 @@ export interface IData extends INamed {
     flatteningOption?: string;
     fromColumn?: string;
     toColumn?: string;
+    fromFirst?: boolean;
 }
 
 export interface IIndicator extends INamed {
@@ -222,6 +223,7 @@ export interface IStore {
     groups: string[];
     levels: string[];
     expandedKeys: React.Key[];
+    selectedKeys: React.Key[];
     selectedCategory: string;
     selectedDashboard: string;
     isAdmin: boolean;

@@ -99,154 +99,162 @@ const TableProperties = ({
 
     return (
         <Stack>
-            <Stack>
-                <Text>Columns</Text>
-                <Select<Option, true, GroupBase<Option>>
-                    value={columns.filter(
-                        (pt) =>
-                            String(visualization.properties["columns"])
-                                .split(",")
-                                .indexOf(pt.value) !== -1
-                    )}
-                    onChange={(e) =>
-                        sectionApi.changeVisualizationProperties({
-                            visualization: visualization.id,
-                            attribute: "columns",
-                            value: Array.from(e)
-                                .map(({ value }) => value)
-                                .join(","),
-                        })
-                    }
-                    options={columns}
-                    isClearable
-                    menuPlacement="top"
-                    isMulti
-                />
-            </Stack>
+            <SimpleAccordion title="Columns">
+                <Stack>
+                    <Text>Columns</Text>
+                    <Select<Option, true, GroupBase<Option>>
+                        value={columns.filter(
+                            (pt) =>
+                                String(visualization.properties["columns"])
+                                    .split(",")
+                                    .indexOf(pt.value) !== -1
+                        )}
+                        onChange={(e) =>
+                            sectionApi.changeVisualizationProperties({
+                                visualization: visualization.id,
+                                attribute: "columns",
+                                value: Array.from(e)
+                                    .map(({ value }) => value)
+                                    .join(","),
+                            })
+                        }
+                        options={columns}
+                        isClearable
+                        menuPlacement="top"
+                        isMulti
+                    />
+                </Stack>
 
-            <Scrollable height={300}>
-                <Table variant="unstyled">
-                    <Thead>
-                        <Tr>
-                            <Th>Column</Th>
-                            <Th>Width</Th>
-                            <Th>BG</Th>
-                            <Th>Rename</Th>
-                        </Tr>
-                    </Thead>
-                    <Tbody>
-                        {lastColumn.map((row) => (
-                            <Tr key={row}>
-                                <Td>{row}</Td>
-                                <Td w="50px">
-                                    <NumberProperty
-                                        visualization={visualization}
-                                        title=""
-                                        attribute={`${row}.width`}
-                                        min={50}
-                                        max={500}
-                                        step={1}
-                                    />
-                                </Td>
-                                <Td w="50px">
-                                    <ColorProperty
-                                        visualization={visualization}
-                                        title=""
-                                        attribute={`${row}.bg`}
-                                    />
-                                </Td>
-                                <Td>
-                                    <TextProperty
-                                        visualization={visualization}
-                                        title=""
-                                        attribute={`${row}.name`}
-                                    />
-                                </Td>
+                <Scrollable height={300}>
+                    <Table variant="unstyled">
+                        <Thead>
+                            <Tr>
+                                <Th>Column</Th>
+                                <Th>Width</Th>
+                                <Th>BG</Th>
+                                <Th>Rename</Th>
                             </Tr>
-                        ))}
-                    </Tbody>
-                </Table>
-            </Scrollable>
-            <Stack>
-                <Text>Rows</Text>
-                <Select<Option, true, GroupBase<Option>>
-                    value={columns.filter(
-                        (pt) =>
-                            String(visualization.properties["rows"])
-                                .split(",")
-                                .indexOf(pt.value) !== -1
-                    )}
-                    onChange={(e) =>
-                        sectionApi.changeVisualizationProperties({
-                            visualization: visualization.id,
-                            attribute: "rows",
-                            value: Array.from(e)
-                                .map(({ value }) => value)
-                                .join(","),
-                        })
-                    }
-                    options={columns}
-                    isClearable
-                    menuPlacement="top"
-                    isMulti
-                />
-            </Stack>
+                        </Thead>
+                        <Tbody>
+                            {lastColumn.map((row) => (
+                                <Tr key={row}>
+                                    <Td>{row}</Td>
+                                    <Td w="50px">
+                                        <NumberProperty
+                                            visualization={visualization}
+                                            title=""
+                                            attribute={`${row}.width`}
+                                            min={50}
+                                            max={500}
+                                            step={1}
+                                        />
+                                    </Td>
+                                    <Td w="50px">
+                                        <ColorProperty
+                                            visualization={visualization}
+                                            title=""
+                                            attribute={`${row}.bg`}
+                                        />
+                                    </Td>
+                                    <Td>
+                                        <TextProperty
+                                            visualization={visualization}
+                                            title=""
+                                            attribute={`${row}.name`}
+                                        />
+                                    </Td>
+                                </Tr>
+                            ))}
+                        </Tbody>
+                    </Table>
+                </Scrollable>
+            </SimpleAccordion>
 
-            <Scrollable height={300}>
-                <Table variant="unstyled">
-                    <Thead>
-                        <Tr>
-                            <Th>Column</Th>
-                            <Th>Width</Th>
-                            <Th>BG</Th>
-                            <Th>Rename</Th>
-                        </Tr>
-                    </Thead>
-                    <Tbody>
-                        {lastRow.map((row) => (
-                            <Tr key={row}>
-                                <Td>{row}</Td>
-                                <Td w="50px">
-                                    <NumberProperty
-                                        visualization={visualization}
-                                        title=""
-                                        attribute={`${row}.width`}
-                                        min={50}
-                                        max={500}
-                                        step={1}
-                                    />
-                                </Td>
-                                <Td w="50px">
-                                    <ColorProperty
-                                        visualization={visualization}
-                                        title=""
-                                        attribute={`${row}.bg`}
-                                    />
-                                </Td>
-                                <Td w="300px">
-                                    <TextProperty
-                                        visualization={visualization}
-                                        title=""
-                                        attribute={`${row}.name`}
-                                    />
-                                </Td>
+            <SimpleAccordion title="Rows">
+                <Stack>
+                    <Text>Rows</Text>
+                    <Select<Option, true, GroupBase<Option>>
+                        value={columns.filter(
+                            (pt) =>
+                                String(visualization.properties["rows"])
+                                    .split(",")
+                                    .indexOf(pt.value) !== -1
+                        )}
+                        onChange={(e) =>
+                            sectionApi.changeVisualizationProperties({
+                                visualization: visualization.id,
+                                attribute: "rows",
+                                value: Array.from(e)
+                                    .map(({ value }) => value)
+                                    .join(","),
+                            })
+                        }
+                        options={columns}
+                        isClearable
+                        menuPlacement="top"
+                        isMulti
+                    />
+                </Stack>
+
+                <Scrollable height={300}>
+                    <Table variant="unstyled">
+                        <Thead>
+                            <Tr>
+                                <Th>Column</Th>
+                                <Th>Width</Th>
+                                <Th>BG</Th>
+                                <Th>Rename</Th>
                             </Tr>
-                        ))}
-                    </Tbody>
-                </Table>
-            </Scrollable>
-            <SelectProperty
-                visualization={visualization}
-                title="Aggregation"
-                attribute="aggregation"
-                options={aggregations}
-            />
-            <SelectProperty
-                visualization={visualization}
-                title="Aggregation Column"
-                attribute="aggregationColumn"
-                options={createOptions(normalColumns)}
-            />
+                        </Thead>
+                        <Tbody>
+                            {lastRow.map((row) => (
+                                <Tr key={row}>
+                                    <Td>{row}</Td>
+                                    <Td w="50px">
+                                        <NumberProperty
+                                            visualization={visualization}
+                                            title=""
+                                            attribute={`${row}.width`}
+                                            min={50}
+                                            max={500}
+                                            step={1}
+                                        />
+                                    </Td>
+                                    <Td w="50px">
+                                        <ColorProperty
+                                            visualization={visualization}
+                                            title=""
+                                            attribute={`${row}.bg`}
+                                        />
+                                    </Td>
+                                    <Td w="300px">
+                                        <TextProperty
+                                            visualization={visualization}
+                                            title=""
+                                            attribute={`${row}.name`}
+                                        />
+                                    </Td>
+                                </Tr>
+                            ))}
+                        </Tbody>
+                    </Table>
+                </Scrollable>
+            </SimpleAccordion>
+
+            <SimpleAccordion title="Aggregation">
+                <SelectProperty
+                    visualization={visualization}
+                    title="Aggregation"
+                    attribute="aggregation"
+                    options={aggregations}
+                />
+                <SelectProperty
+                    visualization={visualization}
+                    title="Aggregation Column"
+                    attribute="aggregationColumn"
+                    options={createOptions(normalColumns)}
+                />
+            </SimpleAccordion>
             <SimpleAccordion title="Table">
                 <TextProperty
                     visualization={visualization}
