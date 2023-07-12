@@ -311,16 +311,16 @@ export const useInitials = (storage: "data-store" | "es") => {
         systemInfo: {
             resource: "system/info",
         },
-        directives: {
-            resource:
-                "analytics.json?dimension=dx:B04qyv8sHLZ;Et0jLLFoPiQ;FJ1pjZ5Edzf;HolY9bB9ndg;I8NkRKchMoU;N7r57cuvssW;PQxdLS3vke3;Q18G7d3DPOg;QYISgIjXTJC;QgvBHBb5xcS;UEDzAaR5GpB;WdilrXx08R4;gjqIp8H7948;gypjprrtiKV;h4lJWKnqnxx;lYoAOhykYUW;m3xNIoQ2esR;nOnQwK1sDaN;tWRpQ8HFWk4;um8prFWwCYU;w6VmDxFste0;wRshJ7SJcHq;wXeABLEj9Vj&dimension=pe:2020July;2021July;2022July;2023July;2024July&dimension=ou:qjk1ujdzlss&aggregationType=MAX",
-        },
+        // directives: {
+        //     resource:
+        //         "analytics.json?dimension=dx:B04qyv8sHLZ;Et0jLLFoPiQ;FJ1pjZ5Edzf;HolY9bB9ndg;I8NkRKchMoU;N7r57cuvssW;PQxdLS3vke3;Q18G7d3DPOg;QYISgIjXTJC;QgvBHBb5xcS;UEDzAaR5GpB;WdilrXx08R4;gjqIp8H7948;gypjprrtiKV;h4lJWKnqnxx;lYoAOhykYUW;m3xNIoQ2esR;nOnQwK1sDaN;tWRpQ8HFWk4;um8prFWwCYU;w6VmDxFste0;wRshJ7SJcHq;wXeABLEj9Vj&dimension=pe:2020July;2021July;2022July;2023July;2024July&dimension=ou:qjk1ujdzlss&aggregationType=MAX",
+        // },
     };
     return useQuery<string, Error>(
         ["initialing"],
         async ({ signal }) => {
             const {
-                directives: { rows, headers },
+                //directives: { rows, headers },
                 systemInfo: { systemId, systemName, instanceBaseUrl },
                 me: { organisationUnits, authorities },
                 levels: { organisationUnitLevels },
@@ -328,31 +328,31 @@ export const useInitials = (storage: "data-store" | "es") => {
                 dataSets: { dataSets },
             }: any = await engine.query(ouQuery);
 
-            const processed = flattenDHIS2Data(
-                rows.map((row: string[]) => {
-                    return fromPairs(
-                        row.map((value, index) => {
-                            const header = headers?.[index];
-                            return [header.name, value];
-                        })
-                    );
-                }),
-                "processDirectives"
-            );
+            // const processed = flattenDHIS2Data(
+            //     rows.map((row: string[]) => {
+            //         return fromPairs(
+            //             row.map((value, index) => {
+            //                 const header = headers?.[index];
+            //                 return [header.name, value];
+            //             })
+            //         );
+            //     }),
+            //     "processDirectives"
+            // );
 
-            const maxPe = max(processed.map((d: any) => d.pe));
+            //const maxPe = max(processed.map((d: any) => d.pe));
 
-            Object.entries(
-                groupBy(
-                    processed.filter((d: any) => d.pe === maxPe),
-                    "label"
-                )
-            ).forEach(([id, values]) =>
-                calculatedApi.add({
-                    id,
-                    value: uniqBy(values, "dx").length,
-                })
-            );
+            // Object.entries(
+            //     groupBy(
+            //         processed.filter((d: any) => d.pe === maxPe),
+            //         "label"
+            //     )
+            // ).forEach(([id, values]) =>
+            //     calculatedApi.add({
+            //         id,
+            //         value: uniqBy(values, "dx").length,
+            //     })
+            // );
 
             const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
             const facilities: string[] = organisationUnits.map(
