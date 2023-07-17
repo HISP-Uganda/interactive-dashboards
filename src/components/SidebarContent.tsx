@@ -3,7 +3,7 @@ import { useStore } from "effector-react";
 import { $store } from "../Store";
 // import DashboardList from "./DashboardList";
 import Menus from "./Menus";
-interface SidebarProps extends StackProps {}
+interface SidebarProps extends StackProps { }
 
 const SidebarContent = ({ ...rest }: SidebarProps) => {
     const store = useStore($store);
@@ -12,7 +12,7 @@ const SidebarContent = ({ ...rest }: SidebarProps) => {
         <Stack {...rest} h="100%">
             <Text
                 fontSize="xl"
-                fontWeight="bold"
+                p="bold"
                 textAlign="left"
                 pl="3"
                 pt="2"
@@ -25,13 +25,13 @@ const SidebarContent = ({ ...rest }: SidebarProps) => {
                 store.currentPage === "dashboard" ? (
                     <Text>Coming soon</Text>
                 ) : // <DashboardList />
-                store.currentPage === "sections" ? null : (
-                    <Menus />
-                )
+                    store.currentPage === "sections" ? null : (
+                        <Menus />
+                    )
             ) : (
-                <Text>Coming soon</Text>
-                // <DashboardList />
-            )}
+                    <Text>Coming soon</Text>
+                    // <DashboardList />
+                )}
         </Stack>
     );
 };

@@ -81,7 +81,9 @@ export default function VisualizationQueries() {
     };
     return (
         <Stack>
+            <Text fontSize="2xl" fontWeight="bold" p="2" color="blue.600">Visualisation Queries</Text>
             <Stack direction="row">
+
                 <Input
                     value={q}
                     placeholder="Search Visualization Queries"
@@ -200,7 +202,7 @@ export default function VisualizationQueries() {
                                                         isLoading={
                                                             loading2 &&
                                                             currentId ===
-                                                                visualizationQuery.id
+                                                            visualizationQuery.id
                                                         }
                                                     >
                                                         Duplicate
@@ -211,7 +213,7 @@ export default function VisualizationQueries() {
                                                         isLoading={
                                                             loading &&
                                                             currentId ===
-                                                                visualizationQuery.id
+                                                            visualizationQuery.id
                                                         }
                                                         onClick={() =>
                                                             deleteResource(

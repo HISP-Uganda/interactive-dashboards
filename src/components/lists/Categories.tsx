@@ -46,6 +46,7 @@ const Categories = () => {
     return (
         <Stack>
             <Stack direction="row">
+                <Text fontSize="2xl" fontWeight="bold" p="2" color="blue.600">Categories</Text>
                 <Spacer />
                 <Button
                     colorScheme="blue"
