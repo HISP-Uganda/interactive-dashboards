@@ -19,10 +19,10 @@ export default function ImageVisualization({ dataProperties }: ChartProps) {
                     height: "auto",
                 }}
             />
-            <Stack>
+            {/* <Stack>
                 <Text textTransform="uppercase" fontWeight="bold" fontSize="lg">Office of the President</Text>
                 <Text fontWeight="bold" fontSize="lg">The Republic Of Uganda</Text>
-            </Stack>
+            </Stack> */}
         </>
     );
 }

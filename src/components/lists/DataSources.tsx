@@ -47,6 +47,7 @@ const DataSources = () => {
     return (
         <Stack>
             <Stack direction="row" border="1">
+                <Text fontSize="2xl" fontWeight="bold" p="2" color="blue.600">Data Sources</Text>
                 <Spacer />
                 <Button
                     colorScheme="blue"

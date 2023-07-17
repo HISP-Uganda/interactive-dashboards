@@ -8,7 +8,7 @@ export default function DashboardTitle() {
     return (
         <Stack justifyContent="center">
             {dashboard.name && (
-                <Text fontSize="4xl" fontWeight="bold">
+                <Text fontSize="4xl" fontWeight="bold" color="blue.400">
                     {dashboard.name}
                 </Text>
             )}

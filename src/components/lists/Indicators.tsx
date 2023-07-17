@@ -78,6 +78,7 @@ const Indicators = () => {
     };
     return (
         <Stack>
+            <Text fontSize="2xl" fontWeight="bold" p="2" color="blue.600">Indicators</Text>
             <Stack direction="row">
                 <Input
                     value={q}
@@ -181,7 +182,7 @@ const Indicators = () => {
                                                     isLoading={
                                                         loading2 &&
                                                         currentId ===
-                                                            indicator.id
+                                                        indicator.id
                                                     }
                                                 >
                                                     Duplicate
@@ -192,7 +193,7 @@ const Indicators = () => {
                                                     isLoading={
                                                         loading &&
                                                         currentId ===
-                                                            indicator.id
+                                                        indicator.id
                                                     }
                                                     onClick={() =>
                                                         deleteResource(

@@ -60,6 +60,7 @@ const Dashboards = () => {
 
     return (
         <Stack p="20px">
+            <Text fontSize="2xl" fontWeight="bold" p="2" color="blue.600">Dashboard List</Text>
             <Stack direction="row">
                 <Spacer />
                 <Button
