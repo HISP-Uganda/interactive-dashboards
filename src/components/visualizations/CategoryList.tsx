@@ -19,7 +19,7 @@ export default function CategoryList() {
         <>
             {isLoading && <LoadingIndicator />}
             {isSuccess && (
-                <Stack spacing="40px" p="5px">
+                <Stack spacing="10px" p="5px" overflow="auto">
                     {categoryOptions
                         .map((category) => {
                             const groupedDashboards = groupBy(data, "category");

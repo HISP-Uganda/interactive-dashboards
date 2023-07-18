@@ -39,6 +39,7 @@ import TreeMaps from "./TreeMaps";
 import { useSearch } from "@tanstack/react-location";
 import TextVisualisation from "./TextVisualisation";
 import ClockVisualisation from "./ClockVisualisation";
+import HeatMap from "./HeatMap";
 
 type VisualizationProps = {
     visualization: IVisualization;
@@ -271,6 +272,9 @@ const getVisualization = (
             ),
         clock: (
             <ClockVisualisation visualization={visualization} section={section} />
+        ),
+        heatmap: (
+            <HeatMap visualization={visualization} section={section} />
         ),
     };
     return allTypes[visualization.type];

@@ -16,7 +16,7 @@ const NavItem = ({ option: { label, value, dashboards } }: NavItemProps) => {
             <Text
                 color="gray.600"
                 m="1"
-                mt="4"
+                mt="2"
                 fontSize="lg"
                 fontWeight="bold"
                 textTransform="uppercase"
@@ -35,9 +35,12 @@ const NavItem = ({ option: { label, value, dashboards } }: NavItemProps) => {
                     fontSize="lg"
                     m="2"
                     cursor="pointer"
-                    _hover={{ bgColor: "teal", color: "white" }}
-                    bgColor={dashboard.id === d.id ? "gray.200" : "gray.200"}
+                    _hover={{ bgColor: "teal", color: "white", transform: "scale(1.1)" }}
+                    //bgColor={dashboard.id === d.id ? "gray.200" : "gray.200"}
                     //color={dashboard.id === d.id ? "black" : ""}
+                    // _hover={{
+                    //     color: "blue.600", fontWeight: "bold", transform: "scale(1.1)",
+                    // }}
                     _active={{ bgColor: "teal", color: "white" }}
                     onClick={(e) => {
                         e.stopPropagation();

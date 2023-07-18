@@ -626,6 +626,7 @@ export const chartTypes: Option[] = [
     { value: "optionSet", label: "Option Set" },
     { value: "text", label: "Text" },
     { value: "clock", label: "Clock" },
+    { value: "heatmap", label: "Heat Map" },
 ];
 
 export const createOptions = (options: string[]): Option[] => {
