@@ -385,17 +385,15 @@ export const useInitials = (storage: "data-store" | "es") => {
                 signal,
                 engine,
             });
-            const defaultDashboard = settings.find(
-                (s: any) => s.id === systemId && s.default
-            );
-            if (defaultDashboard) {
-                storeApi.changeSelectedDashboard(
-                    defaultDashboard.defaultDashboard
-                );
-                storeApi.setDefaultDashboard(defaultDashboard.defaultDashboard);
-                if (defaultDashboard.storage) {
-                    settingsApi.changeStorage(defaultDashboard.storage);
-                }
+            // const defaultDashboard = settings.find(
+            //     (s: any) => s.id === systemId && s.default
+            // );
+            if (settings.length > 0) {
+                storeApi.changeSelectedDashboard(settings[0].defaultDashboard);
+                storeApi.setDefaultDashboard(settings[0].defaultDashboard);
+                // if (defaultDashboard.storage) {
+                //     settingsApi.changeStorage(defaultDashboard.storage);
+                // }
             }
             if (minSublevel && minSublevel + 1 <= maxLevel) {
                 storeApi.setMinSublevel(minSublevel + 1);
