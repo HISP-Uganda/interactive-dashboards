@@ -23,7 +23,7 @@ const breakString = (str: string, maxChars: number): string => {
         if (index === -1) index = str.indexOf(" ", maxChars + 1);
         return (
             str.substr(0, index) +
-            "</br></br>" +
+            "<br />" +
             breakString(str.substr(index + 1), maxChars)
         );
     } else {
@@ -37,26 +37,31 @@ function padZero(str: string, len: number = 2) {
 }
 
 export function invertHex(hex: string, bw: boolean = true) {
-    if (hex.indexOf("#") === 0) {
-        hex = hex.slice(1);
+    if (hex) {
+        if (hex.indexOf("#") === 0) {
+            hex = hex.slice(1);
+        }
+        if (hex.length === 3) {
+            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+        }
+        if (hex.length !== 6) {
+            return "";
+        }
+        const r = parseInt(hex.slice(0, 2), 16);
+        const g = parseInt(hex.slice(2, 4), 16);
+        const b = parseInt(hex.slice(4, 6), 16);
+        if (bw) {
+            return r * 0.299 + g * 0.587 + b * 0.114 > 186
+                ? "#000000"
+                : "#FFFFFF";
+        }
+        const r1 = (255 - r).toString(16);
+        const g1 = (255 - g).toString(16);
+        const b1 = (255 - b).toString(16);
+        // pad each with zeros and return
+        return "#" + padZero(r1) + padZero(g1) + padZero(b1);
     }
-    if (hex.length === 3) {
-        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-    }
-    if (hex.length !== 6) {
-        return "";
-    }
-    const r = parseInt(hex.slice(0, 2), 16);
-    const g = parseInt(hex.slice(2, 4), 16);
-    const b = parseInt(hex.slice(4, 6), 16);
-    if (bw) {
-        return r * 0.299 + g * 0.587 + b * 0.114 > 186 ? "#000000" : "#FFFFFF";
-    }
-    const r1 = (255 - r).toString(16);
-    const g1 = (255 - g).toString(16);
-    const b1 = (255 - b).toString(16);
-    // pad each with zeros and return
-    return "#" + padZero(r1) + padZero(g1) + padZero(b1);
+    return "";
 }
 
 export const findColor = (
