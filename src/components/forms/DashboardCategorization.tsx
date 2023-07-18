@@ -16,7 +16,7 @@ const DashboardCategorization = ({ dataSet }: DashboardCategorizationProps) => {
         <>
             {isLoading && <Spinner />}
             {isSuccess && (
-                <Stack spacing="30px">
+                <Stack spacing="30px" >
                     {dashboard.availableCategories.map(
                         ({ id, name, categoryOptions }) => {
                             return (

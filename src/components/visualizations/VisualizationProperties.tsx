@@ -16,6 +16,8 @@ import TableProperties from "../properties/TableProperties";
 import OptionSetProperties from "../properties/OptionSetProperties";
 import TextVisualisationProperties from "../properties/TextVisualisationproperties";
 import ClockProperties from "../properties/ClockProperties";
+import HeatMap from "./HeatMap";
+import HeatMapProperties from "../properties/HeatMapProperties";
 type VizProps = {
     visualization: IVisualization;
 };
@@ -44,6 +46,7 @@ const VisualizationProperties = ({ visualization }: VizProps) => {
             optionSet: <OptionSetProperties visualization={visualization} />,
             text: <TextVisualisationProperties visualization={visualization} />,
             clock: <ClockProperties />,
+            heatmap: <HeatMapProperties />
 
         };
         if (visualizationType) {
