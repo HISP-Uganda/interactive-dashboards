@@ -31,6 +31,7 @@ const SingleValue = ({
         visualization.properties["uniqBy"] || ""
     );
 
+
     const colorSearch = dataProperties?.["data.thresholds"]?.find(
         ({ max, min }: any) => {
             if (max && min) {
@@ -69,7 +70,7 @@ const SingleValue = ({
     const targetSpacing = dataProperties?.["data.targetspacing"] || 0;
     const spacing =
         dataProperties?.["data.format.spacing"] ||
-        ["row", "row-reverse"].indexOf(alignment) !== -1
+            ["row", "row-reverse"].indexOf(alignment) !== -1
             ? 10
             : 0;
 
@@ -109,7 +110,6 @@ const SingleValue = ({
             });
         }
     }, [value]);
-
     const numberFormatter = Intl.NumberFormat("en-US", format);
 
     return (
@@ -137,10 +137,6 @@ const SingleValue = ({
             )}
             <Stack
                 direction={direction}
-                // alignItems="center"
-                // alignContent="center"
-                // justifyContent="center"
-                // justifyItems="center"
                 spacing={`${targetSpacing}px`}
             >
                 {targetGraph === "circular" && targetValue && target ? (
