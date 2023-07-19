@@ -18,8 +18,7 @@ import {
     ScreenSize,
 } from "./interfaces";
 import { generateUid } from "./utils/uid";
-import { getRelativePeriods, relativePeriodTypes } from "./utils/utils";
-
+import { getRelativePeriods, relativePeriods2 } from "./utils/utils";
 export const createSection = (id = generateUid()): ISection => {
     return {
         id,
@@ -174,13 +173,7 @@ export const $settings = domain.createStore<IDashboardSetting>({
 
 export const $store = domain.createStore<IStore>({
     showSider: false,
-    periods: [
-        { value: "2020July", label: "July 2020 - June 2021", type: "fixed" },
-        { value: "2021July", label: "July 2021 - June 2022", type: "fixed" },
-        { value: "2022July", label: "July 2022 - June 2023", type: "fixed" },
-        { value: "2023July", label: "July 2023 - June 2024", type: "fixed" },
-        { value: "2024July", label: "July 2024 - June 2025", type: "fixed" },
-    ],
+    periods: [{ value: "THIS_YEAR", label: "This year", type: "relative" }],
     organisations: [],
     levels: [],
     groups: [],
@@ -421,7 +414,7 @@ export const $globalFilters = combine(
     (store, categoryOptionCombo, dashboard, target) => {
         const periods = store.periods.flatMap((period) => {
             if (period.type === "relative") {
-                return getRelativePeriods(period.value).map((x) => x.value);
+                return getRelativePeriods(period.value).map((x: string) => x);
             }
             return [period.value];
         });

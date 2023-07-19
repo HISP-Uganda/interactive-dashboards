@@ -286,7 +286,7 @@ export const useInitials = (storage: "data-store" | "es") => {
         me: {
             resource: "me.json",
             params: {
-                fields: "organisationUnits[id,name,leaf,level],authorities",
+                fields: "organisationUnits[id,name,leaf,level],authorities,userRoles[name]",
             },
         },
         levels: {
@@ -322,7 +322,7 @@ export const useInitials = (storage: "data-store" | "es") => {
             const {
                 //directives: { rows, headers },
                 systemInfo: { systemId, systemName, instanceBaseUrl },
-                me: { organisationUnits, authorities },
+                me: { organisationUnits, authorities, userRoles },
                 levels: { organisationUnitLevels },
                 groups: { organisationUnitGroups },
                 dataSets: { dataSets },
@@ -353,8 +353,11 @@ export const useInitials = (storage: "data-store" | "es") => {
             //         value: uniqBy(values, "dx").length,
             //     })
             // );
-
-            const isAdmin = authorities.indexOf("IDVT_ADMINISTRATION") !== -1;
+            const isAdmin =
+                authorities.indexOf("IDVT_ADMINISTRATION") !== -1 ||
+                authorities.indexOf("ALL") !== -1 ||
+                userRoles.map(({ name }: any) => name).indexOf("Superuser") !==
+                    -1;
             const facilities: string[] = organisationUnits.map(
                 (unit: any) => unit.id
             );
@@ -1713,7 +1716,7 @@ const getDHIS2Query = (
 ) => {
     if (query.type === "ANALYTICS") {
         const params = makeDHIS2Query(query, globalFilters, overrides);
-        return `analytics.json?${params}&aggregationType=MAX`;
+        return `analytics.json?${params}`;
     }
     if (query.type === "SQL_VIEW") {
         let currentParams = "";

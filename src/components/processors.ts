@@ -535,6 +535,7 @@ export const processSingleValue = (
     uniqColumn: string
 ): any => {
     if (data.length > 0) {
+        console.log(data);
         if (aggregate && aggregationColumn && key) {
             const grouped = groupBy(data, aggregationColumn);
             const value = uniqColumn
@@ -551,6 +552,9 @@ export const processSingleValue = (
                 return values[0];
             }
             if (data.length === 1 && Object.keys(data[0]).length > 1) {
+                return values[values.length - 1];
+            }
+            if (data.length > 0 && Object.keys(data[0]).length > 1) {
                 return values[values.length - 1];
             }
         }
