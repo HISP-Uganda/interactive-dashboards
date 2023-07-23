@@ -5,8 +5,9 @@ import { useElementSize } from "usehooks-ts";
 import { ChartProps, Column, Threshold } from "../../interfaces";
 import { SPECIAL_COLUMNS } from "../constants";
 import { invertHex, processTable } from "../processors";
+import { utils, writeFile } from "xlsx";
 
-interface TableProps extends ChartProps {}
+interface TableProps extends ChartProps { }
 
 const Tables = ({
     visualization,
@@ -58,6 +59,7 @@ const Tables = ({
                         size={visualization.properties["cellHeight"]}
                         style={{ borderSpacing: 0, borderCollapse: "collapse" }}
                     >
+
                         {visualization.properties["showHeaders"] && (
                             <Thead>
                                 {finalColumns.map((col, index) => (
@@ -74,7 +76,7 @@ const Tables = ({
                                             >
                                                 {
                                                     visualization.properties[
-                                                        "rowName"
+                                                    "rowName"
                                                     ]
                                                 }
                                             </Th>
@@ -98,7 +100,7 @@ const Tables = ({
                                                         textAlign={
                                                             visualization
                                                                 .properties[
-                                                                "columnAlignment"
+                                                            "columnAlignment"
                                                             ]
                                                         }
                                                         rowSpan={
@@ -115,12 +117,12 @@ const Tables = ({
                                             <Th
                                                 bg={
                                                     visualization.properties[
-                                                        `${col.actual}.bg`
+                                                    `${col.actual}.bg`
                                                     ]
                                                 }
                                                 color={invertHex(
                                                     visualization.properties[
-                                                        `${col.actual}.bg`
+                                                    `${col.actual}.bg`
                                                     ] || "#ffffff",
                                                     true
                                                 )}
@@ -133,7 +135,7 @@ const Tables = ({
                                                 colSpan={col.span}
                                                 textAlign={
                                                     visualization.properties[
-                                                        "columnAlignment"
+                                                    "columnAlignment"
                                                     ]
                                                 }
                                             >
@@ -158,8 +160,8 @@ const Tables = ({
                                                     borderColor="#DDDDDD"
                                                     borderWidth="thin"
                                                     borderStyle="solid"
-                                                    //bg="blue"
-                                                    //fontWeight="extrabold"
+                                                //bg="blue"
+                                                //fontWeight="extrabold"
                                                 >
                                                     {visualization.properties[
                                                         `${r[index].actual}.name`
@@ -183,13 +185,13 @@ const Tables = ({
                                                     textAlign={
                                                         visualization
                                                             .properties[
-                                                            "columnAlignment"
+                                                        "columnAlignment"
                                                         ]
                                                     }
                                                 >
                                                     {
                                                         finalData[
-                                                            `${row.value}${c}`
+                                                        `${row.value}${c}`
                                                         ]?.["value"]
                                                     }
                                                 </Td>
@@ -207,7 +209,7 @@ const Tables = ({
                                                         textAlign={
                                                             visualization
                                                                 .properties[
-                                                                "columnAlignment"
+                                                            "columnAlignment"
                                                             ]
                                                         }
                                                         {...findOthers(col)}
@@ -217,13 +219,13 @@ const Tables = ({
                                                         //     ]?.["bg"]
                                                         // }
                                                         bg={""}
-                                                        // color={invertHex(visualization.properties[`${col.actual}.bg`] || finalData[
-                                                        //     `${row.value}${col.value}`
-                                                        // ]?.["bg"] || "#000000", false)}
+                                                    // color={invertHex(visualization.properties[`${col.actual}.bg`] || finalData[
+                                                    //     `${row.value}${col.value}`
+                                                    // ]?.["bg"] || "#000000", false)}
                                                     >
                                                         {
                                                             finalData[
-                                                                `${row.value}${col.value}`
+                                                            `${row.value}${col.value}`
                                                             ]?.["value"]
                                                         }
                                                         {/* {col.value} */}

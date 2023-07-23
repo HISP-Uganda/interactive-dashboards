@@ -1,18 +1,34 @@
 import { Stack } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import React, { useState, MouseEvent } from "react";
+import React, { useState, MouseEvent, useEffect } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { dashboardApi, sectionApi } from "../Events";
 import { $dashboard, $size, isOpenApi, $store } from "../Store";
 import SectionVisualization from "./SectionVisualization";
+import VisualizationMenu from "./visualizations/VisualizationMenu";
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
 export default function DynamicDashboard() {
     const dashboard = useStore($dashboard);
     const store = useStore($store);
     const size = useStore($size);
+    const [showMenu, setShowMenu] = useState<boolean>(false);
+    const handleContextMenu = (e: MouseEvent<HTMLElement>) => {
+        e.preventDefault();
+        setShowMenu(true);
+        //alert("right clicked")
+
+    };
+
+    const handleOutsideClick = () => {
+        setShowMenu(false);
+    };
+    useEffect(() => {
+        document.addEventListener("click", handleOutsideClick);
+        return () => document.removeEventListener("click", handleOutsideClick);
+    }, []);
     const settings: {
         className: string;
         rowHeight: number;
@@ -45,13 +61,13 @@ export default function DynamicDashboard() {
             <Stack
                 key={section.id}
                 h="100%"
-                onClick={(e: MouseEvent<HTMLElement>) => {
-                    if (e.detail === 2 && store.isAdmin) {
-                        sectionApi.setCurrentSection(section);
-                        isOpenApi.onOpen();
-                    }
-                }}
+                onMouseEnter={() => setShowMenu(() => true)}
+                onMouseLeave={() => setShowMenu(() => false)}
+                //onContextMenu={(e: MouseEvent<HTMLElement>) => { showMenu && <VisualizationMenu section={section} /> }}
+                onContextMenu={handleContextMenu}
+
             >
+                {/* {showMenu && <VisualizationMenu section={section} position={menuPosition}/>} */}
                 <SectionVisualization {...section} />
             </Stack>
         ));
@@ -69,8 +85,8 @@ export default function DynamicDashboard() {
             oldCompactType === "horizontal"
                 ? "vertical"
                 : oldCompactType === "vertical"
-                ? null
-                : "horizontal";
+                    ? null
+                    : "horizontal";
         setCurrent((prev) => {
             return { ...prev, compactType };
         });

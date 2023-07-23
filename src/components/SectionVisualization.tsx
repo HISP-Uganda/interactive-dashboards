@@ -8,11 +8,30 @@ import { $store, isOpenApi } from "../Store";
 import Carousel from "./visualizations/Carousel";
 import TabPanelVisualization from "./visualizations/TabPanelVisualization";
 import Visualization from "./visualizations/Visualization";
+import { useState, useEffect } from "react";
 import VisualizationTitle from "./visualizations/VisualizationTitle";
+import VisualizationMenu from "./visualizations/VisualizationMenu";
+import ListMenu from "./visualizations/ListMenu";
 
 const SectionVisualization = (section: ISection) => {
     const store = useStore($store);
+    const [showMenu, setShowMenu] = useState<boolean>(false);
+    const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+    const handleContextMenu = (e: MouseEvent<HTMLElement>) => {
+        e.preventDefault();
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+        setMenuPosition({ x: mouseX, y: mouseY });
+        setShowMenu(true);
+    };
 
+    const handleOutsideClick = () => {
+        setShowMenu(false);
+    };
+    useEffect(() => {
+        document.addEventListener("click", handleOutsideClick);
+        return () => document.removeEventListener("click", handleOutsideClick);
+    }, []);
     const displays = {
         carousel: <Carousel {...section} />,
         marquee: (
@@ -23,6 +42,8 @@ const SectionVisualization = (section: ISection) => {
                 alignItems="center"
                 justifyContent="center"
                 justifyItems="center"
+                onMouseEnter={() => setShowMenu(() => true)}
+                onMouseLeave={() => setShowMenu(() => false)}
                 w="100%"
                 h="100%"
                 onClick={(e: MouseEvent<HTMLElement>) => {
@@ -31,15 +52,25 @@ const SectionVisualization = (section: ISection) => {
                         isOpenApi.onOpen();
                     }
                 }}
+                //onContextMenu={(e: MouseEvent<HTMLElement>) => { showMenu && <VisualizationMenu section={section} /> }}
+                onContextMenu={handleContextMenu}
             >
                 <Stack w="100%">
+                    {showMenu && <Box
+                        top={`${menuPosition.y}px`}
+                        left={`${menuPosition.x}px`}
+                        zIndex={1000}>
+                        <Box>
+                            <ListMenu section={section} />
+                        </Box>
+                    </Box>}
                     <Marquee
                         velocity={60}
                         direction="rtl"
-                        onFinish={() => {}}
+                        onFinish={() => { }}
                         resetAfterTries={200}
                         scatterRandomly={false}
-                        onInit={() => {}}
+                        onInit={() => { }}
                     >
                         {section.visualizations.map((visualization) => (
                             <Stack direction="row" key={visualization.id}>

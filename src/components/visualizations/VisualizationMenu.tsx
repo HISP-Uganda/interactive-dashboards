@@ -2,7 +2,7 @@ import {
     DeleteIcon,
     EditIcon,
     ExternalLinkIcon,
-    HamburgerIcon,
+    HamburgerIcon
 } from "@chakra-ui/icons";
 import {
     FormControl,
@@ -21,16 +21,19 @@ import {
     ModalOverlay,
     Stack,
     useDisclosure,
+    useToast
 } from "@chakra-ui/react";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
+import { saveAs } from "file-saver";
+import html2canvas from "html2canvas";
 import { ChangeEvent } from "react";
 import {
     AiFillFilter,
     AiOutlineBarChart,
     AiOutlineLineChart,
-    AiOutlineNumber,
+    AiOutlineNumber
 } from "react-icons/ai";
 import { FaGlobeAfrica } from "react-icons/fa";
 import { dashboardApi, sectionApi } from "../../Events";
@@ -49,6 +52,7 @@ type VisualizationMenuProps = {
 const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
     const store = useStore($store);
     const navigate = useNavigate();
+    const toast = useToast();
     const search = useSearch<LocationGenerics>();
     const {
         isOpen: isOpen1,
@@ -64,9 +68,41 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
     const displayFull = () => {
         onFull();
     };
+    const handleDownloadClick = () => {
+        const sectionContainer = document.getElementById(section.id);
+        if (sectionContainer) {
+            html2canvas(sectionContainer).then((canvas) => {
+                try {
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            saveAs(blob, "section.png");
+                            toast({
+                                title: "Section downloaded!",
+                                description: "The section has been downloaded as a PNG.",
+                                status: "success",
+                                duration: 3000,
+                                isClosable: true,
+                            });
+                        }
+                    });
+                } catch (error) {
+                    console.error("Error saving image:", error);
+                    toast({
+                        title: "Error",
+                        description: "An error occurred while saving the section.",
+                        status: "error",
+                        duration: 3000,
+                        isClosable: true,
+                    });
+                }
+            });
+        }
+    };
+
 
     return (
         <>
+
             <Menu placement="left-start">
                 <MenuButton
                     _hover={{ bg: "none" }}
@@ -79,6 +115,19 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
                     variant="ghost"
                 />
                 <MenuList zIndex={100000}>
+                    <MenuItem
+                        fontSize="18px"
+                        // onClick={() =>
+                        //     dashboardApi.changeVisualizationType({
+                        //         section,
+                        //         visualization: "bar",
+                        //     })
+                        // }
+                        icon={<AiOutlineBarChart />}
+                        onClick={() => handleDownloadClick()}
+                    >
+                        Download Chart
+                    </MenuItem>
                     {store.isAdmin && (
                         <MenuItem
                             fontSize="18px"
