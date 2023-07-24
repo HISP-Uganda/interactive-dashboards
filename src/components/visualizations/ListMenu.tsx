@@ -37,6 +37,7 @@ import { dashboardApi, sectionApi } from "../../Events";
 import { ISection, LocationGenerics, Option } from "../../interfaces";
 import { $dashboard, $store, isOpenApi } from "../../Store";
 import Visualization from "./Visualization";
+import FullScreen from "../FullScreen";
 
 const sortingOptions: Option[] = [
     { label: "Top", value: "desc" },
@@ -66,7 +67,6 @@ const ListMenu = ({ section }: ListMenuProps) => {
         onFull();
     };
 
-
     return (
         <>
             <List spacing={3} color="gray.600">
@@ -81,7 +81,7 @@ const ListMenu = ({ section }: ListMenuProps) => {
                     }}
                 >
                     <Icon as={DownloadIcon} /> Download
-                    </MotionListItem>
+                </MotionListItem>
                 {store.isAdmin && (
                     <MotionListItem
                         initial={{ opacity: 0, x: -50 }}
@@ -104,7 +104,7 @@ const ListMenu = ({ section }: ListMenuProps) => {
                     onClick={() => displayFull()}
                 >
                     <Icon as={ExternalLinkIcon} /> Expand
-                 </MotionListItem>
+                </MotionListItem>
                 <MotionListItem
                     initial={{ opacity: 0, x: -50 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -132,7 +132,7 @@ const ListMenu = ({ section }: ListMenuProps) => {
                     }
                 >
                     <Icon as={AiOutlineBarChart} /> View as Column
-            </MotionListItem>
+                </MotionListItem>
                 <MotionListItem
                     initial={{ opacity: 0, x: -50 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -188,27 +188,6 @@ const ListMenu = ({ section }: ListMenuProps) => {
                     </MotionListItem>
                 )}
             </List>
-            <Modal isOpen={isFull} onClose={onUnFull} size="full">
-                <ModalOverlay />
-                <ModalContent
-                    h="100vh"
-                    display="flex"
-                    flexDirection="column"
-                    w="100vw"
-                >
-                    <ModalBody>
-                        <Stack h="100%" w="100%" direction={section?.direction}>
-                            {section?.visualizations.map((visualization) => (
-                                <Visualization
-                                    key={visualization.id}
-                                    visualization={visualization}
-                                    section={section}
-                                />
-                            ))}
-                        </Stack>
-                    </ModalBody>
-                </ModalContent>
-            </Modal>
             <Modal
                 // initialFocusRef={initialRef}
                 // finalFocusRef={finalRef}

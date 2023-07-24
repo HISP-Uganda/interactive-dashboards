@@ -1,10 +1,17 @@
-import { Box, SimpleGrid, Stack } from "@chakra-ui/react";
+import { Box, SimpleGrid, Stack, useDisclosure } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { MouseEvent } from "react";
 import Marquee from "react-marquee-slider";
+import {
+    Menu,
+    Item,
+    Separator,
+    Submenu,
+    useContextMenu,
+} from "react-contexify";
 import { sectionApi } from "../Events";
 import { ISection } from "../interfaces";
-import { $store, isOpenApi } from "../Store";
+import { $store, isOpenApi, $dashboard } from "../Store";
 import Carousel from "./visualizations/Carousel";
 import TabPanelVisualization from "./visualizations/TabPanelVisualization";
 import Visualization from "./visualizations/Visualization";
@@ -13,7 +20,14 @@ import VisualizationTitle from "./visualizations/VisualizationTitle";
 import VisualizationMenu from "./visualizations/VisualizationMenu";
 import ListMenu from "./visualizations/ListMenu";
 
+import "react-contexify/dist/ReactContexify.css";
+import FullScreen from "./FullScreen";
+// import { FullScreen } from "react-full-screen";
+
 const SectionVisualization = (section: ISection) => {
+    const { show } = useContextMenu({
+        id: section.id,
+    });
     const store = useStore($store);
     const [showMenu, setShowMenu] = useState<boolean>(false);
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
@@ -32,6 +46,18 @@ const SectionVisualization = (section: ISection) => {
         document.addEventListener("click", handleOutsideClick);
         return () => document.removeEventListener("click", handleOutsideClick);
     }, []);
+
+    function handleItemClick({ event, props, triggerEvent, data }: any) {
+        console.log(event, props, triggerEvent, data);
+    }
+
+    function displayMenu(e: any) {
+        // put whatever custom logic you need
+        // you can even decide to not display the Menu
+        show({
+            event: e,
+        });
+    }
     const displays = {
         carousel: <Carousel {...section} />,
         marquee: (
@@ -56,21 +82,24 @@ const SectionVisualization = (section: ISection) => {
                 onContextMenu={handleContextMenu}
             >
                 <Stack w="100%">
-                    {showMenu && <Box
-                        top={`${menuPosition.y}px`}
-                        left={`${menuPosition.x}px`}
-                        zIndex={1000}>
-                        <Box>
-                            <ListMenu section={section} />
+                    {showMenu && (
+                        <Box
+                            top={`${menuPosition.y}px`}
+                            left={`${menuPosition.x}px`}
+                            zIndex={1000}
+                        >
+                            <Box>
+                                <ListMenu section={section} />
+                            </Box>
                         </Box>
-                    </Box>}
+                    )}
                     <Marquee
                         velocity={60}
                         direction="rtl"
-                        onFinish={() => { }}
+                        onFinish={() => {}}
                         resetAfterTries={200}
                         scatterRandomly={false}
-                        onInit={() => { }}
+                        onInit={() => {}}
                     >
                         {section.visualizations.map((visualization) => (
                             <Stack direction="row" key={visualization.id}>
@@ -145,7 +174,41 @@ const SectionVisualization = (section: ISection) => {
         ),
         tab: <TabPanelVisualization {...section} />,
     };
-    return displays[section.display] || displays.normal;
+
+    const {
+        isOpen: isFull,
+        onOpen: onFull,
+        onClose: onUnFull,
+    } = useDisclosure();
+    const displayFull = () => {
+        onFull();
+    };
+
+    return (
+        <Stack onContextMenu={displayMenu} w="100%" h="100%">
+            {displays[section.display] || displays.normal}
+            <Menu id={section.id}>
+                <Item
+                    onClick={() => {
+                        sectionApi.setCurrentSection(section);
+                        isOpenApi.onOpen();
+                    }}
+                >
+                    Edit
+                </Item>
+                <Item onClick={() => displayFull()}>Expand</Item>
+                <Separator />
+                <Item disabled>Disabled</Item>
+                <Separator />
+                <Submenu label="Submenu">
+                    <Item onClick={handleItemClick}>Sub Item 1</Item>
+                    <Item onClick={handleItemClick}>Sub Item 2</Item>
+                </Submenu>
+            </Menu>
+
+            <FullScreen section={section} onUnFull={onUnFull} isFull={isFull} />
+        </Stack>
+    );
 };
 
 export default SectionVisualization;
