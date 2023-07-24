@@ -20,13 +20,13 @@ const options = {
     // target: "https://eidsr.health.go.ug", // target host
     // target: "https://dev.ndpme.go.ug/ndpdb", // target host
     // target: "http://localhost:8080", // target host
-    target: "https://tests.dhis2.hispuganda.org/hmis/", // target host
+    // target: "https://tests.dhis2.hispuganda.org/hmis/", // target host
     // target: "https://hmis-repo.health.go.ug/repo", // target host
     // target: "https://tests.dhis2.stephocay.com/sia", // target host
     // target: "https://etracker.moh.gov.rw/individualrecords", // target host
     // target: "https://epivac.health.go.ug", // target host
     // target: "https://train.ndpme.go.ug/ndpdb", // target host
-    // target: "https://play.dhis2.org/2.39.2.1",
+    target: "https://play.dhis2.org/2.39.2.1",
     onProxyReq,
     onProxyRes,
     changeOrigin: true, // needed for virtual hosted sites

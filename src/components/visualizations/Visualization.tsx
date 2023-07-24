@@ -250,7 +250,9 @@ const getVisualization = (
         ),
         dashboardList: <DashboardList />,
         dashboardTree: <DashboardTree />,
-        categoryList: <CategoryList />,
+        categoryList: (
+            <CategoryList section={section} visualization={visualization} />
+        ),
         imageVisualization: (
             <ImageVisualization
                 section={section}
@@ -266,16 +268,19 @@ const getVisualization = (
         optionSet: (
             <OptionSet visualization={visualization} section={section} />
         ),
-        text:
-            (
-                <TextVisualisation visualization={visualization} section={section} />
-            ),
+        text: (
+            <TextVisualisation
+                visualization={visualization}
+                section={section}
+            />
+        ),
         clock: (
-            <ClockVisualisation visualization={visualization} section={section} />
+            <ClockVisualisation
+                visualization={visualization}
+                section={section}
+            />
         ),
-        heatmap: (
-            <HeatMap visualization={visualization} section={section} />
-        ),
+        heatmap: <HeatMap visualization={visualization} section={section} />,
     };
     return allTypes[visualization.type];
 };

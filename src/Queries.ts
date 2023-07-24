@@ -204,8 +204,8 @@ export const getESIndex = async <TData>(args: Omit<QueryProps, "engine">) => {
                         must,
                     },
                 },
-            },
-            { signal: args.signal }
+            }
+            // { signal: args.signal }
         );
         return hits.map(({ _source }) => _source);
     } catch (error) {
@@ -259,8 +259,8 @@ export const getESRecord = async <TData>(
             {
                 index: args.namespace,
                 id,
-            },
-            { signal: args.signal }
+            }
+            // { signal: args.signal }
         );
         return _source;
     } catch (error) {

@@ -16,6 +16,7 @@ import {
     Option,
     Playlist,
     ScreenSize,
+    DataNode,
 } from "./interfaces";
 import { generateUid } from "./utils/uid";
 import { getRelativePeriods, relativePeriods2 } from "./utils/utils";
@@ -261,6 +262,36 @@ export const $categoryDashboards = combine(
                 };
                 return current;
             });
+    }
+);
+
+export const $categoryDashboardTree = combine(
+    $dashboards,
+    $categories,
+    (dashboards, categories) => {
+        return categories.map(({ id, name }) => {
+            const node: DataNode = {
+                id,
+                pId: "",
+                title: name,
+                nodeSource: {},
+                key: id,
+                children: dashboards
+                    .filter((d) => d.category === id)
+                    .map(({ id: dId, name: dName }) => {
+                        const node2: DataNode = {
+                            pId: id,
+                            title: dName,
+                            nodeSource: {},
+                            key: dId,
+                            id: dId,
+                        };
+                        return node2;
+                    }),
+            };
+
+            return node;
+        });
     }
 );
 export const $dataSourceOptions = $dataSources.map((state) => {

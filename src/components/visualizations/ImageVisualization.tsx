@@ -1,6 +1,5 @@
 import React from "react";
 import { ChartProps } from "../../interfaces";
-import { Stack, Text } from "@chakra-ui/react";
 
 export default function ImageVisualization({ dataProperties }: ChartProps) {
     const src = dataProperties?.["data.src"];

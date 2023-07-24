@@ -21,7 +21,7 @@
         "concurrently": "^8.1.0"
     },
     "resolutions": {
-        "react-error-overlay": "6.0.9"
+        "react-error-overlay": "6.0.11"
     },
     "dependencies": {
         "@ajna/pagination": "1.4.19",
@@ -48,7 +48,7 @@
         "@xstate/react": "^4.0.0-beta.3",
         "antd": "^5.6.2",
         "array-to-tree": "^3.3.2",
-        "axios": "^1.2.4",
+        "axios": "^1.4.0",
         "chakra-react-select": "^3.1.2",
         "cors": "^2.8.5",
         "d2": "^31.10.2",
