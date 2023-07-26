@@ -14,7 +14,7 @@ import { ISection } from "../interfaces";
 import { $store, isOpenApi, $dashboard } from "../Store";
 import Carousel from "./visualizations/Carousel";
 import TabPanelVisualization from "./visualizations/TabPanelVisualization";
-import Visualization from "./visualizations/Visualization";
+import VisualizationSection from "./visualizations/Visualization";
 import { useState, useEffect } from "react";
 import VisualizationTitle from "./visualizations/VisualizationTitle";
 import VisualizationMenu from "./visualizations/VisualizationMenu";
@@ -22,6 +22,7 @@ import ListMenu from "./visualizations/ListMenu";
 
 import "react-contexify/dist/ReactContexify.css";
 import FullScreen from "./FullScreen";
+import DHIS2Viz from "./visualizations/DHIS2Viz";
 // import { FullScreen } from "react-full-screen";
 
 const SectionVisualization = (section: ISection) => {
@@ -29,31 +30,12 @@ const SectionVisualization = (section: ISection) => {
         id: section.id,
     });
     const store = useStore($store);
-    const [showMenu, setShowMenu] = useState<boolean>(false);
-    const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
-    const handleContextMenu = (e: MouseEvent<HTMLElement>) => {
-        e.preventDefault();
-        const mouseX = e.clientX;
-        const mouseY = e.clientY;
-        setMenuPosition({ x: mouseX, y: mouseY });
-        setShowMenu(true);
-    };
-
-    const handleOutsideClick = () => {
-        setShowMenu(false);
-    };
-    useEffect(() => {
-        document.addEventListener("click", handleOutsideClick);
-        return () => document.removeEventListener("click", handleOutsideClick);
-    }, []);
 
     function handleItemClick({ event, props, triggerEvent, data }: any) {
         console.log(event, props, triggerEvent, data);
     }
 
     function displayMenu(e: any) {
-        // put whatever custom logic you need
-        // you can even decide to not display the Menu
         show({
             event: e,
         });
@@ -68,8 +50,6 @@ const SectionVisualization = (section: ISection) => {
                 alignItems="center"
                 justifyContent="center"
                 justifyItems="center"
-                onMouseEnter={() => setShowMenu(() => true)}
-                onMouseLeave={() => setShowMenu(() => false)}
                 w="100%"
                 h="100%"
                 onClick={(e: MouseEvent<HTMLElement>) => {
@@ -78,21 +58,8 @@ const SectionVisualization = (section: ISection) => {
                         isOpenApi.onOpen();
                     }
                 }}
-                //onContextMenu={(e: MouseEvent<HTMLElement>) => { showMenu && <VisualizationMenu section={section} /> }}
-                onContextMenu={handleContextMenu}
             >
                 <Stack w="100%">
-                    {showMenu && (
-                        <Box
-                            top={`${menuPosition.y}px`}
-                            left={`${menuPosition.x}px`}
-                            zIndex={1000}
-                        >
-                            <Box>
-                                <ListMenu section={section} />
-                            </Box>
-                        </Box>
-                    )}
                     <Marquee
                         velocity={60}
                         direction="rtl"
@@ -103,7 +70,7 @@ const SectionVisualization = (section: ISection) => {
                     >
                         {section.visualizations.map((visualization) => (
                             <Stack direction="row" key={visualization.id}>
-                                <Visualization
+                                <VisualizationSection
                                     section={section}
                                     key={visualization.id}
                                     visualization={visualization}
@@ -135,7 +102,7 @@ const SectionVisualization = (section: ISection) => {
                 )}
                 <SimpleGrid columns={2} h="100%" w="100%" flex={1} spacing="0">
                     {section.visualizations.map((visualization, i) => (
-                        <Visualization
+                        <VisualizationSection
                             key={visualization.id}
                             visualization={visualization}
                             section={section}
@@ -163,7 +130,7 @@ const SectionVisualization = (section: ISection) => {
                     p={section.padding}
                 >
                     {section.visualizations.map((visualization) => (
-                        <Visualization
+                        <VisualizationSection
                             key={visualization.id}
                             visualization={visualization}
                             section={section}

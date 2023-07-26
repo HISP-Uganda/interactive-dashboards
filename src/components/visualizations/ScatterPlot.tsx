@@ -32,7 +32,8 @@ const ScatterPlot = ({ visualization }: ScatterPlotProps) => {
     console.log("traces:", traces);
     return (
         <Plot
-            data={traces}
+            // TODO Fix this as any
+            data={traces as any}
             layout={{
                 title: visualization.showTitle ? "Scatter Plot" : "",
                 xaxis: {

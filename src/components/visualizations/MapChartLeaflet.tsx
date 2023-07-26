@@ -16,10 +16,9 @@ const MapChartLeaflet = ({
 }: ChartProps) => {
     const elementRef = useRef<any>();
     const dimensions = useDimensions(elementRef);
-
-    const indicators = useStore($indicators);
     const indicator = visualization.indicators[0];
-    const { levels, ous } = findLevelsAndOus(indicator);
+    // TODO Fix this as any
+    const { levels, ous } = findLevelsAndOus(indicator as any);
     const levelIsGlobal = levels.findIndex((l) => l === "GQhi6pRnTKF");
     const ouIsGlobal = ous.findIndex((l) => l === "mclvD0Z9mfT");
     const globalFilters = useStore($globalFilters);

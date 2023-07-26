@@ -86,11 +86,11 @@ export interface IDimension {
 export interface IData extends INamed {
     query?: string;
     expressions?: IExpressions;
-    type: "SQL_VIEW" | "ANALYTICS" | "API";
+    type: "SQL_VIEW" | "ANALYTICS" | "API" | "VISUALIZATION";
     accessor?: string;
     dataDimensions: IDimension;
-    dataSource?: IDataSource;
-    joinTo?: IData;
+    dataSource?: string;
+    joinTo?: string;
     flatteningOption?: string;
     fromColumn?: string;
     toColumn?: string;
@@ -98,15 +98,15 @@ export interface IData extends INamed {
 }
 
 export interface IIndicator extends INamed {
-    numerator?: IData;
-    denominator?: IData;
+    numerator?: string;
+    denominator?: string;
     factor: string;
     custom: boolean;
     query?: string;
 }
 
 export interface IVisualization extends INamed {
-    indicators: Array<IIndicator>;
+    indicators: Array<string>;
     type: string;
     refreshInterval?: number;
     overrides: { [key: string]: any };
@@ -134,7 +134,6 @@ export interface ISection
     carouselOver: string;
     colSpan: number;
     rowSpan: number;
-    images: IImage[];
     bg: string;
     height: string;
     headerBg: string;
@@ -174,7 +173,6 @@ export interface IDashboard extends INamed {
         subSearch: string;
     }>;
     tag: string;
-    images: IImage[];
     type: "fixed" | "dynamic";
     excludeFromList: boolean;
     child?: string;
@@ -284,7 +282,7 @@ export type LocationGenerics = MakeGenerics<{
         groups: string;
         organisations: string;
         dataSourceId: string;
-        action: "create" | "update";
+        action: "create" | "update" | "view";
         type: "fixed" | "dynamic";
         optionSet: string;
         affected: string;
@@ -432,3 +430,18 @@ export interface Period extends Option {
     endDate?: string;
     type: "fixed" | "relative" | "range";
 }
+
+export type IData2 = Omit<IData, "joinTo" | "dataSource"> &
+    Partial<{
+        joinTo: IData2;
+        dataSource: IDataSource;
+    }>;
+export type IIndicator2 = Omit<IIndicator, "numerator" | "denominator"> &
+    Partial<{
+        numerator: IData2;
+        denominator: IData2;
+    }>;
+
+export type IVisualization2 = Omit<IVisualization, "indicators"> & {
+    indicators: Array<IIndicator2>;
+};

@@ -1,11 +1,8 @@
-import { DeleteIcon } from "@chakra-ui/icons";
-import { Box, IconButton, Stack, Text, useDisclosure } from "@chakra-ui/react";
+import { ColorPicker, Divider } from "antd";
 import React from "react";
-import { SwatchesPicker } from "react-color";
-import useOnClickOutside from "use-onclickoutside";
-import { sectionApi } from "../Events";
 import { IVisualization } from "../interfaces";
 import { swatchColors } from "../utils/utils";
+import { sectionApi } from "../Events";
 
 type ColorPalletProps = {
     visualization: IVisualization;
@@ -13,51 +10,61 @@ type ColorPalletProps = {
 };
 
 const ColorPalette = ({ visualization, attribute }: ColorPalletProps) => {
-    const { isOpen, onToggle, onClose } = useDisclosure();
-    const ref = React.useRef(null);
-    useOnClickOutside(ref, onClose);
     return (
-        <Stack
-            position="relative"
-            bgColor="gray.400"
-            direction="row"
-            spacing="0"
-        >
-            <Text
-                flex={1}
-                bgColor={visualization.properties?.[attribute] || "black"}
-                onClick={onToggle}
-            />
-            <IconButton
-                aria-label="delete"
-                bgColor="none"
-                borderRadius="none"
-                icon={<DeleteIcon w={3} h={3} />}
-                onClick={() =>
-                    sectionApi.changeVisualizationProperties({
-                        visualization: visualization.id,
-                        attribute: attribute,
-                        value: "",
-                    })
-                }
-            />
-            {isOpen && (
-                <Box bottom={0} top="42px" zIndex={1000} position="absolute">
-                    <SwatchesPicker
-                        colors={swatchColors}
-                        color={visualization.properties?.[attribute] || ""}
-                        onChangeComplete={(color) => {
-                            sectionApi.changeVisualizationProperties({
-                                visualization: visualization.id,
-                                attribute: attribute,
-                                value: color.hex,
-                            });
-                            onClose();
+        <ColorPicker
+            allowClear
+            value={visualization.properties[attribute]}
+            onChange={(_, hex) =>
+                sectionApi.changeVisualizationProperties({
+                    visualization: visualization.id,
+                    attribute: attribute,
+                    value: hex,
+                })
+            }
+            styles={{
+                popupOverlayInner: {
+                    width: 468 + 24,
+                },
+            }}
+            presets={[
+                {
+                    label: "Recommended",
+                    colors: swatchColors.flat(),
+                },
+            ]}
+            panelRender={(_, { components: { Picker, Presets } }) => (
+                <div
+                    className="custom-panel"
+                    style={{
+                        display: "flex",
+                        width: 468,
+                    }}
+                >
+                    <div
+                        style={{
+                            flex: 1,
+                            height: 300,
+                            overflow: "auto",
+                        }}
+                    >
+                        <Presets />
+                    </div>
+                    <Divider
+                        type="vertical"
+                        style={{
+                            height: "auto",
                         }}
                     />
-                </Box>
+                    <div
+                        style={{
+                            width: 234,
+                        }}
+                    >
+                        <Picker />
+                    </div>
+                </div>
             )}
-        </Stack>
+        />
     );
 };
 

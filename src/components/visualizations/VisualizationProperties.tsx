@@ -19,6 +19,7 @@ import ClockProperties from "../properties/ClockProperties";
 import HeatMap from "./HeatMap";
 import HeatMapProperties from "../properties/HeatMapProperties";
 import CategoryListProperties from "../properties/CategoryListProperties";
+import DHIS2VisualizationProperties from "../properties/DHIS2VisualizationProperties";
 type VizProps = {
     visualization: IVisualization;
 };
@@ -51,6 +52,7 @@ const VisualizationProperties = ({ visualization }: VizProps) => {
             categoryList: (
                 <CategoryListProperties visualization={visualization} />
             ),
+            dhis2: <DHIS2VisualizationProperties />,
         };
         if (visualizationType) {
             return allTypes[visualizationType] || null;

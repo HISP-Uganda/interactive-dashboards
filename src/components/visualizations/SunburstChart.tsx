@@ -58,7 +58,8 @@ const SunburstChart = ({ visualization }: SunBurstProps) => {
 
     return (
         <Plot
-            data={[data]}
+            // TODO Fix this as any
+            data={[data as any]}
             layout={{
                 title: visualization.showTitle ? "Sunburst chart" : "",
                 margin: { l: 0, r: 0, b: 0, t: 50 },

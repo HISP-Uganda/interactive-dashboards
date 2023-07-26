@@ -8,9 +8,9 @@ import {
 import { Progress } from "antd";
 import { useStore } from "effector-react";
 import { useEffect, useState } from "react";
+import { calculatedApi } from "../../Events";
 import { ChartProps } from "../../interfaces";
 import { $visualizationData } from "../../Store";
-import { visualizationDataApi, calculatedApi } from "../../Events";
 import { processSingleValue } from "../processors";
 
 const SingleValue = ({
@@ -30,7 +30,6 @@ const SingleValue = ({
         visualization.properties["key"] || "",
         visualization.properties["uniqBy"] || ""
     );
-
 
     const colorSearch = dataProperties?.["data.thresholds"]?.find(
         ({ max, min }: any) => {
@@ -70,7 +69,7 @@ const SingleValue = ({
     const targetSpacing = dataProperties?.["data.targetspacing"] || 0;
     const spacing =
         dataProperties?.["data.format.spacing"] ||
-            ["row", "row-reverse"].indexOf(alignment) !== -1
+        ["row", "row-reverse"].indexOf(alignment) !== -1
             ? 10
             : 0;
 
@@ -135,10 +134,7 @@ const SingleValue = ({
                     {visualization.name}
                 </Text>
             )}
-            <Stack
-                direction={direction}
-                spacing={`${targetSpacing}px`}
-            >
+            <Stack direction={direction} spacing={`${targetSpacing}px`}>
                 {targetGraph === "circular" && targetValue && target ? (
                     <CircularProgress
                         value={(value * 100) / targetValue}

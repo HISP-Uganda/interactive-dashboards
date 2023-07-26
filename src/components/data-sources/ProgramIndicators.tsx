@@ -85,7 +85,6 @@ const ProgramIndicators = () => {
         currentPage,
         pageSize,
         q,
-        selectedProgramIndicators,
         hasDHIS2,
         currentDataSource
     );

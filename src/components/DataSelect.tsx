@@ -12,10 +12,10 @@ export default function DataSelect<T>({
     list: T[];
     labelKey: keyof T;
     valueKey: keyof T;
-    value: T | undefined | null;
+    value: string | undefined | null;
     onChange: (value: T | null) => void;
 }) {
-    const currentValue = list.find((l) => l[valueKey] === value?.[valueKey]);
+    const currentValue = list.find((l) => String(l[valueKey]) === value);
     return (
         <Select<T, false, GroupBase<T>>
             value={currentValue}

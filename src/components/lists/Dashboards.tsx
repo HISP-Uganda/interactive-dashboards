@@ -13,22 +13,13 @@ import {
 } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate } from "@tanstack/react-location";
-import { EventDataNode } from "antd/es/tree";
 import { useStore } from "effector-react";
-import { uniq } from "lodash";
 import { useEffect, useState } from "react";
-import { db } from "../../db";
-import {
-    dashboardTypeApi,
-    storeApi,
-    dashboardApi,
-    visualizationDataApi,
-} from "../../Events";
-import { DataNode, IDashboard, LocationGenerics } from "../../interfaces";
+import { dashboardApi, dashboardTypeApi, storeApi } from "../../Events";
+import { IDashboard, LocationGenerics } from "../../interfaces";
 import { deleteDocument, useDashboards } from "../../Queries";
 import { $settings, $store } from "../../Store";
 import { generateUid } from "../../utils/uid";
-import { loadData } from "../helpers";
 import LoadingIndicator from "../LoadingIndicator";
 
 const Dashboards = () => {
@@ -60,7 +51,9 @@ const Dashboards = () => {
 
     return (
         <Stack p="20px">
-            <Text fontSize="2xl" fontWeight="bold" p="2" color="blue.600">Dashboard List</Text>
+            <Text fontSize="2xl" fontWeight="bold" p="2" color="blue.600">
+                Dashboard List
+            </Text>
             <Stack direction="row">
                 <Spacer />
                 <Button

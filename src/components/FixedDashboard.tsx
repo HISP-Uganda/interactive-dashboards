@@ -1,28 +1,16 @@
-import { Grid, GridItem, useBreakpointValue, Box, Text } from "@chakra-ui/react";
+import { Grid, GridItem, useBreakpointValue } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { DragEvent, MouseEvent, useRef, useState } from "react";
-import { sectionApi, dashboardApi } from "../Events";
+import { DragEvent, MouseEvent, useRef } from "react";
+import { dashboardApi, sectionApi } from "../Events";
 import { ISection } from "../interfaces";
 import { $dashboard, $dimensions, $store, isOpenApi } from "../Store";
 import SectionVisualization from "./SectionVisualization";
-import ListMenu from "./visualizations/ListMenu";
 
 export default function FixedDashboard() {
     const store = useStore($store);
     const dashboard = useStore($dashboard);
     const { isNotDesktop } = useStore($dimensions);
     const dragItem = useRef<number | undefined | null>();
-    // const [hoveredSection, setHoveredSection] = useState<ISection | null>(null);
-    // const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
-
-    // const handleMouseEnter = (e: MouseEvent<HTMLDivElement>, section: ISection) => {
-    //     setHoveredSection(section);
-    //     setMenuPosition({ x: e.clientX, y: e.clientY });
-    // };
-
-    // const handleMouseLeave = () => {
-    //     setHoveredSection(null);
-    // };
 
     const dragOverItem = useRef<number | null>();
     const templateColumns = useBreakpointValue({
@@ -83,10 +71,20 @@ export default function FixedDashboard() {
                     id={section.id}
                     colSpan={{ lg: section.colSpan, md: 1 }}
                     rowSpan={{ lg: section.rowSpan, md: 1 }}
-                    // onMouseEnter={(e) => handleMouseEnter(e, section)}
-                    // onMouseLeave={handleMouseLeave}
-                    h={isNotDesktop ? (section.height ? section.height : "15vh") : "100%"}
-                    maxH={isNotDesktop ? (section.height ? section.height : "15vh") : "100%"}
+                    h={
+                        isNotDesktop
+                            ? section.height
+                                ? section.height
+                                : "15vh"
+                            : "100%"
+                    }
+                    maxH={
+                        isNotDesktop
+                            ? section.height
+                                ? section.height
+                                : "15vh"
+                            : "100%"
+                    }
                     onClick={(e: MouseEvent<HTMLElement>) => {
                         if (e.detail === 2 && store.isAdmin) {
                             sectionApi.setCurrentSection(section);

@@ -1,16 +1,8 @@
 import {
-    Box,
     Button,
     Checkbox,
-    IconButton,
     Input,
-    Modal,
-    ModalBody,
-    ModalCloseButton,
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
-    ModalOverlay,
+    Spacer,
     Stack,
     Text,
     Textarea,
@@ -18,22 +10,15 @@ import {
 } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
+import { Modal } from "antd";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { ChangeEvent, useEffect, useState } from "react";
-import { SwatchesPicker } from "react-color";
 import { useFullScreenHandle } from "react-full-screen";
-import { FaPlus } from "react-icons/fa";
+import { dashboardApi, sectionApi, storeApi } from "../../Events";
+import { ICategory, IDashboard, LocationGenerics } from "../../interfaces";
+import { saveDocument, useNamespace } from "../../Queries";
 import {
-    dashboardApi,
-    sectionApi,
-    storeApi,
-    dashboardsApi,
-} from "../../Events";
-import { IDashboard, LocationGenerics, Option } from "../../interfaces";
-import { saveDocument } from "../../Queries";
-import {
-    $categoryOptions,
     $dashboard,
     $dashboardType,
     $isOpen,
@@ -43,25 +28,42 @@ import {
     createSection,
     isOpenApi,
 } from "../../Store";
-import { swatchColors } from "../../utils/utils";
 import AutoRefreshPicker from "../AutoRefreshPicker";
 import DashboardDropDown from "../DashboardDropDown";
 import DashboardFilter from "../DashboardFilter";
 import DynamicDashboard from "../DynamicDashboard";
 import FixedDashboard from "../FixedDashboard";
+import LoadingIndicator from "../LoadingIndicator";
+import Picker from "../Picker";
 import Section from "../Section";
+
+const Categories = () => {
+    const { storage } = useStore($settings);
+    const { systemId } = useStore($store);
+    const { isLoading, isSuccess, isError, error, data } =
+        useNamespace<ICategory>("i-categories", storage, systemId, []);
+    const dashboard = useStore($dashboard);
+
+    if (isError) return <Text>{error?.message}</Text>;
+    if (isLoading) return <LoadingIndicator />;
+    if (isSuccess && data)
+        return (
+            <Select<ICategory, false, GroupBase<ICategory>>
+                options={data}
+                value={data.find((d) => d.id === dashboard.category)}
+                onChange={(e) => dashboardApi.changeCategory(e?.id || "")}
+                getOptionValue={(v) => v.id}
+                getOptionLabel={(v) => v.name || ""}
+            />
+        );
+    return null;
+};
 
 const Dashboard = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const search = useSearch<LocationGenerics>();
     const navigate = useNavigate<LocationGenerics>();
     const { isOpen: isOpenDialog, onOpen, onClose } = useDisclosure();
-    const {
-        isOpen: isOpenBg,
-        onOpen: onOpenBg,
-        onClose: onCloseBg,
-    } = useDisclosure();
-    const categoryOptions = useStore($categoryOptions);
     const store = useStore($store);
     const dashboard = useStore($dashboard);
     const section = useStore($section);
@@ -153,112 +155,85 @@ const Dashboard = () => {
             engine,
             "update"
         );
-        // dashboardsApi.setDashboards(
-        //     dashboards.map((d) => {
-        //         if (data.id === d.id) {
-        //             return { ...d, published: value };
-        //         }
-        //         return d;
-        //     })
-        // );
         dashboardApi.setCurrentDashboard({ ...data, published: value });
     };
     return (
-        <Stack w="100%" h="100%" p="5px" bg={dashboard.bg}>
-            {dashboardType === "dynamic" ? (
-                <DynamicDashboard />
-            ) : (
-                <FixedDashboard />
-            )}
-            <Modal
-                isOpen={isOpen}
-                onClose={() => isOpenApi.onClose()}
-                scrollBehavior="inside"
-                isCentered
-            >
-                <ModalOverlay />
-                <ModalContent
-                    minH="calc(100vh - 200px)"
-                    minW="calc(100vw - 200px)"
-                    maxH="calc(100vh - 200px)"
-                    maxW="calc(100vw - 200px)"
-                >
-                    <ModalHeader>Edit Visualisation and Section</ModalHeader>
-                    <ModalCloseButton />
-                    <ModalBody>
-                        <Section />
-                    </ModalBody>
-                    <ModalFooter>
+        <Stack w="100%" h="100%" bg={dashboard.bg} spacing="0">
+            {store.isAdmin && (
+                <Stack h="48px" direction="row" alignItems="center" px="5px">
+                    <Spacer />
+                    <Button onClick={() => onClick()} size="sm">
+                        Add Section
+                    </Button>
+                    <Picker
+                        color={dashboard.bg}
+                        onChange={(color) => dashboardApi.changeBg(color)}
+                    />
+                    <Button colorScheme="blue" onClick={onOpen} size="sm">
+                        Save
+                    </Button>
+                    {dashboard.published && (
                         <Button
-                            colorScheme="blue"
-                            mr={3}
-                            onClick={() => isOpenApi.onClose()}
+                            colorScheme="red"
+                            onClick={() => togglePublish(dashboard, false)}
+                            size="sm"
                         >
-                            Discard
+                            Unpublish
                         </Button>
-                        <Button onClick={() => onApply()}>Apply</Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
-            <Box
-                position="fixed"
-                width="60px"
-                height="60px"
-                bottom="40px"
-                right="40px"
-                color="#FFF"
-                textAlign="center"
-            >
-                <IconButton
-                    onClick={() => onClick()}
-                    borderRadius="50px"
-                    width="60px"
-                    height="60px"
-                    colorScheme="blue"
-                    marginTop="22px"
-                    aria-label="Search database"
-                    icon={<FaPlus />}
-                />
-            </Box>
-
+                    )}
+                    {!dashboard.published && (
+                        <Button
+                            colorScheme="teal"
+                            onClick={() => togglePublish(dashboard, true)}
+                            size="sm"
+                        >
+                            Publish
+                        </Button>
+                    )}
+                    <Button
+                        colorScheme="blue"
+                        onClick={() => navigate({ to: "/settings/dashboards" })}
+                        size="sm"
+                    >
+                        Home
+                    </Button>
+                </Stack>
+            )}
             <Stack
-                position="fixed"
-                top="50px"
-                right="45px"
-                direction="row"
-                spacing="5"
+                h={store.isAdmin ? "calc(100vh - 96px)" : "calc(100vh - 48px)"}
+                p="5px"
             >
-                <Button colorScheme="blue" onClick={onOpenBg}>
-                    Background
-                </Button>
-                <Button colorScheme="blue" onClick={onOpen}>
-                    Save
-                </Button>
-                {dashboard.published && (
-                    <Button
-                        colorScheme="red"
-                        onClick={() => togglePublish(dashboard, false)}
-                    >
-                        Unpublish
-                    </Button>
+                {dashboardType === "dynamic" ? (
+                    <DynamicDashboard />
+                ) : (
+                    <FixedDashboard />
                 )}
-                {!dashboard.published && (
-                    <Button
-                        colorScheme="teal"
-                        onClick={() => togglePublish(dashboard, true)}
-                    >
-                        Publish
-                    </Button>
-                )}
-                <Button
-                    colorScheme="blue"
-                    onClick={() => navigate({ to: "/settings/dashboards" })}
-                >
-                    Home
-                </Button>
             </Stack>
+            <Modal
+                centered
+                width={"calc(100vw - 100px)"}
+                open={isOpen}
+                title="Title"
+                onOk={() => isOpenApi.onClose()}
+                onCancel={() => isOpenApi.onClose()}
+                footer={[
+                    <Button
+                        colorScheme="blue"
+                        mr={3}
+                        onClick={() => isOpenApi.onClose()}
+                    >
+                        Discard
+                    </Button>,
+                    <Button onClick={() => onApply()}>Apply</Button>,
+                ]}
+                bodyStyle={{
+                    height: "calc(100vh - 150px)",
+                }}
+            >
+                <Section />
+            </Modal>
 
-            <Modal isOpen={isOpenBg} onClose={onCloseBg} size="2xl">
+            {/* <Modal isOpen={isOpenBg} onClose={onCloseBg} size="2xl">
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader>Dashboard Background</ModalHeader>
@@ -274,122 +249,96 @@ const Dashboard = () => {
                         />
                     </ModalBody>
                 </ModalContent>
-            </Modal>
-            <Modal isOpen={isOpenDialog} onClose={onClose} size="4xl">
-                <ModalOverlay />
-                <ModalContent>
-                    <ModalHeader>Dashboard Options</ModalHeader>
-                    <ModalCloseButton />
-                    <ModalBody>
-                        <Stack spacing="20px">
-                            <Stack>
-                                <Text>Category</Text>
-                                <Select<Option, false, GroupBase<Option>>
-                                    options={categoryOptions}
-                                    value={categoryOptions.find(
-                                        (d: Option) =>
-                                            d.value === dashboard.category
-                                    )}
-                                    onChange={(e) =>
-                                        dashboardApi.changeCategory(
-                                            e?.value || ""
-                                        )
-                                    }
-                                />
-                            </Stack>
-                            <Stack>
-                                <Text>Name</Text>
-                                <Input
-                                    value={dashboard.name}
-                                    onChange={(
-                                        e: ChangeEvent<HTMLInputElement>
-                                    ) =>
-                                        dashboardApi.changeDashboardName(
-                                            e.target.value
-                                        )
-                                    }
-                                />
-                            </Stack>
-                            <Stack>
-                                <Text>Tag</Text>
-                                <Input
-                                    value={dashboard.tag}
-                                    onChange={(
-                                        e: ChangeEvent<HTMLInputElement>
-                                    ) => dashboardApi.changeTag(e.target.value)}
-                                />
-                            </Stack>
-                            <Stack>
-                                <Text>Description</Text>
-                                <Textarea
-                                    value={dashboard.description}
-                                    onChange={(
-                                        e: ChangeEvent<HTMLTextAreaElement>
-                                    ) =>
-                                        dashboardApi.changeDashboardDescription(
-                                            e.target.value
-                                        )
-                                    }
-                                />
-                            </Stack>
-                            <AutoRefreshPicker />
-                            <Stack>
-                                <Checkbox
-                                    isChecked={
-                                        store.defaultDashboard === dashboard.id
-                                    }
-                                    onChange={(
-                                        e: ChangeEvent<HTMLInputElement>
-                                    ) =>
-                                        storeApi.setDefaultDashboard(
-                                            e.target.checked ? dashboard.id : ""
-                                        )
-                                    }
-                                >
-                                    Default Dashboard
-                                </Checkbox>
-                            </Stack>
-                            <Stack>
-                                <Checkbox
-                                    isChecked={dashboard.excludeFromList}
-                                    onChange={(
-                                        e: ChangeEvent<HTMLInputElement>
-                                    ) =>
-                                        dashboardApi.changeExcludeFromList(
-                                            e.target.checked
-                                        )
-                                    }
-                                >
-                                    Exclude from List
-                                </Checkbox>
-                            </Stack>
-                            <Stack>
-                                <Text>Child Dashboard</Text>
-                                <DashboardDropDown
-                                    value={dashboard.child || ""}
-                                    onChange={(e) =>
-                                        dashboardApi.changeChild(e)
-                                    }
-                                />
-                            </Stack>
-                            <Stack>
-                                <Text>Filters</Text>
-                                <DashboardFilter />
-                            </Stack>
-                        </Stack>
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button colorScheme="red" mr={3} onClick={onClose}>
-                            Close
-                        </Button>
-                        <Button
-                            onClick={() => updateDashboard(dashboard)}
-                            isLoading={loading}
+            </Modal> */}
+            <Modal
+                open={isOpenDialog}
+                onOk={() => onClose()}
+                onCancel={() => onClose()}
+                title="Save Dashboard"
+                width="700px"
+                footer={[
+                    <Button colorScheme="red" mr={3} onClick={onClose}>
+                        Close
+                    </Button>,
+                    <Button
+                        onClick={() => updateDashboard(dashboard)}
+                        isLoading={loading}
+                    >
+                        Save
+                    </Button>,
+                ]}
+            >
+                <Stack spacing="20px">
+                    <Stack>
+                        <Text>Category</Text>
+                        <Categories />
+                    </Stack>
+                    <Stack>
+                        <Text>Name</Text>
+                        <Input
+                            value={dashboard.name}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                dashboardApi.changeDashboardName(e.target.value)
+                            }
+                        />
+                    </Stack>
+                    <Stack>
+                        <Text>Tag</Text>
+                        <Input
+                            value={dashboard.tag}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                dashboardApi.changeTag(e.target.value)
+                            }
+                        />
+                    </Stack>
+                    <Stack>
+                        <Text>Description</Text>
+                        <Textarea
+                            value={dashboard.description}
+                            onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                                dashboardApi.changeDashboardDescription(
+                                    e.target.value
+                                )
+                            }
+                        />
+                    </Stack>
+                    <AutoRefreshPicker />
+                    <Stack>
+                        <Checkbox
+                            isChecked={store.defaultDashboard === dashboard.id}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                storeApi.setDefaultDashboard(
+                                    e.target.checked ? dashboard.id : ""
+                                )
+                            }
                         >
-                            Save
-                        </Button>
-                    </ModalFooter>
-                </ModalContent>
+                            Default Dashboard
+                        </Checkbox>
+                    </Stack>
+                    <Stack>
+                        <Checkbox
+                            isChecked={dashboard.excludeFromList}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                dashboardApi.changeExcludeFromList(
+                                    e.target.checked
+                                )
+                            }
+                        >
+                            Exclude from List
+                        </Checkbox>
+                    </Stack>
+                    <Stack>
+                        <Text>Child Dashboard</Text>
+                        <DashboardDropDown
+                            value={dashboard.child || ""}
+                            onChange={(e) => dashboardApi.changeChild(e)}
+                        />
+                    </Stack>
+                    <Stack>
+                        <Text>Filters</Text>
+                        <DashboardFilter />
+                    </Stack>
+                </Stack>
             </Modal>
         </Stack>
     );

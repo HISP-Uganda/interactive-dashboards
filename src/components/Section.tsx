@@ -15,6 +15,7 @@ import {
     Stack,
     Text,
     Textarea,
+    Grid,
 } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
@@ -80,13 +81,15 @@ const VisualizationQuery = ({
                 {isSuccess && (
                     <Select<IIndicator, true, GroupBase<IIndicator>>
                         isMulti
-                        value={visualization.indicators}
+                        value={data?.filter(
+                            (i) => visualization.indicators.indexOf(i.id) !== -1
+                        )}
                         getOptionLabel={(v) => String(v.name)}
                         getOptionValue={(v) => v.id}
                         onChange={(value) => {
                             sectionApi.changeVisualizationAttribute({
                                 attribute: "indicators",
-                                value,
+                                value: value.map((i) => i.id),
                                 visualization: visualization.id,
                             });
                         }}
@@ -260,20 +263,21 @@ const Section = () => {
     };
 
     return (
-        <Stack
-            maxH="calc(100vh - 350px)"
-            minH="calc(100vh - 350px)"
-            direction="row"
-        >
-            <Stack w="70%" flex={1} bg={section.bg} alignItems="center">
+        <Grid gridTemplateColumns="1fr 30%" gap="2px">
+            <Stack bg={section.bg} alignItems="center">
                 <SectionVisualization {...section} />
             </Stack>
-            <Stack w="30%">
+            <Stack
+                maxH="calc(100vh - 150px)"
+                minH="calc(100vh - 150px)"
+                boxShadow="xl"
+                spacing="2px"
+            >
                 <Flex
                     gap="5px"
                     flexWrap="wrap"
                     bgColor="white"
-                    p="5px"
+                    p="10px"
                     alignContent="flex-start"
                 >
                     <Button
@@ -485,8 +489,6 @@ const Section = () => {
                             visualization.id === active && (
                                 <Stack
                                     key={visualization.id}
-                                    // bgColor={visualization.bg}
-                                    bgColor="white"
                                     overflow="auto"
                                     flex={1}
                                 >
@@ -659,7 +661,7 @@ const Section = () => {
                     )}
                 </Stack>
             </Stack>
-        </Stack>
+        </Grid>
     );
 };
 

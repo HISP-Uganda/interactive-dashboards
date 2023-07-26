@@ -111,7 +111,7 @@ export default function Indicator() {
                         onChange={(value) =>
                             indicatorApi.changeIndicatorAttribute({
                                 attribute: "numerator",
-                                value,
+                                value: value?.id,
                             })
                         }
                     />
@@ -125,7 +125,7 @@ export default function Indicator() {
                         onChange={(value) =>
                             indicatorApi.changeIndicatorAttribute({
                                 attribute: "denominator",
-                                value,
+                                value: value?.id,
                             })
                         }
                     />

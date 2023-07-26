@@ -28,7 +28,7 @@ const SQLViews = () => {
                         value={data
                             .map((d) => {
                                 const o: Option = {
-                                    label: d.name,
+                                    label: d.name || "",
                                     value: d.id,
                                 };
                                 return o;
@@ -47,18 +47,10 @@ const SQLViews = () => {
                                 dimension: "",
                                 replace: true,
                             });
-                            // if (changeQuery) {
-                            //     datumAPi.changeAttribute({
-                            //         attribute: "query",
-                            //         value: data.find(
-                            //             (d: any) => d.id === e?.value
-                            //         )?.sqlQuery,
-                            //     });
-                            // }
                         }}
                         options={data.map((d) => {
                             const o: Option = {
-                                label: d.name,
+                                label: d.name || "",
                                 value: d.id,
                             };
                             return o;

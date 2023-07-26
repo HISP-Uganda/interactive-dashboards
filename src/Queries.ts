@@ -45,6 +45,9 @@ import {
     Storage,
     Threshold,
     IFilter,
+    IVisualization2,
+    IIndicator2,
+    IData2,
 } from "./interfaces";
 import { createCategory, createDashboard, createDataSource } from "./Store";
 import {
@@ -53,6 +56,7 @@ import {
     flattenDHIS2Data,
     merge2DataSources,
 } from "./utils/utils";
+import { get, getOr } from "lodash/fp";
 
 type QueryProps = {
     namespace: string;
@@ -64,6 +68,7 @@ type QueryProps = {
 
 export const api = axios.create({
     baseURL: "https://services.dhis2.hispuganda.org/",
+    string: "",
 });
 
 export const fetchDataForIndex = async (
@@ -133,6 +138,7 @@ export const queryDataSource = async (
 
     let params: AxiosRequestConfig = {
         baseURL: dataSource.authentication?.url,
+        string: "",
     };
 
     if (
@@ -151,6 +157,7 @@ export const queryDataSource = async (
     const instance = axios.create(params);
     const { data } = await instance.get(url, {
         params: parameters,
+        string: "",
     });
     return data;
 };
@@ -226,58 +233,42 @@ export const getIndex = async <TData>(
 
 export const getDHIS2Record = async <TData>(
     id: string,
-    args: Pick<QueryProps, "namespace" | "engine">,
-    isNotNew: boolean
+    args: Pick<QueryProps, "namespace" | "engine">
 ) => {
-    if (isNotNew) {
-        const { namespace, engine } = args;
-        const namespaceQuery = {
-            storedValue: {
-                resource: `dataStore/${namespace}/${id}`,
-            },
-        };
-        try {
-            const { storedValue } = await engine.query(namespaceQuery);
-            return storedValue as TData;
-        } catch (error) {
-            console.log(error);
-        }
-    }
+    const { namespace, engine } = args;
+    const namespaceQuery = {
+        storedValue: {
+            resource: `dataStore/${namespace}/${id}`,
+        },
+    };
+    const { storedValue } = await engine.query(namespaceQuery);
+    return storedValue as TData;
 };
 
 export const getESRecord = async <TData>(
     id: string,
     args: Omit<QueryProps, "systemId" | "engine">
 ) => {
-    try {
-        let {
-            data: {
-                body: { _source },
-            },
-        } = await api.post<{ body: { _source: TData } }>(
-            "wal/get",
-            {
-                index: args.namespace,
-                id,
-            }
-            // { signal: args.signal }
-        );
-        return _source;
-    } catch (error) {
-        return null;
-    }
+    let {
+        data: {
+            body: { _source },
+        },
+    } = await api.post<{ body: { _source: TData } }>("wal/get", {
+        index: args.namespace,
+        id,
+    });
+    return _source;
 };
 
 export const getOneRecord = async <TData>(
     storage: "data-store" | "es",
     id: string,
-    args: QueryProps,
-    isNotNew: boolean = true
+    args: QueryProps
 ) => {
     if (storage === "es") {
         return getESRecord<TData>(id, args);
     }
-    return getDHIS2Record<TData>(id, args, isNotNew);
+    return getDHIS2Record<TData>(id, args);
 };
 
 export const useInitials = (storage: "data-store" | "es") => {
@@ -311,10 +302,6 @@ export const useInitials = (storage: "data-store" | "es") => {
         systemInfo: {
             resource: "system/info",
         },
-        // directives: {
-        //     resource:
-        //         "analytics.json?dimension=dx:B04qyv8sHLZ;Et0jLLFoPiQ;FJ1pjZ5Edzf;HolY9bB9ndg;I8NkRKchMoU;N7r57cuvssW;PQxdLS3vke3;Q18G7d3DPOg;QYISgIjXTJC;QgvBHBb5xcS;UEDzAaR5GpB;WdilrXx08R4;gjqIp8H7948;gypjprrtiKV;h4lJWKnqnxx;lYoAOhykYUW;m3xNIoQ2esR;nOnQwK1sDaN;tWRpQ8HFWk4;um8prFWwCYU;w6VmDxFste0;wRshJ7SJcHq;wXeABLEj9Vj&dimension=pe:2020July;2021July;2022July;2023July;2024July&dimension=ou:qjk1ujdzlss&aggregationType=MAX",
-        // },
     };
     return useQuery<string, Error>(
         ["initialing"],
@@ -328,31 +315,6 @@ export const useInitials = (storage: "data-store" | "es") => {
                 dataSets: { dataSets },
             }: any = await engine.query(ouQuery);
 
-            // const processed = flattenDHIS2Data(
-            //     rows.map((row: string[]) => {
-            //         return fromPairs(
-            //             row.map((value, index) => {
-            //                 const header = headers?.[index];
-            //                 return [header.name, value];
-            //             })
-            //         );
-            //     }),
-            //     "processDirectives"
-            // );
-
-            //const maxPe = max(processed.map((d: any) => d.pe));
-
-            // Object.entries(
-            //     groupBy(
-            //         processed.filter((d: any) => d.pe === maxPe),
-            //         "label"
-            //     )
-            // ).forEach(([id, values]) =>
-            //     calculatedApi.add({
-            //         id,
-            //         value: uniqBy(values, "dx").length,
-            //     })
-            // );
             const isAdmin =
                 authorities.indexOf("IDVT_ADMINISTRATION") !== -1 ||
                 authorities.indexOf("ALL") !== -1 ||
@@ -489,21 +451,6 @@ export const useDashboards = (
                     signal,
                     engine,
                 });
-                const processed = dashboards.map((d) => {
-                    const node: DataNode = {
-                        isLeaf: d.filters ? d.filters.length > 0 : false,
-                        id: d.id,
-                        pId: "",
-                        key: d.id,
-                        style: { fontWeight: "bold" },
-                        title: d.name || "",
-                        checkable: false,
-                        nodeSource: d.nodeSource,
-                        hasChildren: d.hasChildren,
-                    };
-                    return node;
-                });
-                db.dashboards.bulkPut(processed);
                 return dashboards;
             } catch (error) {
                 console.error(error);
@@ -513,18 +460,46 @@ export const useDashboards = (
     );
 };
 
+export const useCategoryList = (
+    storage: "data-store" | "es",
+    systemId: string
+) => {
+    const engine = useDataEngine();
+    return useQuery<
+        { dashboards: IDashboard[]; categories: ICategory[] },
+        Error
+    >(["i-dashboards-categories"], async ({ signal }) => {
+        const dashboards = await getIndex<IDashboard>(storage, {
+            namespace: "i-dashboards",
+            systemId,
+            otherQueries: [],
+            signal,
+            engine,
+        });
+        const categories = await getIndex<ICategory>(storage, {
+            namespace: "i-categories",
+            systemId,
+            otherQueries: [],
+            signal,
+            engine,
+        });
+
+        return { dashboards, categories };
+    });
+};
+
 export const useDashboard = (
     storage: "data-store" | "es",
     id: string,
     systemId: string,
     dashboardType: "dynamic" | "fixed",
-    refresh: boolean = true
+    action: "view" | "create" | "update" | undefined
 ) => {
     const engine = useDataEngine();
-    return useQuery<boolean, Error>(
+    return useQuery<IDashboard, Error>(
         ["i-dashboards", id],
         async ({ signal }) => {
-            if (refresh) {
+            if (action === "view" || action === "update") {
                 let dashboard = await getOneRecord<IDashboard>(storage, id, {
                     namespace: "i-dashboards",
                     otherQueries: [],
@@ -532,137 +507,37 @@ export const useDashboard = (
                     engine,
                     systemId,
                 });
-                if (isEmpty(dashboard)) {
-                    dashboard = createDashboard(id, dashboardType);
-                } else if (dashboard.targetCategoryCombo) {
-                    const {
-                        combo: { categoryOptionCombos },
-                    }: any = await engine.query({
-                        combo: {
-                            resource: `categoryCombos/${dashboard.targetCategoryCombo}`,
-                            params: {
-                                fields: "categoryOptionCombos[id,name,categoryOptions],categories[id,name,categoryOptions[id~rename(value),name~rename(label)]]",
-                            },
-                        },
-                    });
-                    dashboardApi.setTargetCategoryOptionCombos(
-                        categoryOptionCombos
-                    );
-                }
                 dashboardTypeApi.set(dashboard.type);
-                const queries = await getIndex<IIndicator>(storage, {
-                    namespace: "i-visualization-queries",
-                    systemId,
-                    otherQueries: [],
-                    signal,
-                    engine,
-                });
-                // const processedDirectives = dataElementGroups.flatMap(
-                //     ({
-                //         code: degCode,
-                //         name: degName,
-                //         dataElements,
-                //         id: degId,
-                //         attributeValues,
-                //     }: any) => {
-                //         return dataElements.map(
-                //             ({
-                //                 id,
-                //                 name,
-                //                 code,
-                //                 attributeValues: deav,
-                //             }: any) => {
-                //                 let programCode = "";
-                //                 const attribute = attributeValues.find(
-                //                     ({ attribute }: any) =>
-                //                         attribute.id === "UBWSASWdyfi"
-                //                 );
-                //                 if (attribute) {
-                //                     programCode = attribute.value;
-                //                 }
-
-                //                 const decreasing = deav.find(
-                //                     ({ attribute }: any) =>
-                //                         attribute.id === "wRRYuIS8JKN"
-                //                 );
-                //                 const isDecreasing =
-                //                     decreasing && decreasing.value;
-                //                 return {
-                //                     id,
-                //                     name,
-                //                     code,
-                //                     intervention: degName,
-                //                     interventionCode: degCode,
-                //                     subKeyResultArea: name,
-                //                     subKeyResultAreaCode: code,
-                //                     degId,
-                //                     keyResultArea: name,
-                //                     keyResultAreaCode: code,
-                //                     theme: "",
-
-                //                 };
-                //             }
-                //         );
-                //     }
-                // );
-                const dataSources = await getIndex<IDataSource>(storage, {
-                    namespace: "i-data-sources",
-                    systemId,
-                    otherQueries: [],
-                    signal,
-                    engine,
-                });
-                const categories = await getIndex<ICategory>(storage, {
-                    namespace: "i-categories",
-                    systemId,
-                    otherQueries: [],
-                    signal,
-                    engine,
-                });
-                categoriesApi.setCategories(categories);
-                dataSourcesApi.setDataSources(dataSources);
+                // const queries = await getIndex<IIndicator>(storage, {
+                //     namespace: "i-visualization-queries",
+                //     systemId,
+                //     otherQueries: [],
+                //     signal,
+                //     engine,
+                // });
+                // const dataSources = await getIndex<IDataSource>(storage, {
+                //     namespace: "i-data-sources",
+                //     systemId,
+                //     otherQueries: [],
+                //     signal,
+                //     engine,
+                // });
+                // const categories = await getIndex<ICategory>(storage, {
+                //     namespace: "i-categories",
+                //     systemId,
+                //     otherQueries: [],
+                //     signal,
+                //     engine,
+                // });
+                // categoriesApi.setCategories(categories);
+                // dataSourcesApi.setDataSources(dataSources);
                 dashboardApi.setCurrentDashboard(dashboard);
                 storeApi.changeSelectedDashboard(dashboard.id);
                 storeApi.changeSelectedCategory(dashboard.category || "");
-                indicatorsApi.setVisualizationQueries(queries);
-
-                if (
-                    dashboard.nodeSource &&
-                    dashboard.nodeSource.search &&
-                    dashboard.nodeSource.search === "deg"
-                ) {
-                    const data = await db.dataElements.toArray();
-                    const dataElementGroups = uniq(
-                        data.map(({ degId }) => degId)
-                    );
-                    storeApi.setDataElementGroups(dataElementGroups);
-                }
-                if (
-                    dashboard.nodeSource &&
-                    dashboard.nodeSource.search &&
-                    dashboard.nodeSource.search === "degs"
-                ) {
-                    const data = await db.dataElements.toArray();
-                    const dataElementGroupSets = uniq(
-                        data.map(({ degsId }) => degsId)
-                    );
-                    storeApi.setDataElementGroupSets(dataElementGroupSets);
-                }
-
-                const current = {
-                    isLeaf: !dashboard.hasChildren,
-                    id: dashboard.id,
-                    pId: "",
-                    key: dashboard.id,
-                    style: { bg: "yellow", fontWeight: "bold" },
-                    title: dashboard.name || "",
-                    checkable: false,
-                    nodeSource: dashboard.nodeSource,
-                    hasChildren: dashboard.hasChildren,
-                };
-                await db.dashboards.put(current);
+                // indicatorsApi.setVisualizationQueries(queries);
+                return dashboard;
             }
-            return true;
+            return createDashboard(id, dashboardType);
         }
     );
 };
@@ -839,46 +714,70 @@ export const useDataSet = (dataSetId: string) => {
     );
 };
 
-export const useDimensions = (
-    isCurrentDHIS2: boolean | undefined,
-    currentDataSource: AxiosInstance | undefined
-) => {
+export const getDHIS2Resources = async <T>({
+    currentDHIS2,
+    params,
+    resource,
+    resourceKey,
+    dataSource,
+}: Partial<{
+    params: { [key: string]: string };
+    resource: string;
+    currentDHIS2: boolean;
+    resourceKey: string;
+    dataSource: AxiosInstance | undefined;
+}>) => {
     const engine = useDataEngine();
+    if (currentDHIS2 && resource && resourceKey) {
+        const { data }: any = await engine.query({
+            dimensions: {
+                resource,
+                params,
+            },
+        });
+        return getOr<T[]>([], resourceKey, data);
+    } else if (dataSource && resource && resourceKey) {
+        const { data } = await dataSource.get<{ [key: string]: T[] }>(
+            resource,
+            {
+                params,
+                string: "",
+            }
+        );
+        return data[resourceKey];
+    }
+    return [];
+};
+export const useDHIS2Resource = <T>({}: {
+    params: { [key: string]: string };
+    id: string;
+    resource: string;
+}) => {};
 
-    return useQuery<any[], Error>(["dimensions", isCurrentDHIS2], async () => {
-        if (isCurrentDHIS2) {
-            const {
-                dimensions: { dimensions },
-            }: any = await engine.query({
-                dimensions: {
-                    resource: `dimensions.json`,
-                    params: {
-                        fields: "id,name,items[id,name]",
-                        paging: "false",
-                    },
-                },
-            });
-            return dimensions;
-        } else if (currentDataSource) {
-            const {
-                data: { dimensions },
-            } = await currentDataSource.get("dimensions", {
+export const useDimensions = (
+    currentDHIS2: boolean | undefined,
+    dataSource: AxiosInstance | undefined
+) => {
+    return useQuery<Array<INamed & { items: INamed[] }>, Error>(
+        ["dimensions", currentDHIS2],
+        async () => {
+            return getDHIS2Resources<INamed & { items: INamed[] }>({
+                currentDHIS2,
+                resource: "dimensions.json",
                 params: { fields: "id,name,items[id,name]", paging: "false" },
+                dataSource,
             });
-            return dimensions;
         }
-        return [];
-    });
+    );
 };
 
 export const useDataElements = (
     page: number,
     pageSize: number,
     q = "",
-    isCurrentDHIS2: boolean | undefined,
-    currentDataSource: AxiosInstance | undefined
+    currentDHIS2: boolean | undefined,
+    dataSource: AxiosInstance | undefined
 ) => {
-    const engine = useDataEngine();
     let params: { [key: string]: any } = {
         page,
         pageSize,
@@ -892,36 +791,15 @@ export const useDataElements = (
             filter: `identifiable:token:${q}`,
         };
     }
-    return useQuery<{ id: string; name: string }[], Error>(
-        ["data-elements", page, pageSize, q, isCurrentDHIS2],
+    return useQuery<INamed[], Error>(
+        ["data-elements", page, pageSize, q, currentDHIS2],
         async () => {
-            if (isCurrentDHIS2) {
-                const {
-                    elements: {
-                        dataElements,
-                        pager: { total: totalDataElements },
-                    },
-                }: any = await engine.query({
-                    elements: {
-                        resource: "dataElements.json",
-                        params,
-                    },
-                });
-                paginationApi.addPagination({ totalDataElements });
-                return dataElements;
-            } else if (currentDataSource) {
-                const {
-                    data: {
-                        dataElements,
-                        pager: { total: totalDataElements },
-                    },
-                } = await currentDataSource.get("dataElements.json", {
-                    params,
-                });
-                paginationApi.addPagination({ totalDataElements });
-                return dataElements;
-            }
-            return [];
+            return getDHIS2Resources<INamed>({
+                currentDHIS2,
+                resource: "dataElements.json",
+                params,
+                dataSource,
+            });
         }
     );
 };
@@ -930,65 +808,9 @@ export const useDataElementGroups = (
     page: number,
     pageSize: number,
     q = "",
-    isCurrentDHIS2: boolean | undefined,
-    currentDataSource: AxiosInstance | undefined
+    currentDHIS2: boolean | undefined,
+    dataSource: AxiosInstance | undefined
 ) => {
-    const engine = useDataEngine();
-    let params: { [key: string]: any } = {
-        page,
-        pageSize,
-        fields: "id,name",
-        order: "name:ASC",
-    };
-
-    if (q) {
-        params = {
-            ...params,
-            filter: `name:ilike:${q}`,
-        };
-    }
-    return useQuery<{ id: string; name: string }[], Error>(
-        ["data-element-groups", page, pageSize, q],
-        async () => {
-            if (isCurrentDHIS2) {
-                const {
-                    elements: {
-                        dataElementGroups,
-                        pager: { total: totalDataElementGroups },
-                    },
-                }: any = await engine.query({
-                    elements: {
-                        resource: "dataElementGroups.json",
-                        params,
-                    },
-                });
-                paginationApi.addPagination({ totalDataElementGroups });
-                return dataElementGroups;
-            } else if (currentDataSource) {
-                const {
-                    data: {
-                        dataElementGroups,
-                        pager: { total: totalDataElementGroups },
-                    },
-                } = await currentDataSource.get("dataElementGroups.json", {
-                    params,
-                });
-                paginationApi.addPagination({ totalDataElementGroups });
-                return dataElementGroups;
-            }
-            return [];
-        }
-    );
-};
-
-export const useDataElementGroupSets = (
-    page: number,
-    pageSize: number,
-    q = "",
-    isCurrentDHIS2: boolean | undefined,
-    currentDataSource: AxiosInstance | undefined
-) => {
-    const engine = useDataEngine();
     let params: { [key: string]: any } = {
         page,
         pageSize,
@@ -1002,37 +824,48 @@ export const useDataElementGroupSets = (
             filter: `identifiable:token:${q}`,
         };
     }
-    const namespaceQuery = {
-        elements: {
-            resource: "dataElementGroupSets.json",
-            params,
-        },
+    return useQuery<INamed[], Error>(
+        ["data-element-groups", page, pageSize, q],
+        async () => {
+            return getDHIS2Resources<INamed>({
+                currentDHIS2,
+                resource: "dataElementGroups.json",
+                params,
+                dataSource,
+            });
+        }
+    );
+};
+
+export const useDataElementGroupSets = (
+    page: number,
+    pageSize: number,
+    q = "",
+    currentDHIS2: boolean | undefined,
+    dataSource: AxiosInstance | undefined
+) => {
+    let params: { [key: string]: any } = {
+        page,
+        pageSize,
+        fields: "id,name",
+        order: "name:ASC",
     };
-    return useQuery<{ id: string; name: string }[], Error>(
+
+    if (q) {
+        params = {
+            ...params,
+            filter: `identifiable:token:${q}`,
+        };
+    }
+    return useQuery<INamed[], Error>(
         ["data-element-group-sets", page, pageSize, q],
         async () => {
-            if (isCurrentDHIS2) {
-                const {
-                    elements: {
-                        dataElementGroupSets,
-                        pager: { total: totalDataElementGroupSets },
-                    },
-                }: any = await engine.query(namespaceQuery);
-                paginationApi.addPagination({ totalDataElementGroupSets });
-                return dataElementGroupSets;
-            } else if (currentDataSource) {
-                const {
-                    data: {
-                        dataElementGroupSets,
-                        pager: { total: totalDataElementGroupSets },
-                    },
-                } = await currentDataSource.get("dataElementGroupSets.json", {
-                    params,
-                });
-                paginationApi.addPagination({ totalDataElementGroupSets });
-                return dataElementGroupSets;
-            }
-            return [];
+            return getDHIS2Resources<INamed>({
+                currentDHIS2,
+                resource: "dataElementGroupSets.json",
+                params,
+                dataSource,
+            });
         }
     );
 };
@@ -1041,12 +874,9 @@ export const useIndicators = (
     page: number,
     pageSize: number,
     q = "",
-    selectedIndicators: string[] = [],
-    isCurrentDHIS2: boolean | undefined,
-    currentDataSource: AxiosInstance | undefined
+    currentDHIS2: boolean | undefined,
+    dataSource: AxiosInstance | undefined
 ) => {
-    const engine = useDataEngine();
-
     let params: { [key: string]: any } = {
         page,
         pageSize,
@@ -1054,91 +884,67 @@ export const useIndicators = (
         order: "name:ASC",
     };
 
-    let selectedIndicatorsQuery = {};
-
     if (q) {
         params = { ...params, filter: `identifiable:token:${q}` };
     }
-    const query = {
-        elements: {
-            resource: "indicators.json",
-            params,
-        },
-        ...selectedIndicatorsQuery,
-    };
-    return useQuery<{ id: string; name: string }[], Error>(
+    return useQuery<INamed[], Error>(
         ["indicators", page, pageSize, q],
         async () => {
-            if (isCurrentDHIS2) {
-                const {
-                    elements: {
-                        indicators,
-                        pager: { total: totalIndicators },
-                    },
-                }: any = await engine.query(query);
-                paginationApi.addPagination({ totalIndicators });
-                return indicators;
-            } else if (currentDataSource) {
-                const {
-                    data: {
-                        indicators,
-                        pager: { total: totalIndicators },
-                    },
-                } = await currentDataSource.get("indicators.json", {
-                    params,
-                });
-                paginationApi.addPagination({ totalIndicators });
-                return indicators;
-            }
-
-            return [];
+            return getDHIS2Resources<INamed>({
+                currentDHIS2,
+                resource: "indicators.json",
+                params,
+                dataSource,
+            });
         }
     );
 };
 
 export const useSQLViews = (
-    isCurrentDHIS2: boolean | undefined,
-    currentDataSource: AxiosInstance | undefined
+    currentDHIS2: boolean | undefined,
+    dataSource: AxiosInstance | undefined
 ) => {
-    const engine = useDataEngine();
     const params = {
         paging: "false",
         fields: "id,name,sqlQuery",
     };
-    const query = {
-        elements: {
-            resource: "sqlViews.json",
-            params,
-        },
-    };
-    return useQuery<{ id: string; name: string; sqlQuery: string }[], Error>(
+    return useQuery<Array<INamed & { sqlQuery: string }>, Error>(
         ["sql-views"],
         async () => {
-            if (isCurrentDHIS2) {
-                const {
-                    elements: { sqlViews },
-                }: any = await engine.query(query);
-                return sqlViews;
-            } else if (currentDataSource) {
-                const {
-                    data: { sqlViews },
-                } = await currentDataSource.get("sqlViews.json", { params });
-                return sqlViews;
-            }
-            return [];
+            return getDHIS2Resources<INamed & { sqlQuery: string }>({
+                currentDHIS2,
+                resource: "sqlViews.json",
+                params,
+                dataSource,
+            });
         }
     );
+};
+
+export const useDHIS2Visualizations = (
+    currentDHIS2: boolean | undefined,
+    dataSource: AxiosInstance | undefined
+) => {
+    const params = {
+        fields: "id,name",
+    };
+    return useQuery<INamed[], Error>(["dhis-visualizations"], async () => {
+        return getDHIS2Resources<INamed>({
+            currentDHIS2,
+            resource: "sqlViews.json",
+            params,
+            dataSource,
+        });
+    });
 };
 
 export const useProgramIndicators = (
     page: number,
     pageSize: number,
     q = "",
-    selectedProgramIndicators: string[] = [],
-    isCurrentDHIS2: boolean | undefined,
-    currentDataSource: AxiosInstance | undefined
+    currentDHIS2: boolean | undefined,
+    dataSource: AxiosInstance | undefined
 ) => {
-    const engine = useDataEngine();
     let params: { [key: string]: any } = {
         page,
         pageSize,
@@ -1146,44 +952,19 @@ export const useProgramIndicators = (
         order: "name:ASC",
     };
 
-    let selectedProgramIndicatorsQuery = {};
-
     if (q) {
         params = { ...params, filter: `identifiable:token:${q}` };
     }
-    const query = {
-        elements: {
-            resource: "programIndicators.json",
-            params,
-        },
-        ...selectedProgramIndicatorsQuery,
-    };
-    return useQuery<{ id: string; name: string }[], Error>(
+
+    return useQuery<INamed[], Error>(
         ["program-indicators", page, pageSize, q],
         async () => {
-            if (isCurrentDHIS2) {
-                const {
-                    elements: {
-                        programIndicators,
-                        pager: { total: totalProgramIndicators },
-                    },
-                }: any = await engine.query(query);
-                paginationApi.addPagination({ totalProgramIndicators });
-                return programIndicators;
-            } else if (currentDataSource) {
-                const {
-                    data: {
-                        programIndicators,
-                        pager: { total: totalProgramIndicators },
-                    },
-                } = await currentDataSource.get("programIndicators.json", {
-                    params,
-                });
-                paginationApi.addPagination({ totalProgramIndicators });
-                return programIndicators;
-            }
-
-            return [];
+            return getDHIS2Resources<INamed>({
+                currentDHIS2,
+                resource: "programIndicators.json",
+                params,
+                dataSource,
+            });
         }
     );
 };
@@ -1192,10 +973,9 @@ export const useOrganisationUnitGroups = (
     page: number,
     pageSize: number,
     q = "",
-    isCurrentDHIS2: boolean | undefined,
-    currentDataSource: AxiosInstance | undefined
+    currentDHIS2: boolean | undefined,
+    dataSource: AxiosInstance | undefined
 ) => {
-    const engine = useDataEngine();
     let params: { [key: string]: any } = {
         page,
         pageSize,
@@ -1204,38 +984,15 @@ export const useOrganisationUnitGroups = (
     if (q) {
         params = { ...params, filter: `identifiable:token:${q}` };
     }
-    const query = {
-        elements: {
-            resource: "organisationUnitGroups.json",
-            params,
-        },
-    };
-    return useQuery<{ id: string; name: string }[], Error>(
+    return useQuery<INamed[], Error>(
         ["organisation-unit-groups", page, pageSize],
         async () => {
-            if (isCurrentDHIS2) {
-                const {
-                    elements: {
-                        organisationUnitGroups,
-                        pager: { total: totalOrganisationUnitGroups },
-                    },
-                }: any = await engine.query(query);
-                paginationApi.addPagination({ totalOrganisationUnitGroups });
-                return organisationUnitGroups;
-            } else if (currentDataSource) {
-                const {
-                    data: {
-                        organisationUnitGroups,
-                        pager: { total: totalOrganisationUnitGroups },
-                    },
-                } = await currentDataSource.get("organisationUnitGroups.json", {
-                    params,
-                });
-                paginationApi.addPagination({ totalOrganisationUnitGroups });
-                return organisationUnitGroups;
-            }
-
-            return [];
+            return getDHIS2Resources<INamed>({
+                currentDHIS2,
+                resource: "organisationUnitGroups.json",
+                params,
+                dataSource,
+            });
         }
     );
 };
@@ -1244,10 +1001,9 @@ export const useOrganisationUnitGroupSets = (
     page: number,
     pageSize: number,
     q = "",
-    isCurrentDHIS2: boolean | undefined,
-    currentDataSource: AxiosInstance | undefined
+    currentDHIS2: boolean | undefined,
+    dataSource: AxiosInstance | undefined
 ) => {
-    const engine = useDataEngine();
     let params: { [key: string]: any } = {
         page,
         pageSize,
@@ -1256,41 +1012,15 @@ export const useOrganisationUnitGroupSets = (
     if (q) {
         params = { ...params, filter: `identifiable:token:${q}` };
     }
-    const query = {
-        elements: {
-            resource: "organisationUnitGroupSets.json",
-            params,
-        },
-    };
-    return useQuery<{ id: string; name: string }[], Error>(
+    return useQuery<INamed[], Error>(
         ["organisation-unit-group-sets", page, pageSize],
         async () => {
-            if (isCurrentDHIS2) {
-                const {
-                    elements: {
-                        organisationUnitGroupSets,
-                        pager: { total: totalOrganisationUnitGroupSets },
-                    },
-                }: any = await engine.query(query);
-                paginationApi.addPagination({ totalOrganisationUnitGroupSets });
-                return organisationUnitGroupSets;
-            } else if (currentDataSource) {
-                const {
-                    data: {
-                        organisationUnitGroupSets,
-                        pager: { total: totalOrganisationUnitGroupSets },
-                    },
-                } = await currentDataSource.get(
-                    "organisationUnitGroupSets.json",
-                    {
-                        params,
-                    }
-                );
-                paginationApi.addPagination({ totalOrganisationUnitGroupSets });
-                return organisationUnitGroupSets;
-            }
-
-            return [];
+            return getDHIS2Resources<INamed>({
+                currentDHIS2,
+                resource: "organisationUnitGroupSets.json",
+                params,
+                dataSource,
+            });
         }
     );
 };
@@ -1299,10 +1029,9 @@ export const useOrganisationUnitLevels = (
     page: number,
     pageSize: number,
     q = "",
-    isCurrentDHIS2: boolean | undefined,
-    currentDataSource: AxiosInstance | undefined
+    currentDHIS2: boolean | undefined,
+    dataSource: AxiosInstance | undefined
 ) => {
-    const engine = useDataEngine();
     let params: { [key: string]: any } = {
         page,
         pageSize,
@@ -1311,38 +1040,15 @@ export const useOrganisationUnitLevels = (
     if (q) {
         params = { ...params, filter: `identifiable:token:${q}` };
     }
-    const query = {
-        elements: {
-            resource: "organisationUnitLevels.json",
-            params,
-        },
-    };
-    return useQuery<{ id: string; name: string; level: number }[], Error>(
+    return useQuery<Array<INamed & { level: number }>, Error>(
         ["organisation-unit-levels", page, pageSize],
         async () => {
-            if (isCurrentDHIS2) {
-                const {
-                    elements: {
-                        organisationUnitLevels,
-                        pager: { total: totalOrganisationUnitLevels },
-                    },
-                }: any = await engine.query(query);
-                paginationApi.addPagination({ totalOrganisationUnitLevels });
-                return organisationUnitLevels;
-            } else if (currentDataSource) {
-                const {
-                    data: {
-                        organisationUnitLevels,
-                        pager: { total: totalOrganisationUnitLevels },
-                    },
-                } = await currentDataSource.get("organisationUnitLevels.json", {
-                    params,
-                });
-                paginationApi.addPagination({ totalOrganisationUnitLevels });
-                return organisationUnitLevels;
-            }
-
-            return [];
+            return getDHIS2Resources<INamed & { level: number }>({
+                currentDHIS2,
+                resource: "organisationUnitLevels.json",
+                params,
+                dataSource,
+            });
         }
     );
 };
@@ -1373,7 +1079,7 @@ const findDimension = (
     );
 };
 
-export const findLevelsAndOus = (indicator: IIndicator | undefined) => {
+export const findLevelsAndOus = (indicator: IIndicator2 | undefined) => {
     if (indicator) {
         const denDimensions = indicator.denominator?.dataDimensions || {};
         const numDimensions = indicator.numerator?.dataDimensions || {};
@@ -1413,7 +1119,7 @@ export const findLevelsAndOus = (indicator: IIndicator | undefined) => {
 };
 
 const makeDHIS2Query = (
-    data: IData,
+    data: IData2,
     globalFilters: { [key: string]: any } = {},
     overrides: { [key: string]: any } = {}
 ) => {
@@ -1494,7 +1200,7 @@ const makeSQLViewsQueries = (
 };
 
 const generateDHIS2Query = (
-    indicators: IIndicator[],
+    indicators: IIndicator2[],
     globalFilters: { [key: string]: any } = {},
     overrides: { [key: string]: string } = {}
 ) => {
@@ -1583,7 +1289,7 @@ const generateDHIS2Query = (
 };
 
 const generateKeys = (
-    indicators: IIndicator[] = [],
+    indicators: IIndicator2[] = [],
     globalFilters: { [key: string]: any } = {}
 ) => {
     const all = indicators.flatMap((indicator) => {
@@ -1710,7 +1416,7 @@ const processDHIS2Data = (
 };
 
 const getDHIS2Query = (
-    query: IData,
+    query: IData2,
     globalFilters: { [key: string]: any } = {},
     overrides: { [key: string]: string } = {}
 ) => {
@@ -1743,7 +1449,7 @@ const getDHIS2Query = (
 
 const queryDHIS2 = async (
     engine: any,
-    vq: IData | undefined,
+    vq: IData2 | undefined,
     globalFilters: { [key: string]: any } = {},
     otherFilters: { [key: string]: any } = {}
 ) => {
@@ -1778,6 +1484,7 @@ const queryDHIS2 = async (
                         username: vq.dataSource.authentication.username,
                         password: vq.dataSource.authentication.password,
                     },
+                    string: "",
                 }
             );
 
@@ -1797,6 +1504,7 @@ const queryDHIS2 = async (
                     username: vq.dataSource.authentication.username,
                     password: vq.dataSource.authentication.password,
                 },
+                string: "",
             });
             return data;
         }
@@ -1823,6 +1531,7 @@ const queryDHIS2 = async (
                         username: vq.dataSource.authentication.username,
                         password: vq.dataSource.authentication.password,
                     },
+                    string: "",
                 }
             );
             return data;
@@ -1832,7 +1541,7 @@ const queryDHIS2 = async (
 };
 
 const computeIndicator = (
-    indicator: IIndicator,
+    indicator: IIndicator2,
     currentValue: any,
     numeratorValue: string,
     denominatorValue: string
@@ -1867,7 +1576,7 @@ const computeIndicator = (
 
 const queryIndicator = async (
     engine: any,
-    indicator: IIndicator,
+    indicator: IIndicator2,
     globalFilters: { [key: string]: any } = {},
     otherFilters: { [key: string]: any } = {}
 ) => {
@@ -1920,7 +1629,7 @@ const queryIndicator = async (
 
 const processVisualization = async (
     engine: any,
-    visualization: IVisualization,
+    visualization: IVisualization2,
     globalFilters: { [key: string]: any } = {},
     otherFilters: { [key: string]: any } = {}
 ) => {
@@ -1937,8 +1646,194 @@ const processVisualization = async (
     return flatten(data);
 };
 
-export const useVisualization = (
+export const useVisualizationMetadata = (
     visualization: IVisualization,
+    storage: Storage
+) => {
+    const engine = useDataEngine();
+    return useQuery<IVisualization2, Error>(
+        [
+            "visualizations-metadata",
+            visualization.id,
+            ...visualization.indicators,
+        ],
+        async ({ signal }) => {
+            const indicators = await Promise.all(
+                visualization.indicators.map((id) =>
+                    getOneRecord<IIndicator>(storage, id, {
+                        namespace: "i-indicators",
+                        otherQueries: [],
+                        signal,
+                        engine,
+                        systemId: "",
+                    })
+                )
+            );
+
+            const queries = await Promise.all(
+                indicators
+                    .flatMap(({ numerator, denominator }) => {
+                        if (numerator && denominator) {
+                            return [numerator, denominator];
+                        } else if (numerator) {
+                            return numerator;
+                        }
+                        return "";
+                    })
+                    .filter((x) => x !== "")
+                    .map((id) =>
+                        getOneRecord<IData>(storage, id, {
+                            namespace: "i-visualization-queries",
+                            otherQueries: [],
+                            signal,
+                            engine,
+                            systemId: "",
+                        })
+                    )
+            );
+
+            const dataSources = await Promise.all(
+                queries
+                    .map(({ dataSource }) => {
+                        if (dataSource) {
+                            return dataSource;
+                        }
+                        return "";
+                    })
+                    .filter((x) => x !== "")
+                    .map((id) =>
+                        getOneRecord<IDataSource>(storage, id, {
+                            namespace: "i-data-sources",
+                            otherQueries: [],
+                            signal,
+                            engine,
+                            systemId: "",
+                        })
+                    )
+            );
+
+            const processedIndicators: Array<IIndicator2> = indicators.map(
+                (i) => {
+                    let numerator1 = queries.find((q) => q.id === i.numerator);
+                    let denominator1 = queries.find(
+                        (q) => q.id === i.denominator
+                    );
+                    let numerator: IData2 | undefined = undefined;
+                    let denominator: IData2 | undefined = undefined;
+
+                    if (numerator1) {
+                        let joiner = queries.find(
+                            (q) => q.id === numerator1?.joinTo
+                        );
+                        let joinTo: IData2 | undefined = undefined;
+
+                        if (joiner) {
+                            joinTo = {
+                                id: joiner.id,
+                                name: joiner.name,
+                                description: joiner.description,
+                                type: joiner.type,
+                                accessor: joiner.accessor,
+                                expressions: joiner.expressions,
+                                fromFirst: joiner.fromFirst,
+                                flatteningOption: joiner.flatteningOption,
+                                fromColumn: joiner.fromColumn,
+                                toColumn: joiner.toColumn,
+                                query: joiner.query,
+                                dataDimensions: joiner.dataDimensions,
+                                dataSource: dataSources.find(
+                                    (ds) => ds.id === joiner?.dataSource
+                                ),
+                            };
+                        }
+                        numerator = {
+                            id: numerator1.id,
+                            name: numerator1.name,
+                            description: numerator1.description,
+                            type: numerator1.type,
+                            accessor: numerator1.accessor,
+                            expressions: numerator1.expressions,
+                            fromFirst: numerator1.fromFirst,
+                            flatteningOption: numerator1.flatteningOption,
+                            fromColumn: numerator1.fromColumn,
+                            toColumn: numerator1.toColumn,
+                            query: numerator1.query,
+                            dataDimensions: numerator1.dataDimensions,
+                            dataSource: dataSources.find(
+                                (ds) => ds.id === numerator1?.dataSource
+                            ),
+                            joinTo,
+                        };
+                    }
+
+                    if (denominator1) {
+                        let joiner = queries.find(
+                            (q) => q.id === denominator1?.joinTo
+                        );
+                        let joinTo: IData2 | undefined = undefined;
+
+                        if (joiner) {
+                            joinTo = {
+                                id: joiner.id,
+                                name: joiner.name,
+                                description: joiner.description,
+                                type: joiner.type,
+                                accessor: joiner.accessor,
+                                expressions: joiner.expressions,
+                                fromFirst: joiner.fromFirst,
+                                flatteningOption: joiner.flatteningOption,
+                                fromColumn: joiner.fromColumn,
+                                toColumn: joiner.toColumn,
+                                query: joiner.query,
+                                dataDimensions: joiner.dataDimensions,
+                                dataSource: dataSources.find(
+                                    (ds) => ds.id === joiner?.dataSource
+                                ),
+                            };
+                        }
+                        denominator = {
+                            id: denominator1.id,
+                            name: denominator1.name,
+                            description: denominator1.description,
+                            type: denominator1.type,
+                            accessor: denominator1.accessor,
+                            expressions: denominator1.expressions,
+                            fromFirst: denominator1.fromFirst,
+                            flatteningOption: denominator1.flatteningOption,
+                            fromColumn: denominator1.fromColumn,
+                            toColumn: denominator1.toColumn,
+                            query: denominator1.query,
+                            dataDimensions: denominator1.dataDimensions,
+                            dataSource: dataSources.find(
+                                (ds) => ds.id === denominator1?.dataSource
+                            ),
+                            joinTo,
+                        };
+                    }
+                    return {
+                        id: i.id,
+                        name: i.name,
+                        description: i.description,
+                        query: i.query,
+                        custom: i.custom,
+                        factor: i.factor,
+                        numerator,
+                        denominator,
+                    };
+                }
+            );
+
+            const realVisualization: IVisualization2 = {
+                ...visualization,
+                indicators: processedIndicators,
+            };
+            return realVisualization;
+        }
+    );
+};
+
+export const useVisualization = (
+    visualization: IVisualization2,
     refreshInterval?: string,
     globalFilters?: { [key: string]: any },
     otherFilters?: { [key: string]: any }
@@ -1954,7 +1849,7 @@ export const useVisualization = (
     return useQuery<any, Error>(
         [
             "visualizations",
-            ...visualization.indicators.map(({ id }) => id),
+            ...visualization.indicators,
             ...otherKeys,
             ...Object.values(overrides),
             ...Object.values(otherFilters || {}),
@@ -2033,7 +1928,7 @@ export const saveDocument = async <TData extends INamed>(
     systemId: string,
     document: Partial<TData>,
     engine: any,
-    type: "create" | "update"
+    type: "create" | "update" | "view"
 ) => {
     if (storage === "es") {
         const { data } = await api.post(`wal/index?index=${index}`, {

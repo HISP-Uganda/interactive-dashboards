@@ -52,7 +52,13 @@ import {
     storeApi,
     sectionApi,
 } from "../Events";
-import { IDashboard, Item, LocationGenerics, Option } from "../interfaces";
+import {
+    IDashboard,
+    Item,
+    LocationGenerics,
+    Option,
+    Period,
+} from "../interfaces";
 import { saveDocument } from "../Queries";
 import {
     $categoryOptions,
@@ -145,7 +151,7 @@ const DashboardMenu = () => {
         dashboardApi.setCurrentDashboard({ ...data, published: value });
     };
 
-    const onChangePeriods = (periods: Item[]) => {
+    const onChangePeriods = (periods: Period[]) => {
         storeApi.changePeriods(periods);
     };
 
@@ -327,7 +333,7 @@ const DashboardMenu = () => {
                                         (d: Option) =>
                                             dashboard.nodeSource &&
                                             d.value ===
-                                            dashboard.nodeSource.search
+                                                dashboard.nodeSource.search
                                     )}
                                     onChange={(e) =>
                                         changeNodeSource(
@@ -346,7 +352,7 @@ const DashboardMenu = () => {
                                         (d: Option) =>
                                             dashboard.nodeSource &&
                                             d.value ===
-                                            dashboard.nodeSource.subSearch
+                                                dashboard.nodeSource.subSearch
                                     )}
                                     onChange={(e) =>
                                         changeNodeSource(
@@ -401,7 +407,7 @@ const DashboardMenu = () => {
                 isOpen={isOpenSettings}
                 placement="right"
                 onClose={onCloseSettings}
-            // finalFocusRef={btnRef}
+                // finalFocusRef={btnRef}
             >
                 <DrawerOverlay />
                 <DrawerContent>

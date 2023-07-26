@@ -31,7 +31,6 @@ export const createSection = (id = generateUid()): ISection => {
         display: "normal",
         justifyContent: "space-around",
         carouselOver: "items",
-        images: [],
         bg: "white",
         height: "100%",
         padding: "5px",
@@ -142,7 +141,6 @@ export const createDashboard = (
         targetCategoryOptionCombos: [],
         nodeSource: {},
         tag: "Example tag",
-        images: [],
         type,
         excludeFromList: false,
     };
@@ -218,29 +216,21 @@ export const $section = domain.createStore<ISection>(createSection());
 export const $dataSets = domain.createStore<Option[]>([]);
 export const $calculated = domain.createStore<{ [key: string]: any }>({});
 
-export const $hasDHIS2 = $visualizationQuery.map((state) => {
-    return state.dataSource?.isCurrentDHIS2;
-});
-
-export const $dataSourceType = $visualizationQuery.map((state) => {
-    return state.dataSource?.type || "";
-});
-
 export const $currentDataSource = combine(
     $visualizationQuery,
-    (visualizationQuery) => {
-        if (
-            visualizationQuery.dataSource &&
-            !isEmpty(visualizationQuery.dataSource.authentication)
-        ) {
+    $dataSources,
+    (visualizationQuery, dataSources) => {
+        const dataSource = dataSources.find(
+            ({ id }) => id === visualizationQuery.dataSource
+        );
+        if (dataSource && !isEmpty(dataSource.authentication)) {
             return axios.create({
-                baseURL: `${visualizationQuery.dataSource.authentication.url}/api/`,
+                baseURL: `${dataSource.authentication.url}/api/`,
                 auth: {
-                    username:
-                        visualizationQuery.dataSource.authentication.username,
-                    password:
-                        visualizationQuery.dataSource.authentication.password,
+                    username: dataSource.authentication.username,
+                    password: dataSource.authentication.password,
                 },
+                string: "",
             });
         }
         return undefined;
@@ -543,6 +533,14 @@ export const $dimensions = $store.map(
         return initial;
     }
 );
+
+export const $hasDHIS2 = $settings.map((state) => {
+    return state.storage === "data-store";
+});
+
+// export const $dataSourceType = $visualizationQuery.map((state) => {
+//     return state.dataSource?.type || "";
+// });
 export const $isOpen = domain.createStore<boolean>(false);
 export const isOpenApi = createApi($isOpen, {
     onOpen: () => true,

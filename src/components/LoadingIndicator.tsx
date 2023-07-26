@@ -1,14 +1,16 @@
 import React from "react";
-import { Spinner } from "@chakra-ui/react";
+import { Spinner, Stack } from "@chakra-ui/react";
 
 export default function LoadingIndicator() {
     return (
-        <Spinner
+        <Stack w="100%" h="100%" alignItems="center" justifyContent="center">
+            <Spinner
             // thickness="4px"
-            speed="0.65s"
+            // speed="0.65s"
             // emptyColor="gray.200"
             // color="red"
             // size="lg"
-        />
+            />
+        </Stack>
     );
 }

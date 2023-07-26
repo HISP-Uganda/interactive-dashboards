@@ -22,7 +22,7 @@ import {
 import { useStore } from "effector-react";
 import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
-import { IndicatorProps } from "../../interfaces";
+import { datumAPi } from "../../Events";
 import { useOrganisationUnitGroupSets } from "../../Queries";
 import {
     $currentDataSource,
@@ -33,7 +33,6 @@ import {
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import GlobalSearchFilter from "./GlobalSearchFilter";
-import { datumAPi } from "../../Events";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;

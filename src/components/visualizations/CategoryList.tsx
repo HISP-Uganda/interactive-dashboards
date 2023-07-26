@@ -1,67 +1,72 @@
-import React from "react";
 import {
-    Stack,
-    Text,
     Accordion,
-    AccordionItem,
     AccordionButton,
-    AccordionPanel,
     AccordionIcon,
+    AccordionItem,
+    AccordionPanel,
     Box,
     Flex,
+    Stack,
+    Text,
 } from "@chakra-ui/react";
+import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { groupBy } from "lodash";
-import { useDashboards } from "../../Queries";
-import { $categoryOptions, $store, $settings } from "../../Store";
+import React from "react";
+import { ChartProps, LocationGenerics } from "../../interfaces";
+import { useCategoryList } from "../../Queries";
+import { $settings, $store } from "../../Store";
 import LoadingIndicator from "../LoadingIndicator";
 import NavItem from "../NavItem";
-import { ChartProps, LocationGenerics } from "../../interfaces";
-import { useNavigate, useSearch } from "@tanstack/react-location";
 export default function CategoryList({ visualization }: ChartProps) {
     const store = useStore($store);
     const navigate = useNavigate();
     const search = useSearch<LocationGenerics>();
 
     const { storage } = useStore($settings);
-    const { isLoading, isSuccess, isError, error, data } = useDashboards(
+    const { isLoading, isSuccess, isError, error, data } = useCategoryList(
         storage,
         store.systemId
     );
-    const categoryOptions = useStore($categoryOptions);
     const type = visualization.properties["type"] || "list";
 
     const displays: { [key: string]: React.ReactNode } = {
         list: (
             <Stack spacing="10px" p="5px" overflow="auto">
-                {categoryOptions
+                {data?.categories
                     .map((category) => {
-                        const groupedDashboards = groupBy(data, "category");
+                        const groupedDashboards = groupBy(
+                            data.dashboards,
+                            "category"
+                        );
                         return {
                             ...category,
-                            dashboards: groupedDashboards[category.value] || [],
+                            dashboards: groupedDashboards[category.id] || [],
                         };
                     })
                     .filter(({ dashboards }) => dashboards.length > 0)
                     .map((value) => {
-                        return <NavItem option={value} key={value.value} />;
+                        return <NavItem option={value} key={value.id} />;
                     })}
             </Stack>
         ),
         accordion: (
             <Accordion w="100%" h="100%" allowMultiple>
-                {categoryOptions
+                {data?.categories
                     .map((category) => {
-                        const groupedDashboards = groupBy(data, "category");
+                        const groupedDashboards = groupBy(
+                            data.dashboards,
+                            "category"
+                        );
                         return {
                             ...category,
-                            dashboards: groupedDashboards[category.value] || [],
+                            dashboards: groupedDashboards[category.id] || [],
                         };
                     })
                     .filter(({ dashboards }) => dashboards.length > 0)
                     .map((value) => {
                         return (
-                            <AccordionItem>
+                            <AccordionItem key={value.id}>
                                 <h2>
                                     <AccordionButton>
                                         <Box
@@ -69,7 +74,7 @@ export default function CategoryList({ visualization }: ChartProps) {
                                             flex="1"
                                             textAlign="left"
                                         >
-                                            {value.label}
+                                            {value.name}
                                         </Box>
                                         <AccordionIcon />
                                     </AccordionButton>
@@ -112,13 +117,14 @@ export default function CategoryList({ visualization }: ChartProps) {
                     })}
             </Accordion>
         ),
+        tree: <pre>{JSON.stringify(visualization, null, 2)}</pre>,
     };
 
     return (
         <>
             {isLoading && <LoadingIndicator />}
-            {isSuccess && displays[type]}
-            {isError && <Text>No data/Error occurred</Text>}
+            {isSuccess && data && displays[type]}
+            {isError && <Text>{error?.message}</Text>}
         </>
     );
 }

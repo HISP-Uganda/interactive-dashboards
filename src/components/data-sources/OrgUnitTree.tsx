@@ -1,6 +1,5 @@
 import { Stack } from "@chakra-ui/react";
 import { useState } from "react";
-import { IndicatorProps } from "../../interfaces";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import GlobalSearchFilter from "./GlobalSearchFilter";
 

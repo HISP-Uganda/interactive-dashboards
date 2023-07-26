@@ -535,7 +535,6 @@ export const processSingleValue = (
     uniqColumn: string
 ): any => {
     if (data.length > 0) {
-        console.log(data);
         if (aggregate && aggregationColumn && key) {
             const grouped = groupBy(data, aggregationColumn);
             const value = uniqColumn
@@ -576,6 +575,7 @@ export const processGraphs = (
     let chartData: any = [];
     let availableProperties: { [key: string]: any } = {};
     let allSeries = [];
+    console.log(data);
     update(availableProperties, "data.orientation", () => "v");
     Object.entries(dataProperties).forEach(([property, value]) => {
         availableProperties = update(
@@ -651,7 +651,6 @@ export const processGraphs = (
             if (show) {
                 data = data.slice(0, show);
             }
-
             const x = uniq(data.map((num: any) => num[category]));
             const columns = x.map((c: any) => {
                 return {

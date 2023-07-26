@@ -16,15 +16,27 @@ import {
     Box,
     Switch,
 } from "@chakra-ui/react";
+import { useState } from "react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { ChangeEvent } from "react";
 import { datumAPi } from "../../Events";
-import { IData, IDataSource, LocationGenerics, Option } from "../../interfaces";
+import {
+    IData,
+    IDataSource,
+    LocationGenerics,
+    Option,
+    IIndicator,
+} from "../../interfaces";
 import { saveDocument } from "../../Queries";
-import { $settings, $store, $visualizationQuery } from "../../Store";
+import {
+    $settings,
+    $store,
+    $visualizationQuery,
+    $dataSources,
+} from "../../Store";
 import {
     getSearchParams,
     globalIds,
@@ -38,6 +50,7 @@ const availableOptions: Option[] = [
     { value: "SQL_VIEW", label: "SQL Views" },
     { value: "ANALYTICS", label: "Analytics" },
     { value: "API", label: "API" },
+    { value: "VISUALIZATION", label: "DHIS2 Visualizations" },
 ];
 export default function VisualizationQuery() {
     const search = useSearch<LocationGenerics>();
@@ -46,6 +59,10 @@ export default function VisualizationQuery() {
     const engine = useDataEngine();
     const { storage } = useStore($settings);
     const visualizationQuery = useStore($visualizationQuery);
+    const dataSources = useStore($dataSources);
+    const [dataSource, setDataSource] = useState<
+        IDataSource | undefined | null
+    >(() => dataSources.find((d) => d.id === visualizationQuery.dataSource));
     return (
         <Stack
             p={`${generalPadding}px`}
@@ -87,16 +104,17 @@ export default function VisualizationQuery() {
                         <NamespaceDropdown<IDataSource>
                             namespace="i-data-sources"
                             value={visualizationQuery.dataSource}
-                            onChange={(value) =>
+                            onChange={(value) => {
                                 datumAPi.changeAttribute({
                                     attribute: "dataSource",
-                                    value,
-                                })
-                            }
+                                    value: value?.id,
+                                });
+                                setDataSource(() => value);
+                            }}
                         />
                     </Box>
                 </Stack>
-                {visualizationQuery.dataSource?.type === "DHIS2" && (
+                {dataSource?.type === "DHIS2" && (
                     <Stack direction="row" alignItems="center" flex={1}>
                         <Text>Type</Text>
                         <Box flex={1}>
@@ -227,84 +245,89 @@ export default function VisualizationQuery() {
                 </Table>
             )}
 
-            <Stack direction="row" alignItems="center" spacing="30px">
-                <Stack flex={1} direction="row" alignItems="center">
-                    <Text>Flattening Option</Text>
-                    <Box flex={1}>
-                        <Select<Option, false, GroupBase<Option>>
-                            value={flatteningOptions.find(
-                                (pt) =>
-                                    pt.value ===
-                                    visualizationQuery.flatteningOption
-                            )}
+            {!(
+                dataSource?.type === "DHIS2" &&
+                visualizationQuery.type === "VISUALIZATION"
+            ) && (
+                <Stack direction="row" alignItems="center" spacing="30px">
+                    <Stack flex={1} direction="row" alignItems="center">
+                        <Text>Flattening Option</Text>
+                        <Box flex={1}>
+                            <Select<Option, false, GroupBase<Option>>
+                                value={flatteningOptions.find(
+                                    (pt) =>
+                                        pt.value ===
+                                        visualizationQuery.flatteningOption
+                                )}
+                                onChange={(e) =>
+                                    datumAPi.changeAttribute({
+                                        attribute: "flatteningOption",
+                                        value: e?.value,
+                                    })
+                                }
+                                options={flatteningOptions}
+                                isClearable
+                            />
+                        </Box>
+                    </Stack>
+                    <Stack direction="row" flex={1} alignItems="center">
+                        <Text>Join To</Text>
+                        <Box flex={1}>
+                            <NamespaceDropdown<IData>
+                                namespace="i-visualization-queries"
+                                value={visualizationQuery.joinTo}
+                                onChange={(value) =>
+                                    datumAPi.changeAttribute({
+                                        attribute: "joinTo",
+                                        value: value?.id,
+                                    })
+                                }
+                            />
+                        </Box>
+                    </Stack>
+
+                    <Stack direction="row" flex={1} alignItems="center">
+                        <Text>To Column</Text>
+                        <Input
+                            flex={1}
+                            value={visualizationQuery.toColumn}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                datumAPi.changeAttribute({
+                                    attribute: "toColumn",
+                                    value: e.target.value,
+                                })
+                            }
+                        />
+                    </Stack>
+
+                    <Stack direction="row" flex={1} alignItems="center">
+                        <Text>From Column</Text>
+                        <Input
+                            flex={1}
+                            value={visualizationQuery.fromColumn}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                datumAPi.changeAttribute({
+                                    attribute: "fromColumn",
+                                    value: e.target.value,
+                                })
+                            }
+                        />
+                    </Stack>
+
+                    <Stack direction="row">
+                        <Text>Start With from</Text>
+                        <Switch
+                            isChecked={visualizationQuery.fromFirst}
                             onChange={(e) =>
                                 datumAPi.changeAttribute({
-                                    attribute: "flatteningOption",
-                                    value: e?.value,
-                                })
-                            }
-                            options={flatteningOptions}
-                            isClearable
-                        />
-                    </Box>
-                </Stack>
-                <Stack direction="row" flex={1} alignItems="center">
-                    <Text>Join To</Text>
-                    <Box flex={1}>
-                        <NamespaceDropdown<IData>
-                            namespace="i-visualization-queries"
-                            value={visualizationQuery.joinTo}
-                            onChange={(value) =>
-                                datumAPi.changeAttribute({
-                                    attribute: "joinTo",
-                                    value,
+                                    attribute: "fromFirst",
+                                    value: e.target.value,
                                 })
                             }
                         />
-                    </Box>
+                    </Stack>
                 </Stack>
-
-                <Stack direction="row" flex={1} alignItems="center">
-                    <Text>To Column</Text>
-                    <Input
-                        flex={1}
-                        value={visualizationQuery.toColumn}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                            datumAPi.changeAttribute({
-                                attribute: "toColumn",
-                                value: e.target.value,
-                            })
-                        }
-                    />
-                </Stack>
-
-                <Stack direction="row" flex={1} alignItems="center">
-                    <Text>From Column</Text>
-                    <Input
-                        flex={1}
-                        value={visualizationQuery.fromColumn}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                            datumAPi.changeAttribute({
-                                attribute: "fromColumn",
-                                value: e.target.value,
-                            })
-                        }
-                    />
-                </Stack>
-
-                <Stack direction="row">
-                    <Text>Start With from</Text>
-                    <Switch
-                        isChecked={visualizationQuery.fromFirst}
-                        onChange={(e) =>
-                            datumAPi.changeAttribute({
-                                attribute: "fromFirst",
-                                value: e.target.value,
-                            })
-                        }
-                    />
-                </Stack>
-            </Stack>
+            )}
 
             <Stack direction="row">
                 <Spacer />

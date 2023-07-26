@@ -16,7 +16,7 @@ import { Link, useNavigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { useEffect, useState } from "react";
 import { ICategory, LocationGenerics } from "../../interfaces";
-import { deleteDocument, useCategories, useNamespace } from "../../Queries";
+import { deleteDocument, useNamespace } from "../../Queries";
 import { $settings, $store } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import LoadingIndicator from "../LoadingIndicator";
@@ -46,7 +46,9 @@ const Categories = () => {
     return (
         <Stack>
             <Stack direction="row">
-                <Text fontSize="2xl" fontWeight="bold" p="2" color="blue.600">Categories</Text>
+                <Text fontSize="2xl" fontWeight="bold" p="2" color="blue.600">
+                    Categories
+                </Text>
                 <Spacer />
                 <Button
                     colorScheme="blue"
