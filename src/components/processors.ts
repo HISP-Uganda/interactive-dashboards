@@ -575,7 +575,6 @@ export const processGraphs = (
     let chartData: any = [];
     let availableProperties: { [key: string]: any } = {};
     let allSeries = [];
-    console.log(data);
     update(availableProperties, "data.orientation", () => "v");
     Object.entries(dataProperties).forEach(([property, value]) => {
         availableProperties = update(
@@ -645,12 +644,12 @@ export const processGraphs = (
                 allSeries = Object.keys(grouped2);
             }
         } else {
-            if (order) {
-                data = orderBy(data, "value", [order as "asc" | "desc"]);
-            }
-            if (show) {
-                data = data.slice(0, show);
-            }
+            // if (order) {
+            //     data = orderBy(data, "value", [order as "asc" | "desc"]);
+            // }
+            // if (show) {
+            //     data = data.slice(0, show);
+            // }
             const x = uniq(data.map((num: any) => num[category]));
             const columns = x.map((c: any) => {
                 return {
@@ -692,8 +691,8 @@ export const processGraphs = (
                         textposition: "auto",
                         texttemplate:
                             availableProperties?.data?.orientation === "v"
-                                ? "%{y:.0f}"
-                                : "%{x:.0f}",
+                                ? "%{y:.1f}"
+                                : "%{x:.1f}",
                     };
                 });
             } else {
@@ -723,8 +722,8 @@ export const processGraphs = (
                         textposition: "auto",
                         texttemplate:
                             availableProperties?.data?.orientation === "v"
-                                ? "%{y:.0f}"
-                                : "%{x:.0f}",
+                                ? "%{y:.2f}"
+                                : "%{x:.2f}",
                     },
                 ];
             }
