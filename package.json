@@ -13,6 +13,7 @@
     },
     "devDependencies": {
         "@dhis2/cli-app-scripts": "^10.2.0",
+        "@types/axios": "^0.14.0",
         "@types/leaflet": "^1.9.0",
         "@types/plotly.js": "^2.12.18",
         "@types/react-color": "^3.0.6",
@@ -27,7 +28,7 @@
         "@ajna/pagination": "1.4.19",
         "@chakra-ui/icons": "^1.1.7",
         "@chakra-ui/react": "^1.8.9",
-        "@dhis2/analytics": "^24.4.2",
+        "@dhis2/analytics": "^26.0.14",
         "@dhis2/app-runtime": "^3.8.0",
         "@dhis2/app-runtime-adapter-d2": "^1.1.0",
         "@dhis2/ui": "^8.7.7",

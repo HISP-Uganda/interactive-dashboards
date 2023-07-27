@@ -29,12 +29,13 @@ export default function DashboardDropDown({
                     options={data}
                     getOptionValue={(v) => v.id}
                     getOptionLabel={(v) => v.name || ""}
-                    value={data.find((d: IDashboard) => d.id === value)}
+                    value={data?.find((d: IDashboard) => d.id === value)}
                     onChange={(e) => onChange(e?.id || "")}
                     isClearable
+                    menuPlacement="top"
                 />
             )}
-            {isError && <Text>No data/Error occurred</Text>}
+            {isError && <Text>{error?.message}</Text>}
         </>
     );
 }

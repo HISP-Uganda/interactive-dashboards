@@ -1,18 +1,15 @@
 import { Box, Flex, Text } from "@chakra-ui/react";
 import { useNavigate, useSearch } from "@tanstack/react-location";
-import { useStore } from "effector-react";
-import { IDashboard, LocationGenerics, Option } from "../interfaces";
-import { $dashboard } from "../Store";
+import { ICategory, IDashboard, LocationGenerics } from "../interfaces";
 
 interface NavItemProps {
-    option: Option & { dashboards: IDashboard[] };
+    option: ICategory & { dashboards: IDashboard[] };
 }
-const NavItem = ({ option: { label, value, dashboards } }: NavItemProps) => {
+const NavItem = ({ option: { name, id, dashboards } }: NavItemProps) => {
     const navigate = useNavigate();
     const search = useSearch<LocationGenerics>();
-    const dashboard = useStore($dashboard);
     return (
-        <Box key={value}>
+        <Box key={id}>
             <Text
                 color="gray.600"
                 m="1"
@@ -21,7 +18,7 @@ const NavItem = ({ option: { label, value, dashboards } }: NavItemProps) => {
                 fontWeight="bold"
                 textTransform="uppercase"
             >
-                {label}
+                {name}
             </Text>
 
             {dashboards.map((d) => (
@@ -35,7 +32,11 @@ const NavItem = ({ option: { label, value, dashboards } }: NavItemProps) => {
                     fontSize="lg"
                     m="2"
                     cursor="pointer"
-                    _hover={{ bgColor: "teal", color: "white", transform: "scale(1.1)" }}
+                    _hover={{
+                        bgColor: "teal",
+                        color: "white",
+                        transform: "scale(1.1)",
+                    }}
                     //bgColor={dashboard.id === d.id ? "gray.200" : "gray.200"}
                     //color={dashboard.id === d.id ? "black" : ""}
                     // _hover={{

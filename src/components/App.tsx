@@ -1,39 +1,37 @@
-import { Box, Flex, Spinner, useMediaQuery } from "@chakra-ui/react";
+import { Box, useMediaQuery } from "@chakra-ui/react";
 import {
-    createHashHistory,
-    Outlet,
-    parseSearchWith,
-    ReactLocation,
-    Route,
-    Router,
-    stringifySearchWith,
+	createHashHistory,
+	Outlet,
+	parseSearchWith,
+	ReactLocation,
+	Route,
+	Router,
+	stringifySearchWith
 } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { useEffect } from "react";
 import {
-    CategoryForm,
-    DashboardForm,
-    DataSourceForm,
-    IndicatorForm,
-    VisualizationQueryForm,
+	CategoryForm,
+	DashboardForm,
+	DataSourceForm,
+	IndicatorForm,
+	VisualizationQueryForm
 } from "../components/forms";
 import Home from "../components/Home";
 import {
-    Categories,
-    Dashboards,
-    DataSources,
-    Indicators,
-    VisualizationQueries,
+	Categories,
+	Dashboards,
+	DataSources,
+	Indicators,
+	VisualizationQueries
 } from "../components/lists";
-import Section from "../components/Section";
 import { sizeApi, storeApi } from "../Events";
 import { LocationGenerics, ScreenSize } from "../interfaces";
 import { useInitials } from "../Queries";
 import { $settings } from "../Store";
 import { decodeFromBinary, encodeToBinary } from "../utils/utils";
-import Panel from "./Panel";
+import LoadingIndicator from "./LoadingIndicator";
 import Settings from "./Settings";
-import PDF from "./PDF";
 // import IndicatorForm from "./forms/IndicatorForm";
 
 const history = createHashHistory();
@@ -87,14 +85,6 @@ const App = () => {
             element: <Home />,
         },
         {
-            loader: async () => {
-                storeApi.setCurrentPage("");
-                return {};
-            },
-            path: "/panel",
-            element: <Panel />,
-        },
-        {
             path: "/settings",
             element: <Settings />,
             children: [
@@ -108,21 +98,10 @@ const App = () => {
                         {
                             path: "/",
                             element: <Categories />,
-                            loader: async () => {
-                                storeApi.setCurrentPage("categories");
-                                storeApi.setShowSider(true);
-                                return {};
-                            },
                         },
                         {
                             path: ":categoryId",
                             element: <CategoryForm />,
-                            loader: () => {
-                                storeApi.setCurrentPage("category");
-                                storeApi.setShowFooter(false);
-                                storeApi.setShowSider(true);
-                                return {};
-                            },
                         },
                     ],
                 },
@@ -132,21 +111,10 @@ const App = () => {
                         {
                             path: "/",
                             element: <DataSources />,
-                            loader: () => {
-                                storeApi.setCurrentPage("data-sources");
-                                storeApi.setShowFooter(false);
-                                storeApi.setShowSider(true);
-                                return {};
-                            },
                         },
                         {
                             path: ":dataSourceId",
                             element: <DataSourceForm />,
-                            loader: () => {
-                                storeApi.setCurrentPage("data-source");
-                                storeApi.setShowFooter(false);
-                                return {};
-                            },
                         },
                     ],
                 },
@@ -156,12 +124,6 @@ const App = () => {
                         {
                             path: "/",
                             element: <Indicators />,
-                            loader: () => {
-                                storeApi.setCurrentPage("indicators");
-                                storeApi.setShowFooter(false);
-                                storeApi.setShowSider(true);
-                                return {};
-                            },
                         },
                         {
                             path: ":indicatorId",
@@ -169,12 +131,6 @@ const App = () => {
                                 {
                                     path: "/",
                                     element: <IndicatorForm />,
-                                    loader: () => {
-                                        storeApi.setShowFooter(false);
-                                        storeApi.setCurrentPage("indicator");
-                                        storeApi.setShowSider(true);
-                                        return {};
-                                    },
                                 },
                             ],
                         },
@@ -186,14 +142,6 @@ const App = () => {
                         {
                             path: "/",
                             element: <VisualizationQueries />,
-                            loader: () => {
-                                storeApi.setCurrentPage(
-                                    "visualization-queries"
-                                );
-                                storeApi.setShowFooter(false);
-                                storeApi.setShowSider(true);
-                                return {};
-                            },
                         },
                         {
                             path: ":visualizationQueryId",
@@ -201,14 +149,6 @@ const App = () => {
                                 {
                                     path: "/",
                                     element: <VisualizationQueryForm />,
-                                    loader: () => {
-                                        storeApi.setShowFooter(false);
-                                        storeApi.setCurrentPage(
-                                            "visualization-query"
-                                        );
-                                        storeApi.setShowSider(true);
-                                        return {};
-                                    },
                                 },
                             ],
                         },
@@ -220,12 +160,6 @@ const App = () => {
                         {
                             path: "/",
                             element: <Dashboards />,
-                            loader: () => {
-                                storeApi.setCurrentPage("dashboards");
-                                storeApi.setShowFooter(false);
-                                storeApi.setShowSider(true);
-                                return {};
-                            },
                         },
                     ],
                 },
@@ -237,21 +171,6 @@ const App = () => {
                 {
                     path: "/",
                     element: <DashboardForm />,
-                    loader: () => {
-                        storeApi.setCurrentPage("dashboard");
-                        storeApi.setShowFooter(true);
-                        storeApi.setShowSider(true);
-                        return {};
-                    },
-                },
-                {
-                    path: "section",
-                    element: <Section />,
-                    loader: async () => {
-                        storeApi.setCurrentPage("sections");
-                        storeApi.setShowFooter(false);
-                        return {};
-                    },
                 },
             ],
         },
@@ -262,21 +181,12 @@ const App = () => {
 
     return (
         <>
-            {isLoading && (
-                <Flex
-                    w="100%"
-                    alignItems="center"
-                    justifyContent="center"
-                    h="calc(100vh - 48px)"
-                >
-                    <Spinner />
-                </Flex>
-            )}
+            {isLoading && <LoadingIndicator />}
             {isSuccess && (
                 <Router
                     location={location}
                     routes={routes}
-                    defaultPendingElement={<Spinner />}
+                    defaultPendingElement={<LoadingIndicator />}
                 >
                     <Outlet />
                 </Router>

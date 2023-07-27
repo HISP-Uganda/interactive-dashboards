@@ -13,7 +13,7 @@ export default function NamespaceDropdown<T extends INamed>({
 }: {
     namespace: string;
     onChange: (value: T | null) => void;
-    value: T | undefined | null;
+    value: string | undefined | null;
 }) {
     const { storage } = useStore($settings);
     const { systemId } = useStore($store);

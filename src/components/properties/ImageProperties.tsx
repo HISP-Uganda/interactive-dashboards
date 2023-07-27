@@ -67,10 +67,10 @@ export default function ImageProperties({
             <Stack>
                 <Text>Image Height</Text>
                 <NumberInput
-                    value={visualization.properties["data.height"] || 20}
+                    value={visualization.properties["data.height"] || ""}
                     max={100}
-                    min={20}
-                    step={2}
+                    min={1}
+                    step={1}
                     onChange={(value1: string, value2: number) =>
                         sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
@@ -89,10 +89,10 @@ export default function ImageProperties({
             <Stack>
                 <Text>Image Width</Text>
                 <NumberInput
-                    value={visualization.properties["data.width"] || 20}
+                    value={visualization.properties["data.width"] || ""}
                     max={100}
-                    min={20}
-                    step={2}
+                    min={1}
+                    step={1}
                     onChange={(value1: string, value2: number) =>
                         sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,

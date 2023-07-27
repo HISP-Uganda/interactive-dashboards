@@ -1,27 +1,36 @@
 import { Text } from "@chakra-ui/react";
+import { useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { fromPairs } from "lodash";
-import { ISection, IVisualization, LocationGenerics } from "../../interfaces";
-import { useVisualization } from "../../Queries";
 import {
+    ISection,
+    IVisualization,
+    IVisualization2,
+    LocationGenerics,
+} from "../../interfaces";
+import { useVisualization, useVisualizationMetadata } from "../../Queries";
+import {
+    $calculated,
     $dashboard,
     $globalFilters,
-    $visualizationData,
-    $calculated,
+    $settings,
 } from "../../Store";
 import { deriveSingleValues } from "../../utils/utils";
+import DashboardTree from "../DashboardTree";
 import LoadingIndicator from "../LoadingIndicator";
 import AreaGraph from "./AreaGraph";
 import BarGraph from "./BarGraph";
 import BoxPlot from "./BoxPlot";
 import BubbleMaps from "./BubbleMaps";
 import CategoryList from "./CategoryList";
+import ClockVisualisation from "./ClockVisualisation";
 import DashboardList from "./DashboardList";
 import DashboardTitle from "./DashboardTitle";
-import DashboardTree from "../DashboardTree";
+import DHIS2Visualization from "./DHIS2Visualization";
 import Filters from "./Filters";
 import FunnelGraph from "./FunnelGraph";
 import GaugeGraph from "./GaugeGraph";
+import HeatMap from "./HeatMap";
 import Histogram from "./Histogram";
 import ImageVisualization from "./ImageVisualization";
 import LineGraph from "./LineGraph";
@@ -35,14 +44,12 @@ import SingleValue from "./SingleValue";
 import StackedArea from "./StackedArea";
 import SunburstChart from "./SunburstChart";
 import Tables from "./Tables";
-import TreeMaps from "./TreeMaps";
-import { useSearch } from "@tanstack/react-location";
 import TextVisualisation from "./TextVisualisation";
-import ClockVisualisation from "./ClockVisualisation";
-import HeatMap from "./HeatMap";
+import TreeMaps from "./TreeMaps";
 
 type VisualizationProps = {
     visualization: IVisualization;
+    metadata: IVisualization2;
     section: ISection;
 };
 
@@ -281,11 +288,42 @@ const getVisualization = (
             />
         ),
         heatmap: <HeatMap visualization={visualization} section={section} />,
+        dhis2: <DHIS2Visualization />,
     };
     return allTypes[visualization.type];
 };
 
-const Visualization = ({ visualization, section }: VisualizationProps) => {
+const VisualizationMetaData = ({
+    visualization,
+    section,
+}: {
+    visualization: IVisualization;
+    section: ISection;
+}) => {
+    const { storage } = useStore($settings);
+
+    const { isLoading, isSuccess, data, isError, error } =
+        useVisualizationMetadata(visualization, storage);
+
+    if (isError) return <Text>{error?.message}</Text>;
+
+    if (isLoading) return <LoadingIndicator />;
+    if (isSuccess && data)
+        return (
+            <Visualization
+                visualization={visualization}
+                metadata={data}
+                section={section}
+            />
+        );
+    return null;
+};
+
+const Visualization = ({
+    visualization,
+    section,
+    metadata,
+}: VisualizationProps) => {
     const search = useSearch<LocationGenerics>();
     const globalFilters = useStore($globalFilters);
     const dashboard = useStore($dashboard);
@@ -293,7 +331,7 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
     const { affected, optionSet } = search;
 
     const { isLoading, isSuccess, data, isError, error } = useVisualization(
-        visualization,
+        metadata,
         dashboard.refreshInterval,
         globalFilters,
         affected && optionSet ? { [affected]: optionSet } : {}
@@ -311,11 +349,11 @@ const Visualization = ({ visualization, section }: VisualizationProps) => {
                     {isLoading && <LoadingIndicator />}
                     {isSuccess &&
                         getVisualization(visualization, data, section)}
-                    {isError && <Text>{JSON.stringify(error)}</Text>}
+                    {isError && <Text>{error?.message}</Text>}
                 </>
             )}
         </>
     );
 };
 
-export default Visualization;
+export default VisualizationMetaData;

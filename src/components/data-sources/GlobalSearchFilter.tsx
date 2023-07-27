@@ -1,10 +1,8 @@
 import { Input, Stack } from "@chakra-ui/react";
-import { Event } from "effector";
-import React, { ChangeEvent, Dispatch, SetStateAction } from "react";
-import { Dimension, IData } from "../../interfaces";
-import GlobalAndFilter from "./GlobalAndFilter";
 import { useStore } from "effector-react";
+import React, { ChangeEvent, Dispatch, SetStateAction } from "react";
 import { $visualizationQuery } from "../../Store";
+import GlobalAndFilter from "./GlobalAndFilter";
 
 type GlobalSearchFilterProps = {
     useGlobal: boolean;
@@ -33,7 +31,6 @@ export default function GlobalSearchFilter({
     prefix,
     suffix,
 }: GlobalSearchFilterProps) {
-    const visualizationQuery = useStore($visualizationQuery);
     return (
         <Stack direction="row" w="100%" flex={1} alignItems="center">
             <GlobalAndFilter

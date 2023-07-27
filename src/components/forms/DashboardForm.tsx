@@ -1,11 +1,11 @@
-import { Stack, Text } from "@chakra-ui/react";
-import { useMatch } from "@tanstack/react-location";
+import { Stack } from "@chakra-ui/react";
+import { useMatch, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { LocationGenerics } from "../../interfaces";
 import { useDashboard } from "../../Queries";
-import { $store, $settings, $dashboardType } from "../../Store";
-import Dashboard from "./Dashboard";
+import { $dashboardType, $settings, $store } from "../../Store";
 import LoadingIndicator from "../LoadingIndicator";
+import Dashboard from "./Dashboard";
 
 export default function DashboardForm() {
     const store = useStore($store);
@@ -14,13 +14,13 @@ export default function DashboardForm() {
     const {
         params: { dashboardId },
     } = useMatch<LocationGenerics>();
+    const { action } = useSearch<LocationGenerics>();
     const { isLoading, isSuccess, isError, error } = useDashboard(
         storage,
         dashboardId,
         store.systemId,
         dashboardType,
-        store.refresh,
-
+        action
     );
     return (
         <Stack

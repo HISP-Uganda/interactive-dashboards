@@ -1,13 +1,11 @@
-import { Input, Stack, Text, Checkbox } from "@chakra-ui/react";
-import { ChangeEvent } from "react";
+import { Checkbox, Input, Stack, Text } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { Select, GroupBase } from "chakra-react-select";
-import { isArray, uniq, flatten } from "lodash";
+import { flatten, uniq } from "lodash";
+import { ChangeEvent } from "react";
 import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
 import { $visualizationData, $visualizationMetadata } from "../../Store";
-import { customComponents } from "../../utils/components";
-import { colors, createOptions } from "../../utils/utils";
+import { createOptions } from "../../utils/utils";
 
 const RadarGraphProperties = ({
     visualization,

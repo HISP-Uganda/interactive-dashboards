@@ -18,6 +18,7 @@ import Periods from "./Periods";
 import ProgramIndicators from "./ProgramIndicators";
 import SQLViews from "./SQLViews";
 import DHIS2API from "./DHIS2API";
+import DHIS2Visualizations from "./DHIS2Visualizations";
 
 const DHIS2 = () => {
     const currentDataSource = useStore($currentDataSource);
@@ -147,6 +148,9 @@ const DHIS2 = () => {
             )}
             {visualizationQuery.type === "SQL_VIEW" && <SQLViews />}
             {visualizationQuery.type === "API" && <DHIS2API />}
+            {visualizationQuery.type === "VISUALIZATION" && (
+                <DHIS2Visualizations />
+            )}
             {isError && <Text>{error?.message}</Text>}
         </Stack>
     );
