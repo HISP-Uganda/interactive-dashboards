@@ -19,7 +19,11 @@ import {
     DataNode,
 } from "./interfaces";
 import { generateUid } from "./utils/uid";
-import { getRelativePeriods, relativePeriods2 } from "./utils/utils";
+import {
+    getRelativePeriods,
+    relativePeriods2,
+    createAxios,
+} from "./utils/utils";
 export const createSection = (id = generateUid()): ISection => {
     return {
         id,
@@ -216,26 +220,13 @@ export const $section = domain.createStore<ISection>(createSection());
 export const $dataSets = domain.createStore<Option[]>([]);
 export const $calculated = domain.createStore<{ [key: string]: any }>({});
 
-export const $currentDataSource = combine(
-    $visualizationQuery,
-    $dataSources,
-    (visualizationQuery, dataSources) => {
-        const dataSource = dataSources.find(
-            ({ id }) => id === visualizationQuery.dataSource
-        );
-        if (dataSource && !isEmpty(dataSource.authentication)) {
-            return axios.create({
-                baseURL: `${dataSource.authentication.url}/api/`,
-                auth: {
-                    username: dataSource.authentication.username,
-                    password: dataSource.authentication.password,
-                },
-                string: "",
-            });
-        }
-        return undefined;
-    }
-);
+// export const $currentDataSource = combine(
+//     $visualizationQuery,
+//     $dataSources,
+//     (visualizationQuery, dataSources) => {
+//        return createAxios(visualizationQuery)
+//     }
+// );
 
 export const $categoryDashboards = combine(
     $dashboards,

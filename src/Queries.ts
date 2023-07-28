@@ -3,32 +3,26 @@ import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import { Event } from "effector";
 import {
+    every,
+    flatten,
     fromPairs,
     groupBy,
     isEmpty,
+    max,
     min,
     uniq,
-    flatten,
-    every,
-    uniqBy,
-    max,
 } from "lodash";
+import { getOr } from "lodash/fp";
 import { evaluate } from "mathjs";
 import { db } from "./db";
 import {
-    categoriesApi,
     categoryApi,
     dashboardApi,
     dashboardTypeApi,
     dataSetsApi,
     dataSourceApi,
-    dataSourcesApi,
-    indicatorsApi,
-    paginationApi,
-    settingsApi,
     storeApi,
     visualizationDataApi,
-    calculatedApi,
 } from "./Events";
 import {
     DataNode,
@@ -36,27 +30,25 @@ import {
     IDashboard,
     IDashboardSetting,
     IData,
+    IData2,
     IDataSource,
     IDimension,
     IExpressions,
     IIndicator,
+    IIndicator2,
     INamed,
     IVisualization,
+    IVisualization2,
     Storage,
     Threshold,
-    IFilter,
-    IVisualization2,
-    IIndicator2,
-    IData2,
 } from "./interfaces";
 import { createCategory, createDashboard, createDataSource } from "./Store";
 import {
-    getSearchParams,
-    processMap,
     flattenDHIS2Data,
+    getSearchParams,
     merge2DataSources,
+    processMap,
 } from "./utils/utils";
-import { get, getOr } from "lodash/fp";
 
 type QueryProps = {
     namespace: string;
@@ -397,9 +389,6 @@ export const useDataSources = (
         ["i-data-sources"],
         async ({ signal }) => {
             try {
-                storeApi.setCurrentPage("data-sources");
-                storeApi.setShowFooter(false);
-                storeApi.setShowSider(true);
                 return await getIndex<IDataSource>(storage, {
                     namespace: "i-data-sources",
                     systemId,
@@ -414,21 +403,31 @@ export const useDataSources = (
         }
     );
 };
-export const useDataSource = (storage: "data-store" | "es", id: string) => {
+export const useDataSource = (
+    storage: "data-store" | "es",
+    id: string,
+    action: "create" | "update" | "view" | undefined
+) => {
     const engine = useDataEngine();
     return useQuery<boolean, Error>(
-        ["i-data-sources", id],
+        ["i-data-sources", id, action],
         async ({ signal }) => {
-            let dataSource = await getOneRecord<IDataSource>(storage, id, {
-                namespace: "i-data-sources",
-                otherQueries: [],
-                signal,
-                engine,
-                systemId: "",
-            });
-            if (isEmpty(dataSource)) {
-                dataSource = createDataSource(id);
+            if (action === "update" || action === "view") {
+                const dataSource = await getOneRecord<IDataSource>(
+                    storage,
+                    id,
+                    {
+                        namespace: "i-data-sources",
+                        otherQueries: [],
+                        signal,
+                        engine,
+                        systemId: "",
+                    }
+                );
+                dataSourceApi.setDataSource(dataSource);
+                return true;
             }
+            const dataSource = createDataSource(id);
             dataSourceApi.setDataSource(dataSource);
             return true;
         }
@@ -537,7 +536,10 @@ export const useDashboard = (
                 // indicatorsApi.setVisualizationQueries(queries);
                 return dashboard;
             }
-            return createDashboard(id, dashboardType);
+            dashboardTypeApi.set(dashboardType);
+            const dashboard = createDashboard(id, dashboardType);
+            dashboardApi.setCurrentDashboard(dashboard);
+            return dashboard;
         }
     );
 };
@@ -650,32 +652,29 @@ export const useSingleNamespace = <TData>(
     id: string,
     systemId: string,
     namespace: string,
+    action: "create" | "update" | "view" | undefined,
     onQuery: Event<TData>,
     onFailedData: TData
 ) => {
     const engine = useDataEngine();
-    return useQuery<boolean, Error>([namespace, id], async ({ signal }) => {
-        try {
-            const data = await getOneRecord<TData>(storage, id, {
-                namespace,
-                otherQueries: [],
-                signal,
-                engine,
-                systemId,
-            });
-            if (data) {
+    return useQuery<boolean, Error>(
+        [namespace, id, action],
+        async ({ signal }) => {
+            if (action === "view" || action === "update") {
+                const data = await getOneRecord<TData>(storage, id, {
+                    namespace,
+                    otherQueries: [],
+                    signal,
+                    engine,
+                    systemId,
+                });
                 onQuery(data);
             } else {
                 onQuery(onFailedData);
             }
-
             return true;
-        } catch (error) {
-            onQuery(onFailedData);
-            console.error(error);
-            return false;
         }
-    });
+    );
 };
 
 export const useDataSet = (dataSetId: string) => {
@@ -715,69 +714,82 @@ export const useDataSet = (dataSetId: string) => {
 };
 
 export const getDHIS2Resources = async <T>({
-    currentDHIS2,
+    isCurrentDHIS2,
     params,
     resource,
     resourceKey,
-    dataSource,
+    api,
+    engine,
 }: Partial<{
     params: { [key: string]: string };
     resource: string;
-    currentDHIS2: boolean;
+    isCurrentDHIS2: boolean | undefined | null;
     resourceKey: string;
-    dataSource: AxiosInstance | undefined;
+    api: AxiosInstance | undefined | null;
+    engine: any;
 }>) => {
-    const engine = useDataEngine();
-    if (currentDHIS2 && resource && resourceKey) {
+    if (isCurrentDHIS2 && resource && resourceKey) {
         const { data }: any = await engine.query({
-            dimensions: {
+            data: {
                 resource,
                 params,
             },
         });
         return getOr<T[]>([], resourceKey, data);
-    } else if (dataSource && resource && resourceKey) {
-        const { data } = await dataSource.get<{ [key: string]: T[] }>(
-            resource,
-            {
-                params,
-                string: "",
-            }
-        );
+    } else if (api && resource && resourceKey) {
+        const { data } = await api.get<{ [key: string]: T[] }>(resource, {
+            params,
+            string: "",
+        });
         return data[resourceKey];
     }
     return [];
 };
-export const useDHIS2Resource = <T>({}: {
-    params: { [key: string]: string };
-    id: string;
-    resource: string;
-}) => {};
 
 export const useDimensions = (
-    currentDHIS2: boolean | undefined,
-    dataSource: AxiosInstance | undefined
+    isCurrentDHIS2: boolean | undefined | null,
+    api: AxiosInstance | undefined | null
 ) => {
-    return useQuery<Array<INamed & { items: INamed[] }>, Error>(
-        ["dimensions", currentDHIS2],
+    const engine = useDataEngine();
+    return useQuery<Array<INamed & { items: INamed[] }> | undefined, Error>(
+        ["dimensions", isCurrentDHIS2],
         async () => {
-            return getDHIS2Resources<INamed & { items: INamed[] }>({
-                currentDHIS2,
+            const data = getDHIS2Resources<INamed & { items: INamed[] }>({
+                isCurrentDHIS2,
                 resource: "dimensions.json",
-                params: { fields: "id,name,items[id,name]", paging: "false" },
-                dataSource,
+                params: {
+                    fields: "id,name,items[id,name]",
+                    paging: "false",
+                },
+                api,
+                engine,
+                resourceKey: "dimensions",
             });
+            console.log(data);
+            return data;
         }
     );
 };
 
-export const useDataElements = (
-    page: number,
-    pageSize: number,
-    q = "",
-    currentDHIS2: boolean | undefined,
-    dataSource: AxiosInstance | undefined
-) => {
+export const useDHIS2Resources = ({
+    page,
+    pageSize,
+    resource,
+    q,
+    isCurrentDHIS2,
+    api,
+    resourceKey,
+}: {
+    page: number;
+    pageSize: number;
+    resource: string;
+    q: string;
+    isCurrentDHIS2: boolean | undefined | null;
+    api: AxiosInstance | undefined | null;
+    resourceKey?: string;
+}) => {
+    const engine = useDataEngine();
+    const rKey = resourceKey || resource.split(".")[0];
     let params: { [key: string]: any } = {
         page,
         pageSize,
@@ -791,246 +803,159 @@ export const useDataElements = (
             filter: `identifiable:token:${q}`,
         };
     }
+
     return useQuery<INamed[], Error>(
-        ["data-elements", page, pageSize, q, currentDHIS2],
+        [resource, page, pageSize, q, isCurrentDHIS2],
         async () => {
             return getDHIS2Resources<INamed>({
-                currentDHIS2,
-                resource: "dataElements.json",
+                isCurrentDHIS2,
+                resource,
                 params,
-                dataSource,
-            });
-        }
-    );
-};
-
-export const useDataElementGroups = (
-    page: number,
-    pageSize: number,
-    q = "",
-    currentDHIS2: boolean | undefined,
-    dataSource: AxiosInstance | undefined
-) => {
-    let params: { [key: string]: any } = {
-        page,
-        pageSize,
-        fields: "id,name",
-        order: "name:ASC",
-    };
-
-    if (q) {
-        params = {
-            ...params,
-            filter: `identifiable:token:${q}`,
-        };
-    }
-    return useQuery<INamed[], Error>(
-        ["data-element-groups", page, pageSize, q],
-        async () => {
-            return getDHIS2Resources<INamed>({
-                currentDHIS2,
-                resource: "dataElementGroups.json",
-                params,
-                dataSource,
-            });
-        }
-    );
-};
-
-export const useDataElementGroupSets = (
-    page: number,
-    pageSize: number,
-    q = "",
-    currentDHIS2: boolean | undefined,
-    dataSource: AxiosInstance | undefined
-) => {
-    let params: { [key: string]: any } = {
-        page,
-        pageSize,
-        fields: "id,name",
-        order: "name:ASC",
-    };
-
-    if (q) {
-        params = {
-            ...params,
-            filter: `identifiable:token:${q}`,
-        };
-    }
-    return useQuery<INamed[], Error>(
-        ["data-element-group-sets", page, pageSize, q],
-        async () => {
-            return getDHIS2Resources<INamed>({
-                currentDHIS2,
-                resource: "dataElementGroupSets.json",
-                params,
-                dataSource,
-            });
-        }
-    );
-};
-
-export const useIndicators = (
-    page: number,
-    pageSize: number,
-    q = "",
-    currentDHIS2: boolean | undefined,
-    dataSource: AxiosInstance | undefined
-) => {
-    let params: { [key: string]: any } = {
-        page,
-        pageSize,
-        fields: "id,name",
-        order: "name:ASC",
-    };
-
-    if (q) {
-        params = { ...params, filter: `identifiable:token:${q}` };
-    }
-    return useQuery<INamed[], Error>(
-        ["indicators", page, pageSize, q],
-        async () => {
-            return getDHIS2Resources<INamed>({
-                currentDHIS2,
-                resource: "indicators.json",
-                params,
-                dataSource,
+                api,
+                engine,
+                resourceKey: rKey,
             });
         }
     );
 };
 
 export const useSQLViews = (
-    currentDHIS2: boolean | undefined,
-    dataSource: AxiosInstance | undefined
+    isCurrentDHIS2: boolean | undefined | null,
+    api: AxiosInstance | undefined | null
 ) => {
     const params = {
         paging: "false",
         fields: "id,name,sqlQuery",
     };
+    const engine = useDataEngine();
     return useQuery<Array<INamed & { sqlQuery: string }>, Error>(
         ["sql-views"],
         async () => {
             return getDHIS2Resources<INamed & { sqlQuery: string }>({
-                currentDHIS2,
+                isCurrentDHIS2,
                 resource: "sqlViews.json",
                 params,
-                dataSource,
+                api,
+                resourceKey: "sqlViews",
+                engine,
             });
         }
     );
 };
 
 export const useDHIS2Visualizations = (
-    currentDHIS2: boolean | undefined,
-    dataSource: AxiosInstance | undefined
+    isCurrentDHIS2: boolean | undefined | null,
+    api: AxiosInstance | undefined | null
 ) => {
+    const engine = useDataEngine();
     const params = {
         fields: "id,name",
     };
     return useQuery<INamed[], Error>(["dhis-visualizations"], async () => {
         return getDHIS2Resources<INamed>({
-            currentDHIS2,
-            resource: "sqlViews.json",
+            isCurrentDHIS2,
+            resource: "visualizations.json",
+            resourceKey: "visualizations",
             params,
-            dataSource,
+            api,
+            engine,
         });
     });
 };
 
-export const useProgramIndicators = (
-    page: number,
-    pageSize: number,
-    q = "",
-    currentDHIS2: boolean | undefined,
-    dataSource: AxiosInstance | undefined
-) => {
-    let params: { [key: string]: any } = {
-        page,
-        pageSize,
-        fields: "id,name",
-        order: "name:ASC",
-    };
+// export const useProgramIndicators = (
+//     page: number,
+//     pageSize: number,
+//     q = "",
+//     currentDHIS2: boolean | undefined,
+//     dataSource: AxiosInstance | undefined
+// ) => {
+//     let params: { [key: string]: any } = {
+//         page,
+//         pageSize,
+//         fields: "id,name",
+//         order: "name:ASC",
+//     };
 
-    if (q) {
-        params = { ...params, filter: `identifiable:token:${q}` };
-    }
+//     if (q) {
+//         params = { ...params, filter: `identifiable:token:${q}` };
+//     }
 
-    return useQuery<INamed[], Error>(
-        ["program-indicators", page, pageSize, q],
-        async () => {
-            return getDHIS2Resources<INamed>({
-                currentDHIS2,
-                resource: "programIndicators.json",
-                params,
-                dataSource,
-            });
-        }
-    );
-};
+//     return useQuery<INamed[], Error>(
+//         ["program-indicators", page, pageSize, q],
+//         async () => {
+//             return getDHIS2Resources<INamed>({
+//                 currentDHIS2,
+//                 resource: "programIndicators.json",
+//                 params,
+//                 dataSource,
+//             });
+//         }
+//     );
+// };
 
-export const useOrganisationUnitGroups = (
-    page: number,
-    pageSize: number,
-    q = "",
-    currentDHIS2: boolean | undefined,
-    dataSource: AxiosInstance | undefined
-) => {
-    let params: { [key: string]: any } = {
-        page,
-        pageSize,
-        fields: "id,name",
-    };
-    if (q) {
-        params = { ...params, filter: `identifiable:token:${q}` };
-    }
-    return useQuery<INamed[], Error>(
-        ["organisation-unit-groups", page, pageSize],
-        async () => {
-            return getDHIS2Resources<INamed>({
-                currentDHIS2,
-                resource: "organisationUnitGroups.json",
-                params,
-                dataSource,
-            });
-        }
-    );
-};
+// export const useOrganisationUnitGroups = (
+//     page: number,
+//     pageSize: number,
+//     q = "",
+//     currentDHIS2: boolean | undefined,
+//     dataSource: AxiosInstance | undefined
+// ) => {
+//     let params: { [key: string]: any } = {
+//         page,
+//         pageSize,
+//         fields: "id,name",
+//     };
+//     if (q) {
+//         params = { ...params, filter: `identifiable:token:${q}` };
+//     }
+//     return useQuery<INamed[], Error>(
+//         ["organisation-unit-groups", page, pageSize],
+//         async () => {
+//             return getDHIS2Resources<INamed>({
+//                 currentDHIS2,
+//                 resource: "organisationUnitGroups.json",
+//                 params,
+//                 dataSource,
+//             });
+//         }
+//     );
+// };
 
-export const useOrganisationUnitGroupSets = (
-    page: number,
-    pageSize: number,
-    q = "",
-    currentDHIS2: boolean | undefined,
-    dataSource: AxiosInstance | undefined
-) => {
-    let params: { [key: string]: any } = {
-        page,
-        pageSize,
-        fields: "id,name",
-    };
-    if (q) {
-        params = { ...params, filter: `identifiable:token:${q}` };
-    }
-    return useQuery<INamed[], Error>(
-        ["organisation-unit-group-sets", page, pageSize],
-        async () => {
-            return getDHIS2Resources<INamed>({
-                currentDHIS2,
-                resource: "organisationUnitGroupSets.json",
-                params,
-                dataSource,
-            });
-        }
-    );
-};
+// export const useOrganisationUnitGroupSets = (
+//     page: number,
+//     pageSize: number,
+//     q = "",
+//     currentDHIS2: boolean | undefined,
+//     dataSource: AxiosInstance | undefined
+// ) => {
+//     let params: { [key: string]: any } = {
+//         page,
+//         pageSize,
+//         fields: "id,name",
+//     };
+//     if (q) {
+//         params = { ...params, filter: `identifiable:token:${q}` };
+//     }
+//     return useQuery<INamed[], Error>(
+//         ["organisation-unit-group-sets", page, pageSize],
+//         async () => {
+//             return getDHIS2Resources<INamed>({
+//                 currentDHIS2,
+//                 resource: "organisationUnitGroupSets.json",
+//                 params,
+//                 dataSource,
+//             });
+//         }
+//     );
+// };
 
 export const useOrganisationUnitLevels = (
     page: number,
     pageSize: number,
     q = "",
-    currentDHIS2: boolean | undefined,
-    dataSource: AxiosInstance | undefined
+    isCurrentDHIS2: boolean | undefined,
+    api: AxiosInstance | undefined | null
 ) => {
     let params: { [key: string]: any } = {
         page,
@@ -1044,10 +969,10 @@ export const useOrganisationUnitLevels = (
         ["organisation-unit-levels", page, pageSize],
         async () => {
             return getDHIS2Resources<INamed & { level: number }>({
-                currentDHIS2,
+                isCurrentDHIS2,
                 resource: "organisationUnitLevels.json",
                 params,
-                dataSource,
+                api,
             });
         }
     );

@@ -23,28 +23,23 @@ import { useStore } from "effector-react";
 import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
 import { datumAPi } from "../../Events";
-import { useIndicators } from "../../Queries";
-import {
-    $currentDataSource,
-    $hasDHIS2,
-    $paginations,
-    $visualizationQuery,
-} from "../../Store";
+import { useDHIS2Resources } from "../../Queries";
+import { $hasDHIS2, $paginations, $visualizationQuery } from "../../Store";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import GlobalSearchFilter from "./GlobalSearchFilter";
+import { MetadataAPI } from "../../interfaces";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
-const Indicators = () => {
+const Indicators = ({ api, isCurrentDHIS2 }: MetadataAPI) => {
     const { previousType, isGlobal } = computeGlobalParams("i", "JRDOr08JWSW");
     const [type, setType] = useState<"filter" | "dimension">(previousType);
     const [useGlobal, setUseGlobal] = useState<boolean>(isGlobal);
     const [q, setQ] = useState<string>("");
     const paginations = useStore($paginations);
     const hasDHIS2 = useStore($hasDHIS2);
-    const currentDataSource = useStore($currentDataSource);
     const visualizationQuery = useStore($visualizationQuery);
     const {
         pages,
@@ -75,13 +70,14 @@ const Indicators = () => {
         return [];
     });
 
-    const { isLoading, isSuccess, isError, error, data } = useIndicators(
-        currentPage,
+    const { isLoading, isSuccess, isError, error, data } = useDHIS2Resources({
+        page: currentPage,
         pageSize,
         q,
-        hasDHIS2,
-        currentDataSource
-    );
+        isCurrentDHIS2,
+        api,
+        resource: "indicators.json",
+    });
 
     const handlePageChange = (nextPage: number) => {
         setCurrentPage(nextPage);

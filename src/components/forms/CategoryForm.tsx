@@ -1,21 +1,29 @@
 import { Stack, Text } from "@chakra-ui/react";
-
-import { useMatch } from "@tanstack/react-location";
-import { LocationGenerics } from "../../interfaces";
-import { useCategory } from "../../Queries";
-import { generalPadding, otherHeight } from "../constants";
-import Category from "./Category";
-import LoadingIndicator from "../LoadingIndicator";
+import { useMatch, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { $settings } from "../../Store";
+import { categoryApi } from "../../Events";
+import { LocationGenerics } from "../../interfaces";
+import { useSingleNamespace } from "../../Queries";
+import { $settings, $store, createCategory } from "../../Store";
+import { generalPadding, otherHeight } from "../constants";
+import LoadingIndicator from "../LoadingIndicator";
+import Category from "./Category";
+
 export default function CategoryForm() {
     const { storage } = useStore($settings);
+    const store = useStore($store);
     const {
         params: { categoryId },
+        search: { action },
     } = useMatch<LocationGenerics>();
-    const { isLoading, isSuccess, isError, error } = useCategory(
+    const { isLoading, isSuccess, isError, error } = useSingleNamespace(
         storage,
-        categoryId
+        categoryId,
+        store.systemId,
+        "i-categories",
+        action,
+        categoryApi.setCategory,
+        createCategory(categoryId)
     );
     return (
         <Stack
@@ -32,7 +40,7 @@ export default function CategoryForm() {
         >
             {isLoading && <LoadingIndicator />}
             {isSuccess && <Category />}
-            {isError && <Text>No data/Error occurred</Text>}
+            {isError && <Text>{error?.message}</Text>}
         </Stack>
     );
 }

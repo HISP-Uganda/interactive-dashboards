@@ -4,10 +4,15 @@ import { ChangeEvent } from "react";
 import { datumAPi } from "../../Events";
 import { $visualizationQuery } from "../../Store";
 import DHIS2 from "./DHIS2";
-export const DisplayDataSourceType = () => {
+import { IDataSource } from "../../interfaces";
+export const DisplayDataSourceType = ({
+    dataSource,
+}: {
+    dataSource: IDataSource | null | undefined;
+}) => {
     const visualizationQuery = useStore($visualizationQuery);
     const allTypes: { [key: string]: any } = {
-        DHIS2: <DHIS2 />,
+        DHIS2: <DHIS2 dataSource={dataSource} />,
         ELASTICSEARCH: (
             <Stack>
                 <Text>Query</Text>
@@ -38,8 +43,8 @@ export const DisplayDataSourceType = () => {
             </Stack>
         ),
     };
-    if (visualizationQuery.dataSource?.type) {
-        return allTypes[visualizationQuery.dataSource.type] || null;
+    if (dataSource?.type) {
+        return allTypes[dataSource.type] || null;
     }
     return null;
 };

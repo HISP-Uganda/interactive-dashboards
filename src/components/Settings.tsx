@@ -1,7 +1,6 @@
-import { Divider, Grid, Stack, Text, Image, Spacer } from "@chakra-ui/react";
+import { Grid, Image, Stack, Text } from "@chakra-ui/react";
 import { Outlet } from "@tanstack/react-location";
 import Menus from "./Menus";
-
 export default function Settings() {
     return (
         <Grid templateRows="72px 1fr">

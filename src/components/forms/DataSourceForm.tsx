@@ -1,5 +1,5 @@
 import { Stack, Text } from "@chakra-ui/react";
-import { useMatch } from "@tanstack/react-location";
+import { useMatch, useSearch } from "@tanstack/react-location";
 import { LocationGenerics } from "../../interfaces";
 import { useDataSource } from "../../Queries";
 import { generalPadding, otherHeight } from "../constants";
@@ -12,10 +12,12 @@ export default function DataSourceForm() {
     const { storage } = useStore($settings);
     const {
         params: { dataSourceId },
+        search: { action },
     } = useMatch<LocationGenerics>();
     const { isLoading, isSuccess, isError, error } = useDataSource(
         storage,
-        dataSourceId
+        dataSourceId,
+        action
     );
     return (
         <Stack

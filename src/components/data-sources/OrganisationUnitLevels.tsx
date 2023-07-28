@@ -24,20 +24,16 @@ import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
 import { datumAPi } from "../../Events";
 import { useOrganisationUnitLevels } from "../../Queries";
-import {
-    $currentDataSource,
-    $hasDHIS2,
-    $paginations,
-    $visualizationQuery,
-} from "../../Store";
+import { $hasDHIS2, $paginations, $visualizationQuery } from "../../Store";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import GlobalSearchFilter from "./GlobalSearchFilter";
+import { MetadataAPI } from "../../interfaces";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
-const OrganizationUnitLevels = () => {
+const OrganizationUnitLevels = ({ api }: MetadataAPI) => {
     const { previousType, isGlobal } = computeGlobalParams(
         "oul",
         "GQhi6pRnTKF"
@@ -47,7 +43,6 @@ const OrganizationUnitLevels = () => {
     const [q, setQ] = useState<string>("");
     const paginations = useStore($paginations);
     const hasDHIS2 = useStore($hasDHIS2);
-    const currentDataSource = useStore($currentDataSource);
     const visualizationQuery = useStore($visualizationQuery);
     const {
         pages,
@@ -69,13 +64,7 @@ const OrganizationUnitLevels = () => {
         },
     });
     const { isLoading, isSuccess, isError, error, data } =
-        useOrganisationUnitLevels(
-            currentPage,
-            pageSize,
-            q,
-            hasDHIS2,
-            currentDataSource
-        );
+        useOrganisationUnitLevels(currentPage, pageSize, q, hasDHIS2, api);
 
     const handlePageChange = (nextPage: number) => {
         setCurrentPage(nextPage);

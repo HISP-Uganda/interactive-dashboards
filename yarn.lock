@@ -2495,6 +2495,22 @@
     classnames "^2.3.1"
     prop-types "^15.7.2"
 
+"@dhis2/analytics@^24.0.9":
+  version "24.10.1"
+  resolved "https://registry.yarnpkg.com/@dhis2/analytics/-/analytics-24.10.1.tgz#ad595451b724044448c22a413875f0d36df20e8d"
+  integrity sha512-HhKDYzTnk8Uh11523JIjx0lhgIRgcWihCkTlT3qHoaDOhAQdQcadd5i/byjhXpeXrrtqfL0x2gn0Scy3siA2Cg==
+  dependencies:
+    "@dhis2/d2-ui-rich-text" "^7.4.0"
+    "@dhis2/multi-calendar-dates" "1.0.0"
+    classnames "^2.3.1"
+    d2-utilizr "^0.2.16"
+    d3-color "^1.2.3"
+    highcharts "^10.2.0"
+    lodash "^4.17.21"
+    mathjs "^9.4.2"
+    react-beautiful-dnd "^10.1.1"
+    resize-observer-polyfill "^1.5.1"
+
 "@dhis2/analytics@^26.0.14":
   version "26.0.14"
   resolved "https://registry.yarnpkg.com/@dhis2/analytics/-/analytics-26.0.14.tgz#8f1919dd0d017f0d4a6f9bad433bd115f6c5ed7a"
@@ -2531,7 +2547,7 @@
   dependencies:
     prop-types "^15.7.2"
 
-"@dhis2/app-runtime@^3.8.0", "@dhis2/app-runtime@^3.9.0":
+"@dhis2/app-runtime@^3.4.4", "@dhis2/app-runtime@^3.8.0", "@dhis2/app-runtime@^3.9.0":
   version "3.9.4"
   resolved "https://registry.yarnpkg.com/@dhis2/app-runtime/-/app-runtime-3.9.4.tgz#88243dbb9a4a805be744a61cffd13a4c3d2d031d"
   integrity sha512-CBwMXer5/Kcxf6MgfwPgpEaUSXbDXzwItCkH3i0nsjmkD0KIaEOZ6Y1pQL+/5RYnziZ5glYCFWsCKn0eCJrdJg==
@@ -2655,7 +2671,7 @@
     update-notifier "^3.0.0"
     yargs "^13.1.0"
 
-"@dhis2/d2-i18n@^1.1.1":
+"@dhis2/d2-i18n@^1.1.0", "@dhis2/d2-i18n@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@dhis2/d2-i18n/-/d2-i18n-1.1.1.tgz#acaca32cd00b60fd6b6f1dee571f2817a50e243c"
   integrity sha512-X0jOCIKPaYv/2z0/sdkEvcbRiYu5o1FrOwvitiS6aKFxSL/GJ872I+UdHwpWJtL+yM7Z8E1epljazW0LnHUz0Q==
@@ -2663,7 +2679,7 @@
     i18next "^10.3"
     moment "^2.24.0"
 
-"@dhis2/d2-ui-rich-text@^7.4.1":
+"@dhis2/d2-ui-rich-text@^7.4.0", "@dhis2/d2-ui-rich-text@^7.4.1":
   version "7.4.3"
   resolved "https://registry.yarnpkg.com/@dhis2/d2-ui-rich-text/-/d2-ui-rich-text-7.4.3.tgz#a42c8e231bcc05186dd432dac86b33aed4ddc10d"
   integrity sha512-60k/6CO2I8f4t3jU1nAic7uWONME1rckM8RcLnelhwUG20EZWq45OnDDdSfHgOWTwVDtxFnG3wspInkG/530KA==
@@ -2671,6 +2687,18 @@
     babel-runtime "^6.26.0"
     markdown-it "^8.4.2"
     prop-types "^15.6.2"
+
+"@dhis2/data-visualizer-plugin@^39.2.15":
+  version "39.2.15"
+  resolved "https://registry.yarnpkg.com/@dhis2/data-visualizer-plugin/-/data-visualizer-plugin-39.2.15.tgz#5f66868b4821b62bd18236e2dccbec18fb3f4905"
+  integrity sha512-tE6wrHAlGmoou++6K1fpKUtanN40hULBWeBbGYPRSQM0FKGtp6/VOW0zkp7PQJxI2snl+XqyCLfEfAWyS/tBYQ==
+  dependencies:
+    "@dhis2/analytics" "^24.0.9"
+    "@dhis2/app-runtime" "^3.4.4"
+    "@dhis2/d2-i18n" "^1.1.0"
+    "@dhis2/ui" "^8.4.11"
+    lodash-es "^4.17.21"
+    prop-types "^15"
 
 "@dhis2/multi-calendar-dates@1.0.0":
   version "1.0.0"
@@ -2736,7 +2764,7 @@
   resolved "https://registry.yarnpkg.com/@dhis2/ui-icons/-/ui-icons-8.13.14.tgz#f17510ddc990e80fefbbefb4e54ed3bd0c37c4e7"
   integrity sha512-jDHAPHyKcpu7CvjiZZ2LSJknVEw1o5Jd6ScmFCyHDsHg6NsD0FsHDWlGNQC0HXrQ6A8U3IkiFS+FMGlcrUL2jg==
 
-"@dhis2/ui@^8.12.3", "@dhis2/ui@^8.7.7":
+"@dhis2/ui@^8.12.3", "@dhis2/ui@^8.4.11", "@dhis2/ui@^8.7.7":
   version "8.13.14"
   resolved "https://registry.yarnpkg.com/@dhis2/ui/-/ui-8.13.14.tgz#fd7f848c045df513797e5b2cbec375d465366faa"
   integrity sha512-7BoesuTXgudSw49P2k0zwmCifEjm1iE6GYxjIW3ICg9EIoT+uW67CXUTfHpMcUeK4vL3s+LfCwI9y6nguAyQmA==
@@ -10354,7 +10382,7 @@ hey-listen@^1.0.8:
   resolved "https://registry.yarnpkg.com/hey-listen/-/hey-listen-1.0.8.tgz#8e59561ff724908de1aa924ed6ecc84a56a9aa68"
   integrity sha512-COpmrF2NOg4TBWUJ5UVyaCU2A88wEMkUPK4hNqyCkqHbxT92BbvfjoSozkAIIm6XhicGlJHhFdullInrdhwU8Q==
 
-highcharts@^10.3.3:
+highcharts@^10.2.0, highcharts@^10.3.3:
   version "10.3.3"
   resolved "https://registry.yarnpkg.com/highcharts/-/highcharts-10.3.3.tgz#b8acca24f2d4b1f2f726540734166e59e07b35c4"
   integrity sha512-r7wgUPQI9tr3jFDn3XT36qsNwEIZYcfgz4mkKEA6E4nn5p86y+u1EZjazIG4TRkl5/gmGRtkBUiZW81g029RIw==
@@ -12055,7 +12083,7 @@ locate-path@^6.0.0:
   dependencies:
     p-locate "^5.0.0"
 
-lodash-es@^4.17.15:
+lodash-es@^4.17.15, lodash-es@^4.17.21:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.21.tgz#43e626c46e6591b7750beb2b50117390c609e3ee"
   integrity sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==
@@ -14070,7 +14098,7 @@ prompts@^2.0.1, prompts@^2.4.2:
     kleur "^3.0.3"
     sisteransi "^1.0.5"
 
-prop-types@15.x, prop-types@^15.5.10, prop-types@^15.6.0, prop-types@^15.6.1, prop-types@^15.6.2, prop-types@^15.7.2, prop-types@^15.8.1:
+prop-types@15.x, prop-types@^15, prop-types@^15.5.10, prop-types@^15.6.0, prop-types@^15.6.1, prop-types@^15.6.2, prop-types@^15.7.2, prop-types@^15.8.1:
   version "15.8.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.8.1.tgz#67d87bf1a694f48435cf332c24af10214a3140b5"
   integrity sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==

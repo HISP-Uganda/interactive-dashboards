@@ -2,21 +2,15 @@ import { Box, Progress, Stack, Text } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { datumAPi } from "../../Events";
-import { Option } from "../../interfaces";
+import { MetadataAPI, Option } from "../../interfaces";
 import { useSQLViews } from "../../Queries";
-import {
-    $currentDataSource,
-    $hasDHIS2,
-    $visualizationQuery,
-} from "../../Store";
+import { $visualizationQuery } from "../../Store";
 
-const SQLViews = () => {
-    const hasDHIS2 = useStore($hasDHIS2);
-    const currentDataSource = useStore($currentDataSource);
+const SQLViews = ({ api, isCurrentDHIS2 }: MetadataAPI) => {
     const visualizationQuery = useStore($visualizationQuery);
     const { isLoading, isSuccess, isError, error, data } = useSQLViews(
-        hasDHIS2,
-        currentDataSource
+        isCurrentDHIS2,
+        api
     );
     return (
         <>

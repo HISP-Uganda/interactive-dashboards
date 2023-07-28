@@ -1,28 +1,24 @@
 import { Box, SimpleGrid, Stack, useDisclosure } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { MouseEvent } from "react";
-import Marquee from "react-marquee-slider";
 import {
-    Menu,
     Item,
+    Menu,
     Separator,
     Submenu,
     useContextMenu,
 } from "react-contexify";
+import "react-contexify/dist/ReactContexify.css";
+import Marquee from "react-marquee-slider";
 import { sectionApi } from "../Events";
 import { ISection } from "../interfaces";
-import { $store, isOpenApi, $dashboard } from "../Store";
+import { $store, isOpenApi } from "../Store";
+import FullScreen from "./FullScreen";
 import Carousel from "./visualizations/Carousel";
 import TabPanelVisualization from "./visualizations/TabPanelVisualization";
 import VisualizationSection from "./visualizations/Visualization";
-import { useState, useEffect } from "react";
 import VisualizationTitle from "./visualizations/VisualizationTitle";
-import VisualizationMenu from "./visualizations/VisualizationMenu";
-import ListMenu from "./visualizations/ListMenu";
 
-import "react-contexify/dist/ReactContexify.css";
-import FullScreen from "./FullScreen";
-import DHIS2Viz from "./visualizations/DHIS2Viz";
 // import { FullScreen } from "react-full-screen";
 
 const SectionVisualization = (section: ISection) => {

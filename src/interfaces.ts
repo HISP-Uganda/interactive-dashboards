@@ -3,6 +3,7 @@ import { MakeGenerics } from "@tanstack/react-location";
 import type { DataNode as IDataNode } from "antd/es/tree";
 import { OptionBase } from "chakra-react-select";
 import { Event } from "effector";
+import { AxiosInstance } from "axios";
 
 export type Storage = "data-store" | "es";
 export type ScreenSize = "xs" | "sm" | "md" | "lg";
@@ -445,3 +446,8 @@ export type IIndicator2 = Omit<IIndicator, "numerator" | "denominator"> &
 export type IVisualization2 = Omit<IVisualization, "indicators"> & {
     indicators: Array<IIndicator2>;
 };
+
+export interface MetadataAPI {
+    api: AxiosInstance | undefined | null;
+    isCurrentDHIS2: boolean | undefined | null;
+}

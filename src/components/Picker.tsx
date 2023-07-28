@@ -1,16 +1,4 @@
-import {
-    Button,
-    Stack,
-    Tab,
-    TabList,
-    TabPanel,
-    TabPanels,
-    Tabs,
-    useDisclosure,
-} from "@chakra-ui/react";
-import { SketchPicker, SwatchesPicker } from "react-color";
 import { ColorPicker, Divider } from "antd";
-
 import { swatchColors } from "../utils/utils";
 
 export default function Picker({

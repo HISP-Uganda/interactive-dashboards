@@ -1,5 +1,5 @@
 import { Stack, Text } from "@chakra-ui/react";
-import { useMatch } from "@tanstack/react-location";
+import { useMatch, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { datumAPi } from "../../Events";
 import { IData, LocationGenerics } from "../../interfaces";
@@ -13,6 +13,8 @@ export default function VisualizationQueryForm() {
     const {
         params: { visualizationQueryId },
     } = useMatch<LocationGenerics>();
+    const { action } = useSearch<LocationGenerics>();
+
     const store = useStore($store);
     const { storage } = useStore($settings);
     const { isLoading, isSuccess, isError, error } = useSingleNamespace<IData>(
@@ -20,6 +22,7 @@ export default function VisualizationQueryForm() {
         visualizationQueryId,
         store.systemId,
         "i-visualization-queries",
+        action,
         datumAPi.set,
         createVisualizationQuery(visualizationQueryId)
     );

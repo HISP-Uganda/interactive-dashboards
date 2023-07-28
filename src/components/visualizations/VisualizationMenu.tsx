@@ -2,7 +2,7 @@ import {
     DeleteIcon,
     EditIcon,
     ExternalLinkIcon,
-    HamburgerIcon
+    HamburgerIcon,
 } from "@chakra-ui/icons";
 import {
     FormControl,
@@ -21,7 +21,7 @@ import {
     ModalOverlay,
     Stack,
     useDisclosure,
-    useToast
+    useToast,
 } from "@chakra-ui/react";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select } from "chakra-react-select";
@@ -33,7 +33,7 @@ import {
     AiFillFilter,
     AiOutlineBarChart,
     AiOutlineLineChart,
-    AiOutlineNumber
+    AiOutlineNumber,
 } from "react-icons/ai";
 import { FaGlobeAfrica } from "react-icons/fa";
 import { dashboardApi, sectionApi } from "../../Events";
@@ -78,7 +78,8 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
                             saveAs(blob, "section.png");
                             toast({
                                 title: "Section downloaded!",
-                                description: "The section has been downloaded as a PNG.",
+                                description:
+                                    "The section has been downloaded as a PNG.",
                                 status: "success",
                                 duration: 3000,
                                 isClosable: true,
@@ -89,7 +90,8 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
                     console.error("Error saving image:", error);
                     toast({
                         title: "Error",
-                        description: "An error occurred while saving the section.",
+                        description:
+                            "An error occurred while saving the section.",
                         status: "error",
                         duration: 3000,
                         isClosable: true,
@@ -99,10 +101,8 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
         }
     };
 
-
     return (
         <>
-
             <Menu placement="left-start">
                 <MenuButton
                     _hover={{ bg: "none" }}
@@ -203,6 +203,7 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
                                     fontSize="18px"
                                     icon={<AiFillFilter />}
                                     onClick={onOpen1}
+                                    key={visualization.id}
                                 >
                                     Filter
                                 </MenuItem>
