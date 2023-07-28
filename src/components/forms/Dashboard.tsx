@@ -232,7 +232,6 @@ const Dashboard = () => {
             >
                 <Section />
             </Modal>
-
             {/* <Modal isOpen={isOpenBg} onClose={onCloseBg} size="2xl">
                 <ModalOverlay />
                 <ModalContent>

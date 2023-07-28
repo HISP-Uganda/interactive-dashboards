@@ -1,25 +1,24 @@
 import { IVisualization } from "../../interfaces";
 import BarGraphProperties from "../properties/BarGraphProperties";
+import CategoryListProperties from "../properties/CategoryListProperties";
+import ClockProperties from "../properties/ClockProperties";
+import DHIS2VisualizationProperties from "../properties/DHIS2VisualizationProperties";
+import FiltersProperties from "../properties/FiltersProperties";
+import GaugeChartProperties from "../properties/GaugeChartProperties";
+import HeatMapProperties from "../properties/HeatMapProperties";
+import HistogramProperties from "../properties/HistogramProperties";
 import ImageProperties from "../properties/ImageProperties";
 import LineGraphProperties from "../properties/LineGraphProperties";
 import MapChartProperties from "../properties/MapChartProperties";
-import PieChartProperties from "../properties/PieChartProperties";
-import SingleValueProperties from "../properties/SingleValueProperties";
-import FiltersProperties from "../properties/FiltersProperties";
-import HistogramProperties from "../properties/HistogramProperties";
-import ScatterProperties from "../properties/ScatterProperties";
-import SunburstGraphProperties from "../properties/SunBurstChartProperties";
-import GaugeChartProperties from "../properties/GaugeChartProperties";
-import RadarGraphProperties from "../properties/RadarGraphProperties";
-import StackedAreaChartProperties from "../properties/StackedAreaChartProperties";
-import TableProperties from "../properties/TableProperties";
 import OptionSetProperties from "../properties/OptionSetProperties";
+import PieChartProperties from "../properties/PieChartProperties";
+import RadarGraphProperties from "../properties/RadarGraphProperties";
+import ScatterProperties from "../properties/ScatterProperties";
+import SingleValueProperties from "../properties/SingleValueProperties";
+import StackedAreaChartProperties from "../properties/StackedAreaChartProperties";
+import SunburstGraphProperties from "../properties/SunBurstChartProperties";
+import TableProperties from "../properties/TableProperties";
 import TextVisualisationProperties from "../properties/TextVisualisationproperties";
-import ClockProperties from "../properties/ClockProperties";
-import HeatMap from "./HeatMap";
-import HeatMapProperties from "../properties/HeatMapProperties";
-import CategoryListProperties from "../properties/CategoryListProperties";
-import DHIS2VisualizationProperties from "../properties/DHIS2VisualizationProperties";
 type VizProps = {
     visualization: IVisualization;
 };
@@ -52,7 +51,9 @@ const VisualizationProperties = ({ visualization }: VizProps) => {
             categoryList: (
                 <CategoryListProperties visualization={visualization} />
             ),
-            dhis2: <DHIS2VisualizationProperties />,
+            dhis2: (
+                <DHIS2VisualizationProperties visualization={visualization} />
+            ),
         };
         if (visualizationType) {
             return allTypes[visualizationType] || null;

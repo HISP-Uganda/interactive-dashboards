@@ -288,7 +288,7 @@ const getVisualization = (
             />
         ),
         heatmap: <HeatMap visualization={visualization} section={section} />,
-        dhis2: <DHIS2Visualization />,
+        dhis2: <DHIS2Visualization visualization={visualization} />,
     };
     return allTypes[visualization.type];
 };

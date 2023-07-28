@@ -26,7 +26,7 @@ const options = {
     // target: "https://etracker.moh.gov.rw/individualrecords", // target host
     // target: "https://epivac.health.go.ug", // target host
     // target: "https://train.ndpme.go.ug/ndpdb", // target host
-    // target: "https://play.dhis2.org/2.39.2.1",
+    // target: "https://play.dhis2.org/2.38.4.3",
     onProxyReq,
     onProxyRes,
     changeOrigin: true, // needed for virtual hosted sites

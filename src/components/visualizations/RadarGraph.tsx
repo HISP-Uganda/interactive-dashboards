@@ -34,7 +34,7 @@ const RadarGraph = ({ visualization }: RadarGraphProps) => {
 
     return (
         <Plot
-            data={datas}
+            data={datas as any}
             layout={{
                 polar: {
                     radialaxis: {

@@ -18,18 +18,17 @@ export default function NamespaceDropdown<T extends INamed>({
     const { storage } = useStore($settings);
     const { systemId } = useStore($store);
 
-    const { isLoading, isSuccess, error, data } = useNamespace<T>(
+    const { isLoading, isSuccess, error, isError, data } = useNamespace<T>(
         namespace,
         storage,
         systemId,
         []
     );
+    if (isError) return <pre>{error?.message}</pre>;
 
-    if (isLoading) {
-        return <LoadingIndicator />;
-    }
+    if (isLoading) return <LoadingIndicator />;
 
-    if (isSuccess && data) {
+    if (isSuccess && data)
         return (
             <DataSelect<T>
                 list={data}
@@ -39,6 +38,5 @@ export default function NamespaceDropdown<T extends INamed>({
                 onChange={onChange}
             />
         );
-    }
-    return <pre>{JSON.stringify(error)}</pre>;
+    return null;
 }

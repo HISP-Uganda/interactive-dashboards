@@ -9,3 +9,5 @@ declare module "@dhis2-ui/modal";
 declare module "lodash-move";
 declare module "react-spring-dnd";
 declare module "react-contexify";
+declare module "d2";
+declare module "@dhis2/data-visualizer-plugin";

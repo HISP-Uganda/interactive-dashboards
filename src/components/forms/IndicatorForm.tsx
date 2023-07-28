@@ -12,18 +12,19 @@ import Indicator from "./Indicator";
 export default function IndicatorForm() {
     const {
         params: { indicatorId },
+        search: { action },
     } = useMatch<LocationGenerics>();
     const store = useStore($store);
     const { storage } = useStore($settings);
-
     const { isLoading, isSuccess, isError, error } =
         useSingleNamespace<IIndicator>(
             storage,
             indicatorId,
             store.systemId,
             "i-indicators",
+            action,
             indicatorApi.setIndicator,
-            createIndicator()
+            createIndicator(indicatorId)
         );
 
     return (

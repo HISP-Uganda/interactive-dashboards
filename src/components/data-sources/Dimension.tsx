@@ -11,7 +11,6 @@ import {
 } from "@chakra-ui/react";
 import { ChangeEvent, useState } from "react";
 import { datumAPi } from "../../Events";
-import { IndicatorProps } from "../../interfaces";
 import { computeGlobalParams } from "../../utils/utils";
 import GlobalSearchFilter from "./GlobalSearchFilter";
 import { useStore } from "effector-react";

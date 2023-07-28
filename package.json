@@ -31,6 +31,7 @@
         "@dhis2/analytics": "^26.0.14",
         "@dhis2/app-runtime": "^3.8.0",
         "@dhis2/app-runtime-adapter-d2": "^1.1.0",
+        "@dhis2/data-visualizer-plugin": "^39.2.15",
         "@dhis2/ui": "^8.7.7",
         "@emotion/react": "^11.7.1",
         "@emotion/styled": "^11.6.0",

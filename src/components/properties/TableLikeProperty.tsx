@@ -80,7 +80,7 @@ export default function TableLikeProperty<TData extends { id: string }>({
             <Thead>
                 <Tr>
                     {columns.map(({ label }) => (
-                        <Th>{label}</Th>
+                        <Th key={label}>{label}</Th>
                     ))}
                     <Td textAlign="right" w="10%"></Td>
                 </Tr>
@@ -89,7 +89,7 @@ export default function TableLikeProperty<TData extends { id: string }>({
                 {thresholds.map((hold) => (
                     <Tr key={hold.id}>
                         {columns.map(({ value }) => (
-                            <Td>
+                            <Td key={`${hold.id}${value}`}>
                                 <Input
                                     value={String(hold[value])}
                                     onChange={(e) =>

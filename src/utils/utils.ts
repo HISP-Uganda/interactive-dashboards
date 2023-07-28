@@ -13,8 +13,9 @@ import quarterOfYear from "dayjs/plugin/quarterOfYear";
 import { useStore } from "effector-react";
 import { fromPairs, groupBy, uniq } from "lodash";
 import { evaluate } from "mathjs";
-import { Option, Threshold } from "../interfaces";
+import { Option, Threshold, Authentication } from "../interfaces";
 import { $visualizationQuery } from "../Store";
+import axios from "axios";
 
 dayjs.extend(isoWeek);
 dayjs.extend(quarterOfYear);
@@ -1634,3 +1635,17 @@ export const flatteningOptions: Option[] = [
         label: "Directives",
     },
 ];
+
+export const createAxios = (authentication: Authentication | undefined) => {
+    if (authentication) {
+        return axios.create({
+            baseURL: `${authentication.url}/api/`,
+            auth: {
+                username: authentication.username,
+                password: authentication.password,
+            },
+            string: "",
+        });
+    }
+    return undefined;
+};

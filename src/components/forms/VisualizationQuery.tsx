@@ -137,7 +137,7 @@ export default function VisualizationQuery() {
             </Stack>
 
             <Box>
-                <DisplayDataSourceType />
+                <DisplayDataSourceType dataSource={dataSource} />
             </Box>
             {visualizationQuery.type === "SQL_VIEW" && (
                 <Table size="sm" textTransform="none">
@@ -350,6 +350,7 @@ export default function VisualizationQuery() {
                     OK
                 </Button>
             </Stack>
+            <pre>{JSON.stringify(visualizationQuery, null, 2)}</pre>
         </Stack>
     );
 }

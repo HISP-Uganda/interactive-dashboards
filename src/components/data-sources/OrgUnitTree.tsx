@@ -2,8 +2,9 @@ import { Stack } from "@chakra-ui/react";
 import { useState } from "react";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import GlobalSearchFilter from "./GlobalSearchFilter";
+import { MetadataAPI } from "../../interfaces";
 
-const OrgUnitTree = () => {
+const OrgUnitTree = ({ api }: MetadataAPI) => {
     const [q, setQ] = useState<string>("");
     const { previousType, isGlobal } = computeGlobalParams("ou", "mclvD0Z9mfT");
     const [type, setType] = useState<"filter" | "dimension">(previousType);

@@ -23,24 +23,19 @@ import { useStore } from "effector-react";
 import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
 import { datumAPi } from "../../Events";
-import { useOrganisationUnitGroupSets } from "../../Queries";
-import {
-    $currentDataSource,
-    $hasDHIS2,
-    $paginations,
-    $visualizationQuery,
-} from "../../Store";
+import { $hasDHIS2, $paginations, $visualizationQuery } from "../../Store";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import GlobalSearchFilter from "./GlobalSearchFilter";
+import { MetadataAPI } from "../../interfaces";
+import { useDHIS2Resources } from "../../Queries";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
-const OrganizationUnitGroupSets = () => {
+const OrganizationUnitGroupSets = ({ api, isCurrentDHIS2 }: MetadataAPI) => {
     const paginations = useStore($paginations);
     const hasDHIS2 = useStore($hasDHIS2);
-    const currentDataSource = useStore($currentDataSource);
     const visualizationQuery = useStore($visualizationQuery);
     const [q, setQ] = useState<string>("");
 
@@ -69,14 +64,14 @@ const OrganizationUnitGroupSets = () => {
             currentPage: 1,
         },
     });
-    const { isLoading, isSuccess, isError, error, data } =
-        useOrganisationUnitGroupSets(
-            currentPage,
-            pageSize,
-            q,
-            hasDHIS2,
-            currentDataSource
-        );
+    const { isLoading, isSuccess, isError, error, data } = useDHIS2Resources({
+        page: currentPage,
+        pageSize,
+        isCurrentDHIS2,
+        q,
+        api,
+        resource: "organisationUnitGroupSets.json",
+    });
     const handlePageChange = (nextPage: number) => {
         setCurrentPage(nextPage);
     };

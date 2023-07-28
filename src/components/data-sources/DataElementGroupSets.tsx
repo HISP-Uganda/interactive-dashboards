@@ -22,26 +22,19 @@ import {
 import { useStore } from "effector-react";
 import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
-import { IndicatorProps } from "../../interfaces";
-import { useDataElementGroupSets } from "../../Queries";
-import {
-    $currentDataSource,
-    $hasDHIS2,
-    $paginations,
-    $visualizationQuery,
-} from "../../Store";
+import { datumAPi } from "../../Events";
+import { MetadataAPI } from "../../interfaces";
+import { useDHIS2Resources } from "../../Queries";
+import { $hasDHIS2, $paginations, $visualizationQuery } from "../../Store";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import GlobalSearchFilter from "./GlobalSearchFilter";
-import { datumAPi } from "../../Events";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
-const DataElementGroupSets = () => {
+const DataElementGroupSets = ({ api, isCurrentDHIS2 }: MetadataAPI) => {
     const paginations = useStore($paginations);
-    const hasDHIS2 = useStore($hasDHIS2);
-    const currentDataSource = useStore($currentDataSource);
     const visualizationQuery = useStore($visualizationQuery);
 
     const { previousType, isGlobal } = computeGlobalParams(
@@ -71,14 +64,14 @@ const DataElementGroupSets = () => {
             currentPage: 1,
         },
     });
-    const { isLoading, isSuccess, isError, error, data } =
-        useDataElementGroupSets(
-            currentPage,
-            pageSize,
-            q,
-            hasDHIS2,
-            currentDataSource
-        );
+    const { isLoading, isSuccess, isError, error, data } = useDHIS2Resources({
+        page: currentPage,
+        pageSize,
+        q,
+        isCurrentDHIS2,
+        api,
+        resource: "dataElementGroupSets.json",
+    });
 
     const handlePageChange = (nextPage: number) => {
         setCurrentPage(nextPage);
