@@ -5,17 +5,10 @@ import { useElementSize } from "usehooks-ts";
 import { ChartProps, Column, Threshold } from "../../interfaces";
 import { SPECIAL_COLUMNS } from "../constants";
 import { invertHex, processTable } from "../processors";
-import { utils, writeFile } from "xlsx";
 
 interface TableProps extends ChartProps {}
 
-const Tables = ({
-    visualization,
-    layoutProperties,
-    dataProperties,
-    section,
-    data,
-}: TableProps) => {
+const Tables = ({ visualization, data }: TableProps) => {
     const [squareRef, { height }] = useElementSize();
     const flattenedData = flatten(data);
 
@@ -213,22 +206,24 @@ const Tables = ({
                                                             ]
                                                         }
                                                         {...findOthers(col)}
-                                                        // bg={
-                                                        //     visualization.properties[`${col.actual}.bg`] || finalData[
-                                                        //     `${row.value}${col.value}`
-                                                        //     ]?.["bg"]
-                                                        // }
-                                                        bg={""}
-                                                        // color={invertHex(visualization.properties[`${col.actual}.bg`] || finalData[
-                                                        //     `${row.value}${col.value}`
-                                                        // ]?.["bg"] || "#000000", false)}
+                                                        bg={
+                                                            finalData[
+                                                                `${row.value}${col.value}`
+                                                            ]?.["bg"] || "white"
+                                                        }
+                                                        color={invertHex(
+                                                            finalData[
+                                                                `${row.value}${col.value}`
+                                                            ]?.["bg"] ||
+                                                                "white",
+                                                            true
+                                                        )}
                                                     >
                                                         {
                                                             finalData[
                                                                 `${row.value}${col.value}`
                                                             ]?.["value"]
                                                         }
-                                                        {/* {col.value} */}
                                                     </Td>
                                                 );
                                             })}

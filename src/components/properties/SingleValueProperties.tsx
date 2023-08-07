@@ -97,17 +97,28 @@ const SingleValueProperties = ({
             />
             <SelectProperty
                 visualization={visualization}
-                title="Specific Key"
-                attribute="key"
-                options={currentValues}
+                title="Aggregation Strategy"
+                attribute="aggregationStrategy"
+                options={createOptions(["all", "first", "last", "max", "min"])}
             />
-
             <SelectProperty
                 visualization={visualization}
-                title="Uniq By"
-                attribute="uniqBy"
+                title="Aggregation Strategy Columns"
+                attribute="aggregationStrategyColumn"
                 options={createOptions(normalColumns)}
             />
+            <SelectProperty
+                visualization={visualization}
+                title="Uniq Column"
+                attribute="uniqColumn"
+                options={createOptions(normalColumns)}
+            />
+            <TextProperty
+                visualization={visualization}
+                title="Specific Key"
+                attribute="key"
+            />
+
             <SelectProperty
                 visualization={visualization}
                 title="Label Alignment"

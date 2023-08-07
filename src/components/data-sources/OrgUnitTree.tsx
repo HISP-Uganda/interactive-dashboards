@@ -3,13 +3,17 @@ import { useState } from "react";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import GlobalSearchFilter from "./GlobalSearchFilter";
 import { MetadataAPI } from "../../interfaces";
+import OUTree from "../OUTree";
+import { datumAPi } from "../../Events";
 
 const OrgUnitTree = ({ api }: MetadataAPI) => {
     const [q, setQ] = useState<string>("");
-    const { previousType, isGlobal } = computeGlobalParams("ou", "mclvD0Z9mfT");
+    const { previousType, isGlobal, selected } = computeGlobalParams(
+        "ou",
+        "mclvD0Z9mfT"
+    );
     const [type, setType] = useState<"filter" | "dimension">(previousType);
     const [useGlobal, setUseGlobal] = useState<boolean>(isGlobal);
-    console.log(globalIds[5].value);
     return (
         <Stack spacing="20px">
             <GlobalSearchFilter
@@ -22,6 +26,19 @@ const OrgUnitTree = ({ api }: MetadataAPI) => {
                 setQ={setQ}
                 q={q}
                 id={globalIds[5].value}
+            />
+            <OUTree
+                value={selected.map((s) => s.value)}
+                onChange={(items) =>
+                    items.forEach((id) => {
+                        datumAPi.changeDimension({
+                            id,
+                            type,
+                            dimension: "pe",
+                            resource: "pe",
+                        });
+                    })
+                }
             />
         </Stack>
     );

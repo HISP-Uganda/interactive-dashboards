@@ -1,10 +1,12 @@
 import {
+    Box,
     Button,
     Checkbox,
     Heading,
     Input,
     Spacer,
     Stack,
+    Switch,
     Table,
     Tbody,
     Td,
@@ -13,38 +15,30 @@ import {
     Th,
     Thead,
     Tr,
-    Box,
-    Switch,
 } from "@chakra-ui/react";
-import { useState } from "react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { ChangeEvent } from "react";
-import { datumAPi } from "../../Events";
-import {
-    IData,
-    IDataSource,
-    LocationGenerics,
-    Option,
-    IIndicator,
-} from "../../interfaces";
+import { dataSourcesApi, datumAPi } from "../../Events";
+import { IData, IDataSource, LocationGenerics, Option } from "../../interfaces";
 import { saveDocument } from "../../Queries";
 import {
+    $currentDataSource,
     $settings,
     $store,
     $visualizationQuery,
-    $dataSources,
 } from "../../Store";
 import {
+    flatteningOptions,
     getSearchParams,
     globalIds,
-    flatteningOptions,
 } from "../../utils/utils";
 import { generalPadding, otherHeight } from "../constants";
 import { DisplayDataSourceType } from "../data-sources";
 import NamespaceDropdown from "../NamespaceDropdown";
+import { useQueryClient } from "@tanstack/react-query";
 
 const availableOptions: Option[] = [
     { value: "SQL_VIEW", label: "SQL Views" },
@@ -59,10 +53,34 @@ export default function VisualizationQuery() {
     const engine = useDataEngine();
     const { storage } = useStore($settings);
     const visualizationQuery = useStore($visualizationQuery);
-    const dataSources = useStore($dataSources);
-    const [dataSource, setDataSource] = useState<
-        IDataSource | undefined | null
-    >(() => dataSources.find((d) => d.id === visualizationQuery.dataSource));
+    const currentDataSource = useStore($currentDataSource);
+    const queryClient = useQueryClient();
+
+    const onSave = async () => {
+        await saveDocument<IData>(
+            storage,
+            "i-visualization-queries",
+            store.systemId,
+            visualizationQuery,
+            engine,
+            search.action || "create"
+        );
+
+        queryClient.setQueryData<IData[]>(
+            ["i-visualization-queries"],
+            (old) => {
+                if (old) {
+                    return [...old, visualizationQuery];
+                }
+                return [visualizationQuery];
+            }
+        );
+        navigate({
+            to: `/settings/visualization-queries`,
+            search: { action: "update" },
+        });
+    };
+
     return (
         <Stack
             p={`${generalPadding}px`}
@@ -109,12 +127,14 @@ export default function VisualizationQuery() {
                                     attribute: "dataSource",
                                     value: value?.id,
                                 });
-                                setDataSource(() => value);
                             }}
+                            callback={(value: IDataSource[]) =>
+                                dataSourcesApi.setDataSources(value)
+                            }
                         />
                     </Box>
                 </Stack>
-                {dataSource?.type === "DHIS2" && (
+                {currentDataSource?.type === "DHIS2" && (
                     <Stack direction="row" alignItems="center" flex={1}>
                         <Text>Type</Text>
                         <Box flex={1}>
@@ -137,7 +157,7 @@ export default function VisualizationQuery() {
             </Stack>
 
             <Box>
-                <DisplayDataSourceType dataSource={dataSource} />
+                <DisplayDataSourceType dataSource={currentDataSource} />
             </Box>
             {visualizationQuery.type === "SQL_VIEW" && (
                 <Table size="sm" textTransform="none">
@@ -246,7 +266,7 @@ export default function VisualizationQuery() {
             )}
 
             {!(
-                dataSource?.type === "DHIS2" &&
+                currentDataSource?.type === "DHIS2" &&
                 visualizationQuery.type === "VISUALIZATION"
             ) && (
                 <Stack direction="row" alignItems="center" spacing="30px">
@@ -321,7 +341,7 @@ export default function VisualizationQuery() {
                             onChange={(e) =>
                                 datumAPi.changeAttribute({
                                     attribute: "fromFirst",
-                                    value: e.target.value,
+                                    value: e.target.checked,
                                 })
                             }
                         />
@@ -331,26 +351,8 @@ export default function VisualizationQuery() {
 
             <Stack direction="row">
                 <Spacer />
-                <Button
-                    onClick={async () => {
-                        await saveDocument<IData>(
-                            storage,
-                            "i-visualization-queries",
-                            store.systemId,
-                            visualizationQuery,
-                            engine,
-                            search.action || "create"
-                        );
-                        navigate({
-                            to: `/settings/visualization-queries`,
-                            search: { action: "update" },
-                        });
-                    }}
-                >
-                    OK
-                </Button>
+                <Button onClick={() => onSave()}>OK</Button>
             </Stack>
-            <pre>{JSON.stringify(visualizationQuery, null, 2)}</pre>
         </Stack>
     );
 }

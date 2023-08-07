@@ -1,13 +1,7 @@
-import React, { useState } from "react";
 import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
 import {
     IconButton,
-    NumberDecrementStepper,
-    NumberIncrementStepper,
-    NumberInput,
-    NumberInputField,
-    NumberInputStepper,
-    Stack,
+    Input,
     Table,
     Tbody,
     Td,
@@ -15,13 +9,12 @@ import {
     Th,
     Thead,
     Tr,
-    Text,
-    Input,
 } from "@chakra-ui/react";
-import { VizProps } from "../../interfaces";
-import { sectionApi } from "../../Events";
-import { generateUid } from "../../utils/uid";
 import { fromPairs } from "lodash";
+import React, { useState } from "react";
+import { sectionApi } from "../../Events";
+import { VizProps } from "../../interfaces";
+import { generateUid } from "../../utils/uid";
 
 export default function TableLikeProperty<TData extends { id: string }>({
     visualization,

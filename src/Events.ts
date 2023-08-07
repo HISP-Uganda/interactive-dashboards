@@ -334,21 +334,6 @@ export const dashboardApi = createApi($dashboard, {
     setSections: (state, sections: ISection[]) => {
         return { ...state, sections };
     },
-    addImage: (state, image: IImage) => {
-        const imageSearch = state.images.findIndex(
-            ({ alignment }) => image.alignment === alignment
-        );
-        if (imageSearch !== -1) {
-            const images = produce(state.images, (draft) => {
-                draft[imageSearch].src = image.src;
-            });
-
-            return produce(state, (draft) => {
-                draft.images = images;
-            });
-        }
-        return { ...state, images: [...state.images, image] };
-    },
     changeTag: (state, tag: string) =>
         produce(state, (draft) => {
             draft.tag = tag;
@@ -443,7 +428,7 @@ export const indicatorApi = createApi($indicator, {
 
 export const sectionApi = createApi($section, {
     setCurrentSection: (_, section: ISection) => {
-        return { ...section, images: section.images ? section.images : [] };
+        return section;
     },
     addVisualization2Section: (state, id: string) => {
         const visualization: IVisualization = {
@@ -667,6 +652,7 @@ export const datumAPi = createApi($visualizationQuery, {
             prefix,
             suffix,
             label = "",
+            periodType,
         }: Dimension
     ) => {
         if (remove) {
@@ -696,6 +682,7 @@ export const datumAPi = createApi($visualizationQuery, {
                         label,
                         prefix,
                         suffix,
+                        periodType,
                     },
                 },
             };
@@ -712,6 +699,7 @@ export const datumAPi = createApi($visualizationQuery, {
                     prefix,
                     suffix,
                     label,
+                    periodType,
                 },
             },
         };

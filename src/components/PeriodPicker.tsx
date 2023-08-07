@@ -83,8 +83,6 @@ const fixedPeriodTypeOptions = createOptions2(
 );
 
 const PeriodPicker = ({ selectedPeriods, onChange }: PickerProps) => {
-    // const store = useStore(dashboards);
-    const { isOpen, onToggle } = useDisclosure();
     const onRangeChange = (
         dates: null | (Dayjs | null)[],
         dateStrings: string[]
@@ -100,10 +98,6 @@ const PeriodPicker = ({ selectedPeriods, onChange }: PickerProps) => {
         useState<RelativePeriodType>("MONTHLY");
     const [fixedPeriodType, setFixedPeriodType] =
         useState<FixedPeriodType>("MONTHLY");
-
-    // const [selectedPeriods, setSelectedPeriods] = useState<Array<Period>>(
-    //     store.period
-    // );
     const availableRelativePeriods = relativePeriods[relativePeriodType].filter(
         ({ value }: Option) => {
             return !selectedPeriods.find(({ value: val }) => val === value);

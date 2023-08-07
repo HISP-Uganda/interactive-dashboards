@@ -1,4 +1,18 @@
-import { Stack, Table, Tbody, Td, Text, Th, Thead, Tr } from "@chakra-ui/react";
+import {
+    Stack,
+    Table,
+    Tbody,
+    Td,
+    Text,
+    Th,
+    Thead,
+    Tr,
+    Tabs,
+    TabList,
+    TabPanels,
+    Tab,
+    TabPanel,
+} from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import { flatten, uniq } from "lodash";
@@ -9,7 +23,7 @@ import { $visualizationData } from "../../Store";
 import { createOptions, createOptions2 } from "../../utils/utils";
 import ColorRangePicker from "../ColorRangePicker";
 import { SPECIAL_COLUMNS } from "../constants";
-import { getLast } from "../processors";
+import { getLast, getNData } from "../processors";
 import Scrollable from "../Scrollable";
 import SimpleAccordion from "../SimpleAccordion";
 import ColorProperty from "./ColorProperty";
@@ -74,29 +88,34 @@ const TableProperties = ({
 }: {
     visualization: IVisualization;
 }) => {
-    const visualizationData = useStore($visualizationData);
-    const rows = String(visualization.properties["rows"] || "").split(",");
-    const columns1 = String(visualization.properties["columns"] || "").split(
-        ","
-    );
+    const data = useStore($visualizationData)[visualization.id] || [];
+    const rows = String(visualization.properties["rows"] || "")
+        .split(",")
+        .filter((x) => !!x);
+    const columns1 = String(visualization.properties["columns"] || "")
+        .split(",")
+        .filter((x) => !!x);
 
-    const normalColumns = uniq(
-        flatten(
-            flatten(visualizationData[visualization.id]).map((d) =>
-                Object.keys(d)
-            )
-        )
-    );
+    let normalColumns: string[] = [];
+    if (data) {
+        normalColumns = uniq(flatten(flatten(data).map((d) => Object.keys(d))));
+    }
 
-    const columns = visualizationData[visualization.id]
+    const columns = data
         ? createOptions([...normalColumns, ...SPECIAL_COLUMNS])
         : [];
-    const { lastRow, lastColumn } = getLast(
-        flatten(visualizationData[visualization.id]),
-        rows,
-        columns1
-    );
+    const { lastRow, lastColumn } = getLast(flatten(data), rows, columns1);
 
+    const actualData = flatten(data);
+
+    const selectedColumns =
+        String(visualization.properties["columns"])
+            .split(",")
+            .filter((x) => !!x) || [];
+    const selectedRows =
+        String(visualization.properties["rows"])
+            .split(",")
+            .filter((x) => !!x) || [];
     return (
         <Stack>
             <SimpleAccordion title="Columns">
@@ -104,10 +123,7 @@ const TableProperties = ({
                     <Text>Columns</Text>
                     <Select<Option, true, GroupBase<Option>>
                         value={columns.filter(
-                            (pt) =>
-                                String(visualization.properties["columns"])
-                                    .split(",")
-                                    .indexOf(pt.value) !== -1
+                            (pt) => selectedColumns.indexOf(pt.value) !== -1
                         )}
                         onChange={(e) =>
                             sectionApi.changeVisualizationProperties({
@@ -125,49 +141,82 @@ const TableProperties = ({
                     />
                 </Stack>
 
-                <Scrollable height={300}>
-                    <Table variant="unstyled">
-                        <Thead>
-                            <Tr>
-                                <Th>Column</Th>
-                                <Th>Width</Th>
-                                <Th>BG</Th>
-                                <Th>Rename</Th>
-                            </Tr>
-                        </Thead>
-                        <Tbody>
-                            {lastColumn.map((row) => (
-                                <Tr key={row}>
-                                    <Td>{row}</Td>
-                                    <Td w="50px">
-                                        <NumberProperty
-                                            visualization={visualization}
-                                            title=""
-                                            attribute={`${row}.width`}
-                                            min={50}
-                                            max={500}
-                                            step={1}
-                                        />
-                                    </Td>
-                                    <Td w="50px">
-                                        <ColorProperty
-                                            visualization={visualization}
-                                            title=""
-                                            attribute={`${row}.bg`}
-                                        />
-                                    </Td>
-                                    <Td>
-                                        <TextProperty
-                                            visualization={visualization}
-                                            title=""
-                                            attribute={`${row}.name`}
-                                        />
-                                    </Td>
-                                </Tr>
-                            ))}
-                        </Tbody>
-                    </Table>
-                </Scrollable>
+                <Tabs>
+                    <TabList>
+                        {selectedColumns.map((col) => (
+                            <Tab key={col}>{col}</Tab>
+                        ))}
+                    </TabList>
+                    <TabPanels>
+                        {selectedColumns.map((col, index) => (
+                            <TabPanel key={col}>
+                                <Scrollable height={300}>
+                                    <Table variant="unstyled">
+                                        <Thead>
+                                            <Tr>
+                                                <Th>Column</Th>
+                                                <Th>Width</Th>
+                                                <Th>BG</Th>
+                                                <Th>Rename</Th>
+                                                <Th>Position</Th>
+                                            </Tr>
+                                        </Thead>
+                                        <Tbody>
+                                            {getNData(
+                                                actualData,
+                                                selectedColumns,
+                                                index
+                                            ).map((row) => (
+                                                <Tr key={row}>
+                                                    <Td w="30%">{row}</Td>
+                                                    <Td w="50px">
+                                                        <NumberProperty
+                                                            visualization={
+                                                                visualization
+                                                            }
+                                                            title=""
+                                                            attribute={`${row}.width`}
+                                                            min={50}
+                                                            max={500}
+                                                            step={1}
+                                                        />
+                                                    </Td>
+                                                    <Td w="50px">
+                                                        <ColorProperty
+                                                            visualization={
+                                                                visualization
+                                                            }
+                                                            title=""
+                                                            attribute={`${row}.bg`}
+                                                        />
+                                                    </Td>
+                                                    <Td>
+                                                        <TextProperty
+                                                            visualization={
+                                                                visualization
+                                                            }
+                                                            title=""
+                                                            attribute={`${row}.name`}
+                                                        />
+                                                    </Td>
+                                                    <Td>
+                                                        <TextProperty
+                                                            visualization={
+                                                                visualization
+                                                            }
+                                                            title=""
+                                                            attribute={`${row}.position`}
+                                                        />
+                                                    </Td>
+                                                </Tr>
+                                            ))}
+                                        </Tbody>
+                                    </Table>
+                                </Scrollable>
+                            </TabPanel>
+                        ))}
+                    </TabPanels>
+                </Tabs>
             </SimpleAccordion>
 
             <SimpleAccordion title="Rows">
@@ -175,10 +224,7 @@ const TableProperties = ({
                     <Text>Rows</Text>
                     <Select<Option, true, GroupBase<Option>>
                         value={columns.filter(
-                            (pt) =>
-                                String(visualization.properties["rows"])
-                                    .split(",")
-                                    .indexOf(pt.value) !== -1
+                            (pt) => selectedRows.indexOf(pt.value) !== -1
                         )}
                         onChange={(e) =>
                             sectionApi.changeVisualizationProperties({

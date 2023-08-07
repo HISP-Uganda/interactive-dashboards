@@ -22,13 +22,13 @@ import {
 import { useStore } from "effector-react";
 import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
-import { IndicatorProps, MetadataAPI } from "../../interfaces";
+import { datumAPi } from "../../Events";
+import { MetadataAPI } from "../../interfaces";
 import { useDHIS2Resources } from "../../Queries";
-import { $hasDHIS2, $paginations, $visualizationQuery } from "../../Store";
+import { $paginations, $visualizationQuery } from "../../Store";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import GlobalSearchFilter from "./GlobalSearchFilter";
-import { datumAPi } from "../../Events";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;

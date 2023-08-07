@@ -79,6 +79,7 @@ export type Dimension = {
     suffix?: string;
     type: string;
     resource: string;
+    periodType?: PeriodType;
 };
 export interface ICategory extends INamed {}
 export interface IDimension {
@@ -96,6 +97,17 @@ export interface IData extends INamed {
     fromColumn?: string;
     toColumn?: string;
     fromFirst?: boolean;
+    aggregationType?:
+        | "SUM"
+        | "AVERAGE"
+        | "AVERAGE_SUM_ORG_UNIT"
+        | "LAST"
+        | "LAST_AVERAGE_ORG_UNIT"
+        | "COUNT"
+        | "STDDEV"
+        | "VARIANCE"
+        | "MIN"
+        | "MAX";
 }
 
 export interface IIndicator extends INamed {
@@ -426,10 +438,11 @@ export type FixedPeriod = {
     endDate: string;
 };
 
+export type PeriodType = "fixed" | "relative" | "range";
 export interface Period extends Option {
     startDate?: string;
     endDate?: string;
-    type: "fixed" | "relative" | "range";
+    type: PeriodType;
 }
 
 export type IData2 = Omit<IData, "joinTo" | "dataSource"> &

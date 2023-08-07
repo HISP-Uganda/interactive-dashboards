@@ -17,15 +17,15 @@ const onProxyRes = (proxyRes) => {
 };
 // proxy middleware options
 const options = {
-    // target: "https://eidsr.health.go.ug", // target host
-    // target: "https://dev.ndpme.go.ug/ndpdb", // target host
-    // target: "http://localhost:8080", // target host
-    target: "https://tests.dhis2.hispuganda.org/hmis/", // target host
-    // target: "https://hmis-repo.health.go.ug/repo", // target host
-    // target: "https://tests.dhis2.stephocay.com/sia", // target host
-    // target: "https://etracker.moh.gov.rw/individualrecords", // target host
-    // target: "https://epivac.health.go.ug", // target host
-    // target: "https://train.ndpme.go.ug/ndpdb", // target host
+    // target: "https://eidsr.health.go.ug",
+    // target: "https://dev.ndpme.go.ug/ndpdb",
+    target: "http://localhost:8080",
+    // target: "https://tests.dhis2.hispuganda.org/hmis/",
+    // target: "https://hmis-repo.health.go.ug/repo",
+    // target: "https://tests.dhis2.stephocay.com/sia",
+    // target: "https://etracker.moh.gov.rw/individualrecords",
+    // target: "https://epivac.health.go.ug",
+    // target: "https://train.ndpme.go.ug/ndpdb",
     // target: "https://play.dhis2.org/2.38.4.3",
     onProxyReq,
     onProxyRes,
