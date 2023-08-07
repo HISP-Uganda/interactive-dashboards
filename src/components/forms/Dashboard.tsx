@@ -232,23 +232,6 @@ const Dashboard = () => {
             >
                 <Section />
             </Modal>
-            {/* <Modal isOpen={isOpenBg} onClose={onCloseBg} size="2xl">
-                <ModalOverlay />
-                <ModalContent>
-                    <ModalHeader>Dashboard Background</ModalHeader>
-                    <ModalCloseButton />
-                    <ModalBody>
-                        <SwatchesPicker
-                            colors={swatchColors}
-                            color={dashboard.bg}
-                            onChangeComplete={(color) => {
-                                dashboardApi.changeBg(color.hex);
-                                onCloseBg();
-                            }}
-                        />
-                    </ModalBody>
-                </ModalContent>
-            </Modal> */}
             <Modal
                 open={isOpenDialog}
                 onOk={() => onClose()}

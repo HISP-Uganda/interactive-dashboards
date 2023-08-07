@@ -1,9 +1,9 @@
-import axios from "axios";
 import { combine, createApi } from "effector";
-import { isEmpty, isEqual, sortBy } from "lodash";
+import { isEqual, sortBy } from "lodash";
 import { headerHeight, padding, sideWidth } from "./components/constants";
 import { domain } from "./Domain";
 import {
+    DataNode,
     ICategory,
     IDashboard,
     IDashboardSetting,
@@ -16,14 +16,9 @@ import {
     Option,
     Playlist,
     ScreenSize,
-    DataNode,
 } from "./interfaces";
 import { generateUid } from "./utils/uid";
-import {
-    getRelativePeriods,
-    relativePeriods2,
-    createAxios,
-} from "./utils/utils";
+import { getRelativePeriods } from "./utils/utils";
 export const createSection = (id = generateUid()): ISection => {
     return {
         id,
@@ -103,6 +98,7 @@ export const createVisualizationQuery = (id = generateUid()): IData => {
         description: "",
         dataDimensions: {},
         dataSource: undefined,
+        aggregationType: "SUM",
     };
 };
 
@@ -140,7 +136,7 @@ export const createDashboard = (
         categorization: {},
         availableCategories: [],
         availableCategoryOptionCombos: [],
-        bg: "gray.300",
+        bg: "#CBD5E0",
         targetCategoryCombo: "",
         targetCategoryOptionCombos: [],
         nodeSource: {},
@@ -540,3 +536,10 @@ export const isOpenApi = createApi($isOpen, {
 export const $playlist = domain.createStore<Array<Playlist>>([]);
 export const playlistApi = createApi($playlist, {});
 // $previousCategoryOptionCombo.watch((v) => console.log(v));
+
+export const $currentDataSource = combine(
+    $visualizationQuery,
+    $dataSources,
+    (visualizationQuery, dataSources) =>
+        dataSources.find((d) => d.id === visualizationQuery.dataSource)
+);

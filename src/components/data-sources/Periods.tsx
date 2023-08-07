@@ -1,8 +1,10 @@
 import { Stack } from "@chakra-ui/react";
-import { PeriodDimension } from "@dhis2/analytics";
+import { useStore } from "effector-react";
 import React, { useState } from "react";
 import { datumAPi } from "../../Events";
+import { $visualizationQuery } from "../../Store";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
+import PeriodPicker from "../PeriodPicker";
 import GlobalSearchFilter from "./GlobalSearchFilter";
 
 const Periods = () => {
@@ -13,6 +15,7 @@ const Periods = () => {
     const [type, setType] = useState<"filter" | "dimension">(previousType);
     const [useGlobal, setUseGlobal] = useState<boolean>(isGlobal);
     const [q, setQ] = useState<string>("");
+    const visualizationQuery = useStore($visualizationQuery);
 
     return (
         <Stack spacing="20px">
@@ -28,20 +31,24 @@ const Periods = () => {
                 id={globalIds[0].value}
             />
             {!useGlobal && (
-                <PeriodDimension
-                    onSelect={({ items }: any) => {
-                        items.forEach(({ id, name, ...others }: any) => {
-                            datumAPi.changeDimension({
-                                id,
-                                type,
-                                dimension: "pe",
-                                resource: "pe",
-                                label: name,
-                            });
-                        });
-                    }}
-                    selectedPeriods={selected}
-                />
+                <Stack direction="row">
+                    <PeriodPicker
+                        selectedPeriods={selected}
+                        onChange={(items) =>
+                            items.forEach(({ id, value, type, label }) => {
+                                datumAPi.changeDimension({
+                                    id: value,
+                                    type,
+                                    dimension: "pe",
+                                    resource: "pe",
+                                    periodType: type,
+                                    label,
+                                });
+                            })
+                        }
+                    />
+                    <pre>{JSON.stringify(visualizationQuery, null, 2)}</pre>
+                </Stack>
             )}
         </Stack>
     );

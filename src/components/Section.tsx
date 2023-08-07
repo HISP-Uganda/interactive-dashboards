@@ -263,7 +263,7 @@ const Section = () => {
     };
 
     return (
-        <Grid gridTemplateColumns="1fr 30%" gap="2px">
+        <Grid gridTemplateColumns="1fr 40%" gap="2px">
             <Stack bg={section.bg} alignItems="center">
                 <SectionVisualization {...section} />
             </Stack>
@@ -272,12 +272,12 @@ const Section = () => {
                 minH="calc(100vh - 150px)"
                 boxShadow="xl"
                 spacing="2px"
+                p="10px"
             >
                 <Flex
                     gap="5px"
                     flexWrap="wrap"
                     bgColor="white"
-                    p="10px"
                     alignContent="flex-start"
                 >
                     <Button

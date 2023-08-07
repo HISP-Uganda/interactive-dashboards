@@ -1,4 +1,5 @@
 import { center } from "@turf/turf";
+import axios from "axios";
 import {
     eachDayOfInterval,
     eachMonthOfInterval,
@@ -7,15 +8,14 @@ import {
     eachYearOfInterval,
     format,
 } from "date-fns";
-import dayjs, { ManipulateType, QUnitType } from "dayjs";
+import dayjs, { ManipulateType } from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import quarterOfYear from "dayjs/plugin/quarterOfYear";
 import { useStore } from "effector-react";
 import { fromPairs, groupBy, uniq } from "lodash";
 import { evaluate } from "mathjs";
-import { Option, Threshold, Authentication } from "../interfaces";
+import { Authentication, Option, Threshold, Period } from "../interfaces";
 import { $visualizationQuery } from "../Store";
-import axios from "axios";
 
 dayjs.extend(isoWeek);
 dayjs.extend(quarterOfYear);
@@ -41,13 +41,10 @@ export function decodeFromBinary(str: string): string {
 }
 
 const getValue = (value: number) => {
-    if (value === NaN) {
-        return "nac";
-    }
-    if (value >= 100) return "aa";
-    if (value >= 75 && value < 100) return "aav";
-    if (value >= 50 && value < 75) return "av";
-    if (value >= 25 && value < 50) return "bav";
+    if (value >= 75) return "a";
+    if (value >= 50) return "t";
+
+    return "u";
 };
 
 export const globalIds: Option[] = [
@@ -1127,8 +1124,16 @@ export const computeGlobalParams = (
             ? (items[0].type as "filter" | "dimension")
             : "dimension";
 
-    const selected = items.map(({ id }) => String(id));
-    const isGlobal = selected.indexOf(searchId) !== -1;
+    const selected = items.map(({ id, periodType, label }) => {
+        const pe: Period = {
+            value: id,
+            label: label || "",
+            type: periodType || "fixed",
+        };
+        return pe;
+    });
+    const isGlobal =
+        selected.find(({ value }) => value === searchId) !== undefined;
 
     return { previousType, selected, isGlobal };
 };
@@ -1184,7 +1189,7 @@ export const datElementGroupSetsDataElementGroupsWithAttributes = (
                     groupSets,
                     shortName: dataElementGroupShortName,
                 },
-            ] = dataElementGroups;
+            ] = dataElementGroups.filter(({ id }: any) => id !== "ZTv2IkjG5K7");
 
             subKeyResultArea = dataElementGroupName;
             shortName = dataElementGroupShortName;
@@ -1262,6 +1267,43 @@ const allOptions: Partial<{ [key: string]: (data: any) => any[] }> = {
 };
 
 export const flattenDHIS2Data = (data: any, flatteningOption?: string) => {
+    if (data && (data.headers || data.listGrid)) {
+        let rows: string[][] | undefined = undefined;
+        let headers: any[] | undefined = undefined;
+        if (data.listGrid) {
+            headers = data.listGrid.headers;
+            rows = data.listGrid.rows;
+        } else {
+            headers = data.headers;
+            rows = data.rows;
+        }
+        if (headers !== undefined && rows !== undefined) {
+            data = rows.map((row: string[]) => {
+                let others = {};
+
+                if (data.metaData && data.metaData.items) {
+                    row.forEach((r, index) => {
+                        if (index < row.length - 1) {
+                            others = {
+                                ...others,
+                                [`${headers?.[index].name}-name`]:
+                                    data.metaData.items[r]?.name || "",
+                            };
+                        }
+                    });
+                }
+                return {
+                    ...others,
+                    ...fromPairs(
+                        row.map((value, index) => {
+                            const header = headers?.[index];
+                            return [header.name, value];
+                        })
+                    ),
+                };
+            });
+        }
+    }
     if (flatteningOption) {
         return allOptions[flatteningOption]?.(data) || data;
     }
@@ -1387,15 +1429,6 @@ export const merge2DataSources = (
     }
     return to.flatMap((e) => {
         const filtered = from.filter((ev) => {
-            console.log(
-                ev,
-                e,
-                fromColumn,
-                toColumn,
-                ev[fromColumn],
-                e[toColumn],
-                ev[fromColumn] === e[toColumn]
-            );
             return ev[fromColumn] === e[toColumn];
         });
         if (filtered.length > 0) {

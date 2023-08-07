@@ -1,11 +1,12 @@
-import { Button, Flex, Stack, Text } from "@chakra-ui/react";
+import { Button, Flex, Stack, Text, Box } from "@chakra-ui/react";
 import { useStore } from "effector-react";
+import { GroupBase, Select } from "chakra-react-select";
 import { useState } from "react";
 import { useElementSize } from "usehooks-ts";
-import { IDataSource } from "../../interfaces";
+import { IDataSource, Option } from "../../interfaces";
 import { useDimensions } from "../../Queries";
 import { $visualizationQuery } from "../../Store";
-import { createAxios } from "../../utils/utils";
+import { createAxios, createOptions } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import DataElementGroups from "./DataElementGroups";
 import DataElementGroupSets from "./DataElementGroupSets";
@@ -20,6 +21,20 @@ import OrgUnitTree from "./OrgUnitTree";
 import Periods from "./Periods";
 import ProgramIndicators from "./ProgramIndicators";
 import SQLViews from "./SQLViews";
+import { datumAPi } from "../../Events";
+
+const availableOptions: Option[] = createOptions([
+    "SUM",
+    "AVERAGE",
+    "AVERAGE_SUM_ORG_UNIT",
+    "LAST",
+    "LAST_AVERAGE_ORG_UNIT",
+    "COUNT",
+    "STDDEV",
+    "VARIANCE",
+    "MIN",
+    "MAX",
+]);
 
 const DHIS2 = ({
     dataSource,
@@ -127,6 +142,26 @@ const DHIS2 = ({
             {isLoading && <LoadingIndicator />}
             {isSuccess && visualizationQuery.type === "ANALYTICS" && (
                 <Stack w="100%" h="100%">
+                    <Stack direction="row" alignItems="center" flex={1}>
+                        <Text>Aggregation Type</Text>
+                        <Box w="20%">
+                            <Select<Option, false, GroupBase<Option>>
+                                value={availableOptions.find(
+                                    (pt) =>
+                                        pt.value ===
+                                        visualizationQuery.aggregationType
+                                )}
+                                onChange={(e) =>
+                                    datumAPi.changeAttribute({
+                                        attribute: "aggregationType",
+                                        value: e?.value,
+                                    })
+                                }
+                                options={availableOptions}
+                                isClearable
+                            />
+                        </Box>
+                    </Stack>
                     <Flex
                         gap="5px"
                         flexWrap="wrap"

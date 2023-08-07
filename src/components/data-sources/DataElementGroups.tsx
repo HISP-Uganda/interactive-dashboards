@@ -35,7 +35,6 @@ const INNER_LIMIT = 4;
 
 const DataElementGroups = ({ api, isCurrentDHIS2 }: MetadataAPI) => {
     const paginations = useStore($paginations);
-    const hasDHIS2 = useStore($hasDHIS2);
     const visualizationQuery = useStore($visualizationQuery);
     const { previousType, isGlobal } = computeGlobalParams(
         "deg",

@@ -1,5 +1,5 @@
 import { uniqBy } from "lodash/fp";
-import { fromPairs, groupBy, orderBy, sum } from "lodash";
+import { fromPairs, groupBy, orderBy, sum, maxBy, minBy } from "lodash";
 import uniq from "lodash/uniq";
 import update from "lodash/update";
 import { Column, Threshold } from "../interfaces";
@@ -376,74 +376,98 @@ const calculation = {
 };
 
 const findMerged = (list: string[], data: Array<any>) => {
-    let finalColumns: Array<Array<Column>> = [];
-    for (let index = 0; index < list.length; index++) {
-        const col = list[index];
-        let currentValues: Array<Column> = uniq(data.map((d) => d[col]))
-            .filter((d) => !!d)
-            .map((d) => {
-                return { label: d, value: d, span: 1, actual: d };
-            });
-        currentValues = orderBy(currentValues, ["value"], ["desc"]);
-        if (index === 0) {
-            finalColumns[0] = currentValues;
-        } else {
-            const prev = finalColumns[index - 1];
-            let nextValues: Array<Column> = [];
-            for (const v of prev) {
-                for (const p of currentValues) {
-                    nextValues = [
-                        ...nextValues,
-                        {
-                            label: `${v.label}${p.label}`,
-                            value: `${v.value}${p.value}`,
-                            span: 1,
-                            actual: p.value,
-                        },
-                    ];
+    if (data) {
+        let finalColumns: Array<Array<Column>> = [];
+        for (let index = 0; index < list.length; index++) {
+            const col = list[index];
+            let currentValues: Array<Column> = uniq(data.map((d) => d[col]))
+                .filter((d) => !!d)
+                .map((d) => {
+                    return { label: d, value: d, span: 1, actual: d };
+                });
+            if (index === 0) {
+                finalColumns[0] = currentValues;
+            } else {
+                const prev = finalColumns[index - 1];
+                let nextValues: Array<Column> = [];
+                for (const v of prev) {
+                    for (const p of currentValues) {
+                        nextValues = [
+                            ...nextValues,
+                            {
+                                label: `${v.label}${p.label}`,
+                                value: `${v.value}${p.value}`,
+                                span: 1,
+                                actual: p.value,
+                            },
+                        ];
+                    }
                 }
+                finalColumns[index] = nextValues;
             }
-            finalColumns[index] = nextValues;
         }
-    }
 
-    return finalColumns.map((data, index, columns) => {
-        if (index < columns.length - 1) {
-            const last = columns[columns.length - 1].length;
-            const current = columns[index].length;
-            return data.map((x) => {
-                return { ...x, span: last / current };
-            });
+        return finalColumns.map((data, index, columns) => {
+            if (index < columns.length - 1) {
+                const last = columns[columns.length - 1].length;
+                const current = columns[index].length;
+                return data.map((x) => {
+                    return { ...x, span: last / current };
+                });
+            }
+            return data;
+        });
+    }
+    return [];
+};
+
+export const getNData = (data: any[], values: string[], index: number) => {
+    if (data) {
+        let columns = [];
+        const valid = values.filter((d) => SPECIAL_COLUMNS.indexOf(d) === -1);
+        const specialized = values.filter(
+            (d) => SPECIAL_COLUMNS.indexOf(d) !== -1
+        );
+        if (valid.length > 0 && index < valid.length) {
+            const last = valid[index];
+            columns = uniq(data.map((d) => d[last])).filter((d) => !!d);
         }
-        return data;
-    });
+
+        return [...columns, ...specialized];
+    }
+    return [];
 };
 
 export const getLast = (data: any[], rows: string[], columns: string[]) => {
-    let lastColumn = [];
-    let lastRow = [];
-    const validRows = rows.filter((d) => SPECIAL_COLUMNS.indexOf(d) === -1);
-    const validCols = columns.filter((d) => SPECIAL_COLUMNS.indexOf(d) === -1);
-    const specializedRows = rows.filter(
-        (d) => SPECIAL_COLUMNS.indexOf(d) !== -1
-    );
-    const specializedCols = columns.filter(
-        (d) => SPECIAL_COLUMNS.indexOf(d) !== -1
-    );
-    if (validRows.length > 0) {
-        const lastR = validRows[validRows.length - 1];
-        lastRow = uniq(data.map((d) => d[lastR])).filter((d) => !!d);
-    }
+    if (data) {
+        let lastColumn = [];
+        let lastRow = [];
+        const validRows = rows.filter((d) => SPECIAL_COLUMNS.indexOf(d) === -1);
+        const validCols = columns.filter(
+            (d) => SPECIAL_COLUMNS.indexOf(d) === -1
+        );
+        const specializedRows = rows.filter(
+            (d) => SPECIAL_COLUMNS.indexOf(d) !== -1
+        );
+        const specializedCols = columns.filter(
+            (d) => SPECIAL_COLUMNS.indexOf(d) !== -1
+        );
+        if (validRows.length > 0) {
+            const lastR = validRows[validRows.length - 1];
+            lastRow = uniq(data.map((d) => d[lastR])).filter((d) => !!d);
+        }
 
-    if (validCols.length > 0) {
-        const lastC = validCols[validCols.length - 1];
-        lastColumn = uniq(data.map((d) => d[lastC])).filter((d) => !!d);
-    }
+        if (validCols.length > 0) {
+            const lastC = validCols[validCols.length - 1];
+            lastColumn = uniq(data.map((d) => d[lastC])).filter((d) => !!d);
+        }
 
-    return {
-        lastColumn: [...lastColumn, ...specializedCols],
-        lastRow: [...lastRow, ...specializedRows],
-    };
+        return {
+            lastColumn: [...lastColumn, ...specializedCols],
+            lastRow: [...lastRow, ...specializedRows],
+        };
+    }
+    return { lastColumn: [], lastRow: [] };
 };
 
 export const processTable = (
@@ -454,106 +478,146 @@ export const processTable = (
     thresholds: Threshold[],
     aggregationColumn: string
 ) => {
-    const finalColumns = findMerged(
-        columns.filter((c) => SPECIAL_COLUMNS.indexOf(c) === -1),
-        data
-    );
-    const finalRows = findMerged(
-        rows.filter((c) => SPECIAL_COLUMNS.indexOf(c) === -1),
-        data
-    );
+    if (data) {
+        const finalColumns = findMerged(
+            columns.filter((c) => SPECIAL_COLUMNS.indexOf(c) === -1),
+            data
+        );
+        const finalRows = findMerged(
+            rows.filter((c) => SPECIAL_COLUMNS.indexOf(c) === -1),
+            data
+        );
 
-    const withoutBaseline = orderBy(
-        thresholds.flatMap((val) => {
-            if (val.id !== "baseline") {
-                return val;
-            }
-            return [];
-        }),
-        ["value"],
-        ["asc"]
-    );
-
-    const baseline =
-        thresholds.find(({ id }) => id === "baseline")?.color || "";
-
-    const groupedData = groupBy(data, (d) => rows.map((r) => d[r]).join(""));
-    const finalData = Object.entries(groupedData)
-        .flatMap(([key, values]) => {
-            let rows = values;
-
-            if (aggregationColumn) {
-                rows = uniqBy(aggregationColumn, values);
-            }
-            const groupedByColumn = groupBy(values, (d) =>
-                columns
-                    .filter((r) => SPECIAL_COLUMNS.indexOf(r) === -1)
-                    .map((r) => d[r])
-                    .join("")
-            );
-            const normal = Object.entries(groupedByColumn).map(
-                ([columnKey, columnData]) => {
-                    return {
-                        key: `${key}${columnKey}`,
-                        value: calculation[aggregation](
-                            columnData,
-                            withoutBaseline,
-                            baseline,
-                            {
-                                aggregationColumn,
-                                prevValue: rows.length,
-                            }
-                        ),
-                    };
+        const withoutBaseline = orderBy(
+            thresholds.flatMap((val) => {
+                if (val.id !== "baseline") {
+                    return val;
                 }
-            );
+                return [];
+            }),
+            ["value"],
+            ["asc"]
+        );
 
-            return [
-                ...normal,
-                {
-                    key: `${key}rowCount`,
-                    value: { bg: "", value: rows.length, color: "" },
-                },
-            ];
-        })
-        .map(({ key, value }) => {
-            return [key, value];
-        });
+        const baseline =
+            thresholds.find(({ id }) => id === "baseline")?.color || "";
 
-    return {
-        finalColumns,
-        finalRows,
-        finalData: fromPairs(finalData),
-    };
+        const groupedData = groupBy(data, (d) =>
+            rows.map((r) => d[r]).join("")
+        );
+        const finalData = Object.entries(groupedData)
+            .flatMap(([key, values]) => {
+                let rows = values;
+
+                if (aggregationColumn) {
+                    rows = uniqBy(aggregationColumn, values);
+                }
+                const groupedByColumn = groupBy(values, (d) =>
+                    columns
+                        .filter((r) => SPECIAL_COLUMNS.indexOf(r) === -1)
+                        .map((r) => d[r])
+                        .join("")
+                );
+                const normal = Object.entries(groupedByColumn).map(
+                    ([columnKey, columnData]) => {
+                        return {
+                            key: `${key}${columnKey}`,
+                            value: calculation[aggregation](
+                                columnData,
+                                withoutBaseline,
+                                baseline,
+                                {
+                                    aggregationColumn,
+                                    prevValue: rows.length,
+                                }
+                            ),
+                        };
+                    }
+                );
+
+                return [
+                    ...normal,
+                    {
+                        key: `${key}rowCount`,
+                        value: { bg: "", value: rows.length, color: "" },
+                    },
+                ];
+            })
+            .map(({ key, value }) => {
+                return [key, value];
+            });
+
+        return {
+            finalColumns,
+            finalRows,
+            finalData: fromPairs(finalData),
+        };
+    }
+    return { finalColumns: [], finalRows: [], finalData: {} };
 };
 
 export const processSingleValue = (
     data: any[],
-    aggregate: boolean,
-    aggregationColumn: string,
-    key: string,
-    uniqColumn: string
+    properties: { [key: string]: any }
 ): any => {
-    if (data.length > 0) {
-        if (aggregate && aggregationColumn && key) {
-            const grouped = groupBy(data, aggregationColumn);
-            const value = uniqColumn
-                ? uniqBy(uniqColumn, grouped[key]).length
-                : grouped[key]?.length;
-            return value;
-        } else if (aggregate && aggregationColumn) {
-            return Object.keys(groupBy(data, aggregationColumn)).length;
+    let processed: any = data;
+    const {
+        aggregate,
+        aggregationColumn,
+        key,
+        uniqColumn,
+        aggregationStrategy,
+        aggregationStrategyColumn,
+    } = properties;
+
+    if (processed.length > 0) {
+        if (aggregate && aggregationColumn) {
+            processed = groupBy(processed, aggregationColumn);
+            if (aggregationStrategy && aggregationStrategyColumn) {
+                const current = Object.entries(processed).flatMap(
+                    ([_, val]: [string, any]) => {
+                        if (aggregationStrategy === "first") return val[0];
+                        if (aggregationStrategy === "last")
+                            return val[val.length - 1];
+                        if (aggregationStrategy === "max")
+                            return maxBy(val, aggregationStrategyColumn);
+                        if (aggregationStrategy === "min")
+                            return minBy(val, aggregationStrategyColumn);
+                        return val;
+                    }
+                );
+
+                if (uniqColumn) {
+                    const regrouped = groupBy(current, uniqColumn);
+                    if (key) {
+                        return regrouped[key]?.length;
+                    }
+                    return Object.keys(regrouped);
+                }
+                return current.length;
+            } else if (uniqColumn && key) {
+                return uniqBy(uniqColumn, processed[key]).length;
+            } else if (key) {
+                processed[key]?.length;
+            }
+            return Object.keys(processed).length;
         } else if (aggregate) {
-            return data.length;
+            return processed.length;
         } else {
-            const values = Object.values(data[0]);
-            if (data.length === 1 && Object.keys(data[0]).length === 1) {
+            const values = Object.values(processed[0]);
+            if (
+                processed.length === 1 &&
+                Object.keys(processed[0]).length === 1
+            ) {
                 return values[0];
             }
-            if (data.length === 1 && Object.keys(data[0]).length > 1) {
+            if (
+                processed.length === 1 &&
+                Object.keys(processed[0]).length > 1
+            ) {
                 return values[values.length - 1];
             }
-            if (data.length > 0 && Object.keys(data[0]).length > 1) {
+            if (processed.length > 0 && Object.keys(processed[0]).length > 1) {
                 return values[values.length - 1];
             }
         }

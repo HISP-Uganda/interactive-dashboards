@@ -10,10 +10,12 @@ export default function NamespaceDropdown<T extends INamed>({
     namespace,
     value,
     onChange,
+    callback,
 }: {
     namespace: string;
     onChange: (value: T | null) => void;
     value: string | undefined | null;
+    callback?: (value: T[]) => void;
 }) {
     const { storage } = useStore($settings);
     const { systemId } = useStore($store);
@@ -22,7 +24,8 @@ export default function NamespaceDropdown<T extends INamed>({
         namespace,
         storage,
         systemId,
-        []
+        [],
+        callback
     );
     if (isError) return <pre>{error?.message}</pre>;
 

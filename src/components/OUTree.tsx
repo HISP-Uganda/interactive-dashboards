@@ -3,11 +3,11 @@ import { useDataEngine } from "@dhis2/app-runtime";
 import { Tree } from "antd";
 import arrayToTree from "array-to-tree";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useStore } from "effector-react";
 import { flatten } from "lodash";
 import React, { useState } from "react";
 import { db } from "../db";
-import { $store } from "../Store";
+import { useStore } from "effector-react";
+import { $visualizationQuery } from "../Store";
 
 const OUTree = ({
     value,
@@ -18,9 +18,9 @@ const OUTree = ({
 }) => {
     const engine = useDataEngine();
     const organisations = useLiveQuery(() => db.organisations.toArray());
-    const levels = useLiveQuery(() => db.levels.toArray());
     const expandedKeys = useLiveQuery(() => db.expandedKeys.get("1"));
     const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
+    const visualizationQuery = useStore($visualizationQuery);
     const [checkedKeys, setCheckedKeys] = useState<
         { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[]
     >(() => {
@@ -97,7 +97,7 @@ const OUTree = ({
     return (
         <Stack bgColor="white" spacing="20px">
             {organisations !== undefined && (
-                <>
+                <Stack direction="row">
                     <Tree
                         checkable
                         onExpand={onExpand}
@@ -112,7 +112,7 @@ const OUTree = ({
                         checkedKeys={checkedKeys}
                         loadData={onLoadData}
                         style={{
-                            maxHeight: "500px",
+                            maxHeight: "400px",
                             overflow: "auto",
                             fontSize: "18px",
                         }}
@@ -120,39 +120,9 @@ const OUTree = ({
                             parentProperty: "pId",
                         })}
                     />
-                </>
-            )}
-            {levels !== undefined && (
-                <Stack zIndex={300}>
-                    {/* <Text fontSize="2xl" color="yellow.500">Key Reult Areas</Text>
-          <Select<Option, true, GroupBase<Option>>
-            isMulti
-            options={levels}
-            value={levels.filter(
-              (d: Option) => store.levels.indexOf(String(d.value)) !== -1
-            )}
-            onChange={(e) => {
-              setLevels(e.map((ex) => ex.value));
-            }}
-          /> */}
+                    <pre>{JSON.stringify(visualizationQuery, null, 2)}</pre>
                 </Stack>
             )}
-            {/* {groups !== undefined && (
-        <Stack zIndex={200}>
-          <Text>Group</Text>
-          <Select<Option, true, GroupBase<Option>>
-            isMulti
-            options={groups}
-            hideSelectedOptions
-            value={groups.filter(
-              (d: Option) => store.groups.indexOf(d.value) !== -1
-            )}
-            onChange={(e) => {
-              setGroups(e.map((ex) => ex.value));
-            }}
-          />
-        </Stack>
-      )} */}
         </Stack>
     );
 };
