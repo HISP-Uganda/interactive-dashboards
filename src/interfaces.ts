@@ -313,6 +313,7 @@ export interface ChartProps {
     dataProperties?: { [key: string]: any };
     section: ISection;
     data?: any;
+    dimensions?: { [key: string]: string[] };
 }
 
 export interface Threshold {

@@ -24,6 +24,7 @@ import {
     dataSourceApi,
     storeApi,
     visualizationDataApi,
+    visualizationDimensionsApi,
 } from "./Events";
 import {
     DataNode,
@@ -1119,7 +1120,7 @@ const queryData = async (
 ) => {
     const realData = await queryDHIS2(engine, vq, globalFilters);
     const joinData = await queryDHIS2(engine, vq?.joinTo, globalFilters);
-    console.log(realData, joinData);
+    let dimensions: { [key: string]: string[] } = {};
 
     const data = processDHIS2Data(
         flattenDHIS2Data(realData, vq?.flatteningOption),
@@ -1133,7 +1134,43 @@ const queryData = async (
         }
     );
 
-    return { data };
+    if (vq?.dataSource?.type === "DHIS2" && vq.type === "ANALYTICS") {
+        dimensions = realData.metaData.dimensions;
+        if (
+            vq.joinTo &&
+            vq.joinTo.dataSource?.type === "DHIS2" &&
+            vq.joinTo.type === "ANALYTICS"
+        ) {
+            Object.entries(joinData.metaData.dimensions).forEach(
+                ([key, values]) => {
+                    if (dimensions[key]) {
+                        dimensions = {
+                            ...dimensions,
+                            [key]: uniq([
+                                ...dimensions[key],
+                                ...(values as string[]),
+                            ]),
+                        };
+                    } else {
+                        dimensions = {
+                            ...dimensions,
+                            [key]: values as string[],
+                        };
+                    }
+                }
+            );
+        }
+    } else {
+        const allKeys = uniq(flatten(flatten(data).map((d) => Object.keys(d))));
+        allKeys.forEach((key) => {
+            dimensions = {
+                ...dimensions,
+                [key]: uniq(data.map((d) => d[key])),
+            };
+        });
+    }
+
+    return { data, dimensions };
 };
 
 const queryDHIS2 = async (
@@ -1247,7 +1284,7 @@ const queryIndicator = async (
     globalFilters: { [key: string]: any } = {},
     otherFilters: { [key: string]: any } = {}
 ) => {
-    const { data: numerator } = await queryData(
+    const { data: numerator, dimensions } = await queryData(
         engine,
         indicator.numerator,
         globalFilters,
@@ -1261,36 +1298,40 @@ const queryIndicator = async (
     );
 
     if (numerator && denominator) {
-        return numerator.map((currentValue: { [key: string]: string }) => {
-            const { value: v1, total: t1, ...others } = currentValue;
-            const columns = Object.values(others).sort().join("");
+        const data = numerator.map(
+            (currentValue: { [key: string]: string }) => {
+                const { value: v1, total: t1, ...others } = currentValue;
+                const columns = Object.values(others).sort().join("");
 
-            const denominatorSearch = denominator.find(
-                (row: { [key: string]: string }) => {
-                    const { value, total, ...someOthers } = row;
-                    return (
-                        columns === Object.values(someOthers).sort().join("")
+                const denominatorSearch = denominator.find(
+                    (row: { [key: string]: string }) => {
+                        const { value, total, ...someOthers } = row;
+                        return (
+                            columns ===
+                            Object.values(someOthers).sort().join("")
+                        );
+                    }
+                );
+                if (denominatorSearch) {
+                    const { value: v1, total: t1 } = currentValue;
+                    const { value: v2, total: t2 } = denominatorSearch;
+
+                    const numeratorValue = v1 || t1;
+                    const denominatorValue = v2 || t2;
+
+                    return computeIndicator(
+                        indicator,
+                        currentValue,
+                        numeratorValue,
+                        denominatorValue
                     );
                 }
-            );
-            if (denominatorSearch) {
-                const { value: v1, total: t1 } = currentValue;
-                const { value: v2, total: t2 } = denominatorSearch;
-
-                const numeratorValue = v1 || t1;
-                const denominatorValue = v2 || t2;
-
-                return computeIndicator(
-                    indicator,
-                    currentValue,
-                    numeratorValue,
-                    denominatorValue
-                );
+                return { ...currentValue, value: 0 };
             }
-            return { ...currentValue, value: 0 };
-        });
+        );
+        return { data, dimensions };
     }
-    return numerator;
+    return { data: numerator, dimensions };
 };
 
 const processVisualization = async (
@@ -1305,11 +1346,25 @@ const processVisualization = async (
         )
     );
 
+    const actualData = data.flatMap(({ data }) => data);
+    let finalDimensions: { [key: string]: string[] } = {};
+    data.forEach(({ dimensions }) => {
+        Object.entries(dimensions).forEach(([key, values]) => {
+            finalDimensions = {
+                ...finalDimensions,
+                [key]: [...values, ...(finalDimensions[key] || [])],
+            };
+        });
+    });
+    visualizationDimensionsApi.updateVisualizationData({
+        visualizationId: visualization.id,
+        data: finalDimensions,
+    });
     visualizationDataApi.updateVisualizationData({
         visualizationId: visualization.id,
-        data: flatten(data),
+        data: actualData,
     });
-    return flatten(data);
+    return actualData;
 };
 
 export const useVisualizationMetadata = (

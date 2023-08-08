@@ -8,7 +8,7 @@ import { invertHex, processTable } from "../processors";
 
 interface TableProps extends ChartProps {}
 
-const Tables = ({ visualization, data }: TableProps) => {
+const Tables = ({ visualization, data, dimensions }: TableProps) => {
     const [squareRef, { height }] = useElementSize();
     const flattenedData = flatten(data);
 
@@ -28,7 +28,8 @@ const Tables = ({ visualization, data }: TableProps) => {
         columns,
         aggregation,
         thresholds,
-        aggregationColumn
+        aggregationColumn,
+        dimensions
     );
 
     const findOthers = (col: Column) => {

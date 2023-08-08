@@ -41,6 +41,7 @@ import {
     $visualizationMetadata,
     $visualizationQuery,
     $calculated,
+    $visualizationDimensions,
 } from "./Store";
 
 export const loadDefaults = domain.createEvent<{
@@ -577,6 +578,20 @@ export const visualizationDataApi = createApi($visualizationData, {
         }: {
             visualizationId: string;
             data: any;
+        }
+    ) => {
+        return { ...state, [visualizationId]: data };
+    },
+});
+export const visualizationDimensionsApi = createApi($visualizationDimensions, {
+    updateVisualizationData: (
+        state,
+        {
+            visualizationId,
+            data,
+        }: {
+            visualizationId: string;
+            data: { [key: string]: string[] };
         }
     ) => {
         return { ...state, [visualizationId]: data };

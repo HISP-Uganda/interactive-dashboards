@@ -19,6 +19,7 @@ import StackedAreaChartProperties from "../properties/StackedAreaChartProperties
 import SunburstGraphProperties from "../properties/SunBurstChartProperties";
 import TableProperties from "../properties/TableProperties";
 import TextVisualisationProperties from "../properties/TextVisualisationproperties";
+import DashboardTitleProperties from "../properties/DashboardTitleProperties";
 type VizProps = {
     visualization: IVisualization;
 };
@@ -53,6 +54,9 @@ const VisualizationProperties = ({ visualization }: VizProps) => {
             ),
             dhis2: (
                 <DHIS2VisualizationProperties visualization={visualization} />
+            ),
+            dashboardTitle: (
+                <DashboardTitleProperties visualization={visualization} />
             ),
         };
         if (visualizationType) {
