@@ -264,7 +264,7 @@ const Section = () => {
 
     return (
         <Grid gridTemplateColumns="1fr 40%" gap="2px">
-            <Stack bg={section.bg} alignItems="center">
+            <Stack bg={section.bg} alignItems="center" overflow="auto">
                 <SectionVisualization {...section} />
             </Stack>
             <Stack

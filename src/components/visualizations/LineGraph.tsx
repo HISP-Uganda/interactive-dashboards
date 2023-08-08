@@ -47,6 +47,18 @@ const LineGraph = ({
     const titleFontSize = dataProperties?.["data.title.fontsize"] || "1.5vh";
     const titleCase = dataProperties?.["data.title.case"] || "";
     const titleColor = dataProperties?.["data.title.color"] || "gray.500";
+
+    const { chartData, allSeries } = processGraphs(
+        data,
+        visualization.order,
+        visualization.show,
+        visualization.properties["summarize"] || false,
+        dataProperties,
+        category,
+        series,
+        visualization.properties,
+        "line"
+    );
     return (
         <Stack w="100%" h="100%" spacing={0}>
             {visualization.name && (
@@ -61,16 +73,7 @@ const LineGraph = ({
             )}
             <Stack flex={1}>
                 <Plot
-                    data={
-                        processGraphs(
-                            data,
-                            category,
-                            series,
-                            dataProperties,
-                            metadata[visualization.id],
-                            "line"
-                        ) as any
-                    }
+                    data={chartData as any}
                     layout={{
                         margin: {
                             pad: 5,
@@ -85,6 +88,8 @@ const LineGraph = ({
                             automargin: true,
                             showgrid: false,
                             type: "category",
+                            showticklabels: true,
+                            zeroline: false,
                         },
                         legend: {
                             orientation: "h",

@@ -216,14 +216,6 @@ export const $section = domain.createStore<ISection>(createSection());
 export const $dataSets = domain.createStore<Option[]>([]);
 export const $calculated = domain.createStore<{ [key: string]: any }>({});
 
-// export const $currentDataSource = combine(
-//     $visualizationQuery,
-//     $dataSources,
-//     (visualizationQuery, dataSources) => {
-//        return createAxios(visualizationQuery)
-//     }
-// );
-
 export const $categoryDashboards = combine(
     $dashboards,
     $store,
@@ -295,8 +287,12 @@ export const $visualizationData = domain.createStore<{ [key: string]: any[] }>(
     {}
 );
 
+export const $visualizationDimensions = domain.createStore<{
+    [key: string]: { [key: string]: string[] };
+}>({});
+
 export const $visualizationMetadata = domain.createStore<{
-    [key: string]: any[];
+    [key: string]: string;
 }>({});
 
 export const $dashboardCategory = combine(

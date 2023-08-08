@@ -15,11 +15,11 @@ import {
 } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { flatten, uniq } from "lodash";
+import { flatten, uniq, isEmpty } from "lodash";
 import React from "react";
 import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
-import { $visualizationData } from "../../Store";
+import { $visualizationData, $visualizationDimensions } from "../../Store";
 import { createOptions, createOptions2 } from "../../utils/utils";
 import ColorRangePicker from "../ColorRangePicker";
 import { SPECIAL_COLUMNS } from "../constants";
@@ -89,6 +89,8 @@ const TableProperties = ({
     visualization: IVisualization;
 }) => {
     const data = useStore($visualizationData)[visualization.id] || [];
+    const dimensions = useStore($visualizationDimensions)[visualization.id];
+
     const rows = String(visualization.properties["rows"] || "")
         .split(",")
         .filter((x) => !!x);
@@ -97,13 +99,12 @@ const TableProperties = ({
         .filter((x) => !!x);
 
     let normalColumns: string[] = [];
-    if (data) {
-        normalColumns = uniq(flatten(flatten(data).map((d) => Object.keys(d))));
+
+    if (!isEmpty(dimensions)) {
+        normalColumns = Object.keys(dimensions);
     }
 
-    const columns = data
-        ? createOptions([...normalColumns, ...SPECIAL_COLUMNS])
-        : [];
+    const columns = createOptions([...normalColumns, ...SPECIAL_COLUMNS]);
     const { lastRow, lastColumn } = getLast(flatten(data), rows, columns1);
 
     const actualData = flatten(data);

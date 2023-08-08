@@ -271,7 +271,9 @@ const getVisualization = (
             />
         ),
         filters: <Filters />,
-        dashboardTitle: <DashboardTitle />,
+        dashboardTitle: (
+            <DashboardTitle section={section} visualization={visualization} />
+        ),
         optionSet: (
             <OptionSet visualization={visualization} section={section} />
         ),

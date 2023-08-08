@@ -1,16 +1,8 @@
-import React from 'react'
-import ColorPalette from "../ColorPalette";
-import {
-    NumberDecrementStepper,
-    NumberIncrementStepper,
-    NumberInput,
-    NumberInputField,
-    NumberInputStepper,
-    Stack,
-    Text,
-} from "@chakra-ui/react";
+import { Stack, Text } from "@chakra-ui/react";
+import React from "react";
 import { IVisualization } from "../../interfaces";
-import { sectionApi } from "../../Events";
+import NumberProperty from "./NumberProperty";
+import ColorPalette from "../ColorPalette";
 
 const DashboardTitleProperties = ({
     visualization,
@@ -19,42 +11,25 @@ const DashboardTitleProperties = ({
 }) => {
     return (
         <Stack spacing="20px" pb="10px">
-            <Text>Title font size</Text>
-            <NumberInput
-                value={2}
-                max={10}
-                min={1}
-                step={0.1}
-
-            >
-                <NumberInputField />
-                <NumberInputStepper>
-                    <NumberIncrementStepper />
-                    <NumberDecrementStepper />
-                </NumberInputStepper>
-            </NumberInput>
-            <Text>Title font weight</Text>
-            <NumberInput
-                value={2}
-                max={10}
-                min={1}
-                step={0.1}
-
-            >
-                <NumberInputField />
-                <NumberInputStepper>
-                    <NumberIncrementStepper />
-                    <NumberDecrementStepper />
-                </NumberInputStepper>
-            </NumberInput>
-
-            <Text>Title font color</Text>
-            <ColorPalette
+            <NumberProperty
+                title="Font size"
                 visualization={visualization}
-                attribute="data.title.color"
+                attribute="fontSize"
+            />
+            <Stack>
+                <Text>Title font color</Text>
+                <ColorPalette visualization={visualization} attribute="color" />
+            </Stack>
+            <NumberProperty
+                title="Font Weight"
+                visualization={visualization}
+                attribute="fontWeight"
+                min={100}
+                max={900}
+                step={50}
             />
         </Stack>
-    )
-}
+    );
+};
 
-export default DashboardTitleProperties
+export default DashboardTitleProperties;

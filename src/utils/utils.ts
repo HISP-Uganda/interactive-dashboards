@@ -810,19 +810,22 @@ export const deriveSingleValues = (
 ) => {
     if (expression !== undefined) {
         let finalExpression = expression;
-        const all = expression.match(/\w+/g);
+        const all = expression.match(/#{\w+.?\w*}/g);
         if (all) {
             all.forEach((s) => {
-                const val = data[s] || 0;
+                const val =
+                    data[
+                        s.replace("#", "").replace("{", "").replace("}", "")
+                    ] || 0;
                 finalExpression = finalExpression.replace(s, val);
             });
         }
-        // try {
-        const evaluation = evaluate(finalExpression);
-        return [{ value: evaluation }];
-        // } catch (error) {
-        //     return [{ value: "" }];
-        // }
+        try {
+            const evaluation = evaluate(finalExpression);
+            return [{ value: evaluation }];
+        } catch (error) {
+            return [{ value: "" }];
+        }
     }
 };
 
@@ -1175,52 +1178,75 @@ const dataElements = (data: any) => {
 export const datElementGroupSetsDataElementGroupsWithAttributes = (
     data: any
 ) => {
-    return data.dataElements.map(({ id, name, dataElementGroups }: any) => {
-        let subKeyResultArea: string = "";
-        let keyResultArea: string = "";
-        let attributeName: string = "";
-        let value: string = "";
-        let shortName = "";
-
-        if (dataElementGroups && dataElementGroups.length > 0) {
-            const [
-                {
-                    name: dataElementGroupName,
-                    groupSets,
-                    shortName: dataElementGroupShortName,
-                },
-            ] = dataElementGroups.filter(({ id }: any) => id !== "ZTv2IkjG5K7");
-
-            subKeyResultArea = dataElementGroupName;
-            shortName = dataElementGroupShortName;
-
-            if (groupSets && groupSets.length > 0) {
-                const [{ name: dataElementGroupSetName, attributeValues }] =
-                    groupSets;
-
-                keyResultArea = dataElementGroupSetName;
-
-                if (attributeValues.length > 0) {
-                    const [
-                        {
-                            value: val1,
-                            attribute: { name },
-                        },
-                    ] = attributeValues;
-                    attributeName = name;
-                    value = val1;
-                }
-            }
-        }
-        return {
+    return data.dataElements.map(
+        ({
             id,
             name,
-            subKeyResultArea,
-            shortName,
-            keyResultArea,
-            [attributeName]: value,
-        };
-    });
+            attributeValues: elementAttributes,
+            dataElementGroups,
+        }: any) => {
+            let subKeyResultArea: string = "";
+            let keyResultArea: string = "";
+            let attributeName: string = "";
+            let deAttributeName = "";
+            let deAttributeValue = "";
+            let value: string = "";
+            let shortName = "";
+
+            if (elementAttributes.length > 0) {
+                const [
+                    {
+                        value: val1,
+                        attribute: { name },
+                    },
+                ] = elementAttributes;
+                deAttributeName = name;
+                deAttributeValue = val1;
+            }
+
+            if (dataElementGroups && dataElementGroups.length > 0) {
+                const [
+                    {
+                        name: dataElementGroupName,
+                        groupSets,
+                        shortName: dataElementGroupShortName,
+                    },
+                ] = dataElementGroups.filter(
+                    ({ id }: any) => id !== "ZTv2IkjG5K7"
+                );
+
+                subKeyResultArea = dataElementGroupName;
+                shortName = dataElementGroupShortName;
+
+                if (groupSets && groupSets.length > 0) {
+                    const [{ name: dataElementGroupSetName, attributeValues }] =
+                        groupSets;
+
+                    keyResultArea = dataElementGroupSetName;
+
+                    if (attributeValues.length > 0) {
+                        const [
+                            {
+                                value: val1,
+                                attribute: { name },
+                            },
+                        ] = attributeValues;
+                        attributeName = name;
+                        value = val1;
+                    }
+                }
+            }
+            return {
+                id,
+                name,
+                subKeyResultArea,
+                shortName,
+                keyResultArea,
+                [attributeName]: value,
+                [deAttributeName]: deAttributeValue,
+            };
+        }
+    );
 };
 
 const dataElementGroupsDataElements = (data: any) => {

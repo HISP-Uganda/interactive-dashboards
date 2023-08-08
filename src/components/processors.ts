@@ -476,7 +476,8 @@ export const processTable = (
     columns: string[],
     aggregation: keyof typeof calculation,
     thresholds: Threshold[],
-    aggregationColumn: string
+    aggregationColumn: string,
+    dimensions?: { [key: string]: string[] }
 ) => {
     if (data) {
         const finalColumns = findMerged(
@@ -647,8 +648,8 @@ export const processGraphs = (
             () => value
         );
     });
-
-    if (data && data.length > 0 && category) {
+    console.log(category);
+    if (data && data.length > 0 && category !== undefined) {
         if (summarize) {
             if (series) {
                 const grouped = groupBy(data, series);
@@ -689,21 +690,21 @@ export const processGraphs = (
                 allSeries = Object.keys(groupBy(data, series));
             } else {
                 const grouped2 = groupBy(data, category);
-
+                console.log(grouped2);
                 chartData = [
-                    {
-                        x: Object.keys(grouped2).map((k) =>
-                            breakString(metadata[`${k}.name`] || k, 25)
-                        ),
-                        y: Object.values(grouped2).map((x) => x.length),
-                        type: "bar",
-                        ...availableProperties.data,
-                        textposition: "auto",
-                        texttemplate:
-                            availableProperties?.data?.orientation === "v"
-                                ? "%{y:.0f}"
-                                : "%{x:.0f}",
-                    },
+                    // {
+                    //     x: Object.keys(grouped2).map((k) =>
+                    //         breakString(metadata[`${k}.name`] || k, 25)
+                    //     ),
+                    //     y: Object.values(grouped2).map((x) => x.length),
+                    //     type: "bar",
+                    //     ...availableProperties.data,
+                    //     textposition: "auto",
+                    //     texttemplate:
+                    //         availableProperties?.data?.orientation === "v"
+                    //             ? "%{y:.0f}"
+                    //             : "%{x:.0f}",
+                    // },
                 ];
                 allSeries = Object.keys(grouped2);
             }
