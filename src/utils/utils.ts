@@ -810,19 +810,22 @@ export const deriveSingleValues = (
 ) => {
     if (expression !== undefined) {
         let finalExpression = expression;
-        const all = expression.match(/\w+/g);
+        const all = expression.match(/#{\w+.?\w*}/g);
         if (all) {
             all.forEach((s) => {
-                const val = data[s] || 0;
+                const val =
+                    data[
+                        s.replace("#", "").replace("{", "").replace("}", "")
+                    ] || 0;
                 finalExpression = finalExpression.replace(s, val);
             });
         }
-        // try {
-        const evaluation = evaluate(finalExpression);
-        return [{ value: evaluation }];
-        // } catch (error) {
-        //     return [{ value: "" }];
-        // }
+        try {
+            const evaluation = evaluate(finalExpression);
+            return [{ value: evaluation }];
+        } catch (error) {
+            return [{ value: "" }];
+        }
     }
 };
 
