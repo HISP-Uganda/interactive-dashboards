@@ -148,7 +148,7 @@ const SectionVisualization = (section: ISection) => {
     };
 
     return (
-        <Stack onContextMenu={displayMenu} w="100%" h="100%">
+        <Stack onContextMenu={displayMenu} w="100%" h="100%" overflow="auto">
             {displays[section.display] || displays.normal}
             <Menu id={section.id}>
                 <Item

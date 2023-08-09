@@ -64,35 +64,44 @@ export function invertHex(hex: string, bw: boolean = true) {
     return "";
 }
 
-export const findColor = (
-    val: number,
-    thresholds: Threshold[],
-    defaultValue: string
-) => {
-    return (
-        thresholds.find(({ value }, index) => {
-            if (index < thresholds.length - 1) {
-                return val >= value && val < thresholds[index + 1].value;
+export const findColor = (val: number, thresholds: Threshold[]) => {
+    const withoutBaseline = orderBy(
+        thresholds.flatMap((val) => {
+            if (val.id !== "baseline") {
+                return val;
             }
-            return val >= value;
-        })?.color || defaultValue
+            return [];
+        }),
+        ["value"],
+        ["asc"]
     );
+    const baseline =
+        thresholds.find(({ id }) => id === "baseline")?.color || "";
+    const search = withoutBaseline.find(({ value }, index) => {
+        if (index < withoutBaseline.length - 1) {
+            return val >= value && val < withoutBaseline[index + 1].value;
+        }
+        return val >= value;
+    });
+    if (search) {
+        return search.color;
+    }
+    return baseline;
 };
 
 const calculation = {
     count: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
             prevValue: number;
-        }> = {}
+        }>
     ) => {
         const value = data.length;
 
-        const color = findColor(value, thresholds, defaultValue);
+        const color = findColor(value, thresholds);
 
         return {
             bg: color,
@@ -103,7 +112,6 @@ const calculation = {
     countUniqValues: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -115,7 +123,6 @@ const calculation = {
     listUniqueValues: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -127,7 +134,6 @@ const calculation = {
     sum: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -145,7 +151,7 @@ const calculation = {
                 return 0;
             })
         );
-        const color = findColor(total, thresholds, defaultValue);
+        const color = findColor(total, thresholds);
 
         return {
             bg: color,
@@ -156,7 +162,6 @@ const calculation = {
     integerSum: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -168,7 +173,6 @@ const calculation = {
     average: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -180,7 +184,6 @@ const calculation = {
     median: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -192,7 +195,6 @@ const calculation = {
     sampleVariance: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -204,7 +206,6 @@ const calculation = {
     sampleStandardDeviation: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -216,7 +217,6 @@ const calculation = {
     minimum: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -228,7 +228,6 @@ const calculation = {
     maximum: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -240,7 +239,6 @@ const calculation = {
     first: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -252,7 +250,6 @@ const calculation = {
     last: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -264,7 +261,6 @@ const calculation = {
     sumOverSum: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -276,7 +272,6 @@ const calculation = {
     upperBound80: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -288,7 +283,6 @@ const calculation = {
     lowerBound80: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -300,7 +294,6 @@ const calculation = {
     sumFractionTotals: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -312,7 +305,6 @@ const calculation = {
     sumFractionRows: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -324,7 +316,6 @@ const calculation = {
     sumFractionColumns: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -336,7 +327,6 @@ const calculation = {
     countFractionTotals: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -348,7 +338,6 @@ const calculation = {
     countFractionRows: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -364,7 +353,6 @@ const calculation = {
     countFractionColumns: (
         data: any[],
         thresholds: Threshold[],
-        defaultValue: string,
         others: Partial<{
             aggregationColumn: string;
             col2: string;
@@ -489,20 +477,6 @@ export const processTable = (
             data
         );
 
-        const withoutBaseline = orderBy(
-            thresholds.flatMap((val) => {
-                if (val.id !== "baseline") {
-                    return val;
-                }
-                return [];
-            }),
-            ["value"],
-            ["asc"]
-        );
-
-        const baseline =
-            thresholds.find(({ id }) => id === "baseline")?.color || "";
-
         const groupedData = groupBy(data, (d) =>
             rows.map((r) => d[r]).join("")
         );
@@ -525,8 +499,7 @@ export const processTable = (
                             key: `${key}${columnKey}`,
                             value: calculation[aggregation](
                                 columnData,
-                                withoutBaseline,
-                                baseline,
+                                thresholds,
                                 {
                                     aggregationColumn,
                                     prevValue: rows.length,
@@ -648,7 +621,6 @@ export const processGraphs = (
             () => value
         );
     });
-    console.log(category);
     if (data && data.length > 0 && category !== undefined) {
         if (summarize) {
             if (series) {
@@ -690,7 +662,6 @@ export const processGraphs = (
                 allSeries = Object.keys(groupBy(data, series));
             } else {
                 const grouped2 = groupBy(data, category);
-                console.log(grouped2);
                 chartData = [
                     // {
                     //     x: Object.keys(grouped2).map((k) =>

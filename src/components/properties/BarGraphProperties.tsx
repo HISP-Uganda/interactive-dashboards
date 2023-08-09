@@ -281,7 +281,7 @@ const BarGraphProperties = ({
                                     x[visualization.properties["series"]]
                             )
                         ).map((x) => (
-                            <Tab key={x}>{metadata?.[x]?.name}</Tab>
+                            <Tab key={x}>{metadata?.[x]}</Tab>
                         ))}
                     </TabList>
 

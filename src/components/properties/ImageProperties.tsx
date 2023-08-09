@@ -1,17 +1,8 @@
+import { Button, Input, Stack, Text } from "@chakra-ui/react";
 import React, { ChangeEvent, useRef } from "react";
-import { IVisualization } from "../../interfaces";
-import {
-    Stack,
-    Text,
-    Input,
-    Button,
-    NumberDecrementStepper,
-    NumberIncrementStepper,
-    NumberInput,
-    NumberInputField,
-    NumberInputStepper,
-} from "@chakra-ui/react";
 import { sectionApi } from "../../Events";
+import { IVisualization } from "../../interfaces";
+import NumberProperty from "./NumberProperty";
 
 export default function ImageProperties({
     visualization,
@@ -64,50 +55,30 @@ export default function ImageProperties({
                 onChange={handleFileChange}
             />
 
-            <Stack>
-                <Text>Image Height</Text>
-                <NumberInput
-                    value={visualization.properties["data.height"] || ""}
-                    max={100}
-                    min={1}
-                    step={1}
-                    onChange={(value1: string, value2: number) =>
-                        sectionApi.changeVisualizationProperties({
-                            visualization: visualization.id,
-                            attribute: "data.height",
-                            value: value2,
-                        })
-                    }
-                >
-                    <NumberInputField />
-                    <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                    </NumberInputStepper>
-                </NumberInput>
-            </Stack>
-            <Stack>
-                <Text>Image Width</Text>
-                <NumberInput
-                    value={visualization.properties["data.width"] || ""}
-                    max={100}
-                    min={1}
-                    step={1}
-                    onChange={(value1: string, value2: number) =>
-                        sectionApi.changeVisualizationProperties({
-                            visualization: visualization.id,
-                            attribute: "data.width",
-                            value: value2,
-                        })
-                    }
-                >
-                    <NumberInputField />
-                    <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                    </NumberInputStepper>
-                </NumberInput>
-            </Stack>
+            <NumberProperty
+                title="Image Size"
+                min={1}
+                max={500}
+                step={5}
+                visualization={visualization}
+                attribute="boxSize"
+            />
+            <NumberProperty
+                title="Width"
+                min={1}
+                max={500}
+                step={5}
+                visualization={visualization}
+                attribute="data.width"
+            />
+            <NumberProperty
+                title="Height"
+                min={1}
+                max={500}
+                step={5}
+                visualization={visualization}
+                attribute="data.height"
+            />
         </Stack>
     );
 }

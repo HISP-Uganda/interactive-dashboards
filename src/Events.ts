@@ -133,6 +133,9 @@ export const storeApi = createApi($store, {
     changePeriods: (state, periods: Period[]) => {
         return { ...state, periods };
     },
+    changeLevels: (state, levels: string[]) => {
+        return { ...state, levels };
+    },
     changeSelectedCategory: (state, selectedCategory: string) => {
         return { ...state, selectedCategory };
     },

@@ -6,8 +6,6 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { flatten } from "lodash";
 import React, { useState } from "react";
 import { db } from "../db";
-import { useStore } from "effector-react";
-import { $visualizationQuery } from "../Store";
 
 const OUTree = ({
     value,
@@ -20,7 +18,6 @@ const OUTree = ({
     const organisations = useLiveQuery(() => db.organisations.toArray());
     const expandedKeys = useLiveQuery(() => db.expandedKeys.get("1"));
     const [autoExpandParent, setAutoExpandParent] = useState<boolean>(true);
-    const visualizationQuery = useStore($visualizationQuery);
     const [checkedKeys, setCheckedKeys] = useState<
         { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[]
     >(() => {
@@ -120,7 +117,6 @@ const OUTree = ({
                             parentProperty: "pId",
                         })}
                     />
-                    <pre>{JSON.stringify(visualizationQuery, null, 2)}</pre>
                 </Stack>
             )}
         </Stack>

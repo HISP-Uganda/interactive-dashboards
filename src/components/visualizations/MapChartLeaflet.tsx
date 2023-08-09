@@ -23,9 +23,9 @@ const MapChartLeaflet = ({
     const ouIsGlobal = ous.findIndex((l) => l === "mclvD0Z9mfT");
     const globalFilters = useStore($globalFilters);
     const thresholds: Threshold[] = dataProperties?.["data.thresholds"] || [
-        { id: "1", min: "0", max: "5000", color: "red" },
-        { id: "2", min: "5001", max: "10000", color: "yellow" },
-        { id: "3", min: "10001", color: "green" },
+        { id: "1", min: "0", max: "5", color: "red" },
+        { id: "2", min: "50", max: "75", color: "yellow" },
+        { id: "3", min: "76", color: "green" },
     ];
     const store = useStore($store);
     const {

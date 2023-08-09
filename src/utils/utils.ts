@@ -12,10 +12,17 @@ import dayjs, { ManipulateType } from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import quarterOfYear from "dayjs/plugin/quarterOfYear";
 import { useStore } from "effector-react";
-import { fromPairs, groupBy, uniq } from "lodash";
+import { fromPairs, groupBy, uniq, join } from "lodash";
 import { evaluate } from "mathjs";
-import { Authentication, Option, Threshold, Period } from "../interfaces";
+import {
+    Authentication,
+    Option,
+    Threshold,
+    Period,
+    VisualizationItems,
+} from "../interfaces";
 import { $visualizationQuery } from "../Store";
+import { findColor } from "../components/processors";
 
 dayjs.extend(isoWeek);
 dayjs.extend(quarterOfYear);
@@ -756,29 +763,10 @@ export const processMap = (
     const processedFeatures = features.map(
         ({ id, properties, ...others }: any) => {
             let value = processedData[id];
-            let colorSearch: any = undefined;
-
-            if (value) {
-                const numericValue = Number(value).toFixed(2);
-                colorSearch = thresholds.find(({ max, min }: any) => {
-                    if (max && min) {
-                        return (
-                            Number(numericValue) >= Number(min) &&
-                            Number(value) <= Number(max)
-                        );
-                    } else if (min) {
-                        return Number(numericValue) >= Number(min);
-                    } else if (max) {
-                        return Number(numericValue) <= Number(max);
-                    }
-                });
-            }
             let color = "white";
 
-            if (value && colorSearch) {
-                color = colorSearch.color;
-            } else if (value && thresholds.length > 0) {
-                color = thresholds[0].color;
+            if (value) {
+                color = findColor(value, thresholds);
             }
 
             return {
@@ -786,12 +774,7 @@ export const processMap = (
                 ...others,
                 properties: {
                     ...properties,
-                    value: value
-                        ? Intl.NumberFormat("en-US", {
-                              style: "percent",
-                              maximumFractionDigits: 2,
-                          }).format(value / 100)
-                        : "No Data",
+                    value: value ? value : "No Data",
                     color,
                 },
             };
@@ -1708,3 +1691,48 @@ export const createAxios = (authentication: Authentication | undefined) => {
     }
     return undefined;
 };
+
+export const getAnalyticsQuery = ({
+    columns,
+    rows,
+    filters,
+    aggregationType,
+}: {
+    columns: VisualizationItems;
+    rows: VisualizationItems;
+    filters: VisualizationItems;
+    aggregationType: string;
+}) => {
+    let final: string[] = [`aggregationType=${aggregationType}`];
+    const c = columns
+        .map(
+            ({ items, dimension }) =>
+                `${dimension}:${items.map(({ id }) => id).join(";")}`
+        )
+        .join(",");
+
+    const r = rows
+        .map(
+            ({ items, dimension }) =>
+                `${dimension}:${items.map(({ id }) => id).join(";")}`
+        )
+        .join(",");
+
+    const f = filters
+        .map(
+            ({ items, dimension }) =>
+                `${dimension}:${items.map(({ id }) => id).join(";")}`
+        )
+        .join(",");
+
+    if (c && r) {
+        final = [...final, `dimension=${c},${r}`];
+    }
+    if (f) {
+        final = [...final, `filter:${f}`];
+    }
+
+    return final.join("&");
+};
+
+const processAnalytics = () => {};

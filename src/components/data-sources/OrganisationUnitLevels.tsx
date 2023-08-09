@@ -23,7 +23,7 @@ import { useStore } from "effector-react";
 import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
 import { datumAPi } from "../../Events";
-import { useOrganisationUnitLevels } from "../../Queries";
+import { useOrganisationUnitLevels, useDHIS2Resources } from "../../Queries";
 import { $hasDHIS2, $paginations, $visualizationQuery } from "../../Store";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
@@ -33,7 +33,7 @@ import { MetadataAPI } from "../../interfaces";
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
-const OrganizationUnitLevels = ({ api }: MetadataAPI) => {
+const OrganizationUnitLevels = ({ api, isCurrentDHIS2 }: MetadataAPI) => {
     const { previousType, isGlobal } = computeGlobalParams(
         "oul",
         "GQhi6pRnTKF"
@@ -63,8 +63,16 @@ const OrganizationUnitLevels = ({ api }: MetadataAPI) => {
             currentPage: 1,
         },
     });
-    const { isLoading, isSuccess, isError, error, data } =
-        useOrganisationUnitLevels(currentPage, pageSize, q, hasDHIS2, api);
+
+    const { isLoading, isSuccess, isError, error, data } = useDHIS2Resources({
+        page: currentPage,
+        pageSize,
+        q,
+        isCurrentDHIS2,
+        api,
+        resource: "filledOrganisationUnitLevels.json",
+        derive: false,
+    });
 
     const handlePageChange = (nextPage: number) => {
         setCurrentPage(nextPage);
@@ -91,71 +99,83 @@ const OrganizationUnitLevels = ({ api }: MetadataAPI) => {
                 </Flex>
             )}
             {isSuccess && data && !useGlobal && (
-                <Table
-                    variant="striped"
-                    colorScheme="gray"
-                    textTransform="none"
-                >
-                    <Thead>
-                        <Tr>
-                            <Th w="10px">
-                                <Checkbox />
-                            </Th>
-                            <Th>
-                                <Heading as="h6" size="xs" textTransform="none">
-                                    Id
-                                </Heading>
-                            </Th>
-                            <Th>
-                                <Heading as="h6" size="xs" textTransform="none">
-                                    Name
-                                </Heading>
-                            </Th>
-                        </Tr>
-                    </Thead>
-                    <Tbody>
-                        {data.map((record: any) => (
-                            <Tr key={record.id || record.level}>
-                                <Td>
-                                    <Checkbox
-                                        onChange={(
-                                            e: ChangeEvent<HTMLInputElement>
-                                        ) => {
-                                            if (e.target.checked) {
-                                                datumAPi.changeDimension({
-                                                    id: record.level,
-                                                    type,
-                                                    dimension: "ou",
-                                                    resource: "oul",
-                                                    prefix: "LEVEL-",
-                                                });
-                                            } else {
-                                                datumAPi.changeDimension({
-                                                    id: record.level,
-                                                    type,
-                                                    dimension: "ou",
-                                                    resource: "oul",
-                                                    prefix: "LEVEL-",
-                                                    remove: true,
-                                                });
-                                            }
-                                        }}
-                                        isChecked={
-                                            !isEmpty(
-                                                visualizationQuery
-                                                    .dataDimensions?.[
-                                                    record.level
-                                                ]
-                                            )
-                                        }
-                                    />
-                                </Td>
-                                <Td>{record.id}</Td>
-                                <Td>{record.name}</Td>
+                <Stack>
+                    <pre>{JSON.stringify(visualizationQuery, null, 2)}</pre>
+                    <Table
+                        variant="striped"
+                        colorScheme="gray"
+                        textTransform="none"
+                    >
+                        <Thead>
+                            <Tr>
+                                <Th w="10px">
+                                    <Checkbox />
+                                </Th>
+                                <Th>
+                                    <Heading
+                                        as="h6"
+                                        size="xs"
+                                        textTransform="none"
+                                    >
+                                        Id
+                                    </Heading>
+                                </Th>
+                                <Th>
+                                    <Heading
+                                        as="h6"
+                                        size="xs"
+                                        textTransform="none"
+                                    >
+                                        Name
+                                    </Heading>
+                                </Th>
                             </Tr>
-                        ))}
-                    </Tbody>
-                </Table>
+                        </Thead>
+                        <Tbody>
+                            {data.map((record: any) => (
+                                <Tr key={record.level}>
+                                    <Td>
+                                        {record.level}--{record.id}
+                                        <Checkbox
+                                            onChange={(
+                                                e: ChangeEvent<HTMLInputElement>
+                                            ) => {
+                                                if (e.target.checked) {
+                                                    datumAPi.changeDimension({
+                                                        id: record.level,
+                                                        type,
+                                                        dimension: "ou",
+                                                        resource: "oul",
+                                                        prefix: "LEVEL-",
+                                                    });
+                                                } else {
+                                                    datumAPi.changeDimension({
+                                                        id: record.level,
+                                                        type,
+                                                        dimension: "ou",
+                                                        resource: "oul",
+                                                        prefix: "LEVEL-",
+                                                        remove: true,
+                                                    });
+                                                }
+                                            }}
+                                            isChecked={
+                                                !isEmpty(
+                                                    visualizationQuery
+                                                        .dataDimensions?.[
+                                                        record.level
+                                                    ]
+                                                )
+                                            }
+                                        />
+                                    </Td>
+                                    <Td>{record.id}</Td>
+                                    <Td>{record.name}</Td>
+                                </Tr>
+                            ))}
+                        </Tbody>
+                    </Table>
+                </Stack>
             )}
             {!useGlobal && (
                 <Pagination
