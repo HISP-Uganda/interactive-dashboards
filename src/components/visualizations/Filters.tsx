@@ -7,6 +7,7 @@ import { Period } from "../../interfaces";
 import { $store } from "../../Store";
 import OUTree from "../OUTree";
 import PeriodPicker from "../PeriodPicker";
+import OrganisationUnitLevels from "../OrganisationUnitLevels";
 
 export default function Filters() {
     const store = useStore($store);
@@ -34,6 +35,8 @@ export default function Filters() {
                                 storeApi.setOrganisations(value)
                             }
                         />
+                        <Text>Level</Text>
+                        <OrganisationUnitLevels />
                         <Text>Period</Text>
                         <PeriodPicker
                             selectedPeriods={store.periods}

@@ -465,3 +465,14 @@ export interface MetadataAPI {
     api: AxiosInstance | undefined | null;
     isCurrentDHIS2: boolean | undefined | null;
 }
+
+export type VisualizationItems = Array<{
+    items: Array<{
+        name: string;
+        dimensionItemType: string;
+        displayShortName: string;
+        displayName: string;
+        id: string;
+    }>;
+    dimension: string;
+}>;

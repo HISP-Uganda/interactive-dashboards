@@ -32,7 +32,7 @@ const Layers = ({
             return newGeoJson.geojson;
         });
         setGeoJsonKey(() => newKey);
-    }, [data]);
+    }, [JSON.stringify(data)]);
     const onEachCountry = (country: Feature<Geometry, any>, layer: Layer) => {
         layer.on("mouseover", (e) => {
             const name = country.properties.name;

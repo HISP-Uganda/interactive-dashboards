@@ -48,27 +48,6 @@ const MapChartProperties = ({
                 options={mapStyleOptions}
                 isClearable
             />
-            <Text>Zoom</Text>
-
-            <NumberInput
-                value={visualization.properties?.["layout.zoom"] || 5.3}
-                step={0.1}
-                max={20}
-                min={5.3}
-                onChange={(value1: string, value2: number) =>
-                    sectionApi.changeVisualizationProperties({
-                        visualization: visualization.id,
-                        attribute: "layout.zoom",
-                        value: value2,
-                    })
-                }
-            >
-                <NumberInputField />
-                <NumberInputStepper>
-                    <NumberIncrementStepper />
-                    <NumberDecrementStepper />
-                </NumberInputStepper>
-            </NumberInput>
         </Stack>
     );
 };

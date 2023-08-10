@@ -230,10 +230,6 @@ const Section = () => {
     const section = useStore($section);
     const [active, setActive] = useState<string>("title");
 
-    useEffect(() => {
-        storeApi.setShowSider(false);
-    }, []);
-
     const dragItem = useRef<number | undefined | null>();
     const dragOverItem = useRef<number | null>();
     const dragStart = (e: DragEvent<HTMLButtonElement>, position: number) => {

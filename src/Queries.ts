@@ -275,9 +275,8 @@ export const useInitials = (storage: "data-store" | "es") => {
             },
         },
         levels: {
-            resource: "organisationUnitLevels.json",
+            resource: "filledOrganisationUnitLevels.json",
             params: {
-                order: "level:DESC",
                 fields: "id,level~rename(value),name~rename(label)",
             },
         },
@@ -303,7 +302,7 @@ export const useInitials = (storage: "data-store" | "es") => {
             const {
                 systemInfo: { systemId, systemName, instanceBaseUrl },
                 me: { organisationUnits, authorities, userRoles },
-                levels: { organisationUnitLevels },
+                levels: organisationUnitLevels,
                 groups: { organisationUnitGroups },
                 dataSets: { dataSets },
             }: any = await engine.query(ouQuery);
@@ -360,6 +359,7 @@ export const useInitials = (storage: "data-store" | "es") => {
             storeApi.setOrganisations(facilities);
             storeApi.setMaxLevel(maxLevel);
             storeApi.changeAdministration(isAdmin);
+            storeApi;
             storeApi.setLevels([
                 minLevel === 1 ? "3" : `${minLevel ? minLevel + 1 : 4}`,
             ]);
@@ -705,20 +705,29 @@ export const getDHIS2Resources = async <T>({
     api: AxiosInstance | undefined | null;
     engine: any;
 }>) => {
-    if (isCurrentDHIS2 && resource && resourceKey) {
+    if (isCurrentDHIS2 && resource) {
         const { data }: any = await engine.query({
             data: {
                 resource,
                 params,
             },
         });
-        return getOr<T[]>([], resourceKey, data);
-    } else if (api && resource && resourceKey) {
+        if (resourceKey) {
+            return getOr<T[]>([], resourceKey, data);
+        }
+        return data;
+    } else if (isCurrentDHIS2 && resource) {
+        return;
+    } else if (api && resource) {
         const { data } = await api.get<{ [key: string]: T[] }>(resource, {
             params,
             string: "",
         });
-        return data[resourceKey];
+
+        if (resourceKey) {
+            return data[resourceKey];
+        }
+        return data;
     }
     return [];
 };
@@ -755,6 +764,7 @@ export const useDHIS2Resources = ({
     isCurrentDHIS2,
     api,
     resourceKey,
+    derive = true,
 }: {
     page: number;
     pageSize: number;
@@ -762,14 +772,18 @@ export const useDHIS2Resources = ({
     q: string;
     isCurrentDHIS2: boolean | undefined | null;
     api: AxiosInstance | undefined | null;
+    derive?: boolean;
     resourceKey?: string;
 }) => {
     const engine = useDataEngine();
-    const rKey = resourceKey || resource.split(".")[0];
+    let rKey = resourceKey;
+    if (!rKey && derive) {
+        rKey = resource.split(".")[0];
+    }
     let params: { [key: string]: any } = {
         page,
         pageSize,
-        fields: "id,name",
+        fields: "id,name,level",
         order: "name:ASC",
     };
 
@@ -824,8 +838,11 @@ export const useDHIS2Visualizations = (
     api: AxiosInstance | undefined | null
 ) => {
     const engine = useDataEngine();
-    const params = {
+    const params: {
+        [key: string]: string;
+    } = {
         fields: "id,name",
+        paging: "false",
     };
     return useQuery<INamed[], Error>(["dhis-visualizations"], async () => {
         return getDHIS2Resources<INamed>({
@@ -855,11 +872,11 @@ export const useOrganisationUnitLevels = (
         params = { ...params, filter: `identifiable:token:${q}` };
     }
     return useQuery<Array<INamed & { level: number }>, Error>(
-        ["organisation-unit-levels", page, pageSize],
+        ["organisation-unit-levels-1", page, pageSize],
         async () => {
             return getDHIS2Resources<INamed & { level: number }>({
                 isCurrentDHIS2,
-                resource: "organisationUnitLevels.json",
+                resource: "filledOrganisationUnitLevels.json",
                 params,
                 api,
             });
@@ -1658,7 +1675,7 @@ export const useMaps = (
             const { geojson, ...otherLevels }: any = await engine.query(query);
             return processMap(geojson, otherLevels, data, thresholds);
         },
-        { refetchInterval: 7 }
+        { refetchInterval: 5000 }
     );
 };
 
