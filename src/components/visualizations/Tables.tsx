@@ -1,21 +1,31 @@
-import { Box, Stack, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
+import { Box, Stack, Table, Button, Tbody, Td, Th, Thead, Tr, Flex } from "@chakra-ui/react";
 import { flatten } from "lodash";
-import React from "react";
+import React, { useRef } from "react";
 import { useElementSize } from "usehooks-ts";
 import { ChartProps, Column, Threshold } from "../../interfaces";
 import { SPECIAL_COLUMNS } from "../constants";
 import { invertHex, processTable } from "../processors";
+import { utils, writeFile } from "xlsx";
+import JsPDF from 'jspdf';
 
-interface TableProps extends ChartProps {}
+interface TableProps extends ChartProps { }
 
 const Tables = ({ visualization, data, dimensions }: TableProps) => {
     const [squareRef, { height }] = useElementSize();
+    const tbl = useRef(null);
     const flattenedData = flatten(data);
-
     const rows = String(visualization.properties["rows"] || "").split(",");
     const columns = String(visualization.properties["columns"] || "").split(
         ","
     );
+    const generatePDF = () => {
+        const report = new JsPDF('landscape', 'pt', 'a1');
+        if (tbl.current) {
+            report.html(tbl.current as any).then(() => {
+                report.save('report.pdf');
+            });
+        }
+    }
     const thresholds: Threshold[] =
         visualization.properties["data.thresholds"] || [];
     const aggregation = visualization.properties["aggregation"] || "count";
@@ -38,11 +48,29 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
 
     return (
         <Stack w="100%" p="10px" h="100%">
+            <Flex>
+                <Stack
+                    h="50px"
+                    fontSize="xl"
+                >
+                    <Button
+                        colorScheme="blue"
+                        // onClick={() => {
+                        //     const wb = utils.table_to_book(
+                        //         tbl.current
+                        //     );
+                        //     writeFile(wb, "Table.xlsx");
+                        // }}
+                        onClick={generatePDF}
+                    >
+                        Download Table
+                </Button>
+                </Stack>
+            </Flex>
             <Box h="100%" w="100%" ref={squareRef}>
                 <Box
                     position="relative"
                     overflow="auto"
-                    // whiteSpace="nowrap"
                     h={`${height}px`}
                     w="100%"
                 >
@@ -52,6 +80,7 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                         bg="white"
                         size={visualization.properties["cellHeight"]}
                         style={{ borderSpacing: 0, borderCollapse: "collapse" }}
+                        ref={tbl}
                     >
                         {visualization.properties["showHeaders"] && (
                             <Thead>
@@ -69,7 +98,7 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                             >
                                                 {
                                                     visualization.properties[
-                                                        "rowName"
+                                                    "rowName"
                                                     ]
                                                 }
                                             </Th>
@@ -93,7 +122,7 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                                         textAlign={
                                                             visualization
                                                                 .properties[
-                                                                "columnAlignment"
+                                                            "columnAlignment"
                                                             ]
                                                         }
                                                         rowSpan={
@@ -110,12 +139,12 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                             <Th
                                                 bg={
                                                     visualization.properties[
-                                                        `${col.actual}.bg`
+                                                    `${col.actual}.bg`
                                                     ]
                                                 }
                                                 color={invertHex(
                                                     visualization.properties[
-                                                        `${col.actual}.bg`
+                                                    `${col.actual}.bg`
                                                     ] || "#ffffff",
                                                     true
                                                 )}
@@ -128,7 +157,7 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                                 colSpan={col.span}
                                                 textAlign={
                                                     visualization.properties[
-                                                        "columnAlignment"
+                                                    "columnAlignment"
                                                     ]
                                                 }
                                                 key={col.value}
@@ -154,8 +183,8 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                                     borderColor="#DDDDDD"
                                                     borderWidth="thin"
                                                     borderStyle="solid"
-                                                    //bg="blue"
-                                                    //fontWeight="extrabold"
+                                                //bg="blue"
+                                                //fontWeight="extrabold"
                                                 >
                                                     {visualization.properties[
                                                         `${r[index].actual}.name`
@@ -179,13 +208,13 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                                     textAlign={
                                                         visualization
                                                             .properties[
-                                                            "columnAlignment"
+                                                        "columnAlignment"
                                                         ]
                                                     }
                                                 >
                                                     {
                                                         finalData[
-                                                            `${row.value}${c}`
+                                                        `${row.value}${c}`
                                                         ]?.["value"]
                                                     }
                                                 </Td>
@@ -203,26 +232,26 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                                         textAlign={
                                                             visualization
                                                                 .properties[
-                                                                "columnAlignment"
+                                                            "columnAlignment"
                                                             ]
                                                         }
                                                         {...findOthers(col)}
                                                         bg={
                                                             finalData[
-                                                                `${row.value}${col.value}`
+                                                            `${row.value}${col.value}`
                                                             ]?.["bg"] || "white"
                                                         }
                                                         color={invertHex(
                                                             finalData[
-                                                                `${row.value}${col.value}`
+                                                            `${row.value}${col.value}`
                                                             ]?.["bg"] ||
-                                                                "white",
+                                                            "white",
                                                             true
                                                         )}
                                                     >
                                                         {
                                                             finalData[
-                                                                `${row.value}${col.value}`
+                                                            `${row.value}${col.value}`
                                                             ]?.["value"]
                                                         }
                                                     </Td>
