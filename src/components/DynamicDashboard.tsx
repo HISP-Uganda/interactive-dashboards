@@ -63,11 +63,9 @@ export default function DynamicDashboard() {
                 h="100%"
                 onMouseEnter={() => setShowMenu(() => true)}
                 onMouseLeave={() => setShowMenu(() => false)}
-                //onContextMenu={(e: MouseEvent<HTMLElement>) => { showMenu && <VisualizationMenu section={section} /> }}
                 onContextMenu={handleContextMenu}
 
             >
-                {/* {showMenu && <VisualizationMenu section={section} position={menuPosition}/>} */}
                 <SectionVisualization {...section} />
             </Stack>
         ));
