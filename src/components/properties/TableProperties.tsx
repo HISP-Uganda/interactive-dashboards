@@ -101,7 +101,7 @@ const TableProperties = ({
     let normalColumns: string[] = [];
 
     if (!isEmpty(dimensions)) {
-        normalColumns = Object.keys(dimensions);
+        normalColumns = [...Object.keys(dimensions), "value"];
     }
 
     const columns = createOptions([...normalColumns, ...SPECIAL_COLUMNS]);

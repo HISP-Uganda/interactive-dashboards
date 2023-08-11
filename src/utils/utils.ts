@@ -22,7 +22,7 @@ import {
     VisualizationItems,
 } from "../interfaces";
 import { $visualizationQuery } from "../Store";
-import { findColor } from "../components/processors";
+import { findColor, processGraphs } from "../components/processors";
 
 dayjs.extend(isoWeek);
 dayjs.extend(quarterOfYear);
@@ -1703,7 +1703,10 @@ export const getAnalyticsQuery = ({
     filters: VisualizationItems;
     aggregationType: string;
 }) => {
-    let final: string[] = [`aggregationType=${aggregationType}`];
+    let final: string[] = [];
+    if (aggregationType && aggregationType !== "DEFAULT") {
+        [`aggregationType=${aggregationType}`];
+    }
     const c = columns
         .map(
             ({ items, dimension }) =>
@@ -1729,10 +1732,80 @@ export const getAnalyticsQuery = ({
         final = [...final, `dimension=${c},${r}`];
     }
     if (f) {
-        final = [...final, `filter:${f}`];
+        final = [...final, `filter=${f}`];
     }
 
     return final.join("&");
 };
 
-const processAnalytics = () => {};
+const otherParameters: { [key: string]: { [key: string]: any } } = {
+    COLUMN: { type: "bar", barmode: "group" },
+    LINE: { type: "line" },
+    STACKED_COLUMN: { type: "bar", barmode: "stack" },
+};
+
+export const processAnalytics = ({
+    data,
+    visualization,
+    dimensions,
+    items,
+}: {
+    data: any;
+    dimensions: { [key: string]: string[] };
+    visualization: {
+        type: string;
+        columns: VisualizationItems;
+        rows: VisualizationItems;
+    };
+    items: { [key: string]: { name: string } };
+}) => {
+    if (visualization.columns.length === 1 && visualization.rows.length === 1) {
+        const firstColumn = visualization.columns[0];
+        const firstRow = visualization.rows[0];
+        const groupedData = groupBy(data, firstColumn.dimension);
+        const processedData = dimensions[
+            visualization.columns[0].dimension
+        ].map((val) => {
+            const current = groupedData[val];
+            const c = items[val].name;
+            return {
+                x: dimensions[visualization.rows[0].dimension].map(
+                    (v) => items[v].name
+                ),
+                y: dimensions[visualization.rows[0].dimension].map((val) => {
+                    const currentValue = current?.find(
+                        (vals) => vals[firstRow.dimension] === val
+                    );
+                    return currentValue?.value || "";
+                }),
+                name: c,
+                type: otherParameters[visualization.type].type || "bar",
+                textposition: "auto",
+                texttemplate: "%{y:.0f}",
+            };
+        });
+        return {
+            data: processedData,
+            series: dimensions[visualization.columns[0].dimension].map(
+                (v) => items[v].name
+            ),
+        };
+    }
+    return {
+        data: [],
+        series: [],
+    };
+    // const columns = visualization.columns.map(({ dimension }) => dimension);
+    // const rows = visualization.rows.map(({ dimension }) => dimension);
+    // switch (visualization.type) {
+    //     case "LINE":
+    //         return processGraphs(data, {
+    //             category: columns[0],
+    //             series: rows[0],
+    //             type: "line",
+    //             dataProperties: {},
+    //         });
+    //     default:
+    //         return [];
+    // }
+};

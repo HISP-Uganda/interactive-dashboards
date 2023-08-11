@@ -1,12 +1,14 @@
-import { useRef } from "react";
 import { Stack, Text, useDimensions } from "@chakra-ui/react";
 import { useStore } from "effector-react";
+import { useRef } from "react";
 import { ChartProps, Threshold } from "../../interfaces";
 import { findLevelsAndOus, useMaps } from "../../Queries";
-import { $globalFilters, $indicators, $store } from "../../Store";
+import { $globalFilters, $store } from "../../Store";
+import LoadingIndicator from "../LoadingIndicator";
 import MapVisualization from "./MapVisualization";
 import VisualizationTitle from "./VisualizationTitle";
-import LoadingIndicator from "../LoadingIndicator";
+import { invertHex } from "../processors";
+import { orderBy } from "lodash";
 
 const MapChartLeaflet = ({
     visualization,
@@ -47,6 +49,17 @@ const MapChartLeaflet = ({
         ]
     );
 
+    const withoutBaseline = orderBy(
+        thresholds.flatMap((val) => {
+            if (val.id !== "baseline") {
+                return val;
+            }
+            return [];
+        }),
+        ["value"],
+        ["asc"]
+    );
+
     return (
         <>
             {isLoading && <LoadingIndicator />}
@@ -83,7 +96,34 @@ const MapChartLeaflet = ({
                             />
                         </Stack>
                         <Stack h="20px" direction="row" spacing="0">
-                            {thresholds.map((item) => (
+                            {
+                                thresholds.find(({ id }) => id === "baseline")
+                                    ?.color
+                            }
+
+                            <Text
+                                key="baseline"
+                                backgroundColor={
+                                    thresholds.find(
+                                        ({ id }) => id === "baseline"
+                                    )?.color
+                                }
+                                flex={1}
+                                display="flex"
+                                alignItems="center"
+                                justifyContent="center"
+                                color={invertHex(
+                                    thresholds.find(
+                                        ({ id }) => id === "baseline"
+                                    )?.color || "",
+                                    true
+                                )}
+                                fontWeight="bolder"
+                                height="100%"
+                            >
+                                Baseline
+                            </Text>
+                            {withoutBaseline.map((item, index) => (
                                 <Text
                                     key={item.id}
                                     backgroundColor={item.color}
@@ -91,15 +131,15 @@ const MapChartLeaflet = ({
                                     display="flex"
                                     alignItems="center"
                                     justifyContent="center"
-                                    color="white"
+                                    color={invertHex(item.color, true)}
                                     fontWeight="bolder"
                                     height="100%"
                                 >
-                                    {/* {item.max && item.min
-                                        ? `${item.min} - ${item.max}`
-                                        : item.min
-                                        ? `${item.min}+`
-                                        : item.max} */}
+                                    {index < withoutBaseline.length - 1
+                                        ? `${item.value} - ${
+                                              withoutBaseline[index + 1].value
+                                          }`
+                                        : `${item.value}+`}
                                 </Text>
                             ))}
                         </Stack>

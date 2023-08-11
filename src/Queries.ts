@@ -14,7 +14,7 @@ import {
     isArray,
 } from "lodash";
 import { getOr } from "lodash/fp";
-import { evaluate } from "mathjs";
+import { evaluate, string } from "mathjs";
 import { db } from "./db";
 import {
     categoryApi,
@@ -25,6 +25,7 @@ import {
     storeApi,
     visualizationDataApi,
     visualizationDimensionsApi,
+    visualizationMetadataApi,
 } from "./Events";
 import {
     DataNode,
@@ -918,31 +919,31 @@ export const findLevelsAndOus = (indicator: IIndicator2 | undefined) => {
         const numExpressions = indicator.numerator?.expressions || {};
         const ous = uniq([
             ...Object.entries(denDimensions)
-                .filter(([key, { resource }]) => resource === "ou")
+                .filter(([_, { resource }]) => resource === "ou")
                 .map(([key]) => key),
             ...Object.entries(numDimensions)
                 .filter(([_, { resource }]) => resource === "ou")
                 .map(([key]) => key),
             ...Object.entries(denExpressions)
                 .filter(([key]) => key === "ou")
-                .map(([key, value]) => value.value),
+                .map(([_, value]) => value.value),
             ...Object.entries(numExpressions)
                 .filter(([key]) => key === "ou")
-                .map(([key, value]) => value.value),
+                .map(([_, value]) => value.value),
         ]);
         const levels = uniq([
             ...Object.entries(denDimensions)
-                .filter(([key, { resource }]) => resource === "oul")
+                .filter(([_, { resource }]) => resource === "oul")
                 .map(([key]) => key),
             ...Object.entries(numDimensions)
                 .filter(([_, { resource }]) => resource === "oul")
                 .map(([key]) => key),
             ...Object.entries(denExpressions)
                 .filter(([key]) => key === "oul")
-                .map(([key, value]) => value.value),
+                .map(([_, value]) => value.value),
             ...Object.entries(numExpressions)
                 .filter(([key]) => key === "oul")
-                .map(([key, value]) => value.value),
+                .map(([_, value]) => value.value),
         ]);
         return { levels, ous };
     }
@@ -1138,6 +1139,7 @@ const queryData = async (
     const realData = await queryDHIS2(engine, vq, globalFilters);
     const joinData = await queryDHIS2(engine, vq?.joinTo, globalFilters);
     let dimensions: { [key: string]: string[] } = {};
+    let metadata: { [key: string]: string } = {};
 
     const data = processDHIS2Data(
         flattenDHIS2Data(realData, vq?.flatteningOption),
@@ -1153,11 +1155,22 @@ const queryData = async (
 
     if (vq?.dataSource?.type === "DHIS2" && vq.type === "ANALYTICS") {
         dimensions = realData.metaData.dimensions;
+        metadata = fromPairs(
+            Object.entries(realData.metaData.items).map(
+                ([item, { name }]: [string, any]) => [item, name]
+            )
+        );
         if (
             vq.joinTo &&
             vq.joinTo.dataSource?.type === "DHIS2" &&
             vq.joinTo.type === "ANALYTICS"
         ) {
+            const others = fromPairs(
+                Object.entries(joinData.metaData.items).map(
+                    ([item, { name }]: [string, any]) => [item, name]
+                )
+            );
+            metadata = { ...metadata, ...others };
             Object.entries(joinData.metaData.dimensions).forEach(
                 ([key, values]) => {
                     if (dimensions[key]) {
@@ -1187,7 +1200,7 @@ const queryData = async (
         });
     }
 
-    return { data, dimensions };
+    return { data, dimensions, metadata };
 };
 
 const queryDHIS2 = async (
@@ -1301,7 +1314,11 @@ const queryIndicator = async (
     globalFilters: { [key: string]: any } = {},
     otherFilters: { [key: string]: any } = {}
 ) => {
-    const { data: numerator, dimensions } = await queryData(
+    const {
+        data: numerator,
+        dimensions,
+        metadata,
+    } = await queryData(
         engine,
         indicator.numerator,
         globalFilters,
@@ -1348,7 +1365,7 @@ const queryIndicator = async (
         );
         return { data, dimensions };
     }
-    return { data: numerator, dimensions };
+    return { data: numerator, dimensions, metadata };
 };
 
 const processVisualization = async (
@@ -1365,14 +1382,17 @@ const processVisualization = async (
 
     const actualData = data.flatMap(({ data }) => data);
     let finalDimensions: { [key: string]: string[] } = {};
-    data.forEach(({ dimensions }) => {
+    let finalMetadata: { [key: string]: string } = {};
+    data.forEach(({ dimensions, metadata }) => {
         Object.entries(dimensions).forEach(([key, values]) => {
             finalDimensions = {
                 ...finalDimensions,
                 [key]: [...values, ...(finalDimensions[key] || [])],
             };
         });
+        finalMetadata = { ...finalMetadata, ...metadata };
     });
+
     visualizationDimensionsApi.updateVisualizationData({
         visualizationId: visualization.id,
         data: finalDimensions,
@@ -1380,6 +1400,10 @@ const processVisualization = async (
     visualizationDataApi.updateVisualizationData({
         visualizationId: visualization.id,
         data: actualData,
+    });
+    visualizationMetadataApi.updateVisualizationMetadata({
+        visualizationId: visualization.id,
+        data: finalMetadata,
     });
     return actualData;
 };

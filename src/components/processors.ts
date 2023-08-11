@@ -600,40 +600,42 @@ export const processSingleValue = (
 };
 
 export const processGraphs = (
-    data: any[],
-    order: string,
-    show: number,
-    summarize: boolean,
-    dataProperties = {},
-    category?: string,
-    series?: string,
-    metadata?: any,
-    type: string = "bar"
+    data: any,
+    options: Partial<{
+        order: string;
+        show: number;
+        summarize: boolean;
+        dataProperties: any;
+        category: string;
+        series: string;
+        metadata?: any;
+        type: string;
+    }>
 ) => {
     let chartData: any = [];
     let availableProperties: { [key: string]: any } = {};
-    let allSeries = [];
+    let allSeries: any[] = [];
     update(availableProperties, "data.orientation", () => "v");
-    Object.entries(dataProperties).forEach(([property, value]) => {
+    Object.entries(options.dataProperties).forEach(([property, value]) => {
         availableProperties = update(
             availableProperties,
             property,
             () => value
         );
     });
-    if (data && data.length > 0 && category !== undefined) {
-        if (summarize) {
-            if (series) {
-                const grouped = groupBy(data, series);
+    if (data && data.length > 0 && options.category !== undefined) {
+        if (options.summarize) {
+            if (options.series) {
+                const grouped = groupBy(data, options.series);
                 chartData = Object.entries(grouped).map(([key, values]) => {
-                    const groupedByTheme = groupBy(values, category);
+                    const groupedByTheme = groupBy(values, options.category);
 
                     let others = {};
 
-                    if (metadata[`${key}.bg`]) {
+                    if (options.metadata[`${key}.bg`]) {
                         others = {
                             marker: {
-                                color: metadata[`${key}.bg`],
+                                color: options.metadata[`${key}.bg`],
                             },
                         };
                     }
@@ -643,7 +645,7 @@ export const processGraphs = (
                             undefined,
                             "asc"
                         ).map((k) =>
-                            breakString(metadata[`${k}.name`] || k, 25)
+                            breakString(options.metadata[`${k}.name`] || k, 25)
                         ),
                         y: Object.entries(groupedByTheme).map(
                             ([k, val]) => val.length
@@ -659,9 +661,9 @@ export const processGraphs = (
                         ...others,
                     };
                 });
-                allSeries = Object.keys(groupBy(data, series));
+                allSeries = Object.keys(groupBy(data, options.series));
             } else {
-                const grouped2 = groupBy(data, category);
+                const grouped2 = groupBy(data, options.category);
                 chartData = [
                     // {
                     //     x: Object.keys(grouped2).map((k) =>
@@ -686,17 +688,19 @@ export const processGraphs = (
             // if (show) {
             //     data = data.slice(0, show);
             // }
-            const x = uniq(data.map((num: any) => num[category]));
+            const x = uniq(data.map((num: any) => num[options.category || ""]));
             const columns = x.map((c: any) => {
                 return {
                     id: c,
-                    name: allMetadata[c] || metadata?.[c]?.name || c,
+                    name: allMetadata[c] || options.metadata?.[c]?.name || c,
                 };
             });
 
             const realColumns = columns.map(({ name }) => name);
-            if (series) {
-                allSeries = uniq(data.map((num: any) => num[series]));
+            if (options.series) {
+                allSeries = uniq(
+                    data.map((num: any) => num[options.series || ""])
+                );
                 chartData = allSeries.map((se: any) => {
                     return {
                         x:
@@ -705,8 +709,9 @@ export const processGraphs = (
                                 : columns.map(({ id }) => {
                                       const r = data.find(
                                           (num: any) =>
-                                              num[series] === se &&
-                                              num[category] === id
+                                              num[options.series || ""] ===
+                                                  se &&
+                                              num[options.category || ""] === id
                                       );
                                       return r?.count || r?.value || r?.total;
                                   }),
@@ -715,14 +720,15 @@ export const processGraphs = (
                                 ? columns.map(({ id }) => {
                                       const r = data.find(
                                           (num: any) =>
-                                              num[series] === se &&
-                                              num[category] === id
+                                              num[options.series || ""] ===
+                                                  se &&
+                                              num[options.category || ""] === id
                                       );
                                       return r?.count || r?.value || r?.total;
                                   })
                                 : realColumns,
-                        name: metadata?.[se]?.name || se,
-                        type: availableProperties?.data?.[se] || type,
+                        name: options.metadata?.[se]?.name || se,
+                        type: availableProperties?.data?.[se] || options.type,
                         ...availableProperties.data,
                         textposition: "auto",
                         texttemplate:
@@ -740,7 +746,8 @@ export const processGraphs = (
                                 ? realColumns
                                 : columns.map(({ id }) => {
                                       const r = data.find(
-                                          (num: any) => num[category] === id
+                                          (num: any) =>
+                                              num[options.category || ""] === id
                                       );
                                       return r?.count || r?.value || r?.total;
                                   }),
@@ -748,12 +755,13 @@ export const processGraphs = (
                             availableProperties?.data?.orientation === "v"
                                 ? columns.map(({ id }) => {
                                       const r = data.find(
-                                          (num: any) => num[category] === id
+                                          (num: any) =>
+                                              num[options.category || ""] === id
                                       );
                                       return r?.count || r?.value || r?.total;
                                   })
                                 : realColumns,
-                        type,
+                        type: options.type,
                         ...availableProperties.data,
                         textposition: "auto",
                         texttemplate:
