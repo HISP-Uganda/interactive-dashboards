@@ -45,16 +45,17 @@ const BarGraph = ({
         update(availableProperties, property, () => value);
     });
     const colors = availableProperties.layout.colorway;
-    const { chartData, allSeries } = processGraphs(
-        data,
-        visualization.order,
-        visualization.show,
-        visualization.properties["summarize"] || false,
-        dataProperties,
-        category,
-        series,
-        visualization.properties
-    );
+    const { chartData, allSeries } = processGraphs(data, {
+        order: visualization.order,
+        show: visualization.show,
+        summarize: visualization.properties["summarize"] || false,
+        dataProperties: visualization.properties,
+        category: category,
+        series: series,
+        type: "bar",
+        metadata: metadata,
+    });
+
     return (
         <Stack h="100%" spacing={0} w="100%">
             {((visualization.showTitle !== undefined &&

@@ -314,6 +314,7 @@ export interface ChartProps {
     section: ISection;
     data?: any;
     dimensions?: { [key: string]: string[] };
+    metadata?: { [key: string]: string };
 }
 
 export interface Threshold {

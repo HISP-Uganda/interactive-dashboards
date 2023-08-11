@@ -1,8 +1,10 @@
 import { Box, Stack, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
+import { useStore } from "effector-react";
 import { flatten } from "lodash";
 import React from "react";
 import { useElementSize } from "usehooks-ts";
 import { ChartProps, Column, Threshold } from "../../interfaces";
+import { $visualizationMetadata } from "../../Store";
 import { SPECIAL_COLUMNS } from "../constants";
 import { invertHex, processTable } from "../processors";
 
@@ -11,7 +13,8 @@ interface TableProps extends ChartProps {}
 const Tables = ({ visualization, data, dimensions }: TableProps) => {
     const [squareRef, { height }] = useElementSize();
     const flattenedData = flatten(data);
-
+    console.log(flattenedData);
+    const metadata = useStore($visualizationMetadata)[visualization.id];
     const rows = String(visualization.properties["rows"] || "").split(",");
     const columns = String(visualization.properties["columns"] || "").split(
         ","
@@ -34,6 +37,10 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
 
     const findOthers = (col: Column) => {
         return { bg: visualization.properties[`${col.actual}.bg`] };
+    };
+
+    const findLabel = (data: any) => {
+        return metadata?.[data] || data;
     };
 
     return (
@@ -100,10 +107,12 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                                             finalColumns.length
                                                         }
                                                     >
-                                                        {visualization
-                                                            .properties[
-                                                            `${c}.name`
-                                                        ] || c}
+                                                        {findLabel(
+                                                            visualization
+                                                                .properties[
+                                                                `${c}.name`
+                                                            ] || c
+                                                        )}
                                                     </Th>
                                                 ))}
                                         {col.map((col) => (
@@ -133,9 +142,11 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                                 }
                                                 key={col.value}
                                             >
-                                                {visualization.properties[
-                                                    `${col.actual}.name`
-                                                ] || col.actual}
+                                                {findLabel(
+                                                    visualization.properties[
+                                                        `${col.actual}.name`
+                                                    ] || col.actual
+                                                )}
                                             </Th>
                                         ))}
                                     </Tr>
@@ -157,9 +168,12 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                                     //bg="blue"
                                                     //fontWeight="extrabold"
                                                 >
-                                                    {visualization.properties[
-                                                        `${r[index].actual}.name`
-                                                    ] || r[index].actual}
+                                                    {findLabel(
+                                                        visualization
+                                                            .properties[
+                                                            `${r[index].actual}.name`
+                                                        ] || r[index].actual
+                                                    )}
                                                 </Td>
                                             );
                                         })}
