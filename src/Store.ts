@@ -98,7 +98,7 @@ export const createVisualizationQuery = (id = generateUid()): IData => {
         description: "",
         dataDimensions: {},
         dataSource: undefined,
-        aggregationType: "SUM",
+        aggregationType: undefined,
     };
 };
 

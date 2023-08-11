@@ -9,9 +9,9 @@ import { Progress } from "antd";
 import { useStore } from "effector-react";
 import { useEffect, useState } from "react";
 import { calculatedApi } from "../../Events";
-import { ChartProps } from "../../interfaces";
+import { ChartProps, Threshold } from "../../interfaces";
 import { $visualizationData } from "../../Store";
-import { processSingleValue } from "../processors";
+import { processSingleValue, findColor } from "../processors";
 
 const SingleValue = ({
     visualization,
@@ -25,19 +25,7 @@ const SingleValue = ({
 
     const value = processSingleValue(data, visualization.properties);
 
-    const colorSearch = dataProperties?.["data.thresholds"]?.find(
-        ({ max, min }: any) => {
-            if (max && min) {
-                return (
-                    Number(value) >= Number(min) && Number(value) < Number(max)
-                );
-            } else if (min) {
-                return Number(value) >= Number(min);
-            } else if (max) {
-                return Number(value) <= Number(max);
-            }
-        }
-    );
+    const thresholds: Threshold[] = dataProperties?.["data.thresholds"] || [];
 
     const prefix = dataProperties?.["data.prefix"];
     const suffix = dataProperties?.["data.suffix"];
@@ -75,13 +63,7 @@ const SingleValue = ({
     };
 
     useEffect(() => {
-        if (colorSearch) {
-            setColor(() => colorSearch.color);
-        } else if (dataProperties?.["data.thresholds"]) {
-            setColor(() => dataProperties?.["data.thresholds"][0].color);
-        } else {
-            setColor(() => "");
-        }
+        setColor(() => findColor(value, thresholds));
     }, [dataProperties]);
 
     useEffect(() => {

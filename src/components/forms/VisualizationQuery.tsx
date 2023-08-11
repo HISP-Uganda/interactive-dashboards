@@ -155,7 +155,6 @@ export default function VisualizationQuery() {
                     </Stack>
                 )}
             </Stack>
-
             <Box>
                 <DisplayDataSourceType dataSource={currentDataSource} />
             </Box>
