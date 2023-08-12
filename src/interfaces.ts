@@ -1,9 +1,9 @@
-import { FlexboxProps, SpaceProps, StackProps } from "@chakra-ui/react";
+import type { BoxProps } from "@chakra-ui/react";
 import { MakeGenerics } from "@tanstack/react-location";
 import type { DataNode as IDataNode } from "antd/es/tree";
+import { AxiosInstance } from "axios";
 import { OptionBase } from "chakra-react-select";
 import { Event } from "effector";
-import { AxiosInstance } from "axios";
 
 export type Storage = "data-store" | "es";
 export type ScreenSize = "xs" | "sm" | "md" | "lg";
@@ -50,6 +50,7 @@ export interface INamed {
 }
 export interface IDashboardSetting extends INamed {
     defaultDashboard: string;
+    template: string;
     storage: Storage;
 }
 export interface Authentication {
@@ -132,13 +133,7 @@ export interface IVisualization extends INamed {
     show: number;
     order: string;
 }
-export interface ISection
-    extends Pick<
-            FlexboxProps,
-            "justifyContent" | "alignItems" | "justifyItems" | "alignContent"
-        >,
-        Pick<SpaceProps, "padding">,
-        Pick<StackProps, "spacing"> {
+export interface ISection extends BoxProps {
     id: string;
     title: string;
     visualizations: IVisualization[];
@@ -154,6 +149,8 @@ export interface ISection
     md: ReactGridLayout.Layout;
     sm: ReactGridLayout.Layout;
     xs: ReactGridLayout.Layout;
+    isTemplateArea: boolean;
+    spacing?: string;
 }
 export interface IFilter {
     id: string;
@@ -189,6 +186,7 @@ export interface IDashboard extends INamed {
     type: "fixed" | "dynamic";
     excludeFromList: boolean;
     child?: string;
+    spacing: number;
 }
 export interface Pagination {
     total: number;
@@ -287,13 +285,14 @@ export type LocationGenerics = MakeGenerics<{
         dataSourceId: string;
         dashboardId: string;
         visualizationQueryId: string;
+        templateId: string;
     };
     Search: {
         category: string;
-        periods: string;
-        levels: string;
-        groups: string;
-        organisations: string;
+        periods: string[];
+        levels: string[];
+        groups: string[];
+        organisations: string[];
         dataSourceId: string;
         action: "create" | "update" | "view";
         type: "fixed" | "dynamic";
@@ -477,3 +476,10 @@ export type VisualizationItems = Array<{
     }>;
     dimension: string;
 }>;
+
+export type AttributeProps<T> = {
+    title: string;
+    attribute: keyof T;
+    obj: T;
+    func: Event<{ attribute: keyof T; value: any }>;
+};

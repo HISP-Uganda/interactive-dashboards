@@ -66,6 +66,7 @@ export const createSection = (id = generateUid()): ISection => {
             i: id,
             static: false,
         },
+        isTemplateArea: false,
     };
 };
 
@@ -143,10 +144,11 @@ export const createDashboard = (
         tag: "Example tag",
         type,
         excludeFromList: false,
+        spacing: 5,
     };
 };
 export const $dashboardType = domain.createStore<"fixed" | "dynamic">("fixed");
-
+export const $template = domain.createStore<string>("");
 export const $paginations = domain.createStore<IPagination>({
     totalDataElements: 0,
     totalSQLViews: 0,
@@ -167,7 +169,8 @@ export const $settings = domain.createStore<IDashboardSetting>({
     defaultDashboard: "",
     storage: "data-store",
     name: "",
-    id: generateUid(),
+    id: "settings",
+    template: "",
 });
 
 export const $store = domain.createStore<IStore>({
@@ -533,7 +536,6 @@ export const isOpenApi = createApi($isOpen, {
 });
 export const $playlist = domain.createStore<Array<Playlist>>([]);
 export const playlistApi = createApi($playlist, {});
-// $previousCategoryOptionCombo.watch((v) => console.log(v));
 
 export const $currentDataSource = combine(
     $visualizationQuery,
@@ -541,3 +543,19 @@ export const $currentDataSource = combine(
     (visualizationQuery, dataSources) =>
         dataSources.find((d) => d.id === visualizationQuery.dataSource)
 );
+
+export const $path = $settings.map((state) => {
+    if (state.template) {
+        return `/templates/${state.template}/`;
+    }
+    return "/dashboards/";
+});
+
+export const $hasTemplateSection = $settings.map((state) => {
+    if (state.template) {
+        return `/templates/${state.template}/`;
+    }
+    return "/dashboards/";
+});
+
+$dashboard.watch((v) => console.log(v));

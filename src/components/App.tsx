@@ -1,37 +1,39 @@
 import { Box, useMediaQuery } from "@chakra-ui/react";
 import {
-	createHashHistory,
-	Outlet,
-	parseSearchWith,
-	ReactLocation,
-	Route,
-	Router,
-	stringifySearchWith
+    createHashHistory,
+    Outlet,
+    parseSearchWith,
+    ReactLocation,
+    Route,
+    Router,
+    stringifySearchWith,
 } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { useEffect } from "react";
 import {
-	CategoryForm,
-	DashboardForm,
-	DataSourceForm,
-	IndicatorForm,
-	VisualizationQueryForm
+    CategoryForm,
+    DashboardForm,
+    DataSourceForm,
+    IndicatorForm,
+    VisualizationQueryForm,
 } from "../components/forms";
 import Home from "../components/Home";
 import {
-	Categories,
-	Dashboards,
-	DataSources,
-	Indicators,
-	VisualizationQueries
+    Categories,
+    Dashboards,
+    DataSources,
+    Indicators,
+    VisualizationQueries,
 } from "../components/lists";
 import { sizeApi, storeApi } from "../Events";
 import { LocationGenerics, ScreenSize } from "../interfaces";
 import { useInitials } from "../Queries";
 import { $settings } from "../Store";
 import { decodeFromBinary, encodeToBinary } from "../utils/utils";
+import DashboardTemplateForm from "./forms/DashboardTemplateForm";
 import LoadingIndicator from "./LoadingIndicator";
 import Settings from "./Settings";
+import DashboardTemplates from "./lists/DashboardTemplates";
 // import IndicatorForm from "./forms/IndicatorForm";
 
 const history = createHashHistory();
@@ -155,6 +157,15 @@ const App = () => {
                     ],
                 },
                 {
+                    path: "/templates",
+                    children: [
+                        {
+                            path: "/",
+                            element: <DashboardTemplates />,
+                        },
+                    ],
+                },
+                {
                     path: "/dashboards",
                     children: [
                         {
@@ -170,6 +181,16 @@ const App = () => {
             children: [
                 {
                     path: "/",
+                    element: <DashboardForm />,
+                },
+            ],
+        },
+        {
+            path: "/templates/:templateId",
+            element: <DashboardTemplateForm />,
+            children: [
+                {
+                    path: ":dashboardId",
                     element: <DashboardForm />,
                 },
             ],

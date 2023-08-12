@@ -34,6 +34,7 @@ const VisualizationTitle = ({
             fontWeight="bold"
             px="5px"
             {...rest}
+            spacing="0"
         >
             <Text textAlign="center" noOfLines={1}>
                 {title}

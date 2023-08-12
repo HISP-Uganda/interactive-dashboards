@@ -1,4 +1,15 @@
-import { Box, Stack, Table, Button, Tbody, Td, Th, Thead, Tr, Flex } from "@chakra-ui/react";
+import {
+    Box,
+    Stack,
+    Table,
+    Button,
+    Tbody,
+    Td,
+    Th,
+    Thead,
+    Tr,
+    Flex,
+} from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { flatten } from "lodash";
 import React, { useRef } from "react";
@@ -7,10 +18,9 @@ import { ChartProps, Column, Threshold } from "../../interfaces";
 import { $visualizationMetadata } from "../../Store";
 import { SPECIAL_COLUMNS } from "../constants";
 import { invertHex, processTable } from "../processors";
-import { utils, writeFile } from "xlsx";
-import JsPDF from 'jspdf';
+import JsPDF from "jspdf";
 
-interface TableProps extends ChartProps { }
+interface TableProps extends ChartProps {}
 
 const Tables = ({ visualization, data, dimensions }: TableProps) => {
     const [squareRef, { height }] = useElementSize();
@@ -22,13 +32,14 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
         ","
     );
     const generatePDF = () => {
-        const report = new JsPDF('landscape', 'pt', 'a1');
+        const report = new JsPDF("landscape", "pt", "a1");
         if (tbl.current) {
+            console.log(tbl.current);
             report.html(tbl.current as any).then(() => {
-                report.save('report.pdf');
+                report.save("report.pdf");
             });
         }
-    }
+    };
     const thresholds: Threshold[] =
         visualization.properties["data.thresholds"] || [];
     const aggregation = visualization.properties["aggregation"] || "count";
@@ -56,22 +67,10 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
     return (
         <Stack w="100%" p="10px" h="100%">
             <Flex>
-                <Stack
-                    h="50px"
-                    fontSize="xl"
-                >
-                    <Button
-                        colorScheme="blue"
-                        // onClick={() => {
-                        //     const wb = utils.table_to_book(
-                        //         tbl.current
-                        //     );
-                        //     writeFile(wb, "Table.xlsx");
-                        // }}
-                        onClick={generatePDF}
-                    >
+                <Stack h="50px" fontSize="xl">
+                    <Button colorScheme="blue" onClick={generatePDF}>
                         Download Table
-                </Button>
+                    </Button>
                 </Stack>
             </Flex>
             <Box h="100%" w="100%" ref={squareRef}>
@@ -105,7 +104,7 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                             >
                                                 {
                                                     visualization.properties[
-                                                    "rowName"
+                                                        "rowName"
                                                     ]
                                                 }
                                             </Th>
@@ -129,7 +128,7 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                                         textAlign={
                                                             visualization
                                                                 .properties[
-                                                            "columnAlignment"
+                                                                "columnAlignment"
                                                             ]
                                                         }
                                                         rowSpan={
@@ -148,12 +147,12 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                             <Th
                                                 bg={
                                                     visualization.properties[
-                                                    `${col.actual}.bg`
+                                                        `${col.actual}.bg`
                                                     ]
                                                 }
                                                 color={invertHex(
                                                     visualization.properties[
-                                                    `${col.actual}.bg`
+                                                        `${col.actual}.bg`
                                                     ] || "#ffffff",
                                                     true
                                                 )}
@@ -166,7 +165,7 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                                 colSpan={col.span}
                                                 textAlign={
                                                     visualization.properties[
-                                                    "columnAlignment"
+                                                        "columnAlignment"
                                                     ]
                                                 }
                                                 key={col.value}
@@ -194,8 +193,6 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                                     borderColor="#DDDDDD"
                                                     borderWidth="thin"
                                                     borderStyle="solid"
-                                                //bg="blue"
-                                                //fontWeight="extrabold"
                                                 >
                                                     {findLabel(
                                                         visualization
@@ -222,13 +219,13 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                                     textAlign={
                                                         visualization
                                                             .properties[
-                                                        "columnAlignment"
+                                                            "columnAlignment"
                                                         ]
                                                     }
                                                 >
                                                     {
                                                         finalData[
-                                                        `${row.value}${c}`
+                                                            `${row.value}${c}`
                                                         ]?.["value"]
                                                     }
                                                 </Td>
@@ -246,26 +243,26 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                                         textAlign={
                                                             visualization
                                                                 .properties[
-                                                            "columnAlignment"
+                                                                "columnAlignment"
                                                             ]
                                                         }
                                                         {...findOthers(col)}
                                                         bg={
                                                             finalData[
-                                                            `${row.value}${col.value}`
+                                                                `${row.value}${col.value}`
                                                             ]?.["bg"] || "white"
                                                         }
                                                         color={invertHex(
                                                             finalData[
-                                                            `${row.value}${col.value}`
+                                                                `${row.value}${col.value}`
                                                             ]?.["bg"] ||
-                                                            "white",
+                                                                "white",
                                                             true
                                                         )}
                                                     >
                                                         {
                                                             finalData[
-                                                            `${row.value}${col.value}`
+                                                                `${row.value}${col.value}`
                                                             ]?.["value"]
                                                         }
                                                     </Td>

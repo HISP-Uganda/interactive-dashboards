@@ -19,8 +19,6 @@ import TabPanelVisualization from "./visualizations/TabPanelVisualization";
 import VisualizationSection from "./visualizations/Visualization";
 import VisualizationTitle from "./visualizations/VisualizationTitle";
 
-// import { FullScreen } from "react-full-screen";
-
 const SectionVisualization = (section: ISection) => {
     const { show } = useContextMenu({
         id: section.id,
@@ -148,7 +146,13 @@ const SectionVisualization = (section: ISection) => {
     };
 
     return (
-        <Stack onContextMenu={displayMenu} w="100%" h="100%" overflow="auto">
+        <Stack
+            onContextMenu={displayMenu}
+            w="100%"
+            h="100%"
+            overflow="auto"
+            spacing={0}
+        >
             {displays[section.display] || displays.normal}
             <Menu id={section.id}>
                 <Item

@@ -28,7 +28,13 @@ export default function FullScreen({
                 w="100vw"
             >
                 <ModalBody>
-                    <Stack h="100%" w="100%" direction={section?.direction}>
+                    <Stack
+                        h="100%"
+                        w="100%"
+                        direction={section?.direction}
+                        bg="yellow"
+                        spacing="0"
+                    >
                         {section?.visualizations.map((visualization) => (
                             <Visualization
                                 key={visualization.id}

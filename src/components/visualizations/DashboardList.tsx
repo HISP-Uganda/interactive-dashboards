@@ -35,12 +35,12 @@ function DashboardItem({ dashboards }: { dashboards: IDashboard[] }) {
         if (info.node.pId === "") {
             const { optionSet, affected, ...rest } = search;
             navigate({
-                to: `/dashboards/${info.node.key}`,
+                to: `./${info.node.key}`,
                 search: { ...rest },
             });
         } else if (info.node.actual) {
             navigate({
-                to: `/dashboards/${info.node.actual}`,
+                to: `./${info.node.actual}`,
                 search: (old) => ({
                     ...old,
                     affected: info.node.nodeSource.search,
@@ -49,7 +49,7 @@ function DashboardItem({ dashboards }: { dashboards: IDashboard[] }) {
             });
         } else {
             navigate({
-                to: `/dashboards/${info.node.pId}`,
+                to: `./${info.node.pId}`,
                 search: (old) => ({
                     ...old,
                     affected: info.node.nodeSource.search,

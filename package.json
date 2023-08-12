@@ -44,6 +44,7 @@
         "@tanstack/react-table": "^8.5.22",
         "@turf/turf": "^6.5.0",
         "@types/file-saver": "^2.0.5",
+        "@types/jspdf": "^2.0.0",
         "@types/lodash": "^4.14.194",
         "@types/react-textfit": "^1.1.0",
         "@use-gesture/react": "^10.2.24",
