@@ -17,7 +17,12 @@ export default function NumberField<T>({
     attribute,
     obj,
     func,
-}: AttributeProps<T> & { min?: number; max?: number; step?: number }) {
+}: AttributeProps<T> & {
+    min?: number;
+    max?: number;
+    step?: number;
+    visualization?: string;
+}) {
     return (
         <Stack direction="row" alignItems="center">
             <Text>{title}</Text>

@@ -10,7 +10,12 @@ import { uniq } from "lodash";
 import React, { useState } from "react";
 import { db } from "../db";
 import { storeApi, visualizationDataApi } from "../Events";
-import { DataNode, IDataElement, LocationGenerics } from "../interfaces";
+import {
+    DataNode,
+    IDataElement,
+    LocationGenerics,
+    IVisualization,
+} from "../interfaces";
 import { $store } from "../Store";
 import { loadData } from "./helpers";
 
@@ -21,10 +26,15 @@ const labels: { [key: string]: string } = {
     iE5A3BBdv2z: "Programmes",
 };
 
-export default function DashboardTree() {
+export default function DashboardTree({
+    visualization,
+}: {
+    visualization: IVisualization;
+}) {
     const search = useSearch<LocationGenerics>();
     const store = useStore($store);
     const navigate = useNavigate();
+    const bg = visualization.properties["layout.bg"] || "";
     const [autoExpandParent, setAutoExpandParent] = useState<boolean>(false);
     const [checkedKeys, setCheckedKeys] = useState<
         { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[]
@@ -273,7 +283,7 @@ export default function DashboardTree() {
             checkedKeys={checkedKeys}
             selectedKeys={selectedKeys}
             style={{
-                backgroundColor: "#F7FAFC",
+                backgroundColor: bg,
                 maxHeight: "800px",
                 overflow: "auto",
                 //   fontSize: "18px",

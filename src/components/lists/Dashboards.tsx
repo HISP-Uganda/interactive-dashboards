@@ -113,40 +113,41 @@ const Dashboards = () => {
                         </Thead>
                         <Tbody>
                             {response?.map((dashboard: IDashboard) => (
-                                <Tr
-                                    key={dashboard.id}
-                                    cursor="pointer"
-                                    onClick={async () => {
-                                        dashboardApi.setCurrentDashboard(
-                                            dashboard
-                                        );
-                                        storeApi.changeSelectedDashboard(
-                                            dashboard.id
-                                        );
-                                        storeApi.changeSelectedCategory(
-                                            dashboard.category || ""
-                                        );
-                                        let currentPath = path;
-                                        if (dashboard.id === template) {
-                                            currentPath = "/dashboards/";
-                                        }
-                                        navigate({
-                                            to: `${currentPath}${dashboard.id}`,
-                                            search: {
-                                                action: "update",
-                                                category: dashboard.category,
-                                                periods: store.periods.map(
-                                                    (i) => i.value
-                                                ),
-                                                organisations:
-                                                    store.organisations,
-                                                groups: store.groups,
-                                                levels: store.levels,
-                                            },
-                                        });
-                                    }}
-                                >
-                                    <Td>{dashboard.name}</Td>
+                                <Tr key={dashboard.id} cursor="pointer">
+                                    <Td
+                                        onClick={async () => {
+                                            dashboardApi.setCurrentDashboard(
+                                                dashboard
+                                            );
+                                            storeApi.changeSelectedDashboard(
+                                                dashboard.id
+                                            );
+                                            storeApi.changeSelectedCategory(
+                                                dashboard.category || ""
+                                            );
+                                            let currentPath = path;
+                                            if (dashboard.id === template) {
+                                                currentPath = "/dashboards/";
+                                            }
+                                            navigate({
+                                                to: `${currentPath}${dashboard.id}`,
+                                                search: {
+                                                    action: "update",
+                                                    category:
+                                                        dashboard.category,
+                                                    periods: store.periods.map(
+                                                        (i) => i.value
+                                                    ),
+                                                    organisations:
+                                                        store.organisations,
+                                                    groups: store.groups,
+                                                    levels: store.levels,
+                                                },
+                                            });
+                                        }}
+                                    >
+                                        {dashboard.name}
+                                    </Td>
                                     <Td>{dashboard.category}</Td>
                                     <Td>
                                         {dashboard.published ? "Yes" : "No"}
@@ -158,8 +159,37 @@ const Dashboards = () => {
                                             <Button
                                                 colorScheme="green"
                                                 size="xs"
+                                                onClick={async () => {
+                                                    dashboardApi.setCurrentDashboard(
+                                                        dashboard
+                                                    );
+                                                    storeApi.changeSelectedDashboard(
+                                                        dashboard.id
+                                                    );
+                                                    storeApi.changeSelectedCategory(
+                                                        dashboard.category || ""
+                                                    );
+
+                                                    navigate({
+                                                        to: `/dashboards/${dashboard.id}`,
+                                                        search: {
+                                                            action: "update",
+                                                            category:
+                                                                dashboard.category,
+                                                            periods:
+                                                                store.periods.map(
+                                                                    (i) =>
+                                                                        i.value
+                                                                ),
+                                                            organisations:
+                                                                store.organisations,
+                                                            groups: store.groups,
+                                                            levels: store.levels,
+                                                        },
+                                                    });
+                                                }}
                                             >
-                                                View
+                                                Edit
                                             </Button>
                                             <Button size="xs">Duplicate</Button>
                                             <Button

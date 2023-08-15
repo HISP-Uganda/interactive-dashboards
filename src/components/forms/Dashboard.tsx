@@ -7,6 +7,8 @@ import { $dashboard, $dashboardType, $settings, $store } from "../../Store";
 import AdminPanel from "../AdminPanel";
 import DynamicDashboard from "../DynamicDashboard";
 import FixedDashboard from "../FixedDashboard";
+import { useMatch } from "@tanstack/react-location";
+import { LocationGenerics } from "../../interfaces";
 
 const Dashboard = () => {
     const store = useStore($store);
@@ -15,6 +17,10 @@ const Dashboard = () => {
     const handle = useFullScreenHandle();
     const settings = useStore($settings);
 
+    const {
+        params: { templateId },
+    } = useMatch<LocationGenerics>();
+
     useEffect(() => {
         const callback = async (event: KeyboardEvent) => {
             if (event.key === "F5" || event.key === "f5") {
@@ -22,7 +28,6 @@ const Dashboard = () => {
                 if (handle.active) {
                     storeApi.setIsFullScreen(true);
                 } else {
-                    storeApi.setShowSider(true);
                     storeApi.setIsFullScreen(true);
                 }
             }
@@ -33,11 +38,22 @@ const Dashboard = () => {
         };
     }, []);
 
+    const padding =
+        (store.isAdmin && dashboard.id === settings.template) || !templateId
+            ? dashboard.spacing
+            : 0;
+
     return (
-        <Stack w="100%" h="100%" bg={dashboard.bg} spacing="0">
-            {store.isAdmin &&
-                settings.template &&
-                settings.template === dashboard.id && <AdminPanel />}
+        <Stack
+            w="100%"
+            h="100%"
+            bg={dashboard.bg}
+            spacing="0"
+            p={`${padding}px`}
+        >
+            {((store.isAdmin && dashboard.id === settings.template) ||
+                !templateId) && <AdminPanel />}
+
             <Stack
                 h={store.isAdmin ? "calc(100vh - 96px)" : "calc(100vh - 48px)"}
                 // p={`${dashboard.spacing}px`}

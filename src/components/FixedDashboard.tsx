@@ -61,7 +61,6 @@ export default function FixedDashboard({
             gap={`${dashboard.spacing}px`}
             h="100%"
             w="100%"
-            bg="green.200"
         >
             {dashboard?.sections.map((section: ISection, index: number) => {
                 if (section.isTemplateArea)
@@ -91,12 +90,12 @@ export default function FixedDashboard({
                                         : "15vh"
                                     : "100%"
                             }
-                            // onClick={(e: MouseEvent<HTMLElement>) => {
-                            //     if (e.detail === 2 && store.isAdmin) {
-                            //         sectionApi.setCurrentSection(section);
-                            //         isOpenApi.onOpen();
-                            //     }
-                            // }}
+                            onClick={(e: MouseEvent<HTMLElement>) => {
+                                if (e.detail === 2 && store.isAdmin) {
+                                    sectionApi.setCurrentSection(section);
+                                    isOpenApi.onOpen();
+                                }
+                            }}
                         >
                             <Outlet />
                         </GridItem>

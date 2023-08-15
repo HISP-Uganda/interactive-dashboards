@@ -132,6 +132,8 @@ export interface IVisualization extends INamed {
     needFilter?: boolean;
     show: number;
     order: string;
+    rows?: number;
+    columns?: number;
 }
 export interface ISection extends BoxProps {
     id: string;
@@ -396,6 +398,7 @@ export type Column = {
     value: string;
     span: number;
     actual: string;
+    position: number;
 };
 
 export type RelativePeriodType =

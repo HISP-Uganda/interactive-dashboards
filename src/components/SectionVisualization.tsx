@@ -1,4 +1,12 @@
-import { Box, SimpleGrid, Stack, useDisclosure } from "@chakra-ui/react";
+import {
+    Box,
+    SimpleGrid,
+    Stack,
+    useDisclosure,
+    Grid,
+    useBreakpointValue,
+    GridItem,
+} from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { MouseEvent } from "react";
 import {
@@ -12,18 +20,31 @@ import "react-contexify/dist/ReactContexify.css";
 import Marquee from "react-marquee-slider";
 import { sectionApi } from "../Events";
 import { ISection } from "../interfaces";
-import { $store, isOpenApi } from "../Store";
+import { $store, isOpenApi, $dashboard } from "../Store";
 import FullScreen from "./FullScreen";
 import Carousel from "./visualizations/Carousel";
 import TabPanelVisualization from "./visualizations/TabPanelVisualization";
-import VisualizationSection from "./visualizations/Visualization";
+import Visualization from "./visualizations/Visualization";
 import VisualizationTitle from "./visualizations/VisualizationTitle";
 
 const SectionVisualization = (section: ISection) => {
+    const dashboard = useStore($dashboard);
     const { show } = useContextMenu({
         id: section.id,
     });
     const store = useStore($store);
+    const templateColumns = useBreakpointValue({
+        base: "auto",
+        sm: "auto",
+        md: "auto",
+        lg: `repeat(${dashboard.columns}, 1fr)`,
+    });
+    const templateRows = useBreakpointValue({
+        base: "auto",
+        sm: "auto",
+        md: "auto",
+        lg: `repeat(${dashboard.rows}, 1fr)`,
+    });
 
     function handleItemClick({ event, props, triggerEvent, data }: any) {
         console.log(event, props, triggerEvent, data);
@@ -34,6 +55,7 @@ const SectionVisualization = (section: ISection) => {
             event: e,
         });
     }
+
     const displays = {
         carousel: <Carousel {...section} />,
         marquee: (
@@ -62,48 +84,63 @@ const SectionVisualization = (section: ISection) => {
                         scatterRandomly={false}
                         onInit={() => {}}
                     >
-                        {section.visualizations.map((visualization) => (
-                            <Stack direction="row" key={visualization.id}>
-                                <VisualizationSection
-                                    section={section}
-                                    key={visualization.id}
-                                    visualization={visualization}
-                                />
-                                <Box w="70px">&nbsp;</Box>
-                            </Stack>
-                        ))}
+                        {section.visualizations.map((visualization) => {
+                            return (
+                                <Stack direction="row" key={visualization.id}>
+                                    <Visualization
+                                        section={section}
+                                        key={visualization.id}
+                                        visualization={visualization}
+                                    />
+                                    <Box w="70px">&nbsp;</Box>
+                                </Stack>
+                            );
+                        })}
                     </Marquee>
                 </Stack>
             </Stack>
         ),
         grid: (
-            <Stack
+            <Grid
                 h="100%"
                 w="100%"
                 bg={section.bg}
-                spacing={0}
-                alignItems="center"
-                alignContent="center"
-                justifyContent="center"
-                justifyItems="center"
                 key={section.id}
+                templateColumns={templateColumns}
+                templateRows={templateRows}
+                gap={`${dashboard.spacing}px`}
+                flex={1}
+                // alignItems="center"
+                // justifyContent="center"
             >
-                {section.title && (
-                    <VisualizationTitle
-                        section={section}
-                        title={section.title}
-                    />
-                )}
-                <SimpleGrid columns={2} h="100%" w="100%" flex={1} spacing="0">
-                    {section.visualizations.map((visualization, i) => (
-                        <VisualizationSection
+                {section.visualizations.map((visualization) => {
+                    return (
+                        <GridItem
+                            colSpan={visualization.columns}
+                            rowSpan={visualization.rows}
+                            w="100%"
+                            h="100%"
                             key={visualization.id}
-                            visualization={visualization}
-                            section={section}
-                        />
-                    ))}
-                </SimpleGrid>
-            </Stack>
+                            bgColor={visualization.properties["layout.bg"]}
+                        >
+                            <Stack
+                                alignItems="center"
+                                justifyContent="center"
+                                spacing={0}
+                                p="0"
+                                w="100%"
+                                h="100%"
+                            >
+                                <Visualization
+                                    key={visualization.id}
+                                    visualization={visualization}
+                                    section={section}
+                                />
+                            </Stack>
+                        </GridItem>
+                    );
+                })}
+            </Grid>
         ),
         normal: (
             <Stack h="100%" w="100%" spacing={0} key={section.id} flex={1}>
@@ -124,7 +161,7 @@ const SectionVisualization = (section: ISection) => {
                     p={section.padding}
                 >
                     {section.visualizations.map((visualization) => (
-                        <VisualizationSection
+                        <Visualization
                             key={visualization.id}
                             visualization={visualization}
                             section={section}

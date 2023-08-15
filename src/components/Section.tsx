@@ -38,6 +38,8 @@ import LoadingIndicator from "./LoadingIndicator";
 import SectionColorPalette from "./SectionColorPalette";
 import SectionVisualization from "./SectionVisualization";
 import VisualizationProperties from "./visualizations/VisualizationProperties";
+import NumberProperty from "./properties/NumberProperty";
+import TextProperty from "./properties/TextProperty";
 
 const VisualizationTypes = ({
     visualization,
@@ -287,6 +289,7 @@ const Section = () => {
                         onClick={() => setActive(() => "title")}
                         variant="outline"
                         colorScheme={active === "title" ? "teal" : "gray"}
+                        key={"title"}
                     >
                         Section options
                     </Button>
@@ -517,68 +520,84 @@ const Section = () => {
                                                 )
                                             }
                                         />
-                                        <Text>Title font size</Text>
-                                        <NumberInput
-                                            value={
-                                                visualization.properties[
-                                                    "data.title.fontSize"
-                                                ] || 2
-                                            }
+                                        <Stack>
+                                            <Text>Background Color</Text>
+                                            <ColorPalette
+                                                visualization={visualization}
+                                                attribute="layout.bg"
+                                            />
+                                        </Stack>
+                                        <NumberProperty
                                             max={10}
                                             min={1}
                                             step={0.1}
-                                            onChange={(
-                                                value1: string,
-                                                value2: number
-                                            ) =>
-                                                sectionApi.changeVisualizationProperties(
-                                                    {
-                                                        visualization:
-                                                            visualization?.id,
-                                                        attribute:
-                                                            "data.title.fontSize",
-                                                        value: value2,
-                                                    }
-                                                )
-                                            }
-                                        >
-                                            <NumberInputField />
-                                            <NumberInputStepper>
-                                                <NumberIncrementStepper />
-                                                <NumberDecrementStepper />
-                                            </NumberInputStepper>
-                                        </NumberInput>
-                                        <Text>Title font weight</Text>
-                                        <NumberInput
-                                            value={
-                                                visualization.properties[
-                                                    "data.title.fontWeight"
-                                                ] || 250
-                                            }
+                                            title="Title font size"
+                                            visualization={visualization}
+                                            attribute="data.title.fontSize"
+                                        />
+                                        <NumberProperty
                                             max={1000}
                                             min={100}
                                             step={50}
-                                            onChange={(
-                                                value1: string,
-                                                value2: number
-                                            ) =>
-                                                sectionApi.changeVisualizationProperties(
-                                                    {
-                                                        visualization:
-                                                            visualization.id,
-                                                        attribute:
-                                                            "data.title.fontWeight",
-                                                        value: value2,
-                                                    }
-                                                )
-                                            }
-                                        >
-                                            <NumberInputField />
-                                            <NumberInputStepper>
-                                                <NumberIncrementStepper />
-                                                <NumberDecrementStepper />
-                                            </NumberInputStepper>
-                                        </NumberInput>
+                                            title="Title font weight"
+                                            visualization={visualization}
+                                            attribute="data.title.fontWeight"
+                                        />
+                                        <Stack alignItems="center">
+                                            <Text>Rows</Text>
+                                            <NumberInput
+                                                value={visualization.rows}
+                                                max={24}
+                                                min={1}
+                                                step={1}
+                                                size="sm"
+                                                w="80px"
+                                                onChange={(_, value2: number) =>
+                                                    sectionApi.changeVisualizationAttribute(
+                                                        {
+                                                            attribute: "rows",
+                                                            value: value2,
+                                                            visualization:
+                                                                visualization.id,
+                                                        }
+                                                    )
+                                                }
+                                            >
+                                                <NumberInputField />
+                                                <NumberInputStepper>
+                                                    <NumberIncrementStepper />
+                                                    <NumberDecrementStepper />
+                                                </NumberInputStepper>
+                                            </NumberInput>
+                                        </Stack>
+                                        <Stack alignItems="center">
+                                            <Text>Columns</Text>
+                                            <NumberInput
+                                                value={visualization.columns}
+                                                max={24}
+                                                min={1}
+                                                step={1}
+                                                size="sm"
+                                                w="80px"
+                                                onChange={(_, value2: number) =>
+                                                    sectionApi.changeVisualizationAttribute(
+                                                        {
+                                                            attribute:
+                                                                "columns",
+                                                            value: value2,
+                                                            visualization:
+                                                                visualization.id,
+                                                        }
+                                                    )
+                                                }
+                                            >
+                                                <NumberInputField />
+                                                <NumberInputStepper>
+                                                    <NumberIncrementStepper />
+                                                    <NumberDecrementStepper />
+                                                </NumberInputStepper>
+                                            </NumberInput>
+                                        </Stack>
                                         <Text>Title font color</Text>
                                         <ColorPalette
                                             visualization={visualization}

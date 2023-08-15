@@ -46,6 +46,7 @@ import SunburstChart from "./SunburstChart";
 import Tables from "./Tables";
 import TextVisualisation from "./TextVisualisation";
 import TreeMaps from "./TreeMaps";
+import DividerVisualization from "./DividerVisualization";
 
 type VisualizationProps = {
     visualization: IVisualization;
@@ -255,8 +256,8 @@ const getVisualization = (
                 dataProperties={dataProperties}
             />
         ),
-        dashboardList: <DashboardList />,
-        dashboardTree: <DashboardTree />,
+        dashboardList: <DashboardList visualization={visualization} />,
+        dashboardTree: <DashboardTree visualization={visualization} />,
         categoryList: (
             <CategoryList section={section} visualization={visualization} />
         ),
@@ -291,6 +292,7 @@ const getVisualization = (
         ),
         heatmap: <HeatMap visualization={visualization} section={section} />,
         dhis2: <DHIS2Visualization visualization={visualization} />,
+        divider: <DividerVisualization />,
     };
     return allTypes[visualization.type];
 };

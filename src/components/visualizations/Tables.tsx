@@ -11,7 +11,7 @@ import {
     Flex,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import { flatten } from "lodash";
+import { flatten, orderBy } from "lodash";
 import React, { useRef } from "react";
 import { useElementSize } from "usehooks-ts";
 import { ChartProps, Column, Threshold } from "../../interfaces";
@@ -24,7 +24,7 @@ interface TableProps extends ChartProps {}
 
 const Tables = ({ visualization, data, dimensions }: TableProps) => {
     const [squareRef, { height }] = useElementSize();
-    const tbl = useRef(null);
+    const tbl = useRef<HTMLTableElement>(null);
     const flattenedData = flatten(data);
     const metadata = useStore($visualizationMetadata)[visualization.id];
     const rows = String(visualization.properties["rows"] || "").split(",");
@@ -34,8 +34,7 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
     const generatePDF = () => {
         const report = new JsPDF("landscape", "pt", "a1");
         if (tbl.current) {
-            console.log(tbl.current);
-            report.html(tbl.current as any).then(() => {
+            report.html(tbl.current).then(() => {
                 report.save("report.pdf");
             });
         }
@@ -46,16 +45,16 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
     const aggregationColumn =
         visualization.properties["aggregationColumn"] || "";
 
-    const { finalColumns, finalData, finalRows } = processTable(
+    let { finalColumns, finalData, finalRows } = processTable(
         flattenedData,
         rows,
         columns,
         aggregation,
         thresholds,
         aggregationColumn,
-        dimensions
+        dimensions,
+        visualization.properties
     );
-
     const findOthers = (col: Column) => {
         return { bg: visualization.properties[`${col.actual}.bg`] };
     };
@@ -65,9 +64,9 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
     };
 
     return (
-        <Stack w="100%" p="10px" h="100%">
+        <Stack w="100%" h="100%" spacing={0}>
             <Flex>
-                <Stack h="50px" fontSize="xl">
+                <Stack h="48px" fontSize="xl">
                     <Button colorScheme="blue" onClick={generatePDF}>
                         Download Table
                     </Button>

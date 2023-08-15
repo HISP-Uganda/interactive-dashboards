@@ -363,7 +363,11 @@ const calculation = {
     },
 };
 
-const findMerged = (list: string[], data: Array<any>) => {
+const findMerged = (
+    list: string[],
+    data: Array<any>,
+    properties?: { [key: string]: any }
+) => {
     if (data) {
         let finalColumns: Array<Array<Column>> = [];
         for (let index = 0; index < list.length; index++) {
@@ -371,8 +375,15 @@ const findMerged = (list: string[], data: Array<any>) => {
             let currentValues: Array<Column> = uniq(data.map((d) => d[col]))
                 .filter((d) => !!d)
                 .map((d) => {
-                    return { label: d, value: d, span: 1, actual: d };
+                    return {
+                        label: d,
+                        value: d,
+                        span: 1,
+                        actual: d,
+                        position: properties?.[`${d}.position`] || 1,
+                    };
                 });
+            currentValues = orderBy(currentValues, "value", "asc");
             if (index === 0) {
                 finalColumns[0] = currentValues;
             } else {
@@ -387,10 +398,13 @@ const findMerged = (list: string[], data: Array<any>) => {
                                 value: `${v.value}${p.value}`,
                                 span: 1,
                                 actual: p.value,
+                                position:
+                                    properties?.[`${p.value}.position`] || 1,
                             },
                         ];
                     }
                 }
+                nextValues = orderBy(nextValues, "value", "asc");
                 finalColumns[index] = nextValues;
             }
         }
@@ -465,16 +479,19 @@ export const processTable = (
     aggregation: keyof typeof calculation,
     thresholds: Threshold[],
     aggregationColumn: string,
-    dimensions?: { [key: string]: string[] }
+    dimensions?: { [key: string]: string[] },
+    properties?: { [key: string]: any }
 ) => {
     if (data) {
         const finalColumns = findMerged(
             columns.filter((c) => SPECIAL_COLUMNS.indexOf(c) === -1),
-            data
+            data,
+            properties
         );
         const finalRows = findMerged(
             rows.filter((c) => SPECIAL_COLUMNS.indexOf(c) === -1),
-            data
+            data,
+            properties
         );
 
         const groupedData = groupBy(data, (d) =>
@@ -629,13 +646,16 @@ export const processGraphs = (
                 const grouped = groupBy(data, options.series);
                 chartData = Object.entries(grouped).map(([key, values]) => {
                     const groupedByTheme = groupBy(values, options.category);
-
                     let others = {};
-
-                    if (options.metadata[`${key}.bg`]) {
+                    if (
+                        options.metadata[`${key}.bg`] ||
+                        options.dataProperties[`${key}.bg`]
+                    ) {
                         others = {
                             marker: {
-                                color: options.metadata[`${key}.bg`],
+                                color:
+                                    options.metadata[`${key}.bg`] ||
+                                    options.dataProperties[`${key}.bg`],
                             },
                         };
                     }
@@ -645,7 +665,12 @@ export const processGraphs = (
                             undefined,
                             "asc"
                         ).map((k) =>
-                            breakString(options.metadata[`${k}.name`] || k, 25)
+                            breakString(
+                                options.metadata[`${k}.name`] ||
+                                    options.dataProperties[`${k}.name`] ||
+                                    k,
+                                25
+                            )
                         ),
                         y: Object.entries(groupedByTheme).map(
                             ([k, val]) => val.length

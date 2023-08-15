@@ -485,7 +485,7 @@ export const sectionApi = createApi($section, {
             value,
             visualization,
         }: {
-            attribute: string;
+            attribute: keyof IVisualization;
             value?: any;
             visualization: string;
         }

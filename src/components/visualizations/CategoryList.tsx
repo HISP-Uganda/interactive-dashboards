@@ -15,14 +15,15 @@ import { groupBy } from "lodash";
 import React from "react";
 import { ChartProps, LocationGenerics } from "../../interfaces";
 import { useCategoryList } from "../../Queries";
-import { $settings, $store } from "../../Store";
+import { $settings, $store, $path } from "../../Store";
 import LoadingIndicator from "../LoadingIndicator";
 import NavItem from "../NavItem";
 export default function CategoryList({ visualization }: ChartProps) {
     const store = useStore($store);
     const navigate = useNavigate();
     const search = useSearch<LocationGenerics>();
-
+    const settings = useStore($settings);
+    const path = useStore($path);
     const { storage } = useStore($settings);
     const { isLoading, isSuccess, isError, error, data } = useCategoryList(
         storage,
@@ -65,6 +66,10 @@ export default function CategoryList({ visualization }: ChartProps) {
                     })
                     .filter(({ dashboards }) => dashboards.length > 0)
                     .map((value) => {
+                        let current = "./";
+                        if (settings.template) {
+                            current = path;
+                        }
                         return (
                             <AccordionItem key={value.id}>
                                 <h2>
@@ -103,7 +108,7 @@ export default function CategoryList({ visualization }: ChartProps) {
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 navigate({
-                                                    to: `/dashboards/${d.id}`,
+                                                    to: `${current}${d.id}`,
                                                     search,
                                                 });
                                             }}
@@ -121,10 +126,10 @@ export default function CategoryList({ visualization }: ChartProps) {
     };
 
     return (
-        <>
+        <Stack w="100%" h="100%" bg={visualization.properties["layout.bg"]}>
             {isLoading && <LoadingIndicator />}
             {isSuccess && data && displays[type]}
             {isError && <Text>{error?.message}</Text>}
-        </>
+        </Stack>
     );
 }

@@ -24,7 +24,9 @@ export default function RadioProperty({
             >
                 <Stack direction="row">
                     {options.map((option) => (
-                        <Radio value={option.value}>{option.label}</Radio>
+                        <Radio key={option.value} value={option.value}>
+                            {option.label}
+                        </Radio>
                     ))}
                 </Stack>
             </RadioGroup>

@@ -22,7 +22,6 @@ export default function FiltersProperties({
                 <CheckboxGroup
                     colorScheme="green"
                     onChange={(value) => {
-                        console.log(value);
                         sectionApi.changeVisualizationProperties({
                             visualization: visualization.id,
                             attribute: "layout.items",
