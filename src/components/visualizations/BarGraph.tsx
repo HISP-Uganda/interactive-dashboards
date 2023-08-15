@@ -19,7 +19,6 @@ const BarGraph = ({
     category,
     series,
     layoutProperties,
-    dataProperties,
     section,
     data,
 }: BarGraphProps) => {
@@ -68,8 +67,8 @@ const BarGraph = ({
                     title={visualization.name}
                 />
             )}
-            <Stack flex={1} direction="column">
-                <Stack flex={1}>
+            <Stack flex={1} direction="column" spacing={0} w="100%" h="100%">
+                <Stack flex={1} spacing={0}>
                     <Plot
                         data={chartData as any}
                         layout={{
@@ -106,7 +105,7 @@ const BarGraph = ({
                         }}
                     />
                 </Stack>
-                <Stack direction="row" spacing="20px" justify="center">
+                <Stack direction="row" spacing="20px" justify="center" h="50px">
                     {allSeries
                         .filter((v) => !isEmpty(v))
                         .map((series, index) => (

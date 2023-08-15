@@ -1,21 +1,21 @@
 import {
     Stack,
+    Tab,
     Table,
+    TabList,
+    TabPanel,
+    TabPanels,
+    Tabs,
     Tbody,
     Td,
     Text,
     Th,
     Thead,
     Tr,
-    Tabs,
-    TabList,
-    TabPanels,
-    Tab,
-    TabPanel,
 } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { flatten, uniq, isEmpty } from "lodash";
+import { flatten, isEmpty } from "lodash";
 import React from "react";
 import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";

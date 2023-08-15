@@ -20,6 +20,7 @@ import {
     ScreenSize,
     Storage,
     IFilter,
+    IDashboardSetting,
 } from "./interfaces";
 import {
     $categories,
@@ -90,6 +91,11 @@ export const settingsApi = createApi($settings, {
         produce(state, (draft) => {
             draft.storage = storage;
         }),
+    set: (_, settings: IDashboardSetting) => settings,
+    changeAttribute: (
+        state,
+        { attribute, value }: { attribute: keyof IDashboardSetting; value: any }
+    ) => ({ ...state, [attribute]: value }),
 });
 
 export const storeApi = createApi($store, {
@@ -407,6 +413,12 @@ export const dashboardApi = createApi($dashboard, {
         produce(state, (draft) => {
             draft.excludeFromList = excludeFromList;
         }),
+    changeAttribute: (
+        state,
+        { attribute, value }: { attribute: keyof IDashboard; value: any }
+    ) => {
+        return changeObjectAttribute<IDashboard>(state, { attribute, value });
+    },
 });
 
 export const indicatorApi = createApi($indicator, {
@@ -473,7 +485,7 @@ export const sectionApi = createApi($section, {
             value,
             visualization,
         }: {
-            attribute: string;
+            attribute: keyof IVisualization;
             value?: any;
             visualization: string;
         }
@@ -493,8 +505,8 @@ export const sectionApi = createApi($section, {
             attribute,
             value,
         }: {
-            attribute: string;
-            value?: any;
+            attribute: keyof ISection;
+            value: any;
         }
     ) => {
         return { ...state, [attribute]: value };

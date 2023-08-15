@@ -5374,6 +5374,13 @@
   resolved "https://registry.yarnpkg.com/@types/json5/-/json5-0.0.29.tgz#ee28707ae94e11d2b827bcbe5270bcea7f3e71ee"
   integrity sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==
 
+"@types/jspdf@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@types/jspdf/-/jspdf-2.0.0.tgz#c64d63e9248a62849902085c1cd4753b33f8ee0c"
+  integrity sha512-oonYDXI4GegGaG7FFVtriJ+Yqlh4YR3L3NVDiwCEBVG7sbya19SoGx4MW4kg1MCMRPgkbbFTck8YKJL8PrkDfA==
+  dependencies:
+    jspdf "*"
+
 "@types/leaflet@^1.9.0":
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/@types/leaflet/-/leaflet-1.9.3.tgz#7aac302189eb3aa283f444316167995df42a5467"
@@ -11948,7 +11955,7 @@ jsonrepair@^3.1.0:
   resolved "https://registry.yarnpkg.com/jsonrepair/-/jsonrepair-3.2.0.tgz#ca1b6fdd23ae76bb8c82742f7a5773a7cef3d651"
   integrity sha512-6eHBc2z5vipym4S8rzTcCXQBLWpkSzi9bk7I3xTdUxRzXyYvfjoVZzJ97N4C/9vcKI9NgNp3slPwHufDr0rFYw==
 
-jspdf@^2.5.1:
+jspdf@*, jspdf@^2.5.1:
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/jspdf/-/jspdf-2.5.1.tgz#00c85250abf5447a05f3b32ab9935ab4a56592cc"
   integrity sha512-hXObxz7ZqoyhxET78+XR34Xu2qFGrJJ2I2bE5w4SM8eFaFEkW2xcGRVUss360fYelwRSid/jT078kbNvmoW0QA==

@@ -1,17 +1,20 @@
 import { Grid, GridItem, useBreakpointValue } from "@chakra-ui/react";
+import { Outlet } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { DragEvent, MouseEvent, useRef } from "react";
 import { dashboardApi, sectionApi } from "../Events";
-import { ISection } from "../interfaces";
-import { $dashboard, $dimensions, $store, isOpenApi } from "../Store";
+import { IDashboard, ISection } from "../interfaces";
+import { $dimensions, $store, isOpenApi } from "../Store";
 import SectionVisualization from "./SectionVisualization";
 
-export default function FixedDashboard() {
+export default function FixedDashboard({
+    dashboard,
+}: {
+    dashboard: IDashboard;
+}) {
     const store = useStore($store);
-    const dashboard = useStore($dashboard);
     const { isNotDesktop } = useStore($dimensions);
     const dragItem = useRef<number | undefined | null>();
-
     const dragOverItem = useRef<number | null>();
     const templateColumns = useBreakpointValue({
         base: "auto",
@@ -55,46 +58,85 @@ export default function FixedDashboard() {
         <Grid
             templateColumns={templateColumns}
             templateRows={templateRows}
-            gap="5px"
+            gap={`${dashboard.spacing}px`}
             h="100%"
             w="100%"
         >
-            {dashboard?.sections.map((section: ISection, index: number) => (
-                <GridItem
-                    draggable
-                    onDragStart={(e) => dragStart(e, index)}
-                    onDragEnter={(e) => dragEnter(e, index)}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDragEnd={drop}
-                    bgColor={section.bg}
-                    key={section.id}
-                    id={section.id}
-                    colSpan={{ lg: section.colSpan, md: 1 }}
-                    rowSpan={{ lg: section.rowSpan, md: 1 }}
-                    h={
-                        isNotDesktop
-                            ? section.height
+            {dashboard?.sections.map((section: ISection, index: number) => {
+                if (section.isTemplateArea)
+                    return (
+                        <GridItem
+                            draggable
+                            onDragStart={(e) => dragStart(e, index)}
+                            onDragEnter={(e) => dragEnter(e, index)}
+                            onDragOver={(e) => e.preventDefault()}
+                            onDragEnd={drop}
+                            bgColor={section.bg}
+                            key={section.id}
+                            id={section.id}
+                            colSpan={{ lg: section.colSpan, md: 1 }}
+                            rowSpan={{ lg: section.rowSpan, md: 1 }}
+                            h={
+                                isNotDesktop
+                                    ? section.height
+                                        ? section.height
+                                        : "15vh"
+                                    : "100%"
+                            }
+                            maxH={
+                                isNotDesktop
+                                    ? section.height
+                                        ? section.height
+                                        : "15vh"
+                                    : "100%"
+                            }
+                            onClick={(e: MouseEvent<HTMLElement>) => {
+                                if (e.detail === 2 && store.isAdmin) {
+                                    sectionApi.setCurrentSection(section);
+                                    isOpenApi.onOpen();
+                                }
+                            }}
+                        >
+                            <Outlet />
+                        </GridItem>
+                    );
+                return (
+                    <GridItem
+                        draggable
+                        onDragStart={(e) => dragStart(e, index)}
+                        onDragEnter={(e) => dragEnter(e, index)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDragEnd={drop}
+                        bgColor={section.bg}
+                        key={section.id}
+                        id={section.id}
+                        colSpan={{ lg: section.colSpan, md: 1 }}
+                        rowSpan={{ lg: section.rowSpan, md: 1 }}
+                        h={
+                            isNotDesktop
                                 ? section.height
-                                : "15vh"
-                            : "100%"
-                    }
-                    maxH={
-                        isNotDesktop
-                            ? section.height
-                                ? section.height
-                                : "15vh"
-                            : "100%"
-                    }
-                    onClick={(e: MouseEvent<HTMLElement>) => {
-                        if (e.detail === 2 && store.isAdmin) {
-                            sectionApi.setCurrentSection(section);
-                            isOpenApi.onOpen();
+                                    ? section.height
+                                    : "15vh"
+                                : "100%"
                         }
-                    }}
-                >
-                    <SectionVisualization {...section} />
-                </GridItem>
-            ))}
+                        maxH={
+                            isNotDesktop
+                                ? section.height
+                                    ? section.height
+                                    : "15vh"
+                                : "100%"
+                        }
+                        onClick={(e: MouseEvent<HTMLElement>) => {
+                            if (e.detail === 2 && store.isAdmin) {
+                                sectionApi.setCurrentSection(section);
+                                isOpenApi.onOpen();
+                            }
+                        }}
+                    >
+                        <SectionVisualization {...section} />
+                    </GridItem>
+                );
+            })}
         </Grid>
     );
 }

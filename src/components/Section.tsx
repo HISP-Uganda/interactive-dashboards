@@ -2,6 +2,7 @@ import { DeleteIcon } from "@chakra-ui/icons";
 import {
     Button,
     Flex,
+    Grid,
     IconButton,
     Input,
     NumberDecrementStepper,
@@ -9,34 +10,36 @@ import {
     NumberInput,
     NumberInputField,
     NumberInputStepper,
-    Radio,
-    RadioGroup,
     Spacer,
     Stack,
     Text,
     Textarea,
-    Grid,
 } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { ChangeEvent, DragEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, DragEvent, useRef, useState } from "react";
 import { BiDuplicate } from "react-icons/bi";
-import { sectionApi, storeApi } from "../Events";
-import { IIndicator, IVisualization, Option } from "../interfaces";
+import { sectionApi } from "../Events";
+import { IIndicator, ISection, IVisualization, Option } from "../interfaces";
 import { useNamespace } from "../Queries";
 import { $section, $settings, $store } from "../Store";
 import { generateUid } from "../utils/uid";
 import {
     alignItemsOptions,
     chartTypes,
+    createOptions,
+    createOptions2,
     justifyContentOptions,
 } from "../utils/utils";
 import ColorPalette from "./ColorPalette";
+import { NumberField, RadioField, SelectField, TextField } from "./fields";
+import CheckboxField from "./fields/CheckboxField";
 import LoadingIndicator from "./LoadingIndicator";
 import SectionColorPalette from "./SectionColorPalette";
-import SectionImages from "./SectionImages";
 import SectionVisualization from "./SectionVisualization";
 import VisualizationProperties from "./visualizations/VisualizationProperties";
+import NumberProperty from "./properties/NumberProperty";
+import TextProperty from "./properties/TextProperty";
 
 const VisualizationTypes = ({
     visualization,
@@ -260,7 +263,12 @@ const Section = () => {
 
     return (
         <Grid gridTemplateColumns="1fr 40%" gap="2px">
-            <Stack bg={section.bg} alignItems="center" overflow="auto">
+            <Stack
+                bg={section.bg}
+                alignItems="center"
+                overflow="auto"
+                spacing={0}
+            >
                 <SectionVisualization {...section} />
             </Stack>
             <Stack
@@ -281,6 +289,7 @@ const Section = () => {
                         onClick={() => setActive(() => "title")}
                         variant="outline"
                         colorScheme={active === "title" ? "teal" : "gray"}
+                        key={"title"}
                     >
                         Section options
                     </Button>
@@ -313,171 +322,124 @@ const Section = () => {
                         Add Visualization
                     </Button>
                 </Flex>
-                <Stack overflow="auto" flex={1}>
+                <Stack overflow="auto" flex={1} spacing={0}>
                     {active === "title" && (
                         <Stack p="10px" spacing="20px" bgColor="white">
-                            <Text>Title</Text>
-                            <Input
-                                value={section.title}
-                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                    sectionApi.changeSectionAttribute({
-                                        attribute: "title",
-                                        value: e.target.value,
-                                    })
-                                }
+                            <CheckboxField<ISection>
+                                attribute="isTemplateArea"
+                                func={sectionApi.changeSectionAttribute}
+                                title="Is template area"
+                                obj={section}
+                            />
+                            <TextField<ISection>
+                                attribute="title"
+                                func={sectionApi.changeSectionAttribute}
+                                title="Title"
+                                obj={section}
+                            />
+                            <NumberField<ISection>
+                                attribute="rowSpan"
+                                func={sectionApi.changeSectionAttribute}
+                                title="Row Span"
+                                obj={section}
+                                min={1}
+                                max={24}
+                                step={1}
+                            />
+                            <NumberField<ISection>
+                                attribute="colSpan"
+                                func={sectionApi.changeSectionAttribute}
+                                title="Column Span"
+                                obj={section}
+                                min={1}
+                                max={24}
+                                step={1}
                             />
 
-                            <Text>Row Span</Text>
-                            <NumberInput
-                                value={section.rowSpan}
-                                max={24}
-                                min={1}
-                                onChange={(value1: string, value2: number) =>
-                                    sectionApi.changeSectionAttribute({
-                                        attribute: "rowSpan",
-                                        value: value2,
-                                    })
-                                }
-                            >
-                                <NumberInputField />
-                                <NumberInputStepper>
-                                    <NumberIncrementStepper />
-                                    <NumberDecrementStepper />
-                                </NumberInputStepper>
-                            </NumberInput>
-
-                            <Text>Column Span</Text>
-                            <NumberInput
-                                value={section.colSpan}
-                                max={24}
-                                min={1}
-                                onChange={(value1: string, value2: number) =>
-                                    sectionApi.changeSectionAttribute({
-                                        attribute: "colSpan",
-                                        value: value2,
-                                    })
-                                }
-                            >
-                                <NumberInputField />
-                                <NumberInputStepper>
-                                    <NumberIncrementStepper />
-                                    <NumberDecrementStepper />
-                                </NumberInputStepper>
-                            </NumberInput>
-
-                            <Text>Height(when on small devices)</Text>
-                            <Input
-                                value={section.height}
-                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                    sectionApi.changeSectionAttribute({
-                                        attribute: "height",
-                                        value: e.target.value,
-                                    })
-                                }
+                            <TextField<ISection>
+                                attribute="height"
+                                func={sectionApi.changeSectionAttribute}
+                                title="Height(when on small devices)"
+                                obj={section}
                             />
+
                             <Text>Background Colour</Text>
                             <SectionColorPalette section={section} />
-                            <Text>Arrangement</Text>
-                            <RadioGroup
-                                onChange={(e: string) =>
-                                    sectionApi.changeSectionAttribute({
-                                        attribute: "direction",
-                                        value: e,
-                                    })
-                                }
-                                value={section.direction}
-                            >
-                                <Stack direction="row">
-                                    <Radio value="row">Horizontal</Radio>
-                                    <Radio value="column">Vertical</Radio>
-                                </Stack>
-                            </RadioGroup>
-
-                            <Text> Align Items</Text>
-                            <Select<Option, false, GroupBase<Option>>
-                                value={alignItemsOptions.find(
-                                    (d: Option) =>
-                                        d.value === section.alignItems
-                                )}
-                                onChange={(e) =>
-                                    sectionApi.changeSectionAttribute({
-                                        attribute: "alignItems",
-                                        value: e?.value,
-                                    })
-                                }
+                            <RadioField<ISection>
+                                attribute="direction"
+                                func={sectionApi.changeSectionAttribute}
+                                title="Arrangement"
+                                obj={section}
+                                options={createOptions(["row", "column"])}
+                            />
+                            <SelectField<ISection, Option>
                                 options={alignItemsOptions}
-                                isClearable
-                            />
-                            <Text>Justify Content</Text>
-                            <Select<Option, false, GroupBase<Option>>
-                                value={justifyContentOptions.find(
-                                    (d: Option) =>
-                                        d.value === section.justifyContent
-                                )}
-                                onChange={(e) =>
-                                    sectionApi.changeSectionAttribute({
-                                        attribute: "justifyContent",
-                                        value: e?.value,
-                                    })
-                                }
-                                options={justifyContentOptions}
-                                isClearable
+                                attribute="alignItems"
+                                obj={section}
+                                title="Align Items"
+                                func={sectionApi.changeSectionAttribute}
+                                multiple={false}
+                                labelField="label"
+                                valueField="value"
                             />
 
-                            <Text>Padding</Text>
-                            <Input
-                                value={String(section.padding)}
-                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                    sectionApi.changeSectionAttribute({
-                                        attribute: "padding",
-                                        value: e.target.value,
-                                    })
-                                }
+                            <SelectField<ISection, Option>
+                                options={justifyContentOptions}
+                                attribute="justifyContent"
+                                obj={section}
+                                title="Justify Content"
+                                func={sectionApi.changeSectionAttribute}
+                                multiple={false}
+                                labelField="label"
+                                valueField="value"
                             />
-                            <Text>Spacing (Between Items)</Text>
-                            <Input
-                                value={String(section.spacing)}
-                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                    sectionApi.changeSectionAttribute({
-                                        attribute: "spacing",
-                                        value: e.target.value,
-                                    })
-                                }
+                            <TextField
+                                attribute="padding"
+                                func={sectionApi.changeSectionAttribute}
+                                title="Padding"
+                                obj={section}
                             />
-                            <Text>Display Style</Text>
-                            <RadioGroup
-                                value={section.display}
-                                onChange={(e: string) =>
-                                    sectionApi.changeSectionAttribute({
-                                        attribute: "display",
-                                        value: e,
-                                    })
-                                }
-                            >
-                                <Stack direction="row">
-                                    <Radio value="normal">Normal</Radio>
-                                    <Radio value="carousel">Carousel</Radio>
-                                    <Radio value="marquee">Marquee</Radio>
-                                    <Radio value="grid">Grid</Radio>
-                                    <Radio value="tab">Tabs</Radio>
-                                </Stack>
-                            </RadioGroup>
-                            <Text>Carousel Over</Text>
-                            <RadioGroup
-                                value={section.carouselOver}
-                                onChange={(e: string) =>
-                                    sectionApi.changeSectionAttribute({
-                                        attribute: "carouselOver",
-                                        value: e,
-                                    })
-                                }
-                            >
-                                <Stack direction="row">
-                                    <Radio value="items">Items</Radio>
-                                    <Radio value="groups">Groups</Radio>
-                                </Stack>
-                            </RadioGroup>
-                            <SectionImages />
+
+                            <TextField
+                                attribute="spacing"
+                                func={sectionApi.changeSectionAttribute}
+                                title="Spacing (Between Items)"
+                                obj={section}
+                            />
+
+                            <RadioField
+                                attribute="display"
+                                func={sectionApi.changeSectionAttribute}
+                                title="Display Style"
+                                obj={section}
+                                options={createOptions2(
+                                    [
+                                        "Normal",
+                                        "Carousel",
+                                        "Marquee",
+                                        "Grid",
+                                        "Tabs",
+                                    ],
+                                    [
+                                        "normal",
+                                        "carousel",
+                                        "marquee",
+                                        "grid",
+                                        "tabs",
+                                    ]
+                                )}
+                            />
+
+                            <RadioField
+                                attribute="carouselOver"
+                                func={sectionApi.changeSectionAttribute}
+                                title="Carousel Over"
+                                obj={section}
+                                options={createOptions2(
+                                    ["Items", "items"],
+                                    ["normal", "groups"]
+                                )}
+                            />
                         </Stack>
                     )}
                     {section.visualizations.map(
@@ -558,68 +520,84 @@ const Section = () => {
                                                 )
                                             }
                                         />
-                                        <Text>Title font size</Text>
-                                        <NumberInput
-                                            value={
-                                                visualization.properties[
-                                                    "data.title.fontSize"
-                                                ] || 2
-                                            }
+                                        <Stack>
+                                            <Text>Background Color</Text>
+                                            <ColorPalette
+                                                visualization={visualization}
+                                                attribute="layout.bg"
+                                            />
+                                        </Stack>
+                                        <NumberProperty
                                             max={10}
                                             min={1}
                                             step={0.1}
-                                            onChange={(
-                                                value1: string,
-                                                value2: number
-                                            ) =>
-                                                sectionApi.changeVisualizationProperties(
-                                                    {
-                                                        visualization:
-                                                            visualization?.id,
-                                                        attribute:
-                                                            "data.title.fontSize",
-                                                        value: value2,
-                                                    }
-                                                )
-                                            }
-                                        >
-                                            <NumberInputField />
-                                            <NumberInputStepper>
-                                                <NumberIncrementStepper />
-                                                <NumberDecrementStepper />
-                                            </NumberInputStepper>
-                                        </NumberInput>
-                                        <Text>Title font weight</Text>
-                                        <NumberInput
-                                            value={
-                                                visualization.properties[
-                                                    "data.title.fontWeight"
-                                                ] || 250
-                                            }
+                                            title="Title font size"
+                                            visualization={visualization}
+                                            attribute="data.title.fontSize"
+                                        />
+                                        <NumberProperty
                                             max={1000}
                                             min={100}
                                             step={50}
-                                            onChange={(
-                                                value1: string,
-                                                value2: number
-                                            ) =>
-                                                sectionApi.changeVisualizationProperties(
-                                                    {
-                                                        visualization:
-                                                            visualization.id,
-                                                        attribute:
-                                                            "data.title.fontWeight",
-                                                        value: value2,
-                                                    }
-                                                )
-                                            }
-                                        >
-                                            <NumberInputField />
-                                            <NumberInputStepper>
-                                                <NumberIncrementStepper />
-                                                <NumberDecrementStepper />
-                                            </NumberInputStepper>
-                                        </NumberInput>
+                                            title="Title font weight"
+                                            visualization={visualization}
+                                            attribute="data.title.fontWeight"
+                                        />
+                                        <Stack alignItems="center">
+                                            <Text>Rows</Text>
+                                            <NumberInput
+                                                value={visualization.rows}
+                                                max={24}
+                                                min={1}
+                                                step={1}
+                                                size="sm"
+                                                w="80px"
+                                                onChange={(_, value2: number) =>
+                                                    sectionApi.changeVisualizationAttribute(
+                                                        {
+                                                            attribute: "rows",
+                                                            value: value2,
+                                                            visualization:
+                                                                visualization.id,
+                                                        }
+                                                    )
+                                                }
+                                            >
+                                                <NumberInputField />
+                                                <NumberInputStepper>
+                                                    <NumberIncrementStepper />
+                                                    <NumberDecrementStepper />
+                                                </NumberInputStepper>
+                                            </NumberInput>
+                                        </Stack>
+                                        <Stack alignItems="center">
+                                            <Text>Columns</Text>
+                                            <NumberInput
+                                                value={visualization.columns}
+                                                max={24}
+                                                min={1}
+                                                step={1}
+                                                size="sm"
+                                                w="80px"
+                                                onChange={(_, value2: number) =>
+                                                    sectionApi.changeVisualizationAttribute(
+                                                        {
+                                                            attribute:
+                                                                "columns",
+                                                            value: value2,
+                                                            visualization:
+                                                                visualization.id,
+                                                        }
+                                                    )
+                                                }
+                                            >
+                                                <NumberInputField />
+                                                <NumberInputStepper>
+                                                    <NumberIncrementStepper />
+                                                    <NumberDecrementStepper />
+                                                </NumberInputStepper>
+                                            </NumberInput>
+                                        </Stack>
                                         <Text>Title font color</Text>
                                         <ColorPalette
                                             visualization={visualization}

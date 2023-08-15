@@ -7,18 +7,31 @@ import arrayToTree from "array-to-tree";
 import { useStore } from "effector-react";
 import React from "react";
 import { useElementSize } from "usehooks-ts";
-import { DataNode, IDashboard, LocationGenerics } from "../../interfaces";
+import {
+    DataNode,
+    IDashboard,
+    LocationGenerics,
+    IVisualization,
+} from "../../interfaces";
 import { useDashboards, useFilterResources } from "../../Queries";
-import { $settings, $store } from "../../Store";
+import { $settings, $store, $path } from "../../Store";
 import LoadingIndicator from "../LoadingIndicator";
 import { storeApi } from "../../Events";
 
-function DashboardItem({ dashboards }: { dashboards: IDashboard[] }) {
+function DashboardItem({
+    dashboards,
+    visualization,
+}: {
+    dashboards: IDashboard[];
+    visualization: IVisualization;
+}) {
     const navigate = useNavigate<LocationGenerics>();
     const search = useSearch<LocationGenerics>();
     const [squareRef, { width, height }] = useElementSize();
     const store = useStore($store);
-
+    const settings = useStore($settings);
+    const path = useStore($path);
+    const bg = visualization.properties["layout.bg"] || "";
     const { data, isError, isLoading, isSuccess, error } =
         useFilterResources(dashboards);
     const onSelect = async (
@@ -32,15 +45,19 @@ function DashboardItem({ dashboards }: { dashboards: IDashboard[] }) {
         }
     ) => {
         storeApi.setSelectedKeys(selectedKeys);
+        let current = "./";
+        if (settings.template) {
+            current = path;
+        }
         if (info.node.pId === "") {
             const { optionSet, affected, ...rest } = search;
             navigate({
-                to: `/dashboards/${info.node.key}`,
+                to: `${current}${info.node.key}`,
                 search: { ...rest },
             });
         } else if (info.node.actual) {
             navigate({
-                to: `/dashboards/${info.node.actual}`,
+                to: `${current}${info.node.actual}`,
                 search: (old) => ({
                     ...old,
                     affected: info.node.nodeSource.search,
@@ -49,7 +66,7 @@ function DashboardItem({ dashboards }: { dashboards: IDashboard[] }) {
             });
         } else {
             navigate({
-                to: `/dashboards/${info.node.pId}`,
+                to: `${current}${info.node.pId}`,
                 search: (old) => ({
                     ...old,
                     affected: info.node.nodeSource.search,
@@ -80,7 +97,7 @@ function DashboardItem({ dashboards }: { dashboards: IDashboard[] }) {
     }
     if (isSuccess && data) {
         return (
-            <Stack ref={squareRef} w="100%">
+            <Stack ref={squareRef} w="100%" h="100%" flex={1} bg={bg}>
                 <Tree
                     checkable
                     checkStrictly
@@ -104,7 +121,11 @@ function DashboardItem({ dashboards }: { dashboards: IDashboard[] }) {
     return <pre>{JSON.stringify(error)}</pre>;
 }
 
-export default function DashboardList() {
+export default function DashboardList({
+    visualization,
+}: {
+    visualization: IVisualization;
+}) {
     const store = useStore($store);
     const { storage } = useStore($settings);
     const { isLoading, isSuccess, isError, error, data } = useDashboards(
@@ -121,6 +142,7 @@ export default function DashboardList() {
                 dashboards={data.filter(
                     ({ excludeFromList }) => !excludeFromList
                 )}
+                visualization={visualization}
             />
         );
     }

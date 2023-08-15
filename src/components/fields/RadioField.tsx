@@ -1,26 +1,28 @@
 import React from "react";
 import { Radio, RadioGroup, Stack, Switch, Text } from "@chakra-ui/react";
-import { VizProps, Option } from "../../interfaces";
-import { sectionApi } from "../../Events";
 
-export default function RadioProperty({
-    visualization,
-    attribute,
-    title,
+import { AttributeProps, Option } from "../../interfaces";
+
+export default function RadioField<T>({
     options,
-}: VizProps & { options: Option[] }) {
+    title,
+    obj,
+    attribute,
+    func,
+}: AttributeProps<T> & {
+    options: Option[];
+}) {
     return (
         <Stack>
             <Text>{title}</Text>
             <RadioGroup
                 onChange={(e) =>
-                    sectionApi.changeVisualizationProperties({
-                        visualization: visualization.id,
+                    func({
                         attribute,
                         value: e,
                     })
                 }
-                value={visualization.properties[attribute]}
+                value={String(obj[attribute])}
             >
                 <Stack direction="row">
                     {options.map((option) => (

@@ -2,28 +2,45 @@ import { Flex, Stack, Text } from "@chakra-ui/react";
 import { Navigate } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { Key } from "react";
-import { $store } from "../Store";
+import { $store, $settings } from "../Store";
+import { LocationGenerics } from "../interfaces";
 
 export default function Home() {
     const store = useStore($store);
+    const settings = useStore($settings);
 
     return (
         <Stack>
             {store.isAdmin ? (
                 <Navigate to="/settings/data-sources" />
-            ) : store.selectedDashboard ? (
-                <Navigate
-                    to={`/dashboards/${store.selectedDashboard}`}
-                    search={{
-                        category: store.selectedCategory,
-                        periods: store.periods.map((i) => i.id),
-                        organisations: store.organisations.map((k: Key) =>
-                            String(k)
-                        ),
-                        groups: store.groups,
-                        levels: store.levels,
-                    }}
-                />
+            ) : settings.defaultDashboard ? (
+                settings.template ? (
+                    <Navigate<LocationGenerics>
+                        to={`/templates/${settings.template}/${settings.defaultDashboard}`}
+                        search={{
+                            category: store.selectedCategory,
+                            periods: store.periods.map((i) => String(i.id)),
+                            organisations: store.organisations.map((k: Key) =>
+                                String(k)
+                            ),
+                            groups: store.groups,
+                            levels: store.levels,
+                        }}
+                    />
+                ) : (
+                    <Navigate<LocationGenerics>
+                        to={`/dashboards/${settings.defaultDashboard}`}
+                        search={{
+                            category: store.selectedCategory,
+                            periods: store.periods.map((i) => String(i.id)),
+                            organisations: store.organisations.map((k: Key) =>
+                                String(k)
+                            ),
+                            groups: store.groups,
+                            levels: store.levels,
+                        }}
+                    />
+                )
             ) : (
                 <Flex
                     w="100vw"

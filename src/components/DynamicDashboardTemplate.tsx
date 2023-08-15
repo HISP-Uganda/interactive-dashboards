@@ -1,17 +1,22 @@
 import { Stack } from "@chakra-ui/react";
+import { Outlet } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import React, { useState, MouseEvent, useEffect } from "react";
+import React, { useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import { dashboardApi, sectionApi } from "../Events";
-import { $dashboard, $size, isOpenApi, $store } from "../Store";
+import { dashboardApi } from "../Events";
+import { IDashboard } from "../interfaces";
+import { $size } from "../Store";
 import SectionVisualization from "./SectionVisualization";
-import VisualizationMenu from "./visualizations/VisualizationMenu";
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
-export default function DynamicDashboard() {
-    const dashboard = useStore($dashboard);
+export default function DynamicDashboardTemplate({
+    dashboard,
+}: {
+    dashboard: IDashboard;
+}) {
+    // const dashboard = useStore($dashboard);
     const size = useStore($size);
 
     const settings: {
@@ -113,6 +118,7 @@ export default function DynamicDashboard() {
             >
                 {generateDOM()}
             </ResponsiveReactGridLayout>
+            <Outlet />
         </Stack>
     );
 }

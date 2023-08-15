@@ -26,6 +26,7 @@ import {
     visualizationDataApi,
     visualizationDimensionsApi,
     visualizationMetadataApi,
+    settingsApi,
 } from "./Events";
 import {
     DataNode,
@@ -346,7 +347,7 @@ export const useInitials = (storage: "data-store" | "es") => {
 
             if (settings.length > 0) {
                 storeApi.changeSelectedDashboard(settings[0].defaultDashboard);
-                storeApi.setDefaultDashboard(settings[0].defaultDashboard);
+                settingsApi.set(settings[0]);
             }
             if (minSublevel && minSublevel + 1 <= maxLevel) {
                 storeApi.setMinSublevel(minSublevel + 1);
@@ -456,6 +457,31 @@ export const useDashboards = (
     );
 };
 
+export const useDashboardTemplates = (
+    storage: "data-store" | "es",
+    systemId: string
+) => {
+    const engine = useDataEngine();
+    return useQuery<IDashboard[], Error>(
+        ["i-dashboard-templates"],
+        async ({ signal }) => {
+            try {
+                const dashboards = await getIndex<IDashboard>(storage, {
+                    namespace: "i-dashboards",
+                    systemId,
+                    otherQueries: [],
+                    signal,
+                    engine,
+                });
+                return dashboards;
+            } catch (error) {
+                console.error(error);
+                return [];
+            }
+        }
+    );
+};
+
 export const useCategoryList = (
     storage: "data-store" | "es",
     systemId: string
@@ -512,6 +538,27 @@ export const useDashboard = (
             dashboardTypeApi.set(dashboardType);
             const dashboard = createDashboard(id, dashboardType);
             dashboardApi.setCurrentDashboard(dashboard);
+            return dashboard;
+        }
+    );
+};
+
+export const useDashboardTemplate = (
+    storage: "data-store" | "es",
+    id: string,
+    systemId: string
+) => {
+    const engine = useDataEngine();
+    return useQuery<IDashboard, Error>(
+        ["i-dashboard-template", id],
+        async ({ signal }) => {
+            let dashboard = await getOneRecord<IDashboard>(storage, id, {
+                namespace: "i-dashboards",
+                otherQueries: [],
+                signal,
+                engine,
+                systemId,
+            });
             return dashboard;
         }
     );

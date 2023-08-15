@@ -92,7 +92,7 @@ const OUTree = ({
         onChange(allChecked.map((val) => String(val)));
     };
     return (
-        <Stack bgColor="white" spacing="20px">
+        <Stack spacing="20px">
             {organisations !== undefined && (
                 <Stack direction="row">
                     <Tree

@@ -17,12 +17,12 @@ import { useStore } from "effector-react";
 import { useEffect, useState } from "react";
 import { dashboardApi, dashboardTypeApi, storeApi } from "../../Events";
 import { IDashboard, LocationGenerics } from "../../interfaces";
-import { deleteDocument, useDashboards } from "../../Queries";
-import { $settings, $store, $path } from "../../Store";
+import { deleteDocument, useDashboardTemplates } from "../../Queries";
+import { $path, $settings, $store } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import LoadingIndicator from "../LoadingIndicator";
 
-const Dashboards = () => {
+export default function DashboardTemplates() {
     const navigate = useNavigate<LocationGenerics>();
     const store = useStore($store);
     const { storage, template } = useStore($settings);
@@ -30,17 +30,15 @@ const Dashboards = () => {
     const engine = useDataEngine();
     const [loading, setLoading] = useState<boolean>(false);
     const [currentId, setCurrentId] = useState<string>("");
-    const { isLoading, isSuccess, isError, error, data } = useDashboards(
-        storage,
-        store.systemId
-    );
+    const { isLoading, isSuccess, isError, error, data } =
+        useDashboardTemplates(storage, store.systemId);
 
     const [response, setResponse] = useState<IDashboard[] | undefined>(data);
 
     const deleteResource = async (id: string) => {
         setCurrentId(() => id);
         setLoading(() => true);
-        await deleteDocument(storage, "i-dashboards", id, engine);
+        await deleteDocument(storage, "i-templates", id, engine);
         setResponse((prev) => prev?.filter((p) => p.id !== id));
         setLoading(() => false);
     };
@@ -52,7 +50,7 @@ const Dashboards = () => {
     return (
         <Stack p="20px">
             <Text fontSize="2xl" fontWeight="bold" p="2" color="blue.600">
-                Dashboard List
+                Dashboard Template List
             </Text>
             <Stack direction="row">
                 <Spacer />
@@ -74,7 +72,7 @@ const Dashboards = () => {
                     colorScheme="blue"
                 >
                     <AddIcon mr="2" />
-                    New Dynamic Dashboard
+                    New Dynamic Template
                 </Button>
                 <Button
                     onClick={() => {
@@ -94,7 +92,7 @@ const Dashboards = () => {
                     colorScheme="blue"
                 >
                     <AddIcon mr="2" />
-                    New Fixed Dashboard
+                    New Fixed Dashboard Template
                 </Button>
             </Stack>
             <Stack alignContent="center" alignItems="center" flex={1}>
@@ -113,41 +111,40 @@ const Dashboards = () => {
                         </Thead>
                         <Tbody>
                             {response?.map((dashboard: IDashboard) => (
-                                <Tr key={dashboard.id} cursor="pointer">
-                                    <Td
-                                        onClick={async () => {
-                                            dashboardApi.setCurrentDashboard(
-                                                dashboard
-                                            );
-                                            storeApi.changeSelectedDashboard(
-                                                dashboard.id
-                                            );
-                                            storeApi.changeSelectedCategory(
-                                                dashboard.category || ""
-                                            );
-                                            let currentPath = path;
-                                            if (dashboard.id === template) {
-                                                currentPath = "/dashboards/";
-                                            }
-                                            navigate({
-                                                to: `${currentPath}${dashboard.id}`,
-                                                search: {
-                                                    action: "update",
-                                                    category:
-                                                        dashboard.category,
-                                                    periods: store.periods.map(
-                                                        (i) => i.value
-                                                    ),
-                                                    organisations:
-                                                        store.organisations,
-                                                    groups: store.groups,
-                                                    levels: store.levels,
-                                                },
-                                            });
-                                        }}
-                                    >
-                                        {dashboard.name}
-                                    </Td>
+                                <Tr
+                                    key={dashboard.id}
+                                    cursor="pointer"
+                                    onClick={async () => {
+                                        dashboardApi.setCurrentDashboard(
+                                            dashboard
+                                        );
+                                        storeApi.changeSelectedDashboard(
+                                            dashboard.id
+                                        );
+                                        storeApi.changeSelectedCategory(
+                                            dashboard.category || ""
+                                        );
+                                        let currentPath = path;
+                                        if (dashboard.id === template) {
+                                            currentPath = "/dashboards/";
+                                        }
+                                        navigate({
+                                            to: `${currentPath}${dashboard.id}`,
+                                            search: {
+                                                action: "update",
+                                                category: dashboard.category,
+                                                periods: store.periods.map(
+                                                    (i) => i.value
+                                                ),
+                                                organisations:
+                                                    store.organisations,
+                                                groups: store.groups,
+                                                levels: store.levels,
+                                            },
+                                        });
+                                    }}
+                                >
+                                    <Td>{dashboard.name}</Td>
                                     <Td>{dashboard.category}</Td>
                                     <Td>
                                         {dashboard.published ? "Yes" : "No"}
@@ -159,37 +156,8 @@ const Dashboards = () => {
                                             <Button
                                                 colorScheme="green"
                                                 size="xs"
-                                                onClick={async () => {
-                                                    dashboardApi.setCurrentDashboard(
-                                                        dashboard
-                                                    );
-                                                    storeApi.changeSelectedDashboard(
-                                                        dashboard.id
-                                                    );
-                                                    storeApi.changeSelectedCategory(
-                                                        dashboard.category || ""
-                                                    );
-
-                                                    navigate({
-                                                        to: `/dashboards/${dashboard.id}`,
-                                                        search: {
-                                                            action: "update",
-                                                            category:
-                                                                dashboard.category,
-                                                            periods:
-                                                                store.periods.map(
-                                                                    (i) =>
-                                                                        i.value
-                                                                ),
-                                                            organisations:
-                                                                store.organisations,
-                                                            groups: store.groups,
-                                                            levels: store.levels,
-                                                        },
-                                                    });
-                                                }}
                                             >
-                                                Edit
+                                                View
                                             </Button>
                                             <Button size="xs">Duplicate</Button>
                                             <Button
@@ -216,6 +184,4 @@ const Dashboards = () => {
             </Stack>
         </Stack>
     );
-};
-
-export default Dashboards;
+}
