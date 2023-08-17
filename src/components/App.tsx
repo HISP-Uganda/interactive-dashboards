@@ -33,7 +33,9 @@ import { decodeFromBinary, encodeToBinary } from "../utils/utils";
 import DashboardTemplateForm from "./forms/DashboardTemplateForm";
 import LoadingIndicator from "./LoadingIndicator";
 import Settings from "./Settings";
-import DashboardTemplates from "./lists/DashboardTemplates";
+import Presentations from "./lists/Presentations";
+import PresentationForm from "./forms/PresentationForm";
+import Presenter from "./forms/Presenter";
 // import IndicatorForm from "./forms/IndicatorForm";
 
 const history = createHashHistory();
@@ -79,13 +81,10 @@ const App = () => {
 
     const routes: Route<LocationGenerics>[] = [
         {
-            loader: async () => {
-                storeApi.setCurrentPage("");
-                return {};
-            },
             path: "/",
             element: <Home />,
         },
+
         {
             path: "/settings",
             element: <Settings />,
@@ -157,11 +156,20 @@ const App = () => {
                     ],
                 },
                 {
-                    path: "/templates",
+                    path: "/presentations",
                     children: [
                         {
                             path: "/",
-                            element: <DashboardTemplates />,
+                            element: <Presentations />,
+                        },
+                        {
+                            path: ":presentationId",
+                            children: [
+                                {
+                                    path: "/",
+                                    element: <PresentationForm />,
+                                },
+                            ],
                         },
                     ],
                 },
@@ -173,6 +181,15 @@ const App = () => {
                             element: <Dashboards />,
                         },
                     ],
+                },
+            ],
+        },
+        {
+            path: "/presentations/:presentationId",
+            children: [
+                {
+                    path: "/",
+                    element: <Presenter />,
                 },
             ],
         },

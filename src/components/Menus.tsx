@@ -20,10 +20,11 @@ const Menus = () => {
                 direction="row"
                 onClick={() => navigate({ to: "/settings/data-sources" })}
                 _hover={{
-                    color: "blue.600", fontWeight: "bold", transform: "scale(1.1)",
+                    color: "blue.600",
+                    fontWeight: "bold",
+                    transform: "scale(1.1)",
                 }}
                 transition="ease-in-out 0.3s"
-
             >
                 <Icon as={MdInput} w={8} h={8} color="blue.600" />
                 <Text>Data Sources</Text>
@@ -35,7 +36,9 @@ const Menus = () => {
                 cursor="pointer"
                 onClick={() => navigate({ to: "/settings/categories" })}
                 _hover={{
-                    color: "blue.600", fontWeight: "bold", transform: "scale(1.1)",
+                    color: "blue.600",
+                    fontWeight: "bold",
+                    transform: "scale(1.1)",
                 }}
                 transition="ease-in-out 0.3s"
             >
@@ -51,7 +54,9 @@ const Menus = () => {
                     navigate({ to: "/settings/visualization-queries" })
                 }
                 _hover={{
-                    color: "blue.600", fontWeight: "bold", transform: "scale(1.1)",
+                    color: "blue.600",
+                    fontWeight: "bold",
+                    transform: "scale(1.1)",
                 }}
                 transition="ease-in-out 0.3s"
             >
@@ -65,7 +70,9 @@ const Menus = () => {
                 cursor="pointer"
                 onClick={() => navigate({ to: "/settings/indicators" })}
                 _hover={{
-                    color: "blue.600", fontWeight: "bold", transform: "scale(1.1)",
+                    color: "blue.600",
+                    fontWeight: "bold",
+                    transform: "scale(1.1)",
                 }}
                 transition="ease-in-out 0.3s"
             >
@@ -79,12 +86,30 @@ const Menus = () => {
                 cursor="pointer"
                 onClick={() => navigate({ to: "/settings/dashboards" })}
                 _hover={{
-                    color: "blue.600", fontWeight: "bold", transform: "scale(1.1)",
+                    color: "blue.600",
+                    fontWeight: "bold",
+                    transform: "scale(1.1)",
                 }}
                 transition="ease-in-out 0.3s"
             >
                 <Icon as={MdOutlineDashboard} w={8} h={8} color="blue.600" />
                 <Text>Dashboards</Text>
+            </Stack>
+            <Stack
+                alignItems="center"
+                alignContent="center"
+                direction="row"
+                cursor="pointer"
+                onClick={() => navigate({ to: "/settings/presentations" })}
+                _hover={{
+                    color: "blue.600",
+                    fontWeight: "bold",
+                    transform: "scale(1.1)",
+                }}
+                transition="ease-in-out 0.3s"
+            >
+                <Icon as={MdOutlineDashboard} w={8} h={8} color="blue.600" />
+                <Text>Presentations</Text>
             </Stack>
         </Stack>
     );

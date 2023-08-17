@@ -1,4 +1,4 @@
-import { Stack } from "@chakra-ui/react";
+import { Stack, Box } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import update from "lodash/fp/update";
 import Plot from "react-plotly.js";
@@ -7,7 +7,6 @@ import { $visualizationMetadata } from "../../Store";
 import { exclusions } from "../../utils/utils";
 import { processGraphs } from "../processors";
 import VisualizationTitle from "./VisualizationTitle";
-
 interface LineGraphProps extends ChartProps {
     category?: string;
     series?: string;
@@ -48,17 +47,16 @@ const LineGraph = ({
     const titleCase = dataProperties?.["data.title.case"] || "";
     const titleColor = dataProperties?.["data.title.color"] || "gray.500";
 
-    const { chartData, allSeries } = processGraphs(
-        data,
-        visualization.order,
-        visualization.show,
-        visualization.properties["summarize"] || false,
-        dataProperties,
-        category,
-        series,
-        visualization.properties,
-        "line"
-    );
+    const { chartData, allSeries } = processGraphs(data, {
+        order: visualization.order,
+        show: visualization.show,
+        summarize: visualization.properties["summarize"] || false,
+        dataProperties: visualization.properties,
+        category: category,
+        series: series,
+        type: "line",
+        metadata: metadata,
+    });
     return (
         <Stack w="100%" h="100%" spacing={0}>
             {visualization.name && (
@@ -71,7 +69,7 @@ const LineGraph = ({
                     fontWeight="bold"
                 />
             )}
-            <Stack flex={1}>
+            <Stack flex={1} p="0" spacing="0">
                 <Plot
                     data={chartData as any}
                     layout={{
@@ -115,6 +113,34 @@ const LineGraph = ({
                     }}
                 />
             </Stack>
+            {/* <Box>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 841.9 595.3"
+                >
+                    <g class="layers" style="opacity: 1;">
+                        <g class="legendfill"></g>
+                        <g class="legendlines">
+                            <path
+                                class="js-line"
+                                d="M5,0h30"
+                                style="fill: none; stroke: rgb(31, 119, 180); stroke-opacity: 1; stroke-width: 2px;"
+                            ></path>
+                        </g>
+                        <g class="legendsymbols">
+                            <g class="legendpoints">
+                                <path
+                                    class="scatterpts"
+                                    transform="translate(20,0)"
+                                    d="M3,0A3,3 0 1,1 0,-3A3,3 0 0,1 3,0Z"
+                                    style="opacity: 1; stroke-width: 0px; fill: rgb(31, 119, 180); fill-opacity: 1;"
+                                ></path>
+                            </g>
+                        </g>
+                    </g>
+                </svg>
+            </Box> */}
+            <img src="/line.svg" />
         </Stack>
     );
 };

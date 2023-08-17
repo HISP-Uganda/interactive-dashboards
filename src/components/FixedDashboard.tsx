@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Grid, GridItem, useBreakpointValue } from "@chakra-ui/react";
 import { Outlet } from "@tanstack/react-location";
 import { useStore } from "effector-react";
@@ -36,6 +37,24 @@ export default function FixedDashboard({
     const dragEnter = (e: DragEvent<HTMLDivElement>, position: number) => {
         dragOverItem.current = position;
     };
+
+    useEffect(() => {
+        dashboardApi.setCurrentDashboard(dashboard);
+        const callback = async (event: KeyboardEvent) => {
+            // if (event.key === "F5" || event.key === "f5") {
+            //     await handle.enter();
+            //     if (handle.active) {
+            //         storeApi.setIsFullScreen(true);
+            //     } else {
+            //         storeApi.setIsFullScreen(true);
+            //     }
+            // }
+        };
+        // document.addEventListener("keydown", callback);
+        // return () => {
+        //     document.removeEventListener("keydown", callback);
+        // };
+    }, []);
 
     const drop = (e: DragEvent<HTMLDivElement>) => {
         const copyListItems = [...dashboard.sections];
@@ -76,6 +95,7 @@ export default function FixedDashboard({
                             id={section.id}
                             colSpan={{ lg: section.colSpan, md: 1 }}
                             rowSpan={{ lg: section.rowSpan, md: 1 }}
+                            w="100%"
                             h={
                                 isNotDesktop
                                     ? section.height
@@ -126,6 +146,7 @@ export default function FixedDashboard({
                                     : "15vh"
                                 : "100%"
                         }
+                        w="100%"
                         onClick={(e: MouseEvent<HTMLElement>) => {
                             if (e.detail === 2 && store.isAdmin) {
                                 sectionApi.setCurrentSection(section);
