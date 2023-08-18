@@ -200,15 +200,12 @@ export interface DataNode extends IDataNode {
     value?: string;
     pId: string;
     children?: DataNode[];
-    nodeSource: Partial<{
-        resource: string;
-        fields: string;
-        search: string;
-        subSearch: string;
-    }>;
+    type?: string;
+    nodeSource?: { [key: string]: any };
     hasChildren?: boolean;
     bg?: string;
     actual?: string;
+    parent?: { [key: string]: any };
 }
 
 export interface Option extends OptionBase {
@@ -288,6 +285,7 @@ export type LocationGenerics = MakeGenerics<{
         dashboardId: string;
         visualizationQueryId: string;
         templateId: string;
+        presentationId: string;
     };
     Search: {
         category: string;
@@ -486,3 +484,7 @@ export type AttributeProps<T> = {
     obj: T;
     func: Event<{ attribute: keyof T; value: any }>;
 };
+
+export interface IPresentation extends INamed {
+    items: DataNode[];
+}

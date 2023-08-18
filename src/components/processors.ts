@@ -633,13 +633,15 @@ export const processGraphs = (
     let availableProperties: { [key: string]: any } = {};
     let allSeries: any[] = [];
     update(availableProperties, "data.orientation", () => "v");
-    Object.entries(options.dataProperties).forEach(([property, value]) => {
-        availableProperties = update(
-            availableProperties,
-            property,
-            () => value
-        );
-    });
+    Object.entries(options.dataProperties || {}).forEach(
+        ([property, value]) => {
+            availableProperties = update(
+                availableProperties,
+                property,
+                () => value
+            );
+        }
+    );
     if (data && data.length > 0 && options.category !== undefined) {
         if (options.summarize) {
             if (options.series) {

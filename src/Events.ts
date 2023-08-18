@@ -21,6 +21,7 @@ import {
     Storage,
     IFilter,
     IDashboardSetting,
+    IPresentation,
 } from "./interfaces";
 import {
     $categories,
@@ -43,6 +44,7 @@ import {
     $visualizationQuery,
     $calculated,
     $visualizationDimensions,
+    $presentation,
 } from "./Store";
 
 export const loadDefaults = domain.createEvent<{
@@ -740,6 +742,13 @@ export const datumAPi = createApi($visualizationQuery, {
 export const calculatedApi = createApi($calculated, {
     add: (state, { id, value }: { id: string; value: any }) => {
         return { ...state, [id]: value };
+    },
+});
+
+export const presentationApi = createApi($presentation, {
+    setPresentation: (_, presentation: IPresentation) => {
+        console.log(presentation);
+        return presentation;
     },
 });
 

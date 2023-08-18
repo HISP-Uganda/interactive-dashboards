@@ -1,7 +1,7 @@
 import { Stack } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { useEffect } from "react";
-import { useFullScreenHandle } from "react-full-screen";
+import { useFullScreenHandle, FullScreen } from "react-full-screen";
 import { storeApi } from "../../Events";
 import { $dashboard, $dashboardType, $settings, $store } from "../../Store";
 import AdminPanel from "../AdminPanel";
@@ -45,8 +45,8 @@ const Dashboard = () => {
 
     return (
         <Stack
-            w="100%"
-            h="100%"
+            w={store.isFullScreen ? "100vw" : "100%"}
+            h={store.isFullScreen ? "100vh" : "100%"}
             bg={dashboard.bg}
             spacing="0"
             p={`${padding}px`}
@@ -55,15 +55,23 @@ const Dashboard = () => {
                 !templateId) && <AdminPanel />}
 
             <Stack
-                h={store.isAdmin ? "calc(100vh - 96px)" : "calc(100vh - 48px)"}
+                h={
+                    store.isFullScreen
+                        ? "100vh"
+                        : store.isAdmin
+                        ? "calc(100vh - 96px)"
+                        : "calc(100vh - 48px)"
+                }
                 // p={`${dashboard.spacing}px`}
                 spacing={0}
             >
+                {/* <FullScreen handle={handle}> */}
                 {dashboardType === "dynamic" ? (
                     <DynamicDashboard />
                 ) : (
                     <FixedDashboard dashboard={dashboard} />
                 )}
+                {/* </FullScreen> */}
             </Stack>
         </Stack>
     );

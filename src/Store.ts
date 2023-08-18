@@ -16,6 +16,7 @@ import {
     Option,
     Playlist,
     ScreenSize,
+    IPresentation,
 } from "./interfaces";
 import { generateUid } from "./utils/uid";
 import { getRelativePeriods } from "./utils/utils";
@@ -75,6 +76,15 @@ export const createCategory = (id = generateUid()): ICategory => {
         id,
         name: "",
         description: "",
+    };
+};
+
+export const createPresentation = (id = generateUid()): IPresentation => {
+    return {
+        id,
+        name: "",
+        description: "",
+        items: [],
     };
 };
 
@@ -220,6 +230,10 @@ export const $indicator = domain.createStore<IIndicator>(createIndicator());
 export const $section = domain.createStore<ISection>(createSection());
 export const $dataSets = domain.createStore<Option[]>([]);
 export const $calculated = domain.createStore<{ [key: string]: any }>({});
+export const $presentations = domain.createStore<IPresentation[]>([]);
+export const $presentation = domain.createStore<IPresentation>(
+    createPresentation()
+);
 
 export const $categoryDashboards = combine(
     $dashboards,
@@ -558,4 +572,4 @@ export const $hasTemplateSection = $settings.map((state) => {
     return "/dashboards/";
 });
 
-$dashboard.watch((v) => console.log(v));
+// $dashboard.watch((v) => console.log(v));

@@ -18,7 +18,7 @@ import {
 } from "react-contexify";
 import "react-contexify/dist/ReactContexify.css";
 import Marquee from "react-marquee-slider";
-import { sectionApi } from "../Events";
+import { sectionApi, dashboardApi } from "../Events";
 import { ISection } from "../interfaces";
 import { $store, isOpenApi, $dashboard } from "../Store";
 import FullScreen from "./FullScreen";
@@ -202,7 +202,9 @@ const SectionVisualization = (section: ISection) => {
                 </Item>
                 <Item onClick={() => displayFull()}>Expand</Item>
                 <Separator />
-                <Item disabled>Disabled</Item>
+                <Item onClick={() => dashboardApi.deleteSection(section.id)}>
+                    Delete
+                </Item>
                 <Separator />
                 <Submenu label="Submenu">
                     <Item onClick={handleItemClick}>Sub Item 1</Item>
