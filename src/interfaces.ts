@@ -487,4 +487,5 @@ export type AttributeProps<T> = {
 
 export interface IPresentation extends INamed {
     items: DataNode[];
+    speed: number;
 }

@@ -11,3 +11,4 @@ declare module "react-spring-dnd";
 declare module "react-contexify";
 declare module "d2";
 declare module "@dhis2/data-visualizer-plugin";
+declare module "use-react-screenshot";

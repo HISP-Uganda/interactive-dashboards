@@ -1,8 +1,7 @@
-import { useEffect } from "react";
 import { Grid, GridItem, useBreakpointValue } from "@chakra-ui/react";
 import { Outlet } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { DragEvent, MouseEvent, useRef } from "react";
+import { DragEvent, MouseEvent, useEffect, useRef } from "react";
 import { dashboardApi, sectionApi } from "../Events";
 import { IDashboard, ISection } from "../interfaces";
 import { $dimensions, $store, isOpenApi } from "../Store";
@@ -14,6 +13,8 @@ export default function FixedDashboard({
     dashboard: IDashboard;
 }) {
     const store = useStore($store);
+    const tbl = useRef<HTMLDivElement>(null);
+
     const { isNotDesktop } = useStore($dimensions);
     const dragItem = useRef<number | undefined | null>();
     const dragOverItem = useRef<number | null>();
@@ -40,20 +41,6 @@ export default function FixedDashboard({
 
     useEffect(() => {
         dashboardApi.setCurrentDashboard(dashboard);
-        const callback = async (event: KeyboardEvent) => {
-            // if (event.key === "F5" || event.key === "f5") {
-            //     await handle.enter();
-            //     if (handle.active) {
-            //         storeApi.setIsFullScreen(true);
-            //     } else {
-            //         storeApi.setIsFullScreen(true);
-            //     }
-            // }
-        };
-        // document.addEventListener("keydown", callback);
-        // return () => {
-        //     document.removeEventListener("keydown", callback);
-        // };
     }, []);
 
     const drop = (e: DragEvent<HTMLDivElement>) => {
@@ -80,6 +67,7 @@ export default function FixedDashboard({
             gap={`${dashboard.spacing}px`}
             h="100%"
             w="100%"
+            ref={tbl}
         >
             {dashboard?.sections.map((section: ISection, index: number) => {
                 if (section.isTemplateArea)
