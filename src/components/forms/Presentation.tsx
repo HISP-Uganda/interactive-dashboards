@@ -8,6 +8,11 @@ import {
     Spacer,
     Stack,
     Textarea,
+    NumberDecrementStepper,
+    NumberIncrementStepper,
+    NumberInput,
+    NumberInputField,
+    NumberInputStepper,
 } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
@@ -107,6 +112,30 @@ export default function Presentation() {
                                 value={value}
                                 onChange={onChange}
                             />
+                        )}
+                    />
+                    <Controller
+                        control={control}
+                        name="speed"
+                        render={({
+                            field: { onChange, onBlur, value, ref },
+                        }) => (
+                            <NumberInput
+                                value={value}
+                                // max={}
+                                min={500}
+                                step={100}
+                                size="sm"
+                                onChange={(_, value2: number) =>
+                                    onChange(value2)
+                                }
+                            >
+                                <NumberInputField />
+                                <NumberInputStepper>
+                                    <NumberIncrementStepper />
+                                    <NumberDecrementStepper />
+                                </NumberInputStepper>
+                            </NumberInput>
                         )}
                     />
                     <Stack spacing="30px" direction="row">

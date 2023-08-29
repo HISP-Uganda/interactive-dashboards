@@ -85,6 +85,7 @@ export const createPresentation = (id = generateUid()): IPresentation => {
         name: "",
         description: "",
         items: [],
+        speed: 1000,
     };
 };
 

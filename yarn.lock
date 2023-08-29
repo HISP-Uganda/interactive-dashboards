@@ -14818,6 +14818,13 @@ react-draggable@^4.0.0, react-draggable@^4.0.3:
     clsx "^1.1.1"
     prop-types "^15.8.1"
 
+react-easyfullscreen@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/react-easyfullscreen/-/react-easyfullscreen-1.1.2.tgz#9bd9121aa1ffc1e22a1061ac4d98909d297bf7fd"
+  integrity sha512-EofAG3a9F1n5Ot1ppq/g/ORbMC2/1aNb5jc165dkQmmRvOnrXKMqwDYeXRbeWbsgdrmMgKbf0KF+IwxQO5e+lA==
+  dependencies:
+    screenfull "^5.0.2"
+
 react-error-boundary@^4.0.10:
   version "4.0.10"
   resolved "https://registry.yarnpkg.com/react-error-boundary/-/react-error-boundary-4.0.10.tgz#975cc298e93ab7760d1460b7ea5a7855621e355a"
@@ -14886,6 +14893,11 @@ react-hook-form@^7.31.1:
   version "7.45.2"
   resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.45.2.tgz#c757f3d5e633ccb186443d57c10fc511df35721a"
   integrity sha512-9s45OdTaKN+4NSTbXVqeDITd/nwIg++nxJGL8+OD5uf1DxvhsXQ641kaYHk5K28cpIOTYm71O/fYk7rFaygb3A==
+
+react-hotkeys-hook@^4.4.1:
+  version "4.4.1"
+  resolved "https://registry.yarnpkg.com/react-hotkeys-hook/-/react-hotkeys-hook-4.4.1.tgz#1f7a7a1c9c21d4fa3280bf340fcca8fd77d81994"
+  integrity sha512-sClBMBioFEgFGYLTWWRKvhxcCx1DRznd+wkFHwQZspnRBkHTgruKIHptlK/U/2DPX8BhHoRGzpMVWUXMmdZlmw==
 
 react-icons@^4.7.1:
   version "4.10.1"
@@ -15770,7 +15782,7 @@ schema-utils@^4.0.0:
     ajv-formats "^2.1.1"
     ajv-keywords "^5.1.0"
 
-screenfull@^5.2.0:
+screenfull@^5.0.2, screenfull@^5.2.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/screenfull/-/screenfull-5.2.0.tgz#6533d524d30621fc1283b9692146f3f13a93d1ba"
   integrity sha512-9BakfsO2aUQN2K9Fdbj87RJIEZ82Q9IGim7FqM5OsebfoFC6ZHXgDq/KvniuLTPdeM8wY2o6Dj3WQ7KeQCj3cA==
@@ -17393,6 +17405,11 @@ use-onclickoutside@^0.4.0:
   dependencies:
     are-passive-events-supported "^1.1.1"
     use-latest "^1.2.1"
+
+use-react-screenshot@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/use-react-screenshot/-/use-react-screenshot-3.0.0.tgz#fa4f3bc94b17719041273699d9e04f53987194de"
+  integrity sha512-82+zsJgNWEUsUR7lslLIXMw9BW+xic+epn5Dl2ziedgsP9bz0HM0hfx3E71Kkv1U7F6Hyi4E/jMxuxJPLdpHcg==
 
 use-sidecar@^1.0.1, use-sidecar@^1.0.5:
   version "1.1.2"

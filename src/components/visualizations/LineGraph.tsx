@@ -113,34 +113,6 @@ const LineGraph = ({
                     }}
                 />
             </Stack>
-            {/* <Box>
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 841.9 595.3"
-                >
-                    <g class="layers" style="opacity: 1;">
-                        <g class="legendfill"></g>
-                        <g class="legendlines">
-                            <path
-                                class="js-line"
-                                d="M5,0h30"
-                                style="fill: none; stroke: rgb(31, 119, 180); stroke-opacity: 1; stroke-width: 2px;"
-                            ></path>
-                        </g>
-                        <g class="legendsymbols">
-                            <g class="legendpoints">
-                                <path
-                                    class="scatterpts"
-                                    transform="translate(20,0)"
-                                    d="M3,0A3,3 0 1,1 0,-3A3,3 0 0,1 3,0Z"
-                                    style="opacity: 1; stroke-width: 0px; fill: rgb(31, 119, 180); fill-opacity: 1;"
-                                ></path>
-                            </g>
-                        </g>
-                    </g>
-                </svg>
-            </Box> */}
-            <img src="/line.svg" />
         </Stack>
     );
 };

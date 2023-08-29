@@ -1,48 +1,52 @@
 import { Stack } from "@chakra-ui/react";
+import { useMatch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { useEffect } from "react";
-import { useFullScreenHandle, FullScreen } from "react-full-screen";
-import { storeApi } from "../../Events";
+import { useRef } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
+import html2canvas from "html2canvas";
+import JsPDF from "jspdf";
+import { LocationGenerics } from "../../interfaces";
 import { $dashboard, $dashboardType, $settings, $store } from "../../Store";
 import AdminPanel from "../AdminPanel";
 import DynamicDashboard from "../DynamicDashboard";
 import FixedDashboard from "../FixedDashboard";
-import { useMatch } from "@tanstack/react-location";
-import { LocationGenerics } from "../../interfaces";
 
 const Dashboard = () => {
+    const tbl = useRef<HTMLDivElement>(null);
+
     const store = useStore($store);
     const dashboard = useStore($dashboard);
     const dashboardType = useStore($dashboardType);
-    const handle = useFullScreenHandle();
     const settings = useStore($settings);
-
     const {
         params: { templateId },
     } = useMatch<LocationGenerics>();
 
-    useEffect(() => {
-        const callback = async (event: KeyboardEvent) => {
-            if (event.key === "F5" || event.key === "f5") {
-                await handle.enter();
-                if (handle.active) {
-                    storeApi.setIsFullScreen(true);
-                } else {
-                    storeApi.setIsFullScreen(true);
-                }
-            }
-        };
-        document.addEventListener("keydown", callback);
-        return () => {
-            document.removeEventListener("keydown", callback);
-        };
-    }, []);
+    useHotkeys("p", async () => {
+        if (tbl.current) {
+            html2canvas(tbl.current).then((canvas) => {
+                const imageData: any = canvas.toDataURL("img/png");
+                const report = new JsPDF("p", "px", [
+                    canvas.width + 20,
+                    canvas.height + 20,
+                ]);
+                report.addImage(
+                    imageData,
+                    "PNG",
+                    0,
+                    0,
+                    canvas.width,
+                    canvas.height
+                );
+                report.save("download.pdf");
+            });
+        }
+    });
 
     const padding =
         (store.isAdmin && dashboard.id === settings.template) || !templateId
             ? dashboard.spacing
             : 0;
-
     return (
         <Stack
             w={store.isFullScreen ? "100vw" : "100%"}
@@ -50,29 +54,17 @@ const Dashboard = () => {
             bg={dashboard.bg}
             spacing="0"
             p={`${padding}px`}
+            id={dashboard.id}
+            ref={tbl}
         >
             {((store.isAdmin && dashboard.id === settings.template) ||
                 !templateId) && <AdminPanel />}
 
-            <Stack
-                h={
-                    store.isFullScreen
-                        ? "100vh"
-                        : store.isAdmin
-                        ? "calc(100vh - 96px)"
-                        : "calc(100vh - 48px)"
-                }
-                // p={`${dashboard.spacing}px`}
-                spacing={0}
-            >
-                {/* <FullScreen handle={handle}> */}
-                {dashboardType === "dynamic" ? (
-                    <DynamicDashboard />
-                ) : (
-                    <FixedDashboard dashboard={dashboard} />
-                )}
-                {/* </FullScreen> */}
-            </Stack>
+            {dashboardType === "dynamic" ? (
+                <DynamicDashboard />
+            ) : (
+                <FixedDashboard dashboard={dashboard} />
+            )}
         </Stack>
     );
 };
