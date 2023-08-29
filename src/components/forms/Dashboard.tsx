@@ -25,8 +25,10 @@ const Dashboard = () => {
     useHotkeys("p", async () => {
         if (tbl.current) {
             html2canvas(tbl.current).then((canvas) => {
+                canvas.style.width = `${canvas.width}px`;
+                canvas.style.height = `${canvas.height}px`;
                 const imageData: any = canvas.toDataURL("img/png");
-                const report = new JsPDF("p", "px", [
+                const report = new JsPDF("l", "px", [
                     canvas.width + 20,
                     canvas.height + 20,
                 ]);
