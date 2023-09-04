@@ -22,7 +22,7 @@ const Dashboard = () => {
         params: { templateId },
     } = useMatch<LocationGenerics>();
 
-    useHotkeys("p", async () => {
+    useHotkeys("ctrl+p", async () => {
         if (tbl.current) {
             html2canvas(tbl.current).then((canvas) => {
                 canvas.style.width = `${canvas.width}px`;
@@ -44,7 +44,6 @@ const Dashboard = () => {
             });
         }
     });
-
     const padding =
         (store.isAdmin && dashboard.id === settings.template) || !templateId
             ? dashboard.spacing
@@ -65,8 +64,8 @@ const Dashboard = () => {
             {dashboardType === "dynamic" ? (
                 <DynamicDashboard />
             ) : (
-                <FixedDashboard dashboard={dashboard} />
-            )}
+                    <FixedDashboard dashboard={dashboard} />
+                )}
         </Stack>
     );
 };

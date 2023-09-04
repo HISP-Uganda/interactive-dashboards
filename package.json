@@ -69,6 +69,7 @@
         "file-saver": "^2.0.5",
         "framer-motion": "4.1.17",
         "html2canvas": "^1.4.1",
+        "html2pdf": "^0.0.11",
         "http-proxy-middleware": "^2.0.6",
         "immer": "^9.0.21",
         "jsoneditor": "^9.9.0",
@@ -80,6 +81,7 @@
         "mathjs": "^11.5.0",
         "plotly.js": "^2.21.0",
         "postcss-loader": "^7.3.3",
+        "puppeteer": "^21.1.1",
         "react-color": "^2.19.3",
         "react-colorful": "^5.5.1",
         "react-contexify": "^6.0.0",
@@ -115,5 +117,5 @@
     },
     "main": "index.js",
     "repository": "https://github.com/carapai/interactive-dashboards.git",
-    "author": "Charles Olupot <olupotcharles@gmail.com>"
+    "author": "Charles Olupot && Albert Mutesasira"
 }

@@ -1,7 +1,7 @@
 import { Icon, Stack, Text } from "@chakra-ui/react";
 import { useNavigate } from "@tanstack/react-location";
 import { BsFolderPlus } from "react-icons/bs";
-import { MdAddchart, MdInput, MdOutlineDashboard } from "react-icons/md";
+import { MdAddchart, MdInput, MdOutlineDashboard, MdResetTv, MdQueryStats } from "react-icons/md";
 import { boolean } from "mathjs";
 
 const Menus = () => {
@@ -76,7 +76,7 @@ const Menus = () => {
                 }}
                 transition="ease-in-out 0.3s"
             >
-                <Icon as={MdAddchart} w={8} h={8} color="blue.600" />
+                <Icon as={MdQueryStats} w={8} h={8} color="blue.600" />
                 <Text>Indicators</Text>
             </Stack>
             <Stack
@@ -108,7 +108,7 @@ const Menus = () => {
                 }}
                 transition="ease-in-out 0.3s"
             >
-                <Icon as={MdOutlineDashboard} w={8} h={8} color="blue.600" />
+                <Icon as={MdResetTv} w={8} h={8} color="blue.600" />
                 <Text>Presentations</Text>
             </Stack>
         </Stack>
