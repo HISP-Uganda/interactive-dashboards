@@ -26,6 +26,8 @@ import Carousel from "./visualizations/Carousel";
 import TabPanelVisualization from "./visualizations/TabPanelVisualization";
 import Visualization from "./visualizations/Visualization";
 import VisualizationTitle from "./visualizations/VisualizationTitle";
+import { AiOutlineLineChart, AiOutlineBarChart, AiOutlineNumber } from "react-icons/ai";
+import { FaGlobeAfrica } from "react-icons/fa";
 
 const SectionVisualization = (section: ISection) => {
     const dashboard = useStore($dashboard);
@@ -79,10 +81,10 @@ const SectionVisualization = (section: ISection) => {
                     <Marquee
                         velocity={60}
                         direction="rtl"
-                        onFinish={() => {}}
+                        onFinish={() => { }}
                         resetAfterTries={200}
                         scatterRandomly={false}
-                        onInit={() => {}}
+                        onInit={() => { }}
                     >
                         {section.visualizations.map((visualization) => {
                             return (
@@ -110,8 +112,8 @@ const SectionVisualization = (section: ISection) => {
                 templateRows={templateRows}
                 gap={`${dashboard.spacing}px`}
                 flex={1}
-                // alignItems="center"
-                // justifyContent="center"
+            // alignItems="center"
+            // justifyContent="center"
             >
                 {section.visualizations.map((visualization) => {
                     return (
@@ -200,16 +202,56 @@ const SectionVisualization = (section: ISection) => {
                 >
                     Edit
                 </Item>
-                <Item onClick={() => displayFull()}>Expand</Item>
                 <Separator />
-                <Item onClick={() => dashboardApi.deleteSection(section.id)}>
-                    Delete
+                <Item onClick={() => displayFull()}>Full Screen</Item>
+                <Separator />
+                <Item onClick={() =>
+                    dashboardApi.changeVisualizationType({
+                        section,
+                        visualization: "line",
+                    })
+                } icon={<AiOutlineLineChart />}
+                >
+                    View as Line
                 </Item>
                 <Separator />
-                <Submenu label="Submenu">
+                <Item onClick={() =>
+                    dashboardApi.changeVisualizationType({
+                        section,
+                        visualization: "bar",
+                    })
+                }
+                    icon={<AiOutlineBarChart />}>
+                    View as Column
+                </Item>
+                <Separator />
+                <Item onClick={() =>
+                    dashboardApi.changeVisualizationType({
+                        section,
+                        visualization: "map",
+                    })
+                }
+                    icon={<FaGlobeAfrica />}>
+                    View as Map
+                </Item>
+                <Separator />
+                <Item onClick={() =>
+                    dashboardApi.changeVisualizationType({
+                        section,
+                        visualization: "single",
+                    })
+                }
+                    icon={<AiOutlineNumber />}>
+                    View as Single
+                </Item>
+                <Separator />
+                <Item onClick={() => dashboardApi.deleteSection(section.id)}>
+                    Delete Section
+                </Item>
+                {/* <Submenu label="Submenu">
                     <Item onClick={handleItemClick}>Sub Item 1</Item>
                     <Item onClick={handleItemClick}>Sub Item 2</Item>
-                </Submenu>
+                </Submenu> */}
             </Menu>
 
             <FullScreen section={section} onUnFull={onUnFull} isFull={isFull} />
