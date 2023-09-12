@@ -5,6 +5,7 @@ import { useDHIS2Visualizations } from "../../Queries";
 import { createAxios } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import SelectProperty from "./SelectProperty";
+import { sectionApi } from "../../Events";
 
 export default function DHIS2Visualizations({
     dataSource,
@@ -34,6 +35,7 @@ export default function DHIS2Visualizations({
                     const o: Option = {
                         label: d.name || "",
                         value: d.id,
+                        id: d.type,
                     };
                     return o;
                 })}

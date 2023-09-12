@@ -9,7 +9,9 @@ export default function SelectProperty({
     attribute,
     title,
     options,
-}: VizProps & { options: Option[] }) {
+}: VizProps & {
+    options: Option[];
+}) {
     return (
         <Stack>
             <Text>{title}</Text>

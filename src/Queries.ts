@@ -1,20 +1,23 @@
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+import { colorSets } from "@dhis2/analytics";
 import { Event } from "effector";
+
 import {
     every,
     flatten,
     fromPairs,
     groupBy,
+    isArray,
     isEmpty,
     max,
     min,
     uniq,
-    isArray,
+    sortBy,
 } from "lodash";
 import { getOr } from "lodash/fp";
-import { evaluate, string } from "mathjs";
+import { evaluate } from "mathjs";
 import { db } from "./db";
 import {
     categoryApi,
@@ -22,11 +25,13 @@ import {
     dashboardTypeApi,
     dataSetsApi,
     dataSourceApi,
+    settingsApi,
     storeApi,
     visualizationDataApi,
     visualizationDimensionsApi,
     visualizationMetadataApi,
-    settingsApi,
+    totalsApi,
+    sectionApi,
 } from "./Events";
 import {
     DataNode,
@@ -52,6 +57,9 @@ import {
     getSearchParams,
     merge2DataSources,
     processMap,
+    getAnalyticsQuery,
+    findParameters,
+    processAnalyticsData,
 } from "./utils/utils";
 
 type QueryProps = {
@@ -760,12 +768,20 @@ export const getDHIS2Resources = async <T>({
                 params,
             },
         });
+
+        const { pager } = data;
+        let total = params?.pageSize || 10;
+
+        if (pager && pager.total) {
+            total = pager.total;
+        }
+
+        totalsApi.set(Number(total));
+
         if (resourceKey) {
             return getOr<T[]>([], resourceKey, data);
         }
         return data;
-    } else if (isCurrentDHIS2 && resource) {
-        return;
     } else if (api && resource) {
         const { data } = await api.get<{ [key: string]: T[] }>(resource, {
             params,
@@ -845,7 +861,7 @@ export const useDHIS2Resources = ({
     return useQuery<INamed[], Error>(
         [resource, page, pageSize, q, isCurrentDHIS2],
         async () => {
-            return getDHIS2Resources<INamed>({
+            const data = await getDHIS2Resources<INamed>({
                 isCurrentDHIS2,
                 resource,
                 params,
@@ -853,6 +869,8 @@ export const useDHIS2Resources = ({
                 engine,
                 resourceKey: rKey,
             });
+
+            return data;
         }
     );
 };
@@ -889,19 +907,22 @@ export const useDHIS2Visualizations = (
     const params: {
         [key: string]: string;
     } = {
-        fields: "id,name",
+        fields: "id,name,type",
         paging: "false",
     };
-    return useQuery<INamed[], Error>(["dhis-visualizations"], async () => {
-        return getDHIS2Resources<INamed>({
-            isCurrentDHIS2,
-            resource: "visualizations.json",
-            resourceKey: "visualizations",
-            params,
-            api,
-            engine,
-        });
-    });
+    return useQuery<Array<INamed & { type: string }>, Error>(
+        ["dhis-visualizations"],
+        async () => {
+            return getDHIS2Resources<INamed & { type: string }>({
+                isCurrentDHIS2,
+                resource: "visualizations.json",
+                resourceKey: "visualizations",
+                params,
+                api,
+                engine,
+            });
+        }
+    );
 };
 
 export const useOrganisationUnitLevels = (
@@ -1189,10 +1210,18 @@ const queryData = async (
     let metadata: { [key: string]: string } = {};
 
     const data = processDHIS2Data(
-        flattenDHIS2Data(realData, vq?.flatteningOption),
+        flattenDHIS2Data(realData, {
+            flatteningOption: vq?.flatteningOption,
+            includeEmpty: vq?.includeEmpty,
+            valueIfEmpty: vq?.valueIfEmpty,
+        }),
         {
             flatteningOption: vq?.flatteningOption,
-            joinData: flattenDHIS2Data(joinData, vq?.joinTo?.flatteningOption),
+            joinData: flattenDHIS2Data(joinData, {
+                flatteningOption: vq?.joinTo?.flatteningOption,
+                includeEmpty: vq?.joinTo?.includeEmpty,
+                valueIfEmpty: vq?.joinTo?.valueIfEmpty,
+            }),
             otherFilters,
             fromColumn: vq?.fromColumn,
             toColumn: vq?.toColumn,
@@ -1566,6 +1595,8 @@ export const useVisualizationMetadata = (
                                 query: joiner.query,
                                 dataDimensions: joiner.dataDimensions,
                                 aggregationType: joiner.aggregationType,
+                                valueIfEmpty: joiner.valueIfEmpty,
+                                includeEmpty: joiner.includeEmpty,
                                 dataSource: dataSources.find(
                                     (ds) => ds.id === joiner?.dataSource
                                 ),
@@ -1585,6 +1616,8 @@ export const useVisualizationMetadata = (
                             query: numerator1.query,
                             dataDimensions: numerator1.dataDimensions,
                             aggregationType: numerator1.aggregationType,
+                            valueIfEmpty: numerator1.valueIfEmpty,
+                            includeEmpty: numerator1.includeEmpty,
                             dataSource: dataSources.find(
                                 (ds) => ds.id === numerator1?.dataSource
                             ),
@@ -1934,4 +1967,78 @@ export const useFilterResources = (dashboards: IDashboard[]) => {
 
 export const useGlobal = (global: { [key: string]: any[] }) => {
     const engine = useDataEngine();
+};
+
+export const useDHIS2Visualization = (viz: IVisualization) => {
+    const engine = useDataEngine();
+    return useQuery<
+        { data: any; visualization: IVisualization; metadata: any[] },
+        Error
+    >(
+        ["dhis2-visualization", viz.id, viz.properties["visualization"]],
+        async () => {
+            if (viz.properties?.["visualization"]) {
+                const query = {
+                    visualization: {
+                        resource: `visualizations/${viz.properties["visualization"]}.json`,
+                        params: {
+                            fields: "aggregationType,axes,colSubTotals,colTotals,colorSet,columns[dimension,filter,legendSet[id,name,displayName,displayShortName],items[dimensionItem~rename(id),name,displayName,displayShortName,dimensionItemType]],completedOnly,created,cumulative,cumulativeValues,description,digitGroupSeparator,displayDensity,displayDescription,displayName,displayShortName,favorite,favorites,filters[dimension,filter,legendSet[id,name,displayName,displayShortName],items[dimensionItem~rename(id),name,displayName,displayShortName,dimensionItemType]],fixColumnHeaders,fixRowHeaders,fontSize,fontStyle,hideEmptyColumns,hideEmptyRowItems,hideEmptyRows,hideSubtitle,hideTitle,href,id,interpretations[id,created],lastUpdated,lastUpdatedBy,legend[showKey,style,strategy,set[id,name,displayName,displayShortName,legends[endValue,color,startValue,id]]],measureCriteria,name,noSpaceBetweenColumns,numberType,outlierAnalysis,parentGraphMap,percentStackedValues,publicAccess,regression,regressionType,reportingParams,rowSubTotals,rowTotals,rows[dimension,filter,legendSet[id,name,displayName,displayShortName],items[dimensionItem~rename(id),name,displayName,displayShortName,dimensionItemType]],series,seriesKey,shortName,showData,showDimensionLabels,showHierarchy,skipRounding,sortOrder,subscribed,subscribers,subtitle,timeField,title,topLimit,translations,type,user[name,displayName,displayShortName,userCredentials[username]],userAccesses,userGroupAccesses,yearlySeries,!attributeDimensions,!attributeValues,!category,!categoryDimensions,!categoryOptionGroupSetDimensions,!code,!columnDimensions,!dataDimensionItems,!dataElementDimensions,!dataElementGroupSetDimensions,!externalAccess,!filterDimensions,!itemOrganisationUnitGroups,!organisationUnitGroupSetDimensions,!organisationUnitLevels,!organisationUnits,!periods,!programIndicatorDimensions,!relativePeriods,!rowDimensions,!userOrganisationUnit,!userOrganisationUnitChildren,!userOrganisationUnitGrandChildren",
+                        },
+                    },
+                };
+
+                const { visualization }: any = await engine.query(query);
+                console.log(visualization);
+                const params = getAnalyticsQuery(visualization);
+
+                const availableColors =
+                    visualization.legend?.set?.legends || [];
+
+                const thresholds: Threshold[] = availableColors.map(
+                    ({ id, startValue, color }: any) => ({
+                        id,
+                        value: startValue,
+                        color,
+                    })
+                );
+                const {
+                    data: { headers, rows, metaData },
+                }: any = await engine.query({
+                    data: { resource: `analytics.json?${params}` },
+                });
+
+                const currentVisualization: IVisualization = {
+                    ...viz,
+                    name: visualization.name,
+                    properties: {
+                        ...viz.properties,
+                        ...findParameters(visualization),
+                        ["data.thresholds"]: thresholds,
+                    },
+                };
+                const data = processAnalyticsData({
+                    headers,
+                    rows,
+                    metaData,
+                    options: { includeEmpty: true, valueIfEmpty: "" },
+                });
+                console.log(data);
+                sectionApi.setVisualization(currentVisualization);
+                visualizationDataApi.updateVisualizationData({
+                    visualizationId: currentVisualization.id,
+                    data,
+                });
+                return {
+                    visualization: currentVisualization,
+                    metadata: visualization,
+                    data,
+                };
+            }
+            return {
+                visualization: viz,
+                metadata: {},
+                data: [],
+            };
+        }
+    );
 };

@@ -68,6 +68,8 @@
         "express": "^4.18.2",
         "file-saver": "^2.0.5",
         "framer-motion": "4.1.17",
+        "highcharts": "^11.1.0",
+        "highcharts-react-official": "^3.2.1",
         "html2canvas": "^1.4.1",
         "html2pdf": "^0.0.11",
         "http-proxy-middleware": "^2.0.6",

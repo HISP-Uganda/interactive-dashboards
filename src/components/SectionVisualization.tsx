@@ -16,6 +16,7 @@ import {
     Submenu,
     useContextMenu,
 } from "react-contexify";
+import { useElementSize } from "usehooks-ts";
 import "react-contexify/dist/ReactContexify.css";
 import Marquee from "react-marquee-slider";
 import { sectionApi, dashboardApi } from "../Events";
@@ -26,7 +27,11 @@ import Carousel from "./visualizations/Carousel";
 import TabPanelVisualization from "./visualizations/TabPanelVisualization";
 import Visualization from "./visualizations/Visualization";
 import VisualizationTitle from "./visualizations/VisualizationTitle";
-import { AiOutlineLineChart, AiOutlineBarChart, AiOutlineNumber } from "react-icons/ai";
+import {
+    AiOutlineLineChart,
+    AiOutlineBarChart,
+    AiOutlineNumber,
+} from "react-icons/ai";
 import { FaGlobeAfrica } from "react-icons/fa";
 
 const SectionVisualization = (section: ISection) => {
@@ -34,6 +39,7 @@ const SectionVisualization = (section: ISection) => {
     const { show } = useContextMenu({
         id: section.id,
     });
+    const [squareRef, { height }] = useElementSize();
     const store = useStore($store);
     const templateColumns = useBreakpointValue({
         base: "auto",
@@ -59,7 +65,7 @@ const SectionVisualization = (section: ISection) => {
     }
 
     const displays = {
-        carousel: <Carousel {...section} />,
+        carousel: <Carousel section={section} height={height} />,
         marquee: (
             <Stack
                 key={section.id}
@@ -81,10 +87,10 @@ const SectionVisualization = (section: ISection) => {
                     <Marquee
                         velocity={60}
                         direction="rtl"
-                        onFinish={() => { }}
+                        onFinish={() => {}}
                         resetAfterTries={200}
                         scatterRandomly={false}
-                        onInit={() => { }}
+                        onInit={() => {}}
                     >
                         {section.visualizations.map((visualization) => {
                             return (
@@ -112,8 +118,8 @@ const SectionVisualization = (section: ISection) => {
                 templateRows={templateRows}
                 gap={`${dashboard.spacing}px`}
                 flex={1}
-            // alignItems="center"
-            // justifyContent="center"
+                // alignItems="center"
+                // justifyContent="center"
             >
                 {section.visualizations.map((visualization) => {
                     return (
@@ -191,6 +197,7 @@ const SectionVisualization = (section: ISection) => {
             h="100%"
             overflow="auto"
             spacing={0}
+            ref={squareRef}
         >
             {displays[section.display] || displays.normal}
             <Menu id={section.id}>
@@ -200,48 +207,56 @@ const SectionVisualization = (section: ISection) => {
                         isOpenApi.onOpen();
                     }}
                 >
-                    Edit
+                    Edit({height})
                 </Item>
                 <Separator />
                 <Item onClick={() => displayFull()}>Full Screen</Item>
                 <Separator />
-                <Item onClick={() =>
-                    dashboardApi.changeVisualizationType({
-                        section,
-                        visualization: "line",
-                    })
-                } icon={<AiOutlineLineChart />}
+                <Item
+                    onClick={() =>
+                        dashboardApi.changeVisualizationType({
+                            section,
+                            visualization: "line",
+                        })
+                    }
+                    icon={<AiOutlineLineChart />}
                 >
                     View as Line
                 </Item>
                 <Separator />
-                <Item onClick={() =>
-                    dashboardApi.changeVisualizationType({
-                        section,
-                        visualization: "bar",
-                    })
-                }
-                    icon={<AiOutlineBarChart />}>
+                <Item
+                    onClick={() =>
+                        dashboardApi.changeVisualizationType({
+                            section,
+                            visualization: "bar",
+                        })
+                    }
+                    icon={<AiOutlineBarChart />}
+                >
                     View as Column
                 </Item>
                 <Separator />
-                <Item onClick={() =>
-                    dashboardApi.changeVisualizationType({
-                        section,
-                        visualization: "map",
-                    })
-                }
-                    icon={<FaGlobeAfrica />}>
+                <Item
+                    onClick={() =>
+                        dashboardApi.changeVisualizationType({
+                            section,
+                            visualization: "map",
+                        })
+                    }
+                    icon={<FaGlobeAfrica />}
+                >
                     View as Map
                 </Item>
                 <Separator />
-                <Item onClick={() =>
-                    dashboardApi.changeVisualizationType({
-                        section,
-                        visualization: "single",
-                    })
-                }
-                    icon={<AiOutlineNumber />}>
+                <Item
+                    onClick={() =>
+                        dashboardApi.changeVisualizationType({
+                            section,
+                            visualization: "single",
+                        })
+                    }
+                    icon={<AiOutlineNumber />}
+                >
                     View as Single
                 </Item>
                 <Separator />

@@ -170,10 +170,13 @@ export default function AdminPanel() {
                         colorScheme="blue"
                         mr={3}
                         onClick={() => isOpenApi.onClose()}
+                        key="btn1"
                     >
                         Discard
                     </Button>,
-                    <Button onClick={() => onApply()}>Apply</Button>,
+                    <Button onClick={() => onApply()} key="btn2">
+                        Apply
+                    </Button>,
                 ]}
                 bodyStyle={{
                     height: "calc(100vh - 150px)",

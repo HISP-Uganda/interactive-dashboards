@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
-import { flatten, isEmpty } from "lodash";
+import { flatten, isEmpty, uniqBy } from "lodash";
 import React from "react";
 import { sectionApi } from "../../Events";
 import { IVisualization, Option } from "../../interfaces";
@@ -90,7 +90,6 @@ const TableProperties = ({
 }) => {
     const data = useStore($visualizationData)[visualization.id] || [];
     const dimensions = useStore($visualizationDimensions)[visualization.id];
-
     const rows = String(visualization.properties["rows"] || "")
         .split(",")
         .filter((x) => !!x);
@@ -104,7 +103,11 @@ const TableProperties = ({
         normalColumns = [...Object.keys(dimensions), "value"];
     }
 
-    const columns = createOptions([...normalColumns, ...SPECIAL_COLUMNS]);
+    const columns = uniqBy(
+        createOptions([...normalColumns, ...SPECIAL_COLUMNS]),
+        "value"
+    );
+
     const { lastRow, lastColumn } = getLast(flatten(data), rows, columns1);
 
     const actualData = flatten(data);
@@ -117,6 +120,7 @@ const TableProperties = ({
         String(visualization.properties["rows"])
             .split(",")
             .filter((x) => !!x) || [];
+
     return (
         <Stack>
             <SimpleAccordion title="Columns">

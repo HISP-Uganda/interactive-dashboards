@@ -54,7 +54,7 @@ type VisualizationProps = {
     section: ISection;
 };
 
-const getVisualization = (
+export const getVisualization = (
     visualization: IVisualization,
     data: any,
     section: ISection
@@ -75,7 +75,7 @@ const getVisualization = (
         )
     );
 
-    const allTypes: any = {
+    const allTypes: { [key: string]: React.ReactNode } = {
         single: (
             <SingleValue
                 data={data}
@@ -291,7 +291,12 @@ const getVisualization = (
             />
         ),
         heatmap: <HeatMap visualization={visualization} section={section} />,
-        dhis2: <DHIS2Visualization visualization={visualization} />,
+        dhis2: (
+            <DHIS2Visualization
+                visualization={visualization}
+                section={section}
+            />
+        ),
         divider: <DividerVisualization />,
     };
     return allTypes[visualization.type];

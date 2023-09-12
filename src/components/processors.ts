@@ -381,6 +381,7 @@ const findMerged = (
                         span: 1,
                         actual: d,
                         position: properties?.[`${d}.position`] || 1,
+                        key: d,
                     };
                 });
             currentValues = orderBy(currentValues, "value", "asc");
@@ -396,6 +397,7 @@ const findMerged = (
                             {
                                 label: `${v.label}${p.label}`,
                                 value: `${v.value}${p.value}`,
+                                key: `${v.key}--${p.value}`,
                                 span: 1,
                                 actual: p.value,
                                 position:
@@ -530,7 +532,11 @@ export const processTable = (
                     ...normal,
                     {
                         key: `${key}rowCount`,
-                        value: { bg: "", value: rows.length, color: "" },
+                        value: {
+                            bg: "",
+                            value: uniqBy("dx", rows).length,
+                            color: "",
+                        },
                     },
                 ];
             })
@@ -662,21 +668,19 @@ export const processGraphs = (
                         };
                     }
                     return {
-                        x: orderBy(
-                            Object.keys(groupedByTheme),
-                            undefined,
-                            "asc"
-                        ).map((k) =>
-                            breakString(
-                                options.metadata[`${k}.name`] ||
-                                    options.dataProperties[`${k}.name`] ||
-                                    k,
-                                25
-                            )
-                        ),
-                        y: Object.entries(groupedByTheme).map(
-                            ([k, val]) => val.length
-                        ),
+                        x: Object.keys(groupedByTheme)
+                            .sort()
+                            .map((k) =>
+                                breakString(
+                                    options.metadata[`${k}.name`] ||
+                                        options.dataProperties[`${k}.name`] ||
+                                        k,
+                                    25
+                                )
+                            ),
+                        y: Object.keys(groupedByTheme)
+                            .sort()
+                            .map((k) => groupedByTheme[k].length),
                         name: key,
                         type: "bar",
                         ...availableProperties.data,
@@ -843,9 +847,9 @@ export const processPieChart = (
             labels: x,
             values: y,
             type: "pie",
-            textinfo: "label+percent+name",
-            hoverinfo: "label+percent+name",
-            textposition: "inside",
+            textinfo: "label+percent",
+            hoverinfo: "label+percent",
+            textposition: "auto",
             textfont: {
                 size: [16, 16, 16],
                 color:
@@ -853,7 +857,7 @@ export const processPieChart = (
                         ? colors.map((c) => invertHex(c, true))
                         : undefined,
             },
-            hole: 0.1,
+            // hole: 0.1,
             marker: {
                 colors: colors.length > 0 ? colors : undefined,
             },

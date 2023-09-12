@@ -20,6 +20,7 @@ import SunburstGraphProperties from "../properties/SunBurstChartProperties";
 import TableProperties from "../properties/TableProperties";
 import TextVisualisationProperties from "../properties/TextVisualisationproperties";
 import DashboardTitleProperties from "../properties/DashboardTitleProperties";
+import { Stack } from "@chakra-ui/react";
 type VizProps = {
     visualization: IVisualization;
 };
@@ -64,7 +65,12 @@ const VisualizationProperties = ({ visualization }: VizProps) => {
         }
         return null;
     };
-    return displayProperties(visualization.type);
+    return (
+        <Stack spacing="30px">
+            {displayProperties(visualization.type)}
+            {displayProperties(visualization.properties["type"])}
+        </Stack>
+    );
 };
 
 export default VisualizationProperties;
