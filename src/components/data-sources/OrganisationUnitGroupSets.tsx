@@ -23,19 +23,18 @@ import { useStore } from "effector-react";
 import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
 import { datumAPi } from "../../Events";
-import { $hasDHIS2, $paginations, $visualizationQuery } from "../../Store";
+import { MetadataAPI } from "../../interfaces";
+import { useDHIS2Resources } from "../../Queries";
+import { $totals, $visualizationQuery } from "../../Store";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import GlobalSearchFilter from "./GlobalSearchFilter";
-import { MetadataAPI } from "../../interfaces";
-import { useDHIS2Resources } from "../../Queries";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
 const OrganizationUnitGroupSets = ({ api, isCurrentDHIS2 }: MetadataAPI) => {
-    const paginations = useStore($paginations);
-    const hasDHIS2 = useStore($hasDHIS2);
+    const total = useStore($totals);
     const visualizationQuery = useStore($visualizationQuery);
     const [q, setQ] = useState<string>("");
 
@@ -54,7 +53,7 @@ const OrganizationUnitGroupSets = ({ api, isCurrentDHIS2 }: MetadataAPI) => {
         pageSize,
         setPageSize,
     } = usePagination({
-        total: paginations.totalOrganisationUnitGroupSets,
+        total,
         limits: {
             outer: OUTER_LIMIT,
             inner: INNER_LIMIT,

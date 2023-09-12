@@ -45,6 +45,7 @@ import {
     $calculated,
     $visualizationDimensions,
     $presentation,
+    $totals,
 } from "./Store";
 
 export const loadDefaults = domain.createEvent<{
@@ -564,7 +565,17 @@ export const sectionApi = createApi($section, {
         );
         return { ...state, visualizations };
     },
-
+    setVisualization: (state, visualization: IVisualization) => {
+        const visualizations: IVisualization[] = state.visualizations.map(
+            (v: IVisualization) => {
+                if (v.id === visualization.id) {
+                    return visualization;
+                }
+                return v;
+            }
+        );
+        return { ...state, visualizations };
+    },
     setVisualizations: (state, visualizations: IVisualization[]) => {
         return { ...state, visualizations };
     },
@@ -750,6 +761,10 @@ export const presentationApi = createApi($presentation, {
         console.log(presentation);
         return presentation;
     },
+});
+
+export const totalsApi = createApi($totals, {
+    set: (_, value: number) => value,
 });
 
 // export const updateVisualizationData = domain.createEvent<{

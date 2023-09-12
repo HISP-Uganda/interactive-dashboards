@@ -25,7 +25,7 @@ import { ChangeEvent, useState } from "react";
 import { datumAPi } from "../../Events";
 import { MetadataAPI } from "../../interfaces";
 import { useDHIS2Resources } from "../../Queries";
-import { $hasDHIS2, $paginations, $visualizationQuery } from "../../Store";
+import { $paginations, $visualizationQuery, $totals } from "../../Store";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import GlobalSearchFilter from "./GlobalSearchFilter";
@@ -35,6 +35,7 @@ const INNER_LIMIT = 4;
 
 const DataElementGroups = ({ api, isCurrentDHIS2 }: MetadataAPI) => {
     const paginations = useStore($paginations);
+    const total = useStore($totals);
     const visualizationQuery = useStore($visualizationQuery);
     const { previousType, isGlobal } = computeGlobalParams(
         "deg",
@@ -53,7 +54,7 @@ const DataElementGroups = ({ api, isCurrentDHIS2 }: MetadataAPI) => {
         pageSize,
         setPageSize,
     } = usePagination({
-        total: paginations.totalDataElementGroups,
+        total,
         limits: {
             outer: OUTER_LIMIT,
             inner: INNER_LIMIT,

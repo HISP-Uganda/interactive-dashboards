@@ -172,6 +172,8 @@ export const $paginations = domain.createStore<IPagination>({
     totalDataElementGroupSets: 0,
 });
 
+export const $totals = domain.createStore<number>(0);
+
 export const $filters = domain.createStore<{ [key: string]: any }>({});
 
 export const $size = domain.createStore<ScreenSize>("md");

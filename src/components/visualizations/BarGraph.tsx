@@ -47,7 +47,7 @@ const BarGraph = ({
     const { chartData, allSeries } = processGraphs(data, {
         order: visualization.order,
         show: visualization.show,
-        summarize: visualization.properties["summarize"] || false,
+        summarize: visualization.properties?.["summarize"] || false,
         dataProperties: visualization.properties,
         category: category,
         series: series,
@@ -117,7 +117,7 @@ const BarGraph = ({
                             >
                                 <Text
                                     bgColor={
-                                        visualization.properties[
+                                        visualization.properties?.[
                                             `${series}.bg`
                                         ] || colors[index]
                                     }
@@ -127,7 +127,7 @@ const BarGraph = ({
                                     &nbsp;
                                 </Text>
                                 <Text noOfLines={[1, 2, 3]}>
-                                    {visualization.properties[
+                                    {visualization.properties?.[
                                         `${series}.name`
                                     ] || series}
                                 </Text>

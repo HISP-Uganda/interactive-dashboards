@@ -17,14 +17,16 @@ const NUMBER_OF_CODEPOINTS = ALLOWED_CHARS.length;
 const CODESIZE = 11;
 
 function randomWithMax(max: number) {
-  return Math.floor(Math.random() * max);
+    return Math.floor(Math.random() * max);
 }
 
 export function generateUid() {
-  let randomChars = letters.charAt(randomWithMax(letters.length));
+    let randomChars = letters.charAt(randomWithMax(letters.length));
 
-  for (let i = 1; i < CODESIZE; i += 1) {
-    randomChars += ALLOWED_CHARS.charAt(randomWithMax(NUMBER_OF_CODEPOINTS));
-  }
-  return randomChars;
+    for (let i = 1; i < CODESIZE; i += 1) {
+        randomChars += ALLOWED_CHARS.charAt(
+            randomWithMax(NUMBER_OF_CODEPOINTS)
+        );
+    }
+    return randomChars;
 }

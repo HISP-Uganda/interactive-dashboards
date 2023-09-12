@@ -34,7 +34,7 @@ const Periods = () => {
                 <Stack direction="row">
                     <PeriodPicker
                         selectedPeriods={selected}
-                        onChange={(items) =>
+                        onChange={(items, remove) =>
                             items.forEach(({ id, value, type, label }) => {
                                 datumAPi.changeDimension({
                                     id: value,
@@ -42,12 +42,12 @@ const Periods = () => {
                                     dimension: "pe",
                                     resource: "pe",
                                     periodType: type,
+                                    remove,
                                     label,
                                 });
                             })
                         }
                     />
-                    <pre>{JSON.stringify(visualizationQuery, null, 2)}</pre>
                 </Stack>
             )}
         </Stack>

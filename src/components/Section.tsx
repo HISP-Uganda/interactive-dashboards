@@ -628,7 +628,6 @@ const Section = () => {
                                         <VisualizationProperties
                                             visualization={visualization}
                                         />
-                                        x
                                     </Stack>
                                 </Stack>
                             )

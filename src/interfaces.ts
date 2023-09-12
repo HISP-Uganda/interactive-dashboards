@@ -98,6 +98,8 @@ export interface IData extends INamed {
     fromColumn?: string;
     toColumn?: string;
     fromFirst?: boolean;
+    includeEmpty?: boolean;
+    valueIfEmpty?: string;
     aggregationType?:
         | "SUM"
         | "AVERAGE"
@@ -122,6 +124,7 @@ export interface IIndicator extends INamed {
 export interface IVisualization extends INamed {
     indicators: Array<string>;
     type: string;
+    actualType?: string;
     refreshInterval?: number;
     overrides: { [key: string]: any };
     properties: { [key: string]: any };
@@ -221,7 +224,7 @@ export type Item = {
 
 export type PickerProps = {
     selectedPeriods: Period[];
-    onChange: (periods: Period[]) => void;
+    onChange: (periods: Period[], remove: boolean) => void;
 };
 export interface IStore {
     showSider: boolean;
@@ -397,6 +400,7 @@ export type Column = {
     span: number;
     actual: string;
     position: number;
+    key: string;
 };
 
 export type RelativePeriodType =

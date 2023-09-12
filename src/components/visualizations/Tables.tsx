@@ -1,38 +1,36 @@
 import {
     Box,
+    Button,
+    Flex,
     Stack,
     Table,
-    Button,
     Tbody,
     Td,
     Th,
     Thead,
     Tr,
-    Flex,
 } from "@chakra-ui/react";
-import { useStore } from "effector-react";
-import { flatten, orderBy } from "lodash";
+import JsPDF from "jspdf";
+import { flatten } from "lodash";
 import React, { useRef } from "react";
 import { useElementSize } from "usehooks-ts";
 import { ChartProps, Column, Threshold } from "../../interfaces";
-import { $visualizationMetadata } from "../../Store";
 import { SPECIAL_COLUMNS } from "../constants";
 import { invertHex, processTable } from "../processors";
-import JsPDF from "jspdf";
 
 interface TableProps extends ChartProps {}
 
 const Tables = ({ visualization, data, dimensions }: TableProps) => {
-    const [squareRef, { height }] = useElementSize();
+    const [squareRef, { height, width }] = useElementSize();
     const tbl = useRef<HTMLTableElement>(null);
     const flattenedData = flatten(data);
-    const metadata = useStore($visualizationMetadata)[visualization.id];
-    const rows = String(visualization.properties["rows"] || "").split(",");
-    const columns = String(visualization.properties["columns"] || "").split(
+    // const metadata = useStore($visualizationMetadata)[visualization.id];
+    const rows = String(visualization.properties?.["rows"] ?? "").split(",");
+    const columns = String(visualization.properties?.["columns"] ?? "").split(
         ","
     );
     const generatePDF = () => {
-        const report = new JsPDF("landscape", "pt", "a1");
+        const report = new JsPDF("landscape", "px", "a1");
         if (tbl.current) {
             report.html(tbl.current).then(() => {
                 report.save("report.pdf");
@@ -40,10 +38,10 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
         }
     };
     const thresholds: Threshold[] =
-        visualization.properties["data.thresholds"] || [];
-    const aggregation = visualization.properties["aggregation"] || "count";
+        visualization.properties?.["data.thresholds"] ?? [];
+    const aggregation = visualization.properties?.["aggregation"] ?? "count";
     const aggregationColumn =
-        visualization.properties["aggregationColumn"] || "";
+        visualization.properties?.["aggregationColumn"] ?? "";
 
     let { finalColumns, finalData, finalRows } = processTable(
         flattenedData,
@@ -55,12 +53,13 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
         dimensions,
         visualization.properties
     );
+
     const findOthers = (col: Column) => {
         return { bg: visualization.properties[`${col.actual}.bg`] };
     };
 
     const findLabel = (data: any) => {
-        return metadata?.[data] || data;
+        return data;
     };
 
     return (
@@ -76,6 +75,7 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                 <Box
                     position="relative"
                     overflow="auto"
+                    whiteSpace="nowrap"
                     h={`${height}px`}
                     w="100%"
                 >
@@ -83,11 +83,11 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                         variant="unstyled"
                         w="100%"
                         bg="white"
-                        size={visualization.properties["cellHeight"]}
+                        size={visualization.properties?.["cellHeight"]}
                         style={{ borderSpacing: 0, borderCollapse: "collapse" }}
                         ref={tbl}
                     >
-                        {visualization.properties["showHeaders"] && (
+                        {visualization.properties?.["showHeaders"] && (
                             <Thead>
                                 {finalColumns.map((col, index) => (
                                     <Tr key={index}>
@@ -182,94 +182,91 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                         )}
 
                         <Tbody>
-                            {finalRows.map((rows) => {
-                                return rows.map((row, index) => (
-                                    <Tr key={row.value}>
-                                        {finalRows.map((r) => {
-                                            return (
-                                                <Td
-                                                    key={r[index].value}
-                                                    borderColor="#DDDDDD"
-                                                    borderWidth="thin"
-                                                    borderStyle="solid"
-                                                >
-                                                    {findLabel(
-                                                        visualization
-                                                            .properties[
-                                                            `${r[index].actual}.name`
-                                                        ] || r[index].actual
-                                                    )}
-                                                </Td>
+                            {finalRows[finalRows.length - 1].map(
+                                (row, index) => {
+                                    const currentKey = row.key.split("--");
+                                    let display: React.ReactNode = null;
+                                    for (let i = 0; i < finalRows.length; i++) {
+                                        if (
+                                            index % finalRows[i][0].span ===
+                                            0
+                                        ) {
+                                            display = (
+                                                <>
+                                                    {finalRows
+                                                        .slice(i)
+                                                        .map((i1, iw) => (
+                                                            <Td
+                                                                borderColor="#DDDDDD"
+                                                                borderWidth="thin"
+                                                                borderStyle="solid"
+                                                                rowSpan={
+                                                                    i1[i].span
+                                                                }
+                                                            >
+                                                                {
+                                                                    currentKey[
+                                                                        finalRows.length -
+                                                                            finalRows.slice(
+                                                                                i
+                                                                            )
+                                                                                .length +
+                                                                            iw
+                                                                    ]
+                                                                }
+                                                            </Td>
+                                                        ))}
+                                                </>
                                             );
-                                        })}
-                                        {columns
-                                            .filter(
-                                                (c) =>
-                                                    SPECIAL_COLUMNS.indexOf(
-                                                        c
-                                                    ) !== -1
-                                            )
-                                            .map((c) => (
-                                                <Td
-                                                    borderColor="#DDDDDD"
-                                                    borderWidth="thin"
-                                                    borderStyle="solid"
-                                                    key={c}
-                                                    textAlign={
-                                                        visualization
-                                                            .properties[
-                                                            "columnAlignment"
-                                                        ]
-                                                    }
-                                                >
-                                                    {
-                                                        finalData[
-                                                            `${row.value}${c}`
-                                                        ]?.["value"]
-                                                    }
-                                                </Td>
-                                            ))}
-                                        {finalColumns.length > 0 &&
-                                            finalColumns[
-                                                finalColumns.length - 1
-                                            ].map((col) => {
-                                                return (
-                                                    <Td
-                                                        key={col.value}
-                                                        borderColor="#DDDDDD"
-                                                        borderWidth="thin"
-                                                        borderStyle="solid"
-                                                        textAlign={
-                                                            visualization
-                                                                .properties[
-                                                                "columnAlignment"
-                                                            ]
-                                                        }
-                                                        {...findOthers(col)}
-                                                        bg={
-                                                            finalData[
-                                                                `${row.value}${col.value}`
-                                                            ]?.["bg"] || "white"
-                                                        }
-                                                        color={invertHex(
-                                                            finalData[
-                                                                `${row.value}${col.value}`
-                                                            ]?.["bg"] ||
-                                                                "white",
-                                                            true
-                                                        )}
-                                                    >
-                                                        {
-                                                            finalData[
-                                                                `${row.value}${col.value}`
-                                                            ]?.["value"]
-                                                        }
-                                                    </Td>
-                                                );
-                                            })}
-                                    </Tr>
-                                ));
-                            })}
+                                            break;
+                                        }
+                                    }
+                                    return (
+                                        <Tr>
+                                            {display}
+                                            {finalColumns.length > 0 &&
+                                                finalColumns[
+                                                    finalColumns.length - 1
+                                                ].map((col) => {
+                                                    return (
+                                                        <Td
+                                                            key={col.value}
+                                                            borderColor="#DDDDDD"
+                                                            borderWidth="thin"
+                                                            borderStyle="solid"
+                                                            textAlign={
+                                                                visualization
+                                                                    .properties[
+                                                                    "columnAlignment"
+                                                                ]
+                                                            }
+                                                            {...findOthers(col)}
+                                                            bg={
+                                                                finalData[
+                                                                    `${row.value}${col.value}`
+                                                                ]?.["bg"] ||
+                                                                "white"
+                                                            }
+                                                            color={invertHex(
+                                                                finalData[
+                                                                    `${row.value}${col.value}`
+                                                                ]?.["bg"] ||
+                                                                    "white",
+                                                                true
+                                                            )}
+                                                        >
+                                                            {
+                                                                finalData[
+                                                                    `${row.value}${col.value}`
+                                                                ]?.["value"]
+                                                            }
+                                                        </Td>
+                                                    );
+                                                })}
+                                        </Tr>
+                                    );
+                                }
+                            )}
                         </Tbody>
                     </Table>
                 </Box>

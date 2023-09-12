@@ -21,7 +21,6 @@ const LineGraph = ({
     section,
     data,
 }: LineGraphProps) => {
-    const metadata = useStore($visualizationMetadata);
     let availableProperties: { [key: string]: any } = {
         layout: {
             legend: { x: 0.5, y: -0.3, orientation: "h" },
@@ -50,12 +49,11 @@ const LineGraph = ({
     const { chartData, allSeries } = processGraphs(data, {
         order: visualization.order,
         show: visualization.show,
-        summarize: visualization.properties["summarize"] || false,
+        summarize: visualization.properties?.["summarize"] ?? false,
         dataProperties: visualization.properties,
         category: category,
         series: series,
         type: "line",
-        metadata: metadata,
     });
     return (
         <Stack w="100%" h="100%" spacing={0}>

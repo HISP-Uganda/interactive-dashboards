@@ -165,14 +165,17 @@ const PeriodPicker = ({ selectedPeriods, onChange }: PickerProps) => {
                                                 key={value}
                                                 cursor="pointer"
                                                 onClick={() =>
-                                                    onChange([
-                                                        ...selectedPeriods,
-                                                        {
-                                                            label,
-                                                            value,
-                                                            type: "relative",
-                                                        },
-                                                    ])
+                                                    onChange(
+                                                        [
+                                                            ...selectedPeriods,
+                                                            {
+                                                                label,
+                                                                value,
+                                                                type: "relative",
+                                                            },
+                                                        ],
+                                                        false
+                                                    )
                                                 }
                                             >
                                                 {label}
@@ -233,14 +236,17 @@ const PeriodPicker = ({ selectedPeriods, onChange }: PickerProps) => {
                                             key={val.id}
                                             cursor="pointer"
                                             onClick={() =>
-                                                onChange([
-                                                    ...selectedPeriods,
-                                                    {
-                                                        value: val.id,
-                                                        label: val.name,
-                                                        type: "fixed",
-                                                    },
-                                                ])
+                                                onChange(
+                                                    [
+                                                        ...selectedPeriods,
+                                                        {
+                                                            value: val.id,
+                                                            label: val.name,
+                                                            type: "fixed",
+                                                        },
+                                                    ],
+                                                    false
+                                                )
                                             }
                                         >
                                             {val.name}
@@ -293,14 +299,14 @@ const PeriodPicker = ({ selectedPeriods, onChange }: PickerProps) => {
                                       }
                                   )
                                 : [];
-                        onChange([...selectedPeriods, ...others]);
+                        onChange([...selectedPeriods, ...others], false);
                     }}
                 />
 
                 <IconButton
                     aria-label="Search database"
                     icon={<BiArrowToLeft />}
-                    onClick={() => onChange([])}
+                    onClick={() => onChange(selectedPeriods, true)}
                 />
             </Stack>
             <Stack
@@ -323,8 +329,9 @@ const PeriodPicker = ({ selectedPeriods, onChange }: PickerProps) => {
                                         onClick={() =>
                                             onChange(
                                                 selectedPeriods.filter(
-                                                    (v) => v.value !== value
-                                                )
+                                                    (v) => v.value === value
+                                                ),
+                                                true
                                             )
                                         }
                                     >

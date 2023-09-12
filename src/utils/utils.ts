@@ -1,3 +1,4 @@
+import { colorSets } from "@dhis2/analytics";
 import { center } from "@turf/turf";
 import axios from "axios";
 import {
@@ -1276,10 +1277,141 @@ const allOptions: Partial<{ [key: string]: (data: any) => any[] }> = {
     processDirectives,
 };
 
-export const flattenDHIS2Data = (data: any, flatteningOption?: string) => {
+export const processAnalyticsData = ({
+    headers,
+    rows,
+    metaData,
+    options,
+}: {
+    headers: any[];
+    rows: string[][];
+    metaData: any;
+    options: Partial<{
+        includeEmpty: boolean;
+        flatteningOption: string;
+        valueIfEmpty: string;
+    }>;
+}) => {
+    const finalHeaders = headers.filter((header) => header.meta);
+    let values: { [key: string]: string } = {};
+    if (rows) {
+        values = fromPairs(
+            rows.map((r) => [
+                r.slice(0, r.length - 1).join(""),
+                r[r.length - 1],
+            ])
+        );
+    }
+
+    if (finalHeaders.length === 1) {
+        const label1 = finalHeaders[0].name;
+        const first = metaData.dimensions[label1] || [];
+        let currentData = [];
+        for (const item of first) {
+            currentData.push({
+                [label1]: item,
+                [`${label1}-name`]: metaData.items[item]?.name,
+                value: values[item] || options.valueIfEmpty,
+            });
+        }
+        return currentData;
+    }
+    if (finalHeaders.length === 2) {
+        const label1 = finalHeaders[0].name;
+        const label2 = finalHeaders[1].name;
+        const first: string[] = metaData.dimensions[label1] || [];
+        const second: string[] = metaData.dimensions[label2] || [];
+        let currentData = [];
+
+        for (const item of first) {
+            for (const item2 of second) {
+                currentData.push({
+                    [label1]: item,
+                    [label2]: item2,
+                    [`${label1}-name`]: metaData.items[item]?.name,
+                    [`${label2}-name`]: metaData.items[item2]?.name,
+                    value: values[`${item}${item2}`] || options.valueIfEmpty,
+                });
+            }
+        }
+
+        return currentData;
+    }
+    if (finalHeaders.length === 3) {
+        const label0 = finalHeaders[0].name;
+        const label1 = finalHeaders[1].name;
+        const label2 = finalHeaders[2].name;
+        const first: string[] = metaData.dimensions[label0] || [];
+        const second: string[] = metaData.dimensions[label1] || [];
+        const third: string[] = metaData.dimensions[label2] || [];
+        let currentData = [];
+        for (const item0 of first) {
+            for (const item1 of second) {
+                for (const item2 of third) {
+                    currentData.push({
+                        [label0]: item0,
+                        [label1]: item1,
+                        [label2]: item2,
+                        [`${label0}-name`]: metaData.items[item0]?.name,
+                        [`${label1}-name`]: metaData.items[item1]?.name,
+                        [`${label2}-name`]: metaData.items[item2]?.name,
+                        value:
+                            values[`${item0}${item1}${item2}`] ||
+                            options.valueIfEmpty,
+                    });
+                }
+            }
+        }
+        return currentData;
+    }
+
+    if (finalHeaders.length === 4) {
+        const label0 = finalHeaders[0].name;
+        const label1 = finalHeaders[1].name;
+        const label2 = finalHeaders[2].name;
+        const label3 = finalHeaders[3].name;
+        const first: string[] = metaData.dimensions[label0] || [];
+        const second: string[] = metaData.dimensions[label1] || [];
+        const third: string[] = metaData.dimensions[label2] || [];
+        const fourth: string[] = metaData.dimensions[label3] || [];
+        let currentData = [];
+        for (const item0 of first) {
+            for (const item1 of second) {
+                for (const item2 of third) {
+                    for (const item3 of fourth) {
+                        currentData.push({
+                            [label0]: item0,
+                            [label1]: item1,
+                            [label2]: item2,
+                            [label3]: item3,
+                            [`${label0}-name`]: metaData.items[item0]?.name,
+                            [`${label1}-name`]: metaData.items[item1]?.name,
+                            [`${label2}-name`]: metaData.items[item2]?.name,
+                            [`${label3}-name`]: metaData.items[item3]?.name,
+                            value:
+                                values[`${item0}${item1}${item2}${item3}`] ||
+                                options.valueIfEmpty,
+                        });
+                    }
+                }
+            }
+        }
+        return currentData;
+    }
+};
+
+export const flattenDHIS2Data = (
+    data: any,
+    options: Partial<{
+        includeEmpty: boolean;
+        flatteningOption: string;
+        valueIfEmpty: string;
+    }>
+) => {
     if (data && (data.headers || data.listGrid)) {
-        let rows: string[][] | undefined = undefined;
-        let headers: any[] | undefined = undefined;
+        let rows: string[][] = [];
+        let headers: any[] = [];
+
         if (data.listGrid) {
             headers = data.listGrid.headers;
             rows = data.listGrid.rows;
@@ -1287,35 +1419,48 @@ export const flattenDHIS2Data = (data: any, flatteningOption?: string) => {
             headers = data.headers;
             rows = data.rows;
         }
-        if (headers !== undefined && rows !== undefined) {
-            data = rows.map((row: string[]) => {
-                let others = {};
-
-                if (data.metaData && data.metaData.items) {
-                    row.forEach((r, index) => {
-                        if (index < row.length - 1) {
-                            others = {
-                                ...others,
-                                [`${headers?.[index].name}-name`]:
-                                    data.metaData.items[r]?.name || "",
-                            };
-                        }
-                    });
-                }
-                return {
-                    ...others,
-                    ...fromPairs(
-                        row.map((value, index) => {
-                            const header = headers?.[index];
-                            return [header.name, value];
-                        })
-                    ),
-                };
+        if (
+            options.includeEmpty &&
+            headers !== undefined &&
+            data.metaData.dimensions
+        ) {
+            data = processAnalyticsData({
+                headers,
+                rows,
+                options,
+                metaData: data.metaData,
             });
+        } else {
+            if (headers !== undefined && rows !== undefined) {
+                data = rows.map((row: string[]) => {
+                    let others = {};
+
+                    if (data.metaData && data.metaData.items) {
+                        row.forEach((r, index) => {
+                            if (index < row.length - 1) {
+                                others = {
+                                    ...others,
+                                    [`${headers?.[index].name}-name`]:
+                                        data.metaData.items[r]?.name || "",
+                                };
+                            }
+                        });
+                    }
+                    return {
+                        ...others,
+                        ...fromPairs(
+                            row.map((value, index) => {
+                                const header = headers?.[index];
+                                return [header.name, value];
+                            })
+                        ),
+                    };
+                });
+            }
         }
     }
-    if (flatteningOption) {
-        return allOptions[flatteningOption]?.(data) || data;
+    if (options.flatteningOption) {
+        return allOptions[options.flatteningOption]?.(data) || data;
     }
     return data;
 };
@@ -1731,6 +1876,10 @@ export const getAnalyticsQuery = ({
 
     if (c && r) {
         final = [...final, `dimension=${c},${r}`];
+    } else if (c) {
+        final = [...final, `dimension=${c}`];
+    } else if (r) {
+        final = [...final, `dimension=${r}`];
     }
     if (f) {
         final = [...final, `filter=${f}`];
@@ -1739,10 +1888,134 @@ export const getAnalyticsQuery = ({
     return final.join("&");
 };
 
-const otherParameters: { [key: string]: { [key: string]: any } } = {
-    COLUMN: { type: "bar", barmode: "group" },
-    LINE: { type: "line" },
-    STACKED_COLUMN: { type: "bar", barmode: "stack" },
+export const findParameters = (visualization: any) => {
+    console.log(visualization);
+    const colors =
+        colorSets[visualization.colorSet]?.colors ||
+        colorSets["DEFAULT"].colors;
+    switch (visualization.type) {
+        case "COLUMN":
+            return {
+                type: "bar",
+                ["data.orientation"]: "v",
+                category:
+                    visualization.rows.length > 0
+                        ? `${visualization.rows[0].dimension}-name`
+                        : undefined,
+                series:
+                    visualization.columns.length > 0
+                        ? `${visualization.columns[0].dimension}-name`
+                        : undefined,
+                ["layout.colorway"]: colors,
+                summarize: false,
+            };
+        case "LINE":
+            return {
+                type: "line",
+                category:
+                    visualization.rows.length > 0
+                        ? `${visualization.rows[0].dimension}-name`
+                        : undefined,
+                series:
+                    visualization.columns.length > 0
+                        ? `${visualization.columns[0].dimension}-name`
+                        : undefined,
+                ["layout.colorway"]: colors,
+                summarize: false,
+            };
+        case "STACKED_COLUMN":
+            return {
+                type: "bar",
+                ["layout.barmode"]: "stack",
+                ["data.orientation"]: "v",
+                category:
+                    visualization.rows.length > 0
+                        ? `${visualization.rows[0].dimension}-name`
+                        : undefined,
+                series:
+                    visualization.columns.length > 0
+                        ? `${visualization.columns[0].dimension}-name`
+                        : undefined,
+                ["layout.colorway"]: colors,
+                summarize: false,
+            };
+        case "BAR":
+            return {
+                type: "bar",
+                ["data.orientation"]: "h",
+                category:
+                    visualization.rows.length > 0
+                        ? `${visualization.rows[0].dimension}-name`
+                        : undefined,
+                series:
+                    visualization.columns.length > 0
+                        ? `${visualization.columns[0].dimension}-name`
+                        : undefined,
+                ["layout.colorway"]: colors,
+                summarize: false,
+            };
+        case "STACKED_BAR":
+            return {
+                type: "bar",
+                ["layout.barmode"]: "stack",
+                ["data.orientation"]: "h",
+                category:
+                    visualization.rows.length > 0
+                        ? `${visualization.rows[0].dimension}-name`
+                        : undefined,
+                series:
+                    visualization.columns.length > 0
+                        ? `${visualization.columns[0].dimension}-name`
+                        : undefined,
+                ["layout.colorway"]: colors,
+                summarize: false,
+            };
+        case "AREA":
+            return { type: "area" };
+        case "STACKED_AREA":
+            return { type: "bar" };
+        case "PIE":
+            return {
+                type: "pie",
+                summarize: false,
+                labels:
+                    visualization.columns.length > 0
+                        ? `${visualization.columns[0].dimension}-name`
+                        : undefined,
+                values: "value",
+            };
+        case "RADAR":
+            return { type: "bar" };
+        case "GAUGE":
+            return { type: "gauge" };
+        case "YEAR_OVER_YEAR_LINE":
+            return { type: "line" };
+        case "YEAR_OVER_YEAR_COLUMN":
+            return { type: "bar" };
+        case "SCATTER":
+            return { type: "line" };
+        case "BUBBLE":
+            return { type: "line" };
+        case "SINGLE_VALUE":
+            return { type: "single" };
+        case "PIVOT_TABLE":
+            return {
+                type: "tables",
+                rows: visualization.rows
+                    .map((row: any) => `${row.dimension}-name`)
+                    .join(","),
+                columns: visualization.columns
+                    .map((column: any) => `${column.dimension}-name`)
+                    .join(","),
+                showHeaders: true,
+                summarize: true,
+                aggregation: "sum",
+                aggregationColumn: "value",
+            };
+
+        default:
+            return {};
+    }
 };
 
 export const processAnalytics = ({
@@ -1760,33 +2033,54 @@ export const processAnalytics = ({
     };
     items: { [key: string]: { name: string } };
 }) => {
+    if (visualization.type === "GAUGE" && data.length === 1) {
+        return {
+            data: [
+                {
+                    domain: { x: [0, 1], y: [0, 1] },
+                    value: data[0]["value"] || 0,
+                    title: {
+                        text: data[0]["dx-name" || "pe-name" || "ou-name"],
+                    },
+                    type: "indicator",
+                    mode: "gauge+number",
+                    delta: { reference: 10 },
+                    gauge: { axis: { range: [null, 100] } },
+                },
+            ],
+            series: dimensions[visualization.columns[0].dimension].map(
+                (v) => items[v].name
+            ),
+        };
+    }
     if (visualization.columns.length === 1 && visualization.rows.length === 1) {
         const firstColumn = visualization.columns[0];
         const firstRow = visualization.rows[0];
         const groupedData = groupBy(data, firstColumn.dimension);
-        const processedData = dimensions[
-            visualization.columns[0].dimension
-        ].map((val) => {
-            const current = groupedData[val];
-            const c = items[val].name;
-            return {
-                x: dimensions[visualization.rows[0].dimension].map(
-                    (v) => items[v].name
-                ),
-                y: dimensions[visualization.rows[0].dimension].map((val) => {
-                    const currentValue = current?.find(
-                        (vals) => vals[firstRow.dimension] === val
-                    );
-                    return currentValue?.value || "";
-                }),
-                name: c,
-                type: otherParameters[visualization.type].type || "bar",
-                textposition: "auto",
-                texttemplate: "%{y:.0f}",
-            };
-        });
+
+        // const processedData = dimensions[
+        //     visualization.columns[0].dimension
+        // ].map((val) => {
+        //     const current = groupedData[val];
+        //     const c = items[val].name;
+        //     return {
+        //         x: dimensions[visualization.rows[0].dimension].map(
+        //             (v) => items[v].name
+        //         ),
+        //         y: dimensions[visualization.rows[0].dimension].map((val) => {
+        //             const currentValue = current?.find(
+        //                 (vals) => vals[firstRow.dimension] === val
+        //             );
+        //             return currentValue?.value || "";
+        //         }),
+        //         name: c,
+        //         type: otherParameters[visualization.type]?.type || "bar",
+        //         textposition: "auto",
+        //         texttemplate: "%{y:.0f}",
+        //     };
+        // });
         return {
-            data: processedData,
+            data: [],
             series: dimensions[visualization.columns[0].dimension].map(
                 (v) => items[v].name
             ),
@@ -1796,17 +2090,4 @@ export const processAnalytics = ({
         data: [],
         series: [],
     };
-    // const columns = visualization.columns.map(({ dimension }) => dimension);
-    // const rows = visualization.rows.map(({ dimension }) => dimension);
-    // switch (visualization.type) {
-    //     case "LINE":
-    //         return processGraphs(data, {
-    //             category: columns[0],
-    //             series: rows[0],
-    //             type: "line",
-    //             dataProperties: {},
-    //         });
-    //     default:
-    //         return [];
-    // }
 };

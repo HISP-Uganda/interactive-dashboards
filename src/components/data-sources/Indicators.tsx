@@ -23,12 +23,12 @@ import { useStore } from "effector-react";
 import { isEmpty } from "lodash";
 import { ChangeEvent, useState } from "react";
 import { datumAPi } from "../../Events";
+import { MetadataAPI } from "../../interfaces";
 import { useDHIS2Resources } from "../../Queries";
-import { $hasDHIS2, $paginations, $visualizationQuery } from "../../Store";
+import { $hasDHIS2, $totals, $visualizationQuery } from "../../Store";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import GlobalSearchFilter from "./GlobalSearchFilter";
-import { MetadataAPI } from "../../interfaces";
 
 const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
@@ -38,7 +38,7 @@ const Indicators = ({ api, isCurrentDHIS2 }: MetadataAPI) => {
     const [type, setType] = useState<"filter" | "dimension">(previousType);
     const [useGlobal, setUseGlobal] = useState<boolean>(isGlobal);
     const [q, setQ] = useState<string>("");
-    const paginations = useStore($paginations);
+    const total = useStore($totals);
     const hasDHIS2 = useStore($hasDHIS2);
     const visualizationQuery = useStore($visualizationQuery);
     const {
@@ -50,7 +50,7 @@ const Indicators = ({ api, isCurrentDHIS2 }: MetadataAPI) => {
         pageSize,
         setPageSize,
     } = usePagination({
-        total: paginations.totalIndicators,
+        total,
         limits: {
             outer: OUTER_LIMIT,
             inner: INNER_LIMIT,

@@ -1,9 +1,8 @@
-import { Stack, Button } from "@chakra-ui/react";
+import { Stack } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import React, { useEffect } from "react";
+import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import Slider, { Settings } from "react-slick";
-import { useFullScreenHandle, FullScreen } from "react-full-screen";
-
 import "slick-carousel/slick/slick-theme.css";
 import "slick-carousel/slick/slick.css";
 import { dashboardApi, storeApi } from "../../Events";
@@ -17,7 +16,6 @@ export default function Show3() {
     const presentation = useStore($presentation);
     const handle = useFullScreenHandle();
     const store = useStore($store);
-    console.log(presentation.speed);
     const settings: Settings = {
         dots: false,
         infinite: true,

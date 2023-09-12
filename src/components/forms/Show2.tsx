@@ -1,15 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
 import { useStore } from "effector-react";
-import { useSpringCarousel } from "react-spring-carousel";
+import React, { useState } from "react";
 import useInterval from "react-useinterval";
-
+import { dashboardApi } from "../../Events";
+import { IDashboard, ISection, IVisualization } from "../../interfaces";
 import { $presentation } from "../../Store";
 import FixedDashboard from "../FixedDashboard";
-import { IDashboard, ISection, IVisualization } from "../../interfaces";
-import { Button, Stack } from "@chakra-ui/react";
 import SectionVisualization from "../SectionVisualization";
 import Visualization from "../visualizations/Visualization";
-import { dashboardApi } from "../../Events";
 
 export default function Show2() {
     const presentation = useStore($presentation);

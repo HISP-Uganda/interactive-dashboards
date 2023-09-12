@@ -15,6 +15,7 @@ import {
     Th,
     Thead,
     Tr,
+    SimpleGrid,
 } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate, useSearch } from "@tanstack/react-location";
@@ -268,7 +269,7 @@ export default function VisualizationQuery() {
                 currentDataSource?.type === "DHIS2" &&
                 visualizationQuery.type === "VISUALIZATION"
             ) && (
-                <Stack direction="row" alignItems="center" spacing="30px">
+                <SimpleGrid spacing="30px" columns={2}>
                     <Stack flex={1} direction="row" alignItems="center">
                         <Text>Flattening Option</Text>
                         <Box flex={1}>
@@ -345,7 +346,33 @@ export default function VisualizationQuery() {
                             }
                         />
                     </Stack>
-                </Stack>
+                    <Stack direction="row">
+                        <Text>Include Empty</Text>
+                        <Switch
+                            isChecked={visualizationQuery.includeEmpty}
+                            onChange={(e) =>
+                                datumAPi.changeAttribute({
+                                    attribute: "includeEmpty",
+                                    value: e.target.checked,
+                                })
+                            }
+                        />
+                    </Stack>
+
+                    <Stack direction="row" flex={1} alignItems="center">
+                        <Text>Value if Empty</Text>
+                        <Input
+                            flex={1}
+                            value={visualizationQuery.valueIfEmpty}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                datumAPi.changeAttribute({
+                                    attribute: "valueIfEmpty",
+                                    value: e.target.value,
+                                })
+                            }
+                        />
+                    </Stack>
+                </SimpleGrid>
             )}
 
             <Stack direction="row">

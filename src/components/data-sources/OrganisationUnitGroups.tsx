@@ -25,7 +25,7 @@ import { ChangeEvent, useState } from "react";
 import { datumAPi } from "../../Events";
 import { MetadataAPI } from "../../interfaces";
 import { useDHIS2Resources } from "../../Queries";
-import { $paginations, $visualizationQuery } from "../../Store";
+import { $totals, $visualizationQuery } from "../../Store";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import LoadingIndicator from "../LoadingIndicator";
 import GlobalSearchFilter from "./GlobalSearchFilter";
@@ -34,7 +34,7 @@ const OUTER_LIMIT = 4;
 const INNER_LIMIT = 4;
 
 const OrganizationUnitGroups = ({ api, isCurrentDHIS2 }: MetadataAPI) => {
-    const paginations = useStore($paginations);
+    const total = useStore($totals);
     const visualizationQuery = useStore($visualizationQuery);
     const [q, setQ] = useState<string>("");
 
@@ -54,7 +54,7 @@ const OrganizationUnitGroups = ({ api, isCurrentDHIS2 }: MetadataAPI) => {
         pageSize,
         setPageSize,
     } = usePagination({
-        total: paginations.totalOrganisationUnitGroups,
+        total,
         limits: {
             outer: OUTER_LIMIT,
             inner: INNER_LIMIT,
