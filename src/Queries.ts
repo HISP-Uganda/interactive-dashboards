@@ -281,7 +281,7 @@ export const useInitials = (storage: "data-store" | "es") => {
         me: {
             resource: "me.json",
             params: {
-                fields: "organisationUnits[id,name,leaf,level],authorities,userRoles[name]",
+                fields: "dataViewOrganisationUnits[id,name,leaf,level],authorities,userRoles[name]",
             },
         },
         levels: {
@@ -311,7 +311,11 @@ export const useInitials = (storage: "data-store" | "es") => {
         async ({ signal }) => {
             const {
                 systemInfo: { systemId, systemName, instanceBaseUrl },
-                me: { organisationUnits, authorities, userRoles },
+                me: {
+                    dataViewOrganisationUnits: organisationUnits,
+                    authorities,
+                    userRoles,
+                },
                 levels: organisationUnitLevels,
                 groups: { organisationUnitGroups },
                 dataSets: { dataSets },
@@ -352,7 +356,6 @@ export const useInitials = (storage: "data-store" | "es") => {
                 signal,
                 engine,
             });
-
             if (settings.length > 0) {
                 storeApi.changeSelectedDashboard(settings[0].defaultDashboard);
                 settingsApi.set(settings[0]);
