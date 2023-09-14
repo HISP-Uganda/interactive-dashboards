@@ -1,5 +1,6 @@
 import { Text } from "@chakra-ui/react";
 import React from "react";
+import { GroupBase, Select, AsyncSelect } from "chakra-react-select";
 import { IDataSource, IVisualization, Option } from "../../interfaces";
 import { useDHIS2Visualizations } from "../../Queries";
 import { createAxios } from "../../utils/utils";
@@ -27,6 +28,20 @@ export default function DHIS2Visualizations({
 
     if (isSuccess && data) {
         return (
+            // <AsyncSelect
+            //     name="colors"
+            //     placeholder="Select some colors..."
+            //     loadOptions={(inputValue, callback) => {
+            //         setTimeout(() => {
+            //             const values = colourOptions.filter((i) =>
+            //                 i.label
+            //                     .toLowerCase()
+            //                     .includes(inputValue.toLowerCase())
+            //             );
+            //             callback(values);
+            //         }, 3000);
+            //     }}
+            // />
             <SelectProperty
                 attribute="visualization"
                 visualization={visualization}

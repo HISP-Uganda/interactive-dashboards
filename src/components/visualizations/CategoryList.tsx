@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { useNavigate, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { groupBy } from "lodash";
+import { groupBy, orderBy } from "lodash";
 import React from "react";
 import { ChartProps, LocationGenerics } from "../../interfaces";
 import { useCategoryList } from "../../Queries";
@@ -34,10 +34,12 @@ export default function CategoryList({ visualization }: ChartProps) {
     const displays: { [key: string]: React.ReactNode } = {
         list: (
             <Stack spacing="10px" p="5px" overflow="auto">
-                {data?.categories
+                {orderBy(data?.categories, "order")
                     .map((category) => {
                         const groupedDashboards = groupBy(
-                            data.dashboards,
+                            data?.dashboards.filter(
+                                ({ published }) => store.isAdmin || published
+                            ),
                             "category"
                         );
                         return {
@@ -53,10 +55,12 @@ export default function CategoryList({ visualization }: ChartProps) {
         ),
         accordion: (
             <Accordion w="100%" h="100%" allowMultiple>
-                {data?.categories
+                {orderBy(data?.categories, "order")
                     .map((category) => {
                         const groupedDashboards = groupBy(
-                            data.dashboards,
+                            data?.dashboards.filter(
+                                ({ published }) => store.isAdmin || published
+                            ),
                             "category"
                         );
                         return {

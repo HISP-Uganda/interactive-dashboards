@@ -57,6 +57,7 @@ const Dashboard = () => {
             p={`${padding}px`}
             id={dashboard.id}
             ref={tbl}
+            key={dashboard.id}
         >
             {((store.isAdmin && dashboard.id === settings.template) ||
                 !templateId) && <AdminPanel />}
@@ -64,8 +65,8 @@ const Dashboard = () => {
             {dashboardType === "dynamic" ? (
                 <DynamicDashboard />
             ) : (
-                    <FixedDashboard dashboard={dashboard} />
-                )}
+                <FixedDashboard dashboard={dashboard} />
+            )}
         </Stack>
     );
 };

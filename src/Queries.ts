@@ -911,7 +911,7 @@ export const useDHIS2Visualizations = (
         [key: string]: string;
     } = {
         fields: "id,name,type",
-        paging: "false",
+        // paging: "false",
     };
     return useQuery<Array<INamed & { type: string }>, Error>(
         ["dhis-visualizations"],
