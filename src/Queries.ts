@@ -320,12 +320,14 @@ export const useInitials = (storage: "data-store" | "es") => {
                 groups: { organisationUnitGroups },
                 dataSets: { dataSets },
             }: any = await engine.query(ouQuery);
-
             const isAdmin =
                 authorities.indexOf("IDVT_ADMINISTRATION") !== -1 ||
                 authorities.indexOf("ALL") !== -1 ||
-                userRoles?.map(({ name }: any) => name).indexOf("Superuser") !==
-                    -1;
+                (userRoles !== undefined &&
+                    userRoles
+                        .map(({ name }: any) => name)
+                        .indexOf("Superuser") !== -1);
+
             const facilities: string[] = organisationUnits.map(
                 (unit: any) => unit.id
             );
