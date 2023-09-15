@@ -19,9 +19,10 @@ const VisualizationTitle = ({
             direction="row"
             alignItems="center"
             justifyItems="center"
-            alignContent="center"
-            justifyContent="center"
-            _hover={{ bg: "gray.300" }}
+            // alignContent="center"
+            // justifyContent="center"
+            // textAlign="center"
+            // _hover={{ bg: "gray.300" }}
             h="3vh"
             maxH="3vh"
             onMouseEnter={() => setShowMenu(() => true)}
@@ -34,12 +35,11 @@ const VisualizationTitle = ({
             fontWeight="bold"
             px="5px"
             {...rest}
-            spacing="0"
+            // spacing="0"
         >
-            <Text textAlign="center" noOfLines={1}>
+            <Text textAlign="center" noOfLines={1} flex={1}>
                 {title}
             </Text>
-            <Spacer />
             {showMenu && <VisualizationMenu section={section} />}
         </Stack>
     );

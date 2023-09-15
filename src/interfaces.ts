@@ -47,6 +47,7 @@ export interface INamed {
     id: string;
     name?: string;
     description?: string;
+    order?: string;
 }
 export interface IDashboardSetting extends INamed {
     defaultDashboard: string;
@@ -134,7 +135,6 @@ export interface IVisualization extends INamed {
     bg: string;
     needFilter?: boolean;
     show: number;
-    order: string;
     rows?: number;
     columns?: number;
 }

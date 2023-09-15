@@ -198,6 +198,7 @@ const SectionVisualization = (section: ISection) => {
             overflow="auto"
             spacing={0}
             ref={squareRef}
+            id={section.id}
         >
             {displays[section.display] || displays.normal}
             <Menu id={section.id}>

@@ -91,6 +91,18 @@ const Category = () => {
                             {errors.name && errors.name.message}
                         </FormErrorMessage>
                     </FormControl>
+
+                    <FormControl isInvalid={!!errors.order}>
+                        <FormLabel htmlFor="order">Order</FormLabel>
+                        <Input
+                            id="order"
+                            placeholder="Order"
+                            {...register("order")}
+                        />
+                        <FormErrorMessage>
+                            {errors.order && errors.order.message}
+                        </FormErrorMessage>
+                    </FormControl>
                     <Stack spacing="30px" direction="row">
                         <Button
                             colorScheme="red"

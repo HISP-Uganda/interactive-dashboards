@@ -39,7 +39,7 @@ export default function DHIS2VisualizationProperties({
         return (
             <Stack>
                 {data
-                    .filter((d) => d.type === "DHIS2")
+                    .filter((d) => d.type === "DHIS2" && d.isCurrentDHIS2)
                     .map((ds) => (
                         <DashboardItems
                             key={ds.id}

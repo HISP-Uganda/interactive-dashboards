@@ -78,6 +78,7 @@ const Categories = () => {
                             <Tr>
                                 <Th>Name</Th>
                                 <Th>Description</Th>
+                                <Th>Order</Th>
                                 <Th>Actions</Th>
                             </Tr>
                         </Thead>
@@ -93,6 +94,7 @@ const Categories = () => {
                                         </Link>
                                     </Td>
                                     <Td>{category.description}</Td>
+                                    <Td>{category.order}</Td>
                                     <Td>
                                         <Stack direction="row" spacing="5px">
                                             <Button
