@@ -13,17 +13,17 @@ import dayjs, { ManipulateType } from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import quarterOfYear from "dayjs/plugin/quarterOfYear";
 import { useStore } from "effector-react";
-import { fromPairs, groupBy, uniq, join } from "lodash";
+import { fromPairs, groupBy, uniq } from "lodash";
 import { evaluate } from "mathjs";
+import { findColor } from "../components/processors";
 import {
     Authentication,
     Option,
-    Threshold,
     Period,
+    Threshold,
     VisualizationItems,
 } from "../interfaces";
 import { $visualizationQuery } from "../Store";
-import { findColor, processGraphs } from "../components/processors";
 
 dayjs.extend(isoWeek);
 dayjs.extend(quarterOfYear);
@@ -637,6 +637,19 @@ export const chartTypes: Option[] = [
     { value: "heatmap", label: "Heat Map" },
     { value: "dhis2", label: "DHIS2 Visualization" },
     { value: "divider", label: "Divider" },
+];
+
+export const donNotRequireQuery = [
+    "dhis2",
+    "clock",
+    "text",
+    "filters",
+    "imageVisualization",
+    "dashboardTree",
+    "dashboardList",
+    "dashboardTitle",
+    "divider",
+    "categoryList",
 ];
 
 export const createOptions = (options: string[]): Option[] => {
@@ -1889,7 +1902,6 @@ export const getAnalyticsQuery = ({
 };
 
 export const findParameters = (visualization: any) => {
-    console.log(visualization);
     const colors =
         colorSets[visualization.colorSet]?.colors ||
         colorSets["DEFAULT"].colors;
@@ -2011,6 +2023,7 @@ export const findParameters = (visualization: any) => {
                 summarize: true,
                 aggregation: "sum",
                 aggregationColumn: "value",
+                cellHeight: "sm",
             };
 
         default:

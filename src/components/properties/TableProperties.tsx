@@ -155,68 +155,62 @@ const TableProperties = ({
                     <TabPanels>
                         {selectedColumns.map((col, index) => (
                             <TabPanel key={col}>
-                                <Scrollable height={300}>
-                                    <Table variant="unstyled">
-                                        <Thead>
-                                            <Tr>
-                                                <Th>Column</Th>
-                                                <Th>Width</Th>
-                                                <Th>BG</Th>
-                                                <Th>Rename</Th>
-                                                <Th>Position</Th>
-                                            </Tr>
-                                        </Thead>
-                                        <Tbody>
+                                <Scrollable height={350}>
+                                    <Tabs orientation="vertical">
+                                        <TabList>
                                             {getNData(
                                                 actualData,
                                                 selectedColumns,
                                                 index
-                                            ).map((row) => (
-                                                <Tr key={row}>
-                                                    <Td w="30%">{row}</Td>
-                                                    <Td w="50px">
+                                            ).map((r) => (
+                                                <Tab key={r}>{r}</Tab>
+                                            ))}
+                                        </TabList>
+
+                                        <TabPanels>
+                                            {getNData(
+                                                actualData,
+                                                selectedColumns,
+                                                index
+                                            ).map((col) => (
+                                                <TabPanel key={col}>
+                                                    <Stack>
                                                         <NumberProperty
                                                             visualization={
                                                                 visualization
                                                             }
-                                                            title=""
-                                                            attribute={`${row}.width`}
+                                                            title="Width"
+                                                            attribute={`${col}.width`}
                                                             min={50}
                                                             max={500}
                                                             step={1}
                                                         />
-                                                    </Td>
-                                                    <Td w="50px">
                                                         <ColorProperty
                                                             visualization={
                                                                 visualization
                                                             }
-                                                            title=""
-                                                            attribute={`${row}.bg`}
+                                                            title="Background"
+                                                            attribute={`${col}.bg`}
                                                         />
-                                                    </Td>
-                                                    <Td>
                                                         <TextProperty
                                                             visualization={
                                                                 visualization
                                                             }
-                                                            title=""
-                                                            attribute={`${row}.name`}
+                                                            title="Rename"
+                                                            attribute={`${col}.name`}
                                                         />
-                                                    </Td>
-                                                    <Td>
                                                         <TextProperty
                                                             visualization={
                                                                 visualization
                                                             }
-                                                            title=""
-                                                            attribute={`${row}.position`}
+                                                            title="Order"
+                                                            attribute={`${col}.position`}
                                                         />
-                                                    </Td>
-                                                </Tr>
+                                                    </Stack>
+                                                </TabPanel>
                                             ))}
-                                        </Tbody>
-                                    </Table>
+                                        </TabPanels>
+                                    </Tabs>
                                 </Scrollable>
                             </TabPanel>
                         ))}
@@ -247,49 +241,118 @@ const TableProperties = ({
                     />
                 </Stack>
 
-                <Scrollable height={300}>
-                    <Table variant="unstyled">
-                        <Thead>
-                            <Tr>
-                                <Th>Column</Th>
-                                <Th>Width</Th>
-                                <Th>BG</Th>
-                                <Th>Rename</Th>
-                            </Tr>
-                        </Thead>
-                        <Tbody>
-                            {lastRow.map((row) => (
-                                <Tr key={row}>
-                                    <Td>{row}</Td>
-                                    <Td w="50px">
+                <Tabs>
+                    <TabList>
+                        {selectedRows.map((row) => (
+                            <Tab key={row}>{row}</Tab>
+                        ))}
+                    </TabList>
+                    <TabPanels>
+                        {selectedRows.map((row, index) => (
+                            <TabPanel key={row}>
+                                <Scrollable height={350}>
+                                    <Tabs orientation="vertical">
+                                        <TabList>
+                                            {getNData(
+                                                actualData,
+                                                selectedRows,
+                                                index
+                                            ).map((r) => (
+                                                <Tab key={r}>{r}</Tab>
+                                            ))}
+                                        </TabList>
+
+                                        <TabPanels>
+                                            {getNData(
+                                                actualData,
+                                                selectedRows,
+                                                index
+                                            ).map((row1) => (
+                                                <TabPanel key={row1}>
+                                                    <Stack>
+                                                        <NumberProperty
+                                                            visualization={
+                                                                visualization
+                                                            }
+                                                            title="Width"
+                                                            attribute={`${row1}.width`}
+                                                            min={50}
+                                                            max={500}
+                                                            step={1}
+                                                        />
+                                                        <ColorProperty
+                                                            visualization={
+                                                                visualization
+                                                            }
+                                                            title="Background"
+                                                            attribute={`${row1}.bg`}
+                                                        />
+                                                        <TextProperty
+                                                            visualization={
+                                                                visualization
+                                                            }
+                                                            title="Rename"
+                                                            attribute={`${row1}.name`}
+                                                        />
+                                                        <TextProperty
+                                                            visualization={
+                                                                visualization
+                                                            }
+                                                            title="Order"
+                                                            attribute={`${row1}.position`}
+                                                        />
+                                                    </Stack>
+                                                </TabPanel>
+                                            ))}
+                                        </TabPanels>
+                                    </Tabs>
+                                </Scrollable>
+                            </TabPanel>
+                        ))}
+                    </TabPanels>
+                </Tabs>
+
+                {/* <Scrollable height={350}>
+                    <Tabs orientation="vertical">
+                        <TabList>
+                            {lastRow.map((r) => (
+                                <Tab key={r}>{r}</Tab>
+                            ))}
+                        </TabList>
+
+                        <TabPanels>
+                            {lastRow.map((row, index) => (
+                                <TabPanel key={row}>
+                                    <Stack>
                                         <NumberProperty
                                             visualization={visualization}
-                                            title=""
+                                            title="Width"
                                             attribute={`${row}.width`}
                                             min={50}
                                             max={500}
                                             step={1}
                                         />
-                                    </Td>
-                                    <Td w="50px">
                                         <ColorProperty
                                             visualization={visualization}
-                                            title=""
+                                            title="Background"
                                             attribute={`${row}.bg`}
                                         />
-                                    </Td>
-                                    <Td w="300px">
+                                        <TextProperty
+                                            visualization={visualization}
+                                            title="Rename"
+                                            attribute={`${row}.name`}
+                                        />
                                         <TextProperty
                                             visualization={visualization}
                                             title=""
-                                            attribute={`${row}.name`}
+                                            attribute={`${row}.position`}
                                         />
-                                    </Td>
-                                </Tr>
+                                    </Stack>
+                                </TabPanel>
                             ))}
-                        </Tbody>
-                    </Table>
-                </Scrollable>
+                        </TabPanels>
+                    </Tabs>
+                </Scrollable> */}
             </SimpleAccordion>
 
             <SimpleAccordion title="Aggregation">

@@ -1,5 +1,5 @@
 import React, { ChangeEvent } from "react";
-import { Input, Stack, Text } from "@chakra-ui/react";
+import { Input, Stack, Text, StackProps } from "@chakra-ui/react";
 import { AttributeProps } from "../../interfaces";
 
 export default function TextField<T>({
@@ -7,12 +7,14 @@ export default function TextField<T>({
     obj,
     attribute,
     func,
-}: AttributeProps<T>) {
+    ...rest
+}: AttributeProps<T> & StackProps) {
     return (
-        <Stack>
+        <Stack {...rest}>
             <Text>{title}</Text>
             <Input
                 value={`${obj[attribute]}`}
+                size="sm"
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     func({
                         attribute,

@@ -6,6 +6,7 @@ import {
     NumberInputStepper,
     Stack,
     Text,
+    StackProps,
 } from "@chakra-ui/react";
 import React from "react";
 import { sectionApi } from "../../Events";
@@ -18,9 +19,10 @@ export default function NumberProperty({
     min = 0,
     max = 100,
     step = 1,
-}: VizProps & { max?: number; step?: number; min?: number }) {
+    ...rest
+}: VizProps & { max?: number; step?: number; min?: number } & StackProps) {
     return (
-        <Stack>
+        <Stack {...rest}>
             <Text>{title}</Text>
             <NumberInput
                 value={visualization.properties[attribute] || 0}
@@ -35,6 +37,7 @@ export default function NumberProperty({
                         value: value2,
                     })
                 }
+                flex={1}
             >
                 <NumberInputField />
                 <NumberInputStepper>

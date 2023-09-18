@@ -22,6 +22,7 @@ export default function TextProperty({
                     })
                 }
                 isDisabled={disabled}
+                size="sm"
             />
         </Stack>
     );

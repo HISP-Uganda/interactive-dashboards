@@ -137,6 +137,7 @@ export interface IVisualization extends INamed {
     show: number;
     rows?: number;
     columns?: number;
+    isFullscreenable?: boolean;
 }
 export interface ISection extends BoxProps {
     id: string;
@@ -156,6 +157,8 @@ export interface ISection extends BoxProps {
     xs: ReactGridLayout.Layout;
     isTemplateArea: boolean;
     spacing?: string;
+    isPrintable?: boolean;
+    isFullscreenable?: boolean;
 }
 export interface IFilter {
     id: string;
@@ -487,6 +490,7 @@ export type AttributeProps<T> = {
     attribute: keyof T;
     obj: T;
     func: Event<{ attribute: keyof T; value: any }>;
+    direction?: "row" | "column";
 };
 
 export interface IPresentation extends INamed {

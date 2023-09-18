@@ -61,6 +61,7 @@ export default function SelectField<T, U>({
                     menuPlacement="top"
                     getOptionValue={(val) => String(val[valueField])}
                     getOptionLabel={(val) => String(val[labelField])}
+                    size="sm"
                 />
             )}
         </Stack>

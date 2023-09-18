@@ -41,6 +41,7 @@ const LineGraphProperties = ({
                 }
                 options={columns}
                 isClearable
+                size="sm"
             />
             <Text>Traces</Text>
             <Select<Option, false, GroupBase<Option>>
@@ -56,6 +57,7 @@ const LineGraphProperties = ({
                 }
                 options={columns}
                 isClearable
+                size="sm"
             />
 
             <Text>Color scale</Text>
@@ -84,6 +86,7 @@ const LineGraphProperties = ({
                 options={colors}
                 isClearable
                 components={customComponents}
+                size="sm"
             />
 
             <Text>Legend</Text>
@@ -140,6 +143,7 @@ const LineGraphProperties = ({
                             value: e.target.value,
                         })
                     }
+                    size="sm"
                 />
             </Stack>
         </Stack>

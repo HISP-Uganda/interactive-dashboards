@@ -213,6 +213,7 @@ const BarGraphProperties = ({
                 isClearable
                 components={customComponents}
                 menuPlacement="auto"
+                size="sm"
             />
 
             <Text>Legend</Text>
@@ -269,6 +270,7 @@ const BarGraphProperties = ({
                             value: e.target.value,
                         })
                     }
+                    size="sm"
                 />
             </Stack>
 
@@ -316,6 +318,7 @@ const BarGraphProperties = ({
                                         options={chartTypes}
                                         isClearable
                                         menuPlacement="auto"
+                                        size="sm"
                                     />
                                 </Stack>
                             </TabPanel>

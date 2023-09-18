@@ -1,12 +1,12 @@
-import { Text } from "@chakra-ui/react";
-import React from "react";
-import { GroupBase, Select, AsyncSelect } from "chakra-react-select";
-import { IDataSource, IVisualization, Option } from "../../interfaces";
-import { useDHIS2Visualizations } from "../../Queries";
-import { createAxios } from "../../utils/utils";
-import LoadingIndicator from "../LoadingIndicator";
-import SelectProperty from "./SelectProperty";
+import { Input, Stack, Table, Tbody, Th, Tr } from "@chakra-ui/react";
+import { useDataEngine } from "@dhis2/app-runtime";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import React, { ChangeEvent, useState } from "react";
+import { useInView } from "react-intersection-observer";
 import { sectionApi } from "../../Events";
+import { IDataSource, INamed, IVisualization } from "../../interfaces";
+import { getDHIS2Resources2 } from "../../Queries";
+import Scrollable from "../Scrollable";
 
 export default function DHIS2Visualizations({
     dataSource,
@@ -15,47 +15,139 @@ export default function DHIS2Visualizations({
     dataSource: IDataSource;
     visualization: IVisualization;
 }) {
-    const api = createAxios(dataSource.authentication);
-    const { isLoading, data, error, isError, isSuccess } =
-        useDHIS2Visualizations(dataSource.isCurrentDHIS2, api);
+    const { ref, inView } = useInView();
+    const engine = useDataEngine();
 
-    if (isError) {
-        return <Text>{error?.message}</Text>;
-    }
-    if (isLoading) {
-        return <LoadingIndicator />;
-    }
-
-    if (isSuccess && data) {
-        return (
-            // <AsyncSelect
-            //     name="colors"
-            //     placeholder="Select some colors..."
-            //     loadOptions={(inputValue, callback) => {
-            //         setTimeout(() => {
-            //             const values = colourOptions.filter((i) =>
-            //                 i.label
-            //                     .toLowerCase()
-            //                     .includes(inputValue.toLowerCase())
-            //             );
-            //             callback(values);
-            //         }, 3000);
-            //     }}
-            // />
-            <SelectProperty
-                attribute="visualization"
-                visualization={visualization}
-                title="DHIS2 Visualization"
-                options={data.map((d) => {
-                    const o: Option = {
-                        label: d.name || "",
-                        value: d.id,
-                        id: d.type,
-                    };
-                    return o;
-                })}
+    const [search, setSearch] = useState<string | null | undefined>();
+    const [q, setQ] = useState<string>("");
+    const {
+        status,
+        data,
+        error,
+        isFetching,
+        isFetchingNextPage,
+        isFetchingPreviousPage,
+        fetchNextPage,
+        fetchPreviousPage,
+        hasNextPage,
+        hasPreviousPage,
+    } = useInfiniteQuery<
+        {
+            pager: {
+                total: number;
+                page: number;
+                pageSize: number;
+                totalPages: number;
+            };
+            data: Array<INamed & { type: string }>;
+        },
+        Error
+    >(
+        ["projects", search],
+        async ({ pageParam = 1 }) => {
+            let params: { [key: string]: any } = {
+                fields: "id,name,type",
+                page: pageParam,
+            };
+            if (search) {
+                params = { ...params, filter: `identifiable:token:${search}` };
+            }
+            const data = await getDHIS2Resources2<INamed & { type: string }>({
+                resource: "visualizations",
+                params,
+                engine,
+            });
+            return data;
+        },
+        {
+            getPreviousPageParam: (firstPage) =>
+                firstPage.pager.page ?? undefined,
+            getNextPageParam: (lastPage) => lastPage.pager.page + 1,
+        }
+    );
+    React.useEffect(() => {
+        if (inView) {
+            fetchNextPage();
+        }
+    }, [inView]);
+    return (
+        <Stack>
+            <Input
+                size="sm"
+                value={q}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setQ(e.target.value)
+                }
+                onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                        setSearch(q);
+                    }
+                }}
             />
-        );
-    }
-    return null;
+            {status === "loading" ? (
+                <p>Loading...</p>
+            ) : status === "error" ? (
+                <span>Error: {error?.message}</span>
+            ) : (
+                <Scrollable height={300}>
+                    <Table size="md">
+                        <Tr>
+                            <Th>Name</Th>
+                        </Tr>
+                        <Tbody>
+                            {data?.pages.map((page) => (
+                                <React.Fragment key={page.pager.page}>
+                                    {page.data.map((d) => (
+                                        <Tr
+                                            key={d.id}
+                                            bg={
+                                                visualization.properties[
+                                                    "visualization"
+                                                ] === d.id
+                                                    ? "gray.400"
+                                                    : ""
+                                            }
+                                            onClick={() =>
+                                                sectionApi.changeVisualizationProperties(
+                                                    {
+                                                        visualization:
+                                                            visualization.id,
+                                                        attribute:
+                                                            "visualization",
+                                                        value: d.id,
+                                                    }
+                                                )
+                                            }
+                                            cursor="pointer"
+                                        >
+                                            <Th>{d.name}</Th>
+                                        </Tr>
+                                    ))}
+                                </React.Fragment>
+                            ))}
+                        </Tbody>
+                    </Table>
+
+                    <div>
+                        <button
+                            ref={ref}
+                            onClick={() => fetchNextPage()}
+                            disabled={!hasNextPage || isFetchingNextPage}
+                        >
+                            {isFetchingNextPage
+                                ? "Loading more..."
+                                : hasNextPage
+                                ? "Load Newer"
+                                : "Nothing more to load"}
+                        </button>
+                    </div>
+                    <div>
+                        {isFetching && !isFetchingNextPage
+                            ? "Background Updating..."
+                            : null}
+                    </div>
+                </Scrollable>
+            )}
+        </Stack>
+    );
 }
