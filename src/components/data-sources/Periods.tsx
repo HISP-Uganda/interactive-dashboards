@@ -1,8 +1,6 @@
 import { Stack } from "@chakra-ui/react";
-import { useStore } from "effector-react";
 import React, { useState } from "react";
 import { datumAPi } from "../../Events";
-import { $visualizationQuery } from "../../Store";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
 import PeriodPicker from "../PeriodPicker";
 import GlobalSearchFilter from "./GlobalSearchFilter";
@@ -15,7 +13,6 @@ const Periods = () => {
     const [type, setType] = useState<"filter" | "dimension">(previousType);
     const [useGlobal, setUseGlobal] = useState<boolean>(isGlobal);
     const [q, setQ] = useState<string>("");
-    const visualizationQuery = useStore($visualizationQuery);
 
     return (
         <Stack spacing="20px">
@@ -35,17 +32,19 @@ const Periods = () => {
                     <PeriodPicker
                         selectedPeriods={selected}
                         onChange={(items, remove) =>
-                            items.forEach(({ id, value, type, label }) => {
-                                datumAPi.changeDimension({
-                                    id: value,
-                                    type,
-                                    dimension: "pe",
-                                    resource: "pe",
-                                    periodType: type,
-                                    remove,
-                                    label,
-                                });
-                            })
+                            items.forEach(
+                                ({ id, value, type: periodType, label }) => {
+                                    datumAPi.changeDimension({
+                                        id: value,
+                                        type,
+                                        dimension: "pe",
+                                        resource: "pe",
+                                        periodType,
+                                        remove,
+                                        label,
+                                    });
+                                }
+                            )
                         }
                     />
                 </Stack>

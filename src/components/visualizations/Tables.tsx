@@ -24,7 +24,6 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
     const [squareRef, { height, width }] = useElementSize();
     const tbl = useRef<HTMLTableElement>(null);
     const flattenedData = flatten(data);
-    // const metadata = useStore($visualizationMetadata)[visualization.id];
     const rows = String(visualization.properties?.["rows"] ?? "").split(",");
     const columns = String(visualization.properties?.["columns"] ?? "").split(
         ","
@@ -92,21 +91,22 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                 {finalColumns.map((col, index) => (
                                     <Tr key={index}>
                                         {index === 0 && (
-                                            <Th
-                                                textTransform="none"
-                                                borderColor="#DDDDDD"
-                                                borderWidth="thin"
-                                                fontWeight="extrabold"
-                                                borderStyle="solid"
-                                                rowSpan={finalColumns.length}
-                                                colSpan={finalRows.length}
-                                            >
-                                                {
-                                                    visualization.properties[
-                                                        "rowName"
-                                                    ]
-                                                }
-                                            </Th>
+                                            <>
+                                                {rows.map((row) => (
+                                                    <Th
+                                                        textTransform="none"
+                                                        borderColor="#DDDDDD"
+                                                        borderWidth="thin"
+                                                        fontWeight="extrabold"
+                                                        borderStyle="solid"
+                                                        rowSpan={
+                                                            finalColumns.length
+                                                        }
+                                                    >
+                                                        {row}
+                                                    </Th>
+                                                ))}
+                                            </>
                                         )}
                                         {index === 0 &&
                                             columns
@@ -195,27 +195,47 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                                 <>
                                                     {finalRows
                                                         .slice(i)
-                                                        .map((i1, iw) => (
-                                                            <Td
-                                                                borderColor="#DDDDDD"
-                                                                borderWidth="thin"
-                                                                borderStyle="solid"
-                                                                rowSpan={
-                                                                    i1[i].span
-                                                                }
-                                                            >
-                                                                {
-                                                                    currentKey[
-                                                                        finalRows.length -
-                                                                            finalRows.slice(
-                                                                                i
-                                                                            )
-                                                                                .length +
-                                                                            iw
-                                                                    ]
-                                                                }
-                                                            </Td>
-                                                        ))}
+                                                        .map((i1, iw) => {
+                                                            const key =
+                                                                currentKey[
+                                                                    finalRows.length -
+                                                                        finalRows.slice(
+                                                                            i
+                                                                        )
+                                                                            .length +
+                                                                        iw
+                                                                ];
+                                                            return (
+                                                                <Td
+                                                                    borderColor="#DDDDDD"
+                                                                    borderWidth="thin"
+                                                                    borderStyle="solid"
+                                                                    bg={
+                                                                        visualization
+                                                                            .properties[
+                                                                            `${key}.bg`
+                                                                        ]
+                                                                    }
+                                                                    color={invertHex(
+                                                                        visualization
+                                                                            .properties[
+                                                                            `${key}.bg`
+                                                                        ] ||
+                                                                            "#ffffff",
+                                                                        true
+                                                                    )}
+                                                                    rowSpan={
+                                                                        i1[i]
+                                                                            .span
+                                                                    }
+                                                                >
+                                                                    {visualization
+                                                                        .properties[
+                                                                        `${key}.name`
+                                                                    ] || key}
+                                                                </Td>
+                                                            );
+                                                        })}
                                                 </>
                                             );
                                             break;

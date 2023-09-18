@@ -29,6 +29,7 @@ export default function SelectProperty({
                 options={options}
                 isClearable
                 menuPlacement="top"
+                size="sm"
             />
         </Stack>
     );

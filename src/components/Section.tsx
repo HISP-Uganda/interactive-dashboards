@@ -22,7 +22,7 @@ import { BiDuplicate } from "react-icons/bi";
 import { sectionApi } from "../Events";
 import { IIndicator, ISection, IVisualization, Option } from "../interfaces";
 import { useNamespace } from "../Queries";
-import { $section, $settings, $store } from "../Store";
+import { $section, $settings, $store, $dashboard } from "../Store";
 import { generateUid } from "../utils/uid";
 import {
     alignItemsOptions,
@@ -30,6 +30,7 @@ import {
     createOptions,
     createOptions2,
     justifyContentOptions,
+    donNotRequireQuery,
 } from "../utils/utils";
 import ColorPalette from "./ColorPalette";
 import { NumberField, RadioField, SelectField, TextField } from "./fields";
@@ -63,6 +64,7 @@ const VisualizationTypes = ({
                 options={chartTypes}
                 isClearable
                 menuPlacement="top"
+                size="sm"
             />
         </Stack>
     );
@@ -78,44 +80,29 @@ const VisualizationQuery = ({
         useNamespace<IIndicator>("i-indicators", storage, systemId, []);
     return (
         <Stack>
-            <Stack>
-                <Text>Visualization Query</Text>
-                {isLoading && <LoadingIndicator />}
-                {isSuccess && (
-                    <Select<IIndicator, true, GroupBase<IIndicator>>
-                        isMulti
-                        value={data?.filter(
-                            (i) => visualization.indicators.indexOf(i.id) !== -1
-                        )}
-                        getOptionLabel={(v) => String(v.name)}
-                        getOptionValue={(v) => v.id}
-                        onChange={(value) => {
-                            sectionApi.changeVisualizationAttribute({
-                                attribute: "indicators",
-                                value: value.map((i) => i.id),
-                                visualization: visualization.id,
-                            });
-                        }}
-                        options={data}
-                        isClearable
-                    />
-                )}
-                {isError && <Text>{error?.message}</Text>}
-            </Stack>
-
-            <Stack>
-                <Text>Title</Text>
-                <Input
-                    value={visualization.name}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            <Text>Visualization Query</Text>
+            {isLoading && <LoadingIndicator />}
+            {isSuccess && (
+                <Select<IIndicator, true, GroupBase<IIndicator>>
+                    isMulti
+                    value={data?.filter(
+                        (i) => visualization.indicators.indexOf(i.id) !== -1
+                    )}
+                    getOptionLabel={(v) => String(v.name)}
+                    getOptionValue={(v) => v.id}
+                    onChange={(value) => {
                         sectionApi.changeVisualizationAttribute({
-                            attribute: "name",
-                            value: e.target.value,
+                            attribute: "indicators",
+                            value: value.map((i) => i.id),
                             visualization: visualization.id,
-                        })
-                    }
+                        });
+                    }}
+                    options={data}
+                    isClearable
+                    size="sm"
                 />
-            </Stack>
+            )}
+            {isError && <Text>{error?.message}</Text>}
         </Stack>
     );
 };
@@ -239,6 +226,8 @@ const Section = () => {
         dragItem.current = position;
     };
 
+    const dashboard = useStore($dashboard);
+
     const dragEnter = (e: DragEvent<HTMLButtonElement>, position: number) => {
         dragOverItem.current = position;
     };
@@ -337,34 +326,47 @@ const Section = () => {
                                 title="Title"
                                 obj={section}
                             />
-                            <NumberField<ISection>
-                                attribute="rowSpan"
-                                func={sectionApi.changeSectionAttribute}
-                                title="Row Span"
-                                obj={section}
-                                min={1}
-                                max={24}
-                                step={1}
-                            />
-                            <NumberField<ISection>
-                                attribute="colSpan"
-                                func={sectionApi.changeSectionAttribute}
-                                title="Column Span"
-                                obj={section}
-                                min={1}
-                                max={24}
-                                step={1}
-                            />
 
-                            <TextField<ISection>
-                                attribute="height"
-                                func={sectionApi.changeSectionAttribute}
-                                title="Height(when on small devices)"
-                                obj={section}
-                            />
+                            {dashboard.type === "fixed" && (
+                                <>
+                                    <Stack direction="row" spacing="20px">
+                                        <NumberField<ISection>
+                                            attribute="rowSpan"
+                                            func={
+                                                sectionApi.changeSectionAttribute
+                                            }
+                                            title="Row Span"
+                                            obj={section}
+                                            min={1}
+                                            max={24}
+                                            step={1}
+                                        />
+                                        <NumberField<ISection>
+                                            attribute="colSpan"
+                                            func={
+                                                sectionApi.changeSectionAttribute
+                                            }
+                                            title="Column Span"
+                                            obj={section}
+                                            min={1}
+                                            max={24}
+                                            step={1}
+                                        />
+                                    </Stack>
 
-                            <Text>Background Colour</Text>
-                            <SectionColorPalette section={section} />
+                                    <TextField<ISection>
+                                        attribute="height"
+                                        func={sectionApi.changeSectionAttribute}
+                                        title="Height(when on small devices)"
+                                        obj={section}
+                                    />
+                                </>
+                            )}
+
+                            <Stack>
+                                <Text>Background Colour</Text>
+                                <SectionColorPalette section={section} />
+                            </Stack>
                             <RadioField<ISection>
                                 attribute="direction"
                                 func={sectionApi.changeSectionAttribute}
@@ -519,112 +521,179 @@ const Section = () => {
                                                     }
                                                 )
                                             }
+                                            size="sm"
                                         />
-                                        <Stack>
-                                            <Text>Background Color</Text>
-                                            <ColorPalette
-                                                visualization={visualization}
-                                                attribute="layout.bg"
-                                            />
-                                        </Stack>
-                                        <NumberProperty
-                                            max={10}
-                                            min={1}
-                                            step={0.1}
-                                            title="Title font size"
-                                            visualization={visualization}
-                                            attribute="data.title.fontSize"
-                                        />
-                                        <NumberProperty
-                                            max={1000}
-                                            min={100}
-                                            step={50}
-                                            title="Title font weight"
-                                            visualization={visualization}
-                                            attribute="data.title.fontWeight"
-                                        />
-                                        <Stack alignItems="center">
-                                            <Text>Rows</Text>
-                                            <NumberInput
-                                                value={visualization.rows}
-                                                max={24}
-                                                min={1}
-                                                step={1}
-                                                size="sm"
-                                                w="80px"
-                                                onChange={(_, value2: number) =>
-                                                    sectionApi.changeVisualizationAttribute(
-                                                        {
-                                                            attribute: "rows",
-                                                            value: value2,
-                                                            visualization:
-                                                                visualization.id,
+
+                                        {visualization.name && (
+                                            <>
+                                                <Stack
+                                                    direction="row"
+                                                    justifyContent="space-around"
+                                                >
+                                                    <Stack flex={1}>
+                                                        <Text>
+                                                            Title font color
+                                                        </Text>
+                                                        <ColorPalette
+                                                            visualization={
+                                                                visualization
+                                                            }
+                                                            attribute="data.title.color"
+                                                        />
+                                                    </Stack>
+                                                    <Stack flex={1}>
+                                                        <Text>
+                                                            Background Color
+                                                        </Text>
+                                                        <ColorPalette
+                                                            visualization={
+                                                                visualization
+                                                            }
+                                                            attribute="layout.bg"
+                                                        />
+                                                    </Stack>
+                                                </Stack>
+                                                <Stack
+                                                    direction="row"
+                                                    spacing="30px"
+                                                >
+                                                    <NumberProperty
+                                                        max={10}
+                                                        min={1}
+                                                        step={0.1}
+                                                        title="Title font size"
+                                                        visualization={
+                                                            visualization
                                                         }
-                                                    )
-                                                }
-                                            >
-                                                <NumberInputField />
-                                                <NumberInputStepper>
-                                                    <NumberIncrementStepper />
-                                                    <NumberDecrementStepper />
-                                                </NumberInputStepper>
-                                            </NumberInput>
-                                        </Stack>
-                                        <Stack alignItems="center">
-                                            <Text>Columns</Text>
-                                            <NumberInput
-                                                value={visualization.columns}
-                                                max={24}
-                                                min={1}
-                                                step={1}
-                                                size="sm"
-                                                w="80px"
-                                                onChange={(_, value2: number) =>
-                                                    sectionApi.changeVisualizationAttribute(
-                                                        {
-                                                            attribute:
-                                                                "columns",
-                                                            value: value2,
-                                                            visualization:
-                                                                visualization.id,
+                                                        attribute="data.title.fontSize"
+                                                        direction="row"
+                                                        alignItems="center"
+                                                        flex={1}
+                                                    />
+                                                    <NumberProperty
+                                                        max={1000}
+                                                        min={100}
+                                                        step={50}
+                                                        title="Title font weight"
+                                                        visualization={
+                                                            visualization
                                                         }
-                                                    )
-                                                }
-                                            >
-                                                <NumberInputField />
-                                                <NumberInputStepper>
-                                                    <NumberIncrementStepper />
-                                                    <NumberDecrementStepper />
-                                                </NumberInputStepper>
-                                            </NumberInput>
-                                        </Stack>
-                                        <Text>Title font color</Text>
-                                        <ColorPalette
-                                            visualization={visualization}
-                                            attribute="data.title.color"
-                                        />
-                                        <VisualizationQuery
-                                            visualization={visualization}
-                                        />
-                                        <Text>Expression</Text>
-                                        <Textarea
-                                            value={visualization.expression}
-                                            onChange={(
-                                                e: ChangeEvent<HTMLTextAreaElement>
-                                            ) =>
-                                                sectionApi.changeVisualizationAttribute(
-                                                    {
-                                                        attribute: "expression",
-                                                        value: e.target.value,
-                                                        visualization:
-                                                            visualization.id,
-                                                    }
-                                                )
-                                            }
-                                        />
+                                                        attribute="data.title.fontWeight"
+                                                        direction="row"
+                                                        alignItems="center"
+                                                        flex={1}
+                                                    />
+                                                </Stack>
+                                            </>
+                                        )}
+                                        {section.display === "grid" && (
+                                            <>
+                                                <Stack>
+                                                    <Text>Rows</Text>
+                                                    <NumberInput
+                                                        value={
+                                                            visualization.rows
+                                                        }
+                                                        max={24}
+                                                        min={1}
+                                                        step={1}
+                                                        size="sm"
+                                                        onChange={(
+                                                            _,
+                                                            value2: number
+                                                        ) =>
+                                                            sectionApi.changeVisualizationAttribute(
+                                                                {
+                                                                    attribute:
+                                                                        "rows",
+                                                                    value: value2,
+                                                                    visualization:
+                                                                        visualization.id,
+                                                                }
+                                                            )
+                                                        }
+                                                    >
+                                                        <NumberInputField />
+                                                        <NumberInputStepper>
+                                                            <NumberIncrementStepper />
+                                                            <NumberDecrementStepper />
+                                                        </NumberInputStepper>
+                                                    </NumberInput>
+                                                </Stack>
+                                                <Stack>
+                                                    <Text>Columns</Text>
+                                                    <NumberInput
+                                                        value={
+                                                            visualization.columns
+                                                        }
+                                                        max={24}
+                                                        min={1}
+                                                        step={1}
+                                                        size="sm"
+                                                        onChange={(
+                                                            _,
+                                                            value2: number
+                                                        ) =>
+                                                            sectionApi.changeVisualizationAttribute(
+                                                                {
+                                                                    attribute:
+                                                                        "columns",
+                                                                    value: value2,
+                                                                    visualization:
+                                                                        visualization.id,
+                                                                }
+                                                            )
+                                                        }
+                                                    >
+                                                        <NumberInputField />
+                                                        <NumberInputStepper>
+                                                            <NumberIncrementStepper />
+                                                            <NumberDecrementStepper />
+                                                        </NumberInputStepper>
+                                                    </NumberInput>
+                                                </Stack>
+                                            </>
+                                        )}
+
                                         <VisualizationTypes
                                             visualization={visualization}
                                         />
+
+                                        {donNotRequireQuery.indexOf(
+                                            visualization.type
+                                        ) === -1 &&
+                                            visualization.type !== "" && (
+                                                <>
+                                                    <VisualizationQuery
+                                                        visualization={
+                                                            visualization
+                                                        }
+                                                    />
+                                                    <Text>Expression</Text>
+                                                    <Textarea
+                                                        value={
+                                                            visualization.expression
+                                                        }
+                                                        rows={2}
+                                                        onChange={(
+                                                            e: ChangeEvent<HTMLTextAreaElement>
+                                                        ) =>
+                                                            sectionApi.changeVisualizationAttribute(
+                                                                {
+                                                                    attribute:
+                                                                        "expression",
+                                                                    value: e
+                                                                        .target
+                                                                        .value,
+                                                                    visualization:
+                                                                        visualization.id,
+                                                                }
+                                                            )
+                                                        }
+                                                    />
+                                                </>
+                                            )}
+
                                         <VisualizationProperties
                                             visualization={visualization}
                                         />

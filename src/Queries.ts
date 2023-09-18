@@ -1,9 +1,7 @@
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
-import { colorSets } from "@dhis2/analytics";
 import { Event } from "effector";
-
 import {
     every,
     flatten,
@@ -14,7 +12,6 @@ import {
     max,
     min,
     uniq,
-    sortBy,
 } from "lodash";
 import { getOr } from "lodash/fp";
 import { evaluate } from "mathjs";
@@ -25,13 +22,13 @@ import {
     dashboardTypeApi,
     dataSetsApi,
     dataSourceApi,
+    sectionApi,
     settingsApi,
     storeApi,
+    totalsApi,
     visualizationDataApi,
     visualizationDimensionsApi,
     visualizationMetadataApi,
-    totalsApi,
-    sectionApi,
 } from "./Events";
 import {
     DataNode,
@@ -53,13 +50,13 @@ import {
 } from "./interfaces";
 import { createCategory, createDashboard, createDataSource } from "./Store";
 import {
+    findParameters,
     flattenDHIS2Data,
+    getAnalyticsQuery,
     getSearchParams,
     merge2DataSources,
-    processMap,
-    getAnalyticsQuery,
-    findParameters,
     processAnalyticsData,
+    processMap,
 } from "./utils/utils";
 
 type QueryProps = {
@@ -751,6 +748,35 @@ export const useDataSet = (dataSetId: string) => {
     );
 };
 
+export const getDHIS2Resources2 = async <T>({
+    params,
+    resource,
+    engine,
+}: Partial<{
+    params: { [key: string]: string };
+    resource: string;
+    engine: any;
+}>) => {
+    const { data }: any = await engine.query({
+        data: {
+            resource,
+            params,
+        },
+    });
+
+    const x: {
+        pager: {
+            total: number;
+            page: number;
+            pageSize: number;
+            totalPages: number;
+        };
+        data: Array<T>;
+    } = { pager: data.pager, data: data[resource ?? ""] };
+
+    return x;
+};
+
 export const getDHIS2Resources = async <T>({
     isCurrentDHIS2,
     params,
@@ -766,7 +792,7 @@ export const getDHIS2Resources = async <T>({
     api: AxiosInstance | undefined | null;
     engine: any;
 }>) => {
-    if (isCurrentDHIS2 && resource) {
+    if (isCurrentDHIS2 && resource && resourceKey) {
         const { data }: any = await engine.query({
             data: {
                 resource,
@@ -783,19 +809,26 @@ export const getDHIS2Resources = async <T>({
 
         totalsApi.set(Number(total));
 
-        if (resourceKey) {
-            return getOr<T[]>([], resourceKey, data);
-        }
-        return data;
-    } else if (api && resource) {
+        return getOr<T[]>([], resourceKey, data);
+    } else if (isCurrentDHIS2 && resource) {
+        const { data }: any = await engine.query({
+            data: {
+                resource,
+                params,
+            },
+        });
+        return data as Array<T>;
+    } else if (api && resource && resourceKey) {
         const { data } = await api.get<{ [key: string]: T[] }>(resource, {
             params,
             string: "",
         });
-
-        if (resourceKey) {
-            return data[resourceKey];
-        }
+        return data[resourceKey];
+    } else if (api && resource) {
+        const { data } = await api.get<T[]>(resource, {
+            params,
+            string: "",
+        });
         return data;
     }
     return [];
@@ -906,17 +939,22 @@ export const useSQLViews = (
 
 export const useDHIS2Visualizations = (
     isCurrentDHIS2: boolean | undefined | null,
-    api: AxiosInstance | undefined | null
+    api: AxiosInstance | undefined | null,
+    search: string | null | undefined
 ) => {
     const engine = useDataEngine();
-    const params: {
+    let params: {
         [key: string]: string;
     } = {
         fields: "id,name,type",
-        // paging: "false",
+        pageSize: "10",
     };
+
+    if (search) {
+        params = { ...params, filter: `identifiable:token:${search}` };
+    }
     return useQuery<Array<INamed & { type: string }>, Error>(
-        ["dhis-visualizations"],
+        ["dhis-visualizations", search],
         async () => {
             return getDHIS2Resources<INamed & { type: string }>({
                 isCurrentDHIS2,
@@ -1035,7 +1073,7 @@ const makeDHIS2Query = (
     );
     const allDimensions = findDimension(filtered, globalFilters);
 
-    return Object.entries(
+    const final = Object.entries(
         groupBy(allDimensions, (v) => `${v.type}${v.dimension}`)
     )
         .flatMap(([x, y]) => {
@@ -1050,6 +1088,7 @@ const makeDHIS2Query = (
             return [];
         })
         .join("&");
+    return final;
 };
 
 const makeSQLViewsQueries = (
@@ -1209,6 +1248,7 @@ const queryData = async (
     globalFilters: { [key: string]: any } = {},
     otherFilters: { [key: string]: any } = {}
 ) => {
+    console.log(vq);
     const realData = await queryDHIS2(engine, vq, globalFilters);
     const joinData = await queryDHIS2(engine, vq?.joinTo, globalFilters);
     let dimensions: { [key: string]: string[] } = {};
@@ -1993,9 +2033,7 @@ export const useDHIS2Visualization = (viz: IVisualization) => {
                 };
 
                 const { visualization }: any = await engine.query(query);
-                console.log(visualization);
                 const params = getAnalyticsQuery(visualization);
-
                 const availableColors =
                     visualization.legend?.set?.legends || [];
 
@@ -2027,7 +2065,6 @@ export const useDHIS2Visualization = (viz: IVisualization) => {
                     metaData,
                     options: { includeEmpty: true, valueIfEmpty: "" },
                 });
-                console.log(data);
                 sectionApi.setVisualization(currentVisualization);
                 visualizationDataApi.updateVisualizationData({
                     visualizationId: currentVisualization.id,

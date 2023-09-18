@@ -104,7 +104,6 @@ const OrganizationUnitLevels = ({ api, isCurrentDHIS2 }: MetadataAPI) => {
             )}
             {isSuccess && data && !useGlobal && (
                 <Stack>
-                    <pre>{JSON.stringify(visualizationQuery, null, 2)}</pre>
                     <Table
                         variant="striped"
                         colorScheme="gray"
@@ -139,7 +138,6 @@ const OrganizationUnitLevels = ({ api, isCurrentDHIS2 }: MetadataAPI) => {
                             {data.map((record: any) => (
                                 <Tr key={record.level}>
                                     <Td>
-                                        {record.level}--{record.id}
                                         <Checkbox
                                             onChange={(
                                                 e: ChangeEvent<HTMLInputElement>

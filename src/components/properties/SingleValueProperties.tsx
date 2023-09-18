@@ -220,6 +220,7 @@ const SingleValueProperties = ({
             <Stack>
                 <Text>Target</Text>
                 <Input
+                    size="sm"
                     value={visualization.properties?.["data.target"] || ""}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
                         sectionApi.changeVisualizationProperties({
@@ -247,6 +248,7 @@ const SingleValueProperties = ({
                     }
                     options={targetGraphOptions}
                     isClearable
+                    size="sm"
                 />
             </Stack>
 
@@ -267,6 +269,7 @@ const SingleValueProperties = ({
                     }
                     options={progressAlignments}
                     isClearable
+                    size="sm"
                 />
             </Stack>
 
@@ -283,6 +286,7 @@ const SingleValueProperties = ({
                             value: value2,
                         })
                     }
+                    size="sm"
                 >
                     <NumberInputField />
                     <NumberInputStepper>
@@ -315,6 +319,7 @@ const SingleValueProperties = ({
                             value: value2,
                         })
                     }
+                    size="sm"
                 >
                     <NumberInputField />
                     <NumberInputStepper>
@@ -337,6 +342,7 @@ const SingleValueProperties = ({
                             value: value2,
                         })
                     }
+                    size="sm"
                 >
                     <NumberInputField />
                     <NumberInputStepper>
@@ -356,6 +362,7 @@ const SingleValueProperties = ({
                             value: e.target.value,
                         })
                     }
+                    size="sm"
                 />
             </Stack>
         </Stack>
