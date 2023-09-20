@@ -1203,34 +1203,39 @@ export const datElementGroupSetsDataElementGroupsWithAttributes = (
             }
 
             if (dataElementGroups && dataElementGroups.length > 0) {
-                const [
-                    {
-                        name: dataElementGroupName,
-                        groupSets,
-                        shortName: dataElementGroupShortName,
-                    },
-                ] = dataElementGroups.filter(
+                const filtered = dataElementGroups.filter(
                     ({ id }: any) => id !== "ZTv2IkjG5K7"
                 );
 
-                subKeyResultArea = dataElementGroupName;
-                shortName = dataElementGroupShortName;
+                if (filtered.length > 0) {
+                    const [
+                        {
+                            name: dataElementGroupName,
+                            groupSets,
+                            shortName: dataElementGroupShortName,
+                        },
+                    ] = filtered;
 
-                if (groupSets && groupSets.length > 0) {
-                    const [{ name: dataElementGroupSetName, attributeValues }] =
-                        groupSets;
+                    subKeyResultArea = dataElementGroupName;
+                    shortName = dataElementGroupShortName;
 
-                    keyResultArea = dataElementGroupSetName;
-
-                    if (attributeValues.length > 0) {
+                    if (groupSets && groupSets.length > 0) {
                         const [
-                            {
-                                value: val1,
-                                attribute: { name },
-                            },
-                        ] = attributeValues;
-                        attributeName = name;
-                        value = val1;
+                            { name: dataElementGroupSetName, attributeValues },
+                        ] = groupSets;
+
+                        keyResultArea = dataElementGroupSetName;
+
+                        if (attributeValues.length > 0) {
+                            const [
+                                {
+                                    value: val1,
+                                    attribute: { name },
+                                },
+                            ] = attributeValues;
+                            attributeName = name;
+                            value = val1;
+                        }
                     }
                 }
             }

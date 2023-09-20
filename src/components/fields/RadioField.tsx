@@ -1,5 +1,12 @@
 import React from "react";
-import { Radio, RadioGroup, Stack, Switch, Text } from "@chakra-ui/react";
+import {
+    Radio,
+    RadioGroup,
+    Stack,
+    Switch,
+    Text,
+    StackProps,
+} from "@chakra-ui/react";
 
 import { AttributeProps, Option } from "../../interfaces";
 
@@ -9,11 +16,12 @@ export default function RadioField<T>({
     obj,
     attribute,
     func,
+    ...rest
 }: AttributeProps<T> & {
     options: Option[];
-}) {
+} & StackProps) {
     return (
-        <Stack>
+        <Stack {...rest}>
             <Text>{title}</Text>
             <RadioGroup
                 onChange={(e) =>
@@ -23,6 +31,9 @@ export default function RadioField<T>({
                     })
                 }
                 value={String(obj[attribute])}
+                flex={
+                    rest.direction && rest.direction === "row" ? 1 : undefined
+                }
             >
                 <Stack direction="row">
                     {options.map((option) => (

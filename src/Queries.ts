@@ -1248,7 +1248,6 @@ const queryData = async (
     globalFilters: { [key: string]: any } = {},
     otherFilters: { [key: string]: any } = {}
 ) => {
-    console.log(vq);
     const realData = await queryDHIS2(engine, vq, globalFilters);
     const joinData = await queryDHIS2(engine, vq?.joinTo, globalFilters);
     let dimensions: { [key: string]: string[] } = {};

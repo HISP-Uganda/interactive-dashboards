@@ -1,22 +1,17 @@
-import {
-    Box,
-    Button,
-    Flex,
-    Stack,
-    Table,
-    Tbody,
-    Td,
-    Th,
-    Thead,
-    Tr,
-} from "@chakra-ui/react";
+import { Box, Stack, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
 import JsPDF from "jspdf";
 import { flatten } from "lodash";
 import React, { useRef } from "react";
 import { useElementSize } from "usehooks-ts";
-import { ChartProps, Column, Threshold } from "../../interfaces";
+import {
+    ChartProps,
+    Column,
+    Threshold,
+    LocationGenerics,
+} from "../../interfaces";
 import { SPECIAL_COLUMNS } from "../constants";
 import { invertHex, processTable } from "../processors";
+import { useSearch } from "@tanstack/react-location";
 
 interface TableProps extends ChartProps {}
 
@@ -29,13 +24,21 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
         ","
     );
     const generatePDF = () => {
-        const report = new JsPDF("landscape", "px", "a1");
         if (tbl.current) {
-            report.html(tbl.current).then(() => {
-                report.save("report.pdf");
-            });
+            const report = new JsPDF(
+                "landscape",
+                "px",
+                [width + 60, height],
+                true
+            );
+            report
+                .html(tbl.current, { autoPaging: true, margin: 20 })
+                .then(() => {
+                    report.save("report.pdf");
+                });
         }
     };
+    const { display } = useSearch<LocationGenerics>();
     const thresholds: Threshold[] =
         visualization.properties?.["data.thresholds"] ?? [];
     const aggregation = visualization.properties?.["aggregation"] ?? "count";
@@ -62,34 +65,45 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
     };
 
     return (
-        <Stack w="100%" h="100%" spacing={0}>
-            <Flex>
+        <Stack
+            w="100%"
+            // h="100%"
+            spacing={0}
+        >
+            {/* <Flex>
                 <Stack h="48px" fontSize="xl">
-                    <Button colorScheme="blue" onClick={generatePDF}>
+                    <Button colorScheme="blue" >
                         Download Table
                     </Button>
                 </Stack>
-            </Flex>
-            <Box h="100%" w="100%" ref={squareRef}>
+            </Flex> */}
+            <Box
+                // h="100%"
+                w="100%"
+                ref={squareRef}
+            >
                 <Box
                     position="relative"
                     overflow="auto"
-                    whiteSpace="nowrap"
-                    h={`${height}px`}
+                    // whiteSpace="nowrap"
+                    // h={display === "dashboard" ? `${height}px` : "100%"}
                     w="100%"
                 >
                     <Table
                         variant="unstyled"
                         w="100%"
                         bg="white"
-                        size={visualization.properties?.["cellHeight"]}
-                        style={{ borderSpacing: 0, borderCollapse: "collapse" }}
+                        size={visualization.properties?.["cellHeight"] || "sm"}
                         ref={tbl}
+                        // height={height}
                     >
                         {visualization.properties?.["showHeaders"] && (
                             <Thead>
                                 {finalColumns.map((col, index) => (
-                                    <Tr key={index}>
+                                    <Tr
+                                        key={index}
+                                        style={{ pageBreakInside: "avoid" }}
+                                    >
                                         {index === 0 && (
                                             <>
                                                 {rows.map((row) => (
@@ -165,7 +179,7 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                                 textAlign={
                                                     visualization.properties[
                                                         "columnAlignment"
-                                                    ]
+                                                    ] || "center"
                                                 }
                                                 key={col.value}
                                             >
@@ -192,7 +206,7 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                             0
                                         ) {
                                             display = (
-                                                <>
+                                                <React.Fragment key={i}>
                                                     {finalRows
                                                         .slice(i)
                                                         .map((i1, iw) => {
@@ -210,6 +224,9 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                                                     borderColor="#DDDDDD"
                                                                     borderWidth="thin"
                                                                     borderStyle="solid"
+                                                                    key={`${i}${key}`}
+                                                                    textAlign="center"
+                                                                    verticalAlign="middle"
                                                                     bg={
                                                                         visualization
                                                                             .properties[
@@ -236,21 +253,55 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                                                 </Td>
                                                             );
                                                         })}
-                                                </>
+                                                </React.Fragment>
                                             );
                                             break;
                                         }
                                     }
                                     return (
-                                        <Tr>
+                                        <Tr
+                                            style={{ pageBreakInside: "avoid" }}
+                                        >
                                             {display}
+                                            {columns
+                                                .filter(
+                                                    (c) =>
+                                                        SPECIAL_COLUMNS.indexOf(
+                                                            c
+                                                        ) !== -1
+                                                )
+                                                .map((c) => (
+                                                    <Td
+                                                        textTransform="none"
+                                                        fontWeight="extrabold"
+                                                        borderColor="#DDDDDD"
+                                                        borderWidth="thin"
+                                                        borderStyle="solid"
+                                                        key={c}
+                                                        textAlign={
+                                                            visualization
+                                                                .properties[
+                                                                "columnAlignment"
+                                                            ]
+                                                        }
+                                                    >
+                                                        {
+                                                            finalData[
+                                                                `${row.value}${c}`
+                                                            ]?.["value"]
+                                                        }
+                                                    </Td>
+                                                ))}
                                             {finalColumns.length > 0 &&
                                                 finalColumns[
                                                     finalColumns.length - 1
                                                 ].map((col) => {
                                                     return (
                                                         <Td
-                                                            key={col.value}
+                                                            key={
+                                                                col.value +
+                                                                row.key
+                                                            }
                                                             borderColor="#DDDDDD"
                                                             borderWidth="thin"
                                                             borderStyle="solid"
@@ -258,8 +309,9 @@ const Tables = ({ visualization, data, dimensions }: TableProps) => {
                                                                 visualization
                                                                     .properties[
                                                                     "columnAlignment"
-                                                                ]
+                                                                ] || "center"
                                                             }
+                                                            verticalAlign="middle"
                                                             {...findOthers(col)}
                                                             bg={
                                                                 finalData[

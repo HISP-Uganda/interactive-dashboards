@@ -14,6 +14,9 @@ export default function TextField<T>({
             <Text>{title}</Text>
             <Input
                 value={`${obj[attribute]}`}
+                flex={
+                    rest.direction && rest.direction === "row" ? 1 : undefined
+                }
                 size="sm"
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     func({

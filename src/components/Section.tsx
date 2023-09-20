@@ -314,12 +314,21 @@ const Section = () => {
                 <Stack overflow="auto" flex={1} spacing={0}>
                     {active === "title" && (
                         <Stack p="10px" spacing="20px" bgColor="white">
-                            <CheckboxField<ISection>
-                                attribute="isTemplateArea"
-                                func={sectionApi.changeSectionAttribute}
-                                title="Is template area"
-                                obj={section}
-                            />
+                            <Stack direction="row" spacing="20px">
+                                <CheckboxField<ISection>
+                                    attribute="isTemplateArea"
+                                    func={sectionApi.changeSectionAttribute}
+                                    title="Is template area"
+                                    obj={section}
+                                />
+
+                                <CheckboxField<ISection>
+                                    attribute="isPrintable"
+                                    func={sectionApi.changeSectionAttribute}
+                                    title="Is Printable"
+                                    obj={section}
+                                />
+                            </Stack>
                             <TextField<ISection>
                                 attribute="title"
                                 func={sectionApi.changeSectionAttribute}
@@ -373,6 +382,9 @@ const Section = () => {
                                 title="Arrangement"
                                 obj={section}
                                 options={createOptions(["row", "column"])}
+                                direction="row"
+                                spacing="20px"
+                                alignItems="center"
                             />
                             <SelectField<ISection, Option>
                                 options={alignItemsOptions}
