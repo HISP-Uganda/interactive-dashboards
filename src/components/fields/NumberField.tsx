@@ -7,6 +7,7 @@ import {
     NumberInputStepper,
     Stack,
     Text,
+    StackProps,
 } from "@chakra-ui/react";
 import { AttributeProps } from "../../interfaces";
 export default function NumberField<T>({
@@ -17,14 +18,15 @@ export default function NumberField<T>({
     attribute,
     obj,
     func,
+    ...rest
 }: AttributeProps<T> & {
     min?: number;
     max?: number;
     step?: number;
     visualization?: string;
-}) {
+} & StackProps) {
     return (
-        <Stack direction="row" alignItems="center">
+        <Stack {...rest}>
             <Text>{title}</Text>
             <NumberInput
                 value={String(obj[attribute])}
@@ -38,6 +40,9 @@ export default function NumberField<T>({
                         attribute,
                         value: value2,
                     })
+                }
+                flex={
+                    rest.direction && rest.direction === "row" ? 1 : undefined
                 }
             >
                 <NumberInputField />

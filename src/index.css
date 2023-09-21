@@ -8,3 +8,39 @@
 .ant-tree-node-selected {
     background-color: #fee300 !important;
 }
+
+table {
+    /* overflow: visible !important; */
+    border-spacing: 0;
+    border-collapse: "collapse";
+}
+/* thead {
+    display: table-header-group;
+}
+tfoot {
+    display: table-row-group;
+}
+tr {
+    page-break-inside: avoid;
+} */
+
+/* table,
+th,
+tr,
+td {
+    page-break-inside: avoid;
+    page-break-after: auto;
+} */
+
+/* @media all {
+    .page-break {
+        display: none;
+    }
+}
+
+@media print {
+    .page-break {
+        display: block;
+        page-break-before: always;
+    }
+} */

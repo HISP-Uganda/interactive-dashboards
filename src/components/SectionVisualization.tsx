@@ -199,6 +199,7 @@ const SectionVisualization = (section: ISection) => {
             spacing={0}
             ref={squareRef}
             id={section.id}
+            data-testid="viz"
         >
             {displays[section.display] || displays.normal}
             <Menu id={section.id}>

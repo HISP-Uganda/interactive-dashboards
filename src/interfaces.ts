@@ -301,6 +301,7 @@ export type LocationGenerics = MakeGenerics<{
         organisations: string[];
         dataSourceId: string;
         action: "create" | "update" | "view";
+        display: "report" | "dashboard";
         type: "fixed" | "dynamic";
         optionSet: string;
         affected: string;

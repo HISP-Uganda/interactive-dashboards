@@ -120,6 +120,8 @@ export default function AdminPanel() {
                 attribute="spacing"
                 func={dashboardApi.changeAttribute}
                 obj={dashboard}
+                direction="row"
+                alignItems="center"
             />
             <Button onClick={() => onClick()} size="sm">
                 Add Section

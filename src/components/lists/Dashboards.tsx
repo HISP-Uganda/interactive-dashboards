@@ -142,6 +142,7 @@ const Dashboards = () => {
                                                         store.organisations,
                                                     groups: store.groups,
                                                     levels: store.levels,
+                                                    display: "dashboard",
                                                 },
                                             });
                                         }}
@@ -185,11 +186,49 @@ const Dashboards = () => {
                                                                 store.organisations,
                                                             groups: store.groups,
                                                             levels: store.levels,
+                                                            display:
+                                                                "dashboard",
                                                         },
                                                     });
                                                 }}
                                             >
                                                 Edit
+                                            </Button>
+                                            <Button
+                                                colorScheme="green"
+                                                size="xs"
+                                                onClick={async () => {
+                                                    dashboardApi.setCurrentDashboard(
+                                                        dashboard
+                                                    );
+                                                    storeApi.changeSelectedDashboard(
+                                                        dashboard.id
+                                                    );
+                                                    storeApi.changeSelectedCategory(
+                                                        dashboard.category || ""
+                                                    );
+
+                                                    navigate({
+                                                        to: `/dashboards/${dashboard.id}`,
+                                                        search: {
+                                                            action: "view",
+                                                            category:
+                                                                dashboard.category,
+                                                            periods:
+                                                                store.periods.map(
+                                                                    (i) =>
+                                                                        i.value
+                                                                ),
+                                                            organisations:
+                                                                store.organisations,
+                                                            groups: store.groups,
+                                                            levels: store.levels,
+                                                            display: "report",
+                                                        },
+                                                    });
+                                                }}
+                                            >
+                                                View as Report
                                             </Button>
                                             <Button size="xs">Duplicate</Button>
                                             <Button
