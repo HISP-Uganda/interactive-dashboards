@@ -8,6 +8,9 @@ const theme = extendTheme({
                     boxShadow: "none",
                 },
             },
+            defaultProps: {
+                size: "sm",
+            },
         },
     },
     styles: {

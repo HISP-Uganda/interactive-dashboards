@@ -1,40 +1,33 @@
 import {
     Box,
-    SimpleGrid,
-    Stack,
-    useDisclosure,
     Grid,
-    useBreakpointValue,
     GridItem,
+    Stack,
+    useBreakpointValue,
+    useDisclosure,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { MouseEvent } from "react";
-import {
-    Item,
-    Menu,
-    Separator,
-    Submenu,
-    useContextMenu,
-} from "react-contexify";
-import { useElementSize } from "usehooks-ts";
+import { Item, Menu, Separator, useContextMenu } from "react-contexify";
 import "react-contexify/dist/ReactContexify.css";
+import {
+    AiOutlineBarChart,
+    AiOutlineLineChart,
+    AiOutlineNumber,
+} from "react-icons/ai";
+import { FaGlobeAfrica } from "react-icons/fa";
 import Marquee from "react-marquee-slider";
-import { sectionApi, dashboardApi } from "../Events";
+import { useElementSize } from "usehooks-ts";
+import { dashboardApi, sectionApi } from "../Events";
 import { ISection } from "../interfaces";
-import { $store, isOpenApi, $dashboard } from "../Store";
+import { $dashboard, $store, isOpenApi } from "../Store";
 import FullScreen from "./FullScreen";
 import Carousel from "./visualizations/Carousel";
 import TabPanelVisualization from "./visualizations/TabPanelVisualization";
 import Visualization from "./visualizations/Visualization";
 import VisualizationTitle from "./visualizations/VisualizationTitle";
-import {
-    AiOutlineLineChart,
-    AiOutlineBarChart,
-    AiOutlineNumber,
-} from "react-icons/ai";
-import { FaGlobeAfrica } from "react-icons/fa";
 
-const SectionVisualization = (section: ISection) => {
+const SectionVisualization = ({ section }: { section: ISection }) => {
     const dashboard = useStore($dashboard);
     const { show } = useContextMenu({
         id: section.id,
@@ -178,7 +171,7 @@ const SectionVisualization = (section: ISection) => {
                 </Stack>
             </Stack>
         ),
-        tab: <TabPanelVisualization {...section} />,
+        tab: <TabPanelVisualization section={section} />,
     };
 
     const {

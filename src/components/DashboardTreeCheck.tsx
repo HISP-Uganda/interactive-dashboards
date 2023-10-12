@@ -1,5 +1,7 @@
 import { Text } from "@chakra-ui/react";
 import { Tree } from "antd";
+import { TreeProps } from "antd/es/tree";
+
 import { useStore } from "effector-react";
 import React, { useState } from "react";
 import { DataNode, IDashboard, ISection, IVisualization } from "../interfaces";
@@ -13,12 +15,12 @@ function RealTree({
     value,
 }: {
     dashboards: IDashboard[];
-    onChange: (data: any) => void;
-    value: any;
+    onChange: (data: DataNode[]) => void;
+    value: { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[];
 }) {
-    const [checkedKeys, setCheckedKeys] = useState<
-        { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[]
-    >(value.map((x: any) => x.key));
+    // const [checkedKeys, setCheckedKeys] = useState<
+    //     { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[]
+    // >(value.map((x: any) => x.key));
     const processed = dashboards.map((dashboard) => {
         const dashboardChildren = dashboard.sections.map((section) => {
             const sectionNode: DataNode = {
@@ -58,18 +60,12 @@ function RealTree({
         return node;
     });
 
-    const onCheck = async (
-        checkedKeysValue:
-            | { checked: React.Key[]; halfChecked: React.Key[] }
-            | React.Key[],
-        info: any
+    const onCheck: TreeProps<DataNode>["onCheck"] = async (
+        checkedKeysValue,
+        info
     ) => {
-        setCheckedKeys(checkedKeysValue);
-        onChange(
-            info?.checkedNodes.map(({ children, ...rest }: any) => ({
-                ...rest,
-            }))
-        );
+        // setCheckedKeys(checkedKeysValue);
+        onChange(info?.checkedNodes.map(({ children, ...rest }) => rest));
     };
     return (
         <Tree
@@ -78,13 +74,8 @@ function RealTree({
             checkStrictly
             showLine
             selectable={false}
-            // icon={<CarryOutOutlined />}
-            // onSelect={onSelect}
-
-            // autoExpandParent={autoExpandParent}
             onCheck={onCheck}
-            checkedKeys={checkedKeys}
-            // selectedKeys={selectedKeys}
+            checkedKeys={value}
             style={{
                 maxHeight: "800px",
                 overflow: "auto",
@@ -98,8 +89,8 @@ export default function DashboardTreeCheck({
     value,
     onChange,
 }: {
-    value: any;
-    onChange: (e: string) => void;
+    value: { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[];
+    onChange: (e: DataNode[]) => void;
 }) {
     const store = useStore($store);
     const { storage } = useStore($settings);

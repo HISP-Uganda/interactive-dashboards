@@ -17,12 +17,17 @@ import { Link, useNavigate } from "@tanstack/react-location";
 import { useQueryClient } from "@tanstack/react-query";
 import { useStore } from "effector-react";
 import { ChangeEvent, useEffect, useState } from "react";
-import { IData, LocationGenerics } from "../../interfaces";
+import { IData, LocationGenerics, IVisualization } from "../../interfaces";
 import { deleteDocument, saveDocument, useNamespace } from "../../Queries";
 import { $settings, $store, createVisualizationQuery } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import LoadingIndicator from "../LoadingIndicator";
 import PaginatedTable from "./PaginatedTable";
+import Scrollable from "../Scrollable";
+import TableHeader from "../TableHeader";
+import { Popconfirm } from "antd";
+
+const NUMBER_PER_PAGE = 15;
 
 export default function VisualizationQueries() {
     const navigate = useNavigate<LocationGenerics>();
@@ -42,7 +47,7 @@ export default function VisualizationQueries() {
     const [q, setQ] = useState<string>("");
     const [loading2, setLoading2] = useState<boolean>(false);
 
-    const last = currentPage * 20;
+    const last = currentPage * NUMBER_PER_PAGE;
 
     const [currentData, setCurrentData] = useState<IData[] | undefined>(
         data
@@ -53,7 +58,7 @@ export default function VisualizationQueries() {
                         d.id.includes(q))
                 );
             })
-            .slice(last - 20, last)
+            .slice(last - NUMBER_PER_PAGE, last)
     );
     useEffect(() => {
         setCurrentData(() => {
@@ -66,7 +71,7 @@ export default function VisualizationQueries() {
                                 d.id.includes(q))
                         );
                     })
-                    .slice(last - 20, last);
+                    .slice(last - NUMBER_PER_PAGE, last);
             }
             return [];
         });
@@ -79,8 +84,33 @@ export default function VisualizationQueries() {
         setCurrentData((prev) => prev?.filter((p) => p.id !== id));
         setLoading(() => false);
     };
+
+    const duplicate = async (visualizationQuery: IData) => {
+        setCurrentId(() => visualizationQuery.id);
+        const id = generateUid();
+        setLoading2(() => true);
+        await saveDocument(
+            storage,
+            "i-visualization-queries",
+            systemId,
+            {
+                ...visualizationQuery,
+                id,
+            },
+            engine,
+            "create"
+        );
+        await queryClient.invalidateQueries(["visualization-queries"]);
+        setLoading2(() => false);
+        navigate({
+            to: `/settings/visualization-queries/${id}`,
+            search: {
+                action: "update",
+            },
+        });
+    };
     return (
-        <Stack>
+        <Stack w="100%" h="100%">
             <Text fontSize="2xl" fontWeight="bold" p="2" color="blue.600">
                 Visualisation Queries
             </Text>
@@ -92,6 +122,7 @@ export default function VisualizationQueries() {
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
                         setQ(e.target.value)
                     }
+                    size="sm"
                 />
                 <Spacer />
                 <Button
@@ -103,6 +134,7 @@ export default function VisualizationQueries() {
                         });
                     }}
                     colorScheme="blue"
+                    size="sm"
                 >
                     <AddIcon mr="2" />
                     Add Visualization Query
@@ -116,118 +148,101 @@ export default function VisualizationQueries() {
             >
                 {isLoading && <LoadingIndicator />}
                 {isSuccess && (
-                    <Stack spacing="10px" w="100%">
-                        <Table variant="striped">
-                            <Thead>
-                                <Tr>
-                                    <Th>Name</Th>
-                                    <Th>Data Source</Th>
-                                    <Th>Description</Th>
-                                    <Th>Actions</Th>
-                                </Tr>
-                            </Thead>
-                            <Tbody>
-                                {currentData?.map(
-                                    (visualizationQuery: IData) => (
-                                        <Tr key={visualizationQuery.id}>
-                                            <Td>
-                                                <Link<LocationGenerics>
-                                                    to={`/settings/visualization-queries/${visualizationQuery.id}`}
-                                                    search={{
-                                                        action: "update",
-                                                    }}
-                                                >
-                                                    {visualizationQuery.name}
-                                                </Link>
-                                            </Td>
-                                            <Td>
-                                                {visualizationQuery?.dataSource}
-                                            </Td>
-                                            <Td>
-                                                {
-                                                    visualizationQuery?.description
-                                                }
-                                            </Td>
-                                            <Td>
-                                                <Stack
-                                                    direction="row"
-                                                    spacing="5px"
-                                                >
-                                                    <Button
-                                                        colorScheme="green"
-                                                        size="xs"
-                                                    >
-                                                        Edit
-                                                    </Button>
-                                                    <Button
-                                                        size="xs"
-                                                        onClick={async () => {
-                                                            setCurrentId(
-                                                                () =>
-                                                                    visualizationQuery.id
-                                                            );
-                                                            const id =
-                                                                generateUid();
-                                                            setLoading2(
-                                                                () => true
-                                                            );
-                                                            await saveDocument(
-                                                                storage,
-                                                                "i-visualization-queries",
-                                                                systemId,
-                                                                {
-                                                                    ...visualizationQuery,
-                                                                    id,
-                                                                },
-                                                                engine,
-                                                                "create"
-                                                            );
-                                                            await queryClient.invalidateQueries(
-                                                                [
-                                                                    "visualization-queries",
-                                                                ]
-                                                            );
-                                                            setLoading2(
-                                                                () => false
-                                                            );
-                                                            navigate({
-                                                                to: `/settings/visualization-queries/${id}`,
-                                                                search: {
-                                                                    action: "update",
-                                                                },
-                                                            });
+                    <Stack spacing="10px" w="100%" h="100%">
+                        <Scrollable>
+                            <Table variant="striped" size="sm">
+                                <TableHeader>
+                                    <Tr>
+                                        <Th>Name</Th>
+                                        <Th>Data Source</Th>
+                                        <Th>Description</Th>
+                                        <Th>Actions</Th>
+                                    </Tr>
+                                </TableHeader>
+                                <Tbody>
+                                    {currentData?.map(
+                                        (visualizationQuery: IData) => (
+                                            <Tr key={visualizationQuery.id}>
+                                                <Td>
+                                                    <Link<LocationGenerics>
+                                                        to={`/settings/visualization-queries/${visualizationQuery.id}`}
+                                                        search={{
+                                                            action: "update",
                                                         }}
-                                                        isLoading={
-                                                            loading2 &&
-                                                            currentId ===
-                                                                visualizationQuery.id
-                                                        }
                                                     >
-                                                        Duplicate
-                                                    </Button>
-                                                    <Button
-                                                        colorScheme="red"
-                                                        size="xs"
-                                                        isLoading={
-                                                            loading &&
-                                                            currentId ===
-                                                                visualizationQuery.id
+                                                        {
+                                                            visualizationQuery.name
                                                         }
-                                                        onClick={() =>
-                                                            deleteResource(
-                                                                visualizationQuery.id
-                                                            )
-                                                        }
+                                                    </Link>
+                                                </Td>
+                                                <Td>
+                                                    {
+                                                        visualizationQuery?.dataSource
+                                                    }
+                                                </Td>
+                                                <Td>
+                                                    {
+                                                        visualizationQuery?.description
+                                                    }
+                                                </Td>
+                                                <Td>
+                                                    <Stack
+                                                        direction="row"
+                                                        spacing="5px"
                                                     >
-                                                        Delete
-                                                    </Button>
-                                                </Stack>
-                                            </Td>
-                                        </Tr>
-                                    )
-                                )}
-                            </Tbody>
-                        </Table>
+                                                        <Button
+                                                            colorScheme="green"
+                                                            size="xs"
+                                                        >
+                                                            Edit
+                                                        </Button>
+                                                        <Button
+                                                            size="xs"
+                                                            onClick={() =>
+                                                                duplicate(
+                                                                    visualizationQuery
+                                                                )
+                                                            }
+                                                            isLoading={
+                                                                loading2 &&
+                                                                currentId ===
+                                                                    visualizationQuery.id
+                                                            }
+                                                        >
+                                                            Duplicate
+                                                        </Button>
+
+                                                        <Popconfirm
+                                                            title="Delete the presentation"
+                                                            description="Are you sure to delete this presentation?"
+                                                            onConfirm={() =>
+                                                                deleteResource(
+                                                                    visualizationQuery.id
+                                                                )
+                                                            }
+                                                            okText="Yes"
+                                                            cancelText="No"
+                                                        >
+                                                            <Button
+                                                                colorScheme="red"
+                                                                size="xs"
+                                                                isLoading={
+                                                                    loading &&
+                                                                    currentId ===
+                                                                        visualizationQuery.id
+                                                                }
+                                                            >
+                                                                Delete
+                                                            </Button>
+                                                        </Popconfirm>
+                                                    </Stack>
+                                                </Td>
+                                            </Tr>
+                                        )
+                                    )}
+                                </Tbody>
+                            </Table>
+                        </Scrollable>
                         <PaginatedTable
                             currentPage={currentPage}
                             setNextPage={setCurrentPage}
@@ -244,6 +259,7 @@ export default function VisualizationQueries() {
                                     }).length) ||
                                 0
                             }
+                            pageSize={NUMBER_PER_PAGE}
                         />
                     </Stack>
                 )}

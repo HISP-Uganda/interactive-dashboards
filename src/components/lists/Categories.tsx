@@ -20,6 +20,8 @@ import { deleteDocument, useNamespace } from "../../Queries";
 import { $settings, $store } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import LoadingIndicator from "../LoadingIndicator";
+import Scrollable from "../Scrollable";
+import { Popconfirm } from "antd";
 
 const Categories = () => {
     const navigate = useNavigate<LocationGenerics>();
@@ -44,7 +46,7 @@ const Categories = () => {
     }, [data]);
 
     return (
-        <Stack>
+        <Stack w="100%" h="100%">
             <Stack direction="row">
                 <Text fontSize="2xl" fontWeight="bold" p="2" color="blue.600">
                     Categories
@@ -60,6 +62,7 @@ const Categories = () => {
                             },
                         })
                     }
+                    size="sm"
                 >
                     <AddIcon mr="2" />
                     Add Category
@@ -69,60 +72,84 @@ const Categories = () => {
                 justifyItems="center"
                 alignContent="center"
                 alignItems="center"
-                flex={1}
+                w="100%"
+                h="100%"
             >
                 {isLoading && <LoadingIndicator />}
                 {isSuccess && (
-                    <Table variant="striped" w="100%">
-                        <Thead>
-                            <Tr>
-                                <Th>Name</Th>
-                                <Th>Description</Th>
-                                <Th>Order</Th>
-                                <Th>Actions</Th>
-                            </Tr>
-                        </Thead>
-                        <Tbody>
-                            {response?.map((category: ICategory) => (
-                                <Tr key={category.id}>
-                                    <Td>
-                                        <Link<LocationGenerics>
-                                            to={`/settings/categories/${category.id}`}
-                                            search={{ action: "update" }}
-                                        >
-                                            {category.name}
-                                        </Link>
-                                    </Td>
-                                    <Td>{category.description}</Td>
-                                    <Td>{category.order}</Td>
-                                    <Td>
-                                        <Stack direction="row" spacing="5px">
-                                            <Button
-                                                colorScheme="green"
-                                                size="xs"
-                                            >
-                                                Edit
-                                            </Button>
-                                            <Button size="xs">Duplicate</Button>
-                                            <Button
-                                                colorScheme="red"
-                                                size="xs"
-                                                isLoading={
-                                                    loading &&
-                                                    currentId === category.id
-                                                }
-                                                onClick={() =>
-                                                    deleteResource(category.id)
-                                                }
-                                            >
-                                                Delete
-                                            </Button>
-                                        </Stack>
-                                    </Td>
+                    <Scrollable>
+                        <Table variant="striped" w="100%" size="sm">
+                            <Thead
+                                position="sticky"
+                                top="0"
+                                bgColor="white"
+                                zIndex={1}
+                            >
+                                <Tr>
+                                    <Th>Name</Th>
+                                    <Th>Description</Th>
+                                    <Th>Order</Th>
+                                    <Th>Actions</Th>
                                 </Tr>
-                            ))}
-                        </Tbody>
-                    </Table>
+                            </Thead>
+                            <Tbody>
+                                {response?.map((category: ICategory) => (
+                                    <Tr key={category.id}>
+                                        <Td>
+                                            <Link<LocationGenerics>
+                                                to={`/settings/categories/${category.id}`}
+                                                search={{ action: "update" }}
+                                            >
+                                                {category.name}
+                                            </Link>
+                                        </Td>
+                                        <Td>{category.description}</Td>
+                                        <Td>{category.order}</Td>
+                                        <Td>
+                                            <Stack
+                                                direction="row"
+                                                spacing="5px"
+                                            >
+                                                <Button
+                                                    colorScheme="green"
+                                                    size="xs"
+                                                >
+                                                    Edit
+                                                </Button>
+                                                <Button size="xs">
+                                                    Duplicate
+                                                </Button>
+
+                                                <Popconfirm
+                                                    title="Delete the category"
+                                                    description="Are you sure to delete this category?"
+                                                    onConfirm={() =>
+                                                        deleteResource(
+                                                            category.id
+                                                        )
+                                                    }
+                                                    okText="Yes"
+                                                    cancelText="No"
+                                                >
+                                                    <Button
+                                                        colorScheme="red"
+                                                        size="xs"
+                                                        isLoading={
+                                                            loading &&
+                                                            currentId ===
+                                                                category.id
+                                                        }
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </Popconfirm>
+                                            </Stack>
+                                        </Td>
+                                    </Tr>
+                                ))}
+                            </Tbody>
+                        </Table>
+                    </Scrollable>
                 )}
                 {isError && <Text>No data/Error occurred</Text>}
             </Stack>

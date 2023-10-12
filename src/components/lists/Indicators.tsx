@@ -24,6 +24,11 @@ import { $settings, $store, createIndicator } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import LoadingIndicator from "../LoadingIndicator";
 import PaginatedTable from "./PaginatedTable";
+import Scrollable from "../Scrollable";
+import TableHeader from "../TableHeader";
+import { Popconfirm } from "antd";
+
+const NUMBER_PER_PAGE = 15;
 
 const Indicators = () => {
     const navigate = useNavigate<LocationGenerics>();
@@ -39,7 +44,7 @@ const Indicators = () => {
     const [q, setQ] = useState<string>("");
     const [loading2, setLoading2] = useState<boolean>(false);
 
-    const last = currentPage * 20;
+    const last = currentPage * NUMBER_PER_PAGE;
 
     const [currentData, setCurrentData] = useState<IIndicator[] | undefined>(
         data
@@ -50,7 +55,7 @@ const Indicators = () => {
                         d.id.includes(q))
                 );
             })
-            .slice(last - 20, last)
+            .slice(last - NUMBER_PER_PAGE, last)
     );
     useEffect(() => {
         setCurrentData(() => {
@@ -63,7 +68,7 @@ const Indicators = () => {
                                 d.id.includes(q))
                         );
                     })
-                    .slice(last - 20, last);
+                    .slice(last - NUMBER_PER_PAGE, last);
             }
             return [];
         });
@@ -77,16 +82,19 @@ const Indicators = () => {
         setLoading(() => false);
     };
     return (
-        <Stack>
-            <Text fontSize="2xl" fontWeight="bold" p="2" color="blue.600">Indicators</Text>
+        <Stack w="100%" h="100%" spacing="20px">
+            <Text fontSize="2xl" fontWeight="bold" p="2" color="blue.600">
+                Indicators
+            </Text>
             <Stack direction="row">
                 <Input
                     value={q}
-                    placeholder="Search Visualization Data"
+                    placeholder="Search Indicator"
                     width="50%"
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
                         setQ(e.target.value)
                     }
+                    size="sm"
                 />
                 <Spacer />
                 <Button
@@ -99,119 +107,141 @@ const Indicators = () => {
                         });
                     }}
                     colorScheme="blue"
+                    size="sm"
                 >
                     <AddIcon mr="2" />
-                    Add Visualization Data
+                    Add Indicator
                 </Button>
             </Stack>
             <Stack
                 justifyItems="center"
                 alignContent="center"
                 alignItems="center"
-                flex={1}
+                w="100%"
+                h="100%"
             >
                 {isLoading && <LoadingIndicator />}
                 {isSuccess && (
-                    <Stack spacing="10px" w="100%">
-                        <Table variant="striped">
-                            <Thead>
-                                <Tr>
-                                    <Th>Name</Th>
-                                    <Th>Factor</Th>
-                                    <Th>Description</Th>
-                                    <Th>Actions</Th>
-                                </Tr>
-                            </Thead>
-                            <Tbody>
-                                {currentData?.map((indicator: IIndicator) => (
-                                    <Tr key={indicator.id}>
-                                        <Td>
-                                            <Link<LocationGenerics>
-                                                to={`/settings/indicators/${indicator.id}`}
-                                                search={{ action: "update" }}
-                                            >
-                                                {indicator.name}
-                                            </Link>
-                                        </Td>
-                                        <Td>{indicator.factor}</Td>
-                                        <Td>{indicator.description}</Td>
-                                        <Td>
-                                            <Stack
-                                                direction="row"
-                                                spacing="5px"
-                                            >
-                                                <Button
-                                                    colorScheme="green"
-                                                    size="xs"
-                                                >
-                                                    Edit
-                                                </Button>
-                                                <Button
-                                                    size="xs"
-                                                    onClick={async () => {
-                                                        setCurrentId(
-                                                            () => indicator.id
-                                                        );
-                                                        const id =
-                                                            generateUid();
-                                                        setLoading2(() => true);
-                                                        await saveDocument(
-                                                            storage,
-                                                            "i-indicators",
-                                                            systemId,
-                                                            {
-                                                                ...indicator,
-                                                                id,
-                                                            },
-                                                            engine,
-                                                            "create"
-                                                        );
-                                                        await queryClient.invalidateQueries(
-                                                            ["i-indicators"]
-                                                        );
-                                                        setLoading2(
-                                                            () => false
-                                                        );
-                                                        navigate({
-                                                            to: `/settings/indicators/${id}`,
-                                                            search: {
-                                                                action: "update",
-                                                            },
-                                                        });
-                                                    }}
-                                                    isLoading={
-                                                        loading2 &&
-                                                        currentId ===
-                                                        indicator.id
-                                                    }
-                                                >
-                                                    Duplicate
-                                                </Button>
-                                                <Button
-                                                    colorScheme="red"
-                                                    size="xs"
-                                                    isLoading={
-                                                        loading &&
-                                                        currentId ===
-                                                        indicator.id
-                                                    }
-                                                    onClick={() =>
-                                                        deleteResource(
-                                                            indicator.id
-                                                        )
-                                                    }
-                                                >
-                                                    Delete
-                                                </Button>
-                                            </Stack>
-                                        </Td>
+                    <Stack spacing="10px" w="100%" h="100%">
+                        <Scrollable>
+                            <Table variant="striped" size="sm">
+                                <TableHeader>
+                                    <Tr>
+                                        <Th>Name</Th>
+                                        <Th>Factor</Th>
+                                        <Th>Description</Th>
+                                        <Th>Actions</Th>
                                     </Tr>
-                                ))}
-                            </Tbody>
-                        </Table>
+                                </TableHeader>
+                                <Tbody>
+                                    {currentData?.map(
+                                        (indicator: IIndicator) => (
+                                            <Tr key={indicator.id}>
+                                                <Td>
+                                                    <Link<LocationGenerics>
+                                                        to={`/settings/indicators/${indicator.id}`}
+                                                        search={{
+                                                            action: "update",
+                                                        }}
+                                                    >
+                                                        {indicator.name}
+                                                    </Link>
+                                                </Td>
+                                                <Td>{indicator.factor}</Td>
+                                                <Td>{indicator.description}</Td>
+                                                <Td>
+                                                    <Stack
+                                                        direction="row"
+                                                        spacing="5px"
+                                                    >
+                                                        <Button
+                                                            colorScheme="green"
+                                                            size="xs"
+                                                        >
+                                                            Edit
+                                                        </Button>
+                                                        <Button
+                                                            size="xs"
+                                                            onClick={async () => {
+                                                                setCurrentId(
+                                                                    () =>
+                                                                        indicator.id
+                                                                );
+                                                                const id =
+                                                                    generateUid();
+                                                                setLoading2(
+                                                                    () => true
+                                                                );
+                                                                await saveDocument(
+                                                                    storage,
+                                                                    "i-indicators",
+                                                                    systemId,
+                                                                    {
+                                                                        ...indicator,
+                                                                        id,
+                                                                    },
+                                                                    engine,
+                                                                    "create"
+                                                                );
+                                                                await queryClient.invalidateQueries(
+                                                                    [
+                                                                        "i-indicators",
+                                                                    ]
+                                                                );
+                                                                setLoading2(
+                                                                    () => false
+                                                                );
+                                                                navigate({
+                                                                    to: `/settings/indicators/${id}`,
+                                                                    search: {
+                                                                        action: "update",
+                                                                    },
+                                                                });
+                                                            }}
+                                                            isLoading={
+                                                                loading2 &&
+                                                                currentId ===
+                                                                    indicator.id
+                                                            }
+                                                        >
+                                                            Duplicate
+                                                        </Button>
+
+                                                        <Popconfirm
+                                                            title="Delete the indicator"
+                                                            description="Are you sure to delete this indicator?"
+                                                            onConfirm={() =>
+                                                                deleteResource(
+                                                                    indicator.id
+                                                                )
+                                                            }
+                                                            okText="Yes"
+                                                            cancelText="No"
+                                                        >
+                                                            <Button
+                                                                colorScheme="red"
+                                                                size="xs"
+                                                                isLoading={
+                                                                    loading &&
+                                                                    currentId ===
+                                                                        indicator.id
+                                                                }
+                                                            >
+                                                                Delete
+                                                            </Button>
+                                                        </Popconfirm>
+                                                    </Stack>
+                                                </Td>
+                                            </Tr>
+                                        )
+                                    )}
+                                </Tbody>
+                            </Table>
+                        </Scrollable>
                         <PaginatedTable
                             currentPage={currentPage}
                             setNextPage={setCurrentPage}
+                            pageSize={NUMBER_PER_PAGE}
                             total={
                                 (data &&
                                     data.filter((d) => {

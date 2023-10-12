@@ -55,9 +55,6 @@ export default function Show3() {
                 spacing="0"
                 h={store.isFullScreen ? "100vh" : "calc(100vh - 48px)"}
             >
-                {/* <Button position="fixed" top="64px" zIndex={2} left="64px">
-                    Full
-                </Button> */}
                 <Slider {...settings}>
                     {presentation.items.map((item) => {
                         if (item.type === "dashboard") {

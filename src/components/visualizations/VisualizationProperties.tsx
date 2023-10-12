@@ -21,6 +21,7 @@ import TableProperties from "../properties/TableProperties";
 import TextVisualisationProperties from "../properties/TextVisualisationproperties";
 import DashboardTitleProperties from "../properties/DashboardTitleProperties";
 import { Stack } from "@chakra-ui/react";
+import DashboardListProperties from "../properties/DashboardListProperties";
 type VizProps = {
     visualization: IVisualization;
 };
@@ -58,6 +59,9 @@ const VisualizationProperties = ({ visualization }: VizProps) => {
             ),
             dashboardTitle: (
                 <DashboardTitleProperties visualization={visualization} />
+            ),
+            dashboardList: (
+                <DashboardListProperties visualization={visualization} />
             ),
         };
         if (visualizationType) {

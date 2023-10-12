@@ -14,7 +14,7 @@ import { ISection } from "../../interfaces";
 import Visualization from "./Visualization";
 import VisualizationTitle from "./VisualizationTitle";
 
-const TabPanelVisualization = (section: ISection) => {
+const TabPanelVisualization = ({ section }: { section: ISection }) => {
     const [tabIndex, setTabIndex] = useState<number>(0);
     const increment = () =>
         setTabIndex((s: number) => (s + 1) % section.visualizations.length);

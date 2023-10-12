@@ -17,6 +17,8 @@ import {
     Playlist,
     ScreenSize,
     IPresentation,
+    IReport,
+    IPage,
 } from "./interfaces";
 import { generateUid } from "./utils/uid";
 import { getRelativePeriods } from "./utils/utils";
@@ -101,6 +103,20 @@ export const createDataSource = (id = generateUid()): IDataSource => {
         isCurrentDHIS2: true,
     };
 };
+export const createPage = (): IPage => {
+    return { id: generateUid(), items: [] };
+};
+
+export const createReport = (id = generateUid()): IReport => {
+    return {
+        id,
+        pages: [],
+        description: "",
+        name: "",
+        isLandscape: true,
+        size: "A4",
+    };
+};
 
 export const createVisualizationQuery = (id = generateUid()): IData => {
     return {
@@ -113,10 +129,6 @@ export const createVisualizationQuery = (id = generateUid()): IData => {
         aggregationType: undefined,
     };
 };
-
-export const $visualizationQuery = domain.createStore<IData>(
-    createVisualizationQuery()
-);
 
 export const createIndicator = (id = generateUid()): IIndicator => {
     return {
@@ -158,6 +170,11 @@ export const createDashboard = (
         spacing: 5,
     };
 };
+export const $visualizationQuery = domain.createStore<IData>(
+    createVisualizationQuery()
+);
+export const $currentPage = domain.createStore<IPage>(createPage());
+
 export const $dashboardType = domain.createStore<"fixed" | "dynamic">("fixed");
 export const $template = domain.createStore<string>("");
 export const $paginations = domain.createStore<IPagination>({
@@ -223,6 +240,8 @@ export const $store = domain.createStore<IStore>({
     selectedKeys: [],
 });
 export const $dataSource = domain.createStore<IDataSource>(createDataSource());
+export const $report = domain.createStore<IReport>(createReport());
+export const $page = domain.createStore<IPage | null>(null);
 export const $category = domain.createStore<ICategory>(createCategory());
 export const $dashboard = domain.createStore<IDashboard>(createDashboard());
 export const $dashboards = domain.createStore<IDashboard[]>([]);
