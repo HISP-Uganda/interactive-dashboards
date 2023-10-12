@@ -1,7 +1,13 @@
 import { Icon, Stack, Text } from "@chakra-ui/react";
 import { useNavigate } from "@tanstack/react-location";
 import { BsFolderPlus } from "react-icons/bs";
-import { MdAddchart, MdInput, MdOutlineDashboard, MdResetTv, MdQueryStats } from "react-icons/md";
+import {
+    MdAddchart,
+    MdInput,
+    MdOutlineDashboard,
+    MdResetTv,
+    MdQueryStats,
+} from "react-icons/md";
 import { boolean } from "mathjs";
 
 const Menus = () => {
@@ -9,9 +15,9 @@ const Menus = () => {
     return (
         <Stack
             spacing="25px"
-            boxShadow="2xl"
-            h="calc(100vh - 96px - 72px)"
             p="20px"
+            boxShadow="0 0.5mm 2mm rgba(0, 0, 0, 0.3)"
+            h="100%"
         >
             <Stack
                 alignItems="center"
@@ -110,6 +116,22 @@ const Menus = () => {
             >
                 <Icon as={MdResetTv} w={8} h={8} color="blue.600" />
                 <Text>Presentations</Text>
+            </Stack>
+            <Stack
+                alignItems="center"
+                alignContent="center"
+                direction="row"
+                cursor="pointer"
+                onClick={() => navigate({ to: "/settings/reports" })}
+                _hover={{
+                    color: "blue.600",
+                    fontWeight: "bold",
+                    transform: "scale(1.1)",
+                }}
+                transition="ease-in-out 0.3s"
+            >
+                <Icon as={MdResetTv} w={8} h={8} color="blue.600" />
+                <Text>Reports</Text>
             </Stack>
         </Stack>
     );

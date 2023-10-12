@@ -17,6 +17,8 @@ import { useDashboards, useFilterResources } from "../../Queries";
 import { $settings, $store, $path } from "../../Store";
 import LoadingIndicator from "../LoadingIndicator";
 import { storeApi } from "../../Events";
+import { orderBy } from "lodash";
+import { AutoFontSizeDiv } from "../AutoFontSizeDiv";
 
 function DashboardItem({
     dashboards,
@@ -32,6 +34,9 @@ function DashboardItem({
     const settings = useStore($settings);
     const path = useStore($path);
     const bg = visualization.properties["layout.bg"] || "";
+    const sort = visualization.properties["sort"] || false;
+    const descending = visualization.properties["descending"] || false;
+
     const { data, isError, isLoading, isSuccess, error } =
         useFilterResources(dashboards);
     const onSelect = async (
@@ -60,7 +65,7 @@ function DashboardItem({
                 to: `${current}${info.node.actual}`,
                 search: (old) => ({
                     ...old,
-                    affected: info.node.nodeSource.search,
+                    affected: info.node.nodeSource?.search,
                     optionSet: info.node.value,
                 }),
             });
@@ -69,7 +74,7 @@ function DashboardItem({
                 to: `${current}${info.node.pId}`,
                 search: (old) => ({
                     ...old,
-                    affected: info.node.nodeSource.search,
+                    affected: info.node.nodeSource?.search,
                     optionSet: info.node.value,
                 }),
             });
@@ -97,7 +102,14 @@ function DashboardItem({
     }
     if (isSuccess && data) {
         return (
-            <Stack ref={squareRef} w="100%" h="100%" flex={1} bg={bg}>
+            <Stack
+                ref={squareRef}
+                w="100%"
+                h="100%"
+                flex={1}
+                bg={bg}
+                overflow="auto"
+            >
                 <Tree
                     checkable
                     checkStrictly
@@ -113,7 +125,15 @@ function DashboardItem({
                         height: `${height}px`,
                         overflow: "auto",
                     }}
-                    treeData={arrayToTree(data, { parentProperty: "pId" })}
+                    treeData={
+                        sort
+                            ? orderBy(
+                                  arrayToTree(data, { parentProperty: "pId" }),
+                                  "order",
+                                  [descending ? "desc" : "asc"]
+                              )
+                            : arrayToTree(data, { parentProperty: "pId" })
+                    }
                 />
             </Stack>
         );

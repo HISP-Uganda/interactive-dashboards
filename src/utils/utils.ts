@@ -22,6 +22,7 @@ import {
     Period,
     Threshold,
     VisualizationItems,
+    Size,
 } from "../interfaces";
 import { $visualizationQuery } from "../Store";
 
@@ -1190,6 +1191,8 @@ export const datElementGroupSetsDataElementGroupsWithAttributes = (
             let deAttributeValue = "";
             let value: string = "";
             let shortName = "";
+            let subKeyResultAreaCode: string = "";
+            let keyResultAreaCode: string = "";
 
             if (elementAttributes.length > 0) {
                 const [
@@ -1211,6 +1214,7 @@ export const datElementGroupSetsDataElementGroupsWithAttributes = (
                     const [
                         {
                             name: dataElementGroupName,
+                            code: dataElementGroupCode,
                             groupSets,
                             shortName: dataElementGroupShortName,
                         },
@@ -1218,13 +1222,19 @@ export const datElementGroupSetsDataElementGroupsWithAttributes = (
 
                     subKeyResultArea = dataElementGroupName;
                     shortName = dataElementGroupShortName;
+                    subKeyResultAreaCode = dataElementGroupCode;
 
                     if (groupSets && groupSets.length > 0) {
                         const [
-                            { name: dataElementGroupSetName, attributeValues },
+                            {
+                                name: dataElementGroupSetName,
+                                attributeValues,
+                                code: dataElementGroupSetCode,
+                            },
                         ] = groupSets;
 
                         keyResultArea = dataElementGroupSetName;
+                        keyResultAreaCode = dataElementGroupSetCode;
 
                         if (attributeValues.length > 0) {
                             const [
@@ -1243,8 +1253,10 @@ export const datElementGroupSetsDataElementGroupsWithAttributes = (
                 id,
                 name,
                 subKeyResultArea,
+                subKeyResultAreaCode,
                 shortName,
                 keyResultArea,
+                keyResultAreaCode,
                 [attributeName]: value,
                 [deAttributeName]: deAttributeValue,
             };
@@ -2108,4 +2120,21 @@ export const processAnalytics = ({
         data: [],
         series: [],
     };
+};
+
+export const setHeaderbarVisible = (show: boolean) => {
+    const header = document.getElementsByTagName("header")[0];
+    if (show) {
+        header.classList.remove("hidden");
+    } else {
+        header.classList.add("hidden");
+    }
+};
+
+export const setBody = (size: Size, isLandscape: boolean = true) => {
+    const header = document.getElementsByTagName("body")[0];
+    header.classList.add(size);
+    if (isLandscape) {
+        header.classList.add("landscape");
+    }
 };

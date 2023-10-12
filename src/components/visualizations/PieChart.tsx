@@ -34,7 +34,7 @@ const PieChart = ({
     const summarize = visualization.properties?.["summarize"] ?? false;
     return (
         <Stack w="100%" h="100%" spacing={0}>
-            {visualization.name && (
+            {visualization.displayTitle && visualization.name && (
                 <VisualizationTitle
                     section={section}
                     title={visualization.name}

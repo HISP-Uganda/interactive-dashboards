@@ -191,7 +191,7 @@ export default function AdminPanel() {
                 onOk={() => onClose()}
                 onCancel={() => onClose()}
                 title="Save Dashboard"
-                width="700px"
+                width="calc(100vw - 500px)"
                 footer={[
                     <Button colorScheme="red" mr={3} onClick={onClose}>
                         Close
@@ -238,50 +238,65 @@ export default function AdminPanel() {
                             }
                         />
                     </Stack>
-                    <AutoRefreshPicker />
                     <Stack>
-                        <Checkbox
-                            isChecked={
-                                settings.defaultDashboard === dashboard.id
-                            }
+                        <Text>Order</Text>
+                        <Input
+                            value={dashboard.order}
                             onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                settingsApi.changeAttribute({
-                                    value: e.target.checked ? dashboard.id : "",
-                                    attribute: "defaultDashboard",
-                                })
+                                dashboardApi.changeOrder(e.target.value)
                             }
-                        >
-                            Default Dashboard
-                        </Checkbox>
+                        />
                     </Stack>
+                    <Stack direction="row" spacing="20px" alignItems="center">
+                        <AutoRefreshPicker />
+                        <Stack>
+                            <Checkbox
+                                isChecked={
+                                    settings.defaultDashboard === dashboard.id
+                                }
+                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                    settingsApi.changeAttribute({
+                                        value: e.target.checked
+                                            ? dashboard.id
+                                            : "",
+                                        attribute: "defaultDashboard",
+                                    })
+                                }
+                            >
+                                Default Dashboard
+                            </Checkbox>
+                        </Stack>
 
-                    <Stack>
-                        <Checkbox
-                            isChecked={settings.template === dashboard.id}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                settingsApi.changeAttribute({
-                                    value: e.target.checked ? dashboard.id : "",
-                                    attribute: "template",
-                                })
-                            }
-                        >
-                            Make template
-                        </Checkbox>
+                        <Stack>
+                            <Checkbox
+                                isChecked={settings.template === dashboard.id}
+                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                    settingsApi.changeAttribute({
+                                        value: e.target.checked
+                                            ? dashboard.id
+                                            : "",
+                                        attribute: "template",
+                                    })
+                                }
+                            >
+                                Make template
+                            </Checkbox>
+                        </Stack>
+
+                        <CheckboxField<IDashboard>
+                            title="Exclude from List"
+                            func={dashboardApi.changeAttribute}
+                            obj={dashboard}
+                            attribute="excludeFromList"
+                        />
                     </Stack>
-
-                    <CheckboxField<IDashboard>
-                        title="Exclude from List"
-                        func={dashboardApi.changeAttribute}
-                        obj={dashboard}
-                        attribute="excludeFromList"
-                    />
-                    <Stack>
+                    {/* <Stack>
                         <Text>Child Dashboard</Text>
                         <DashboardDropDown
                             value={dashboard.child || ""}
                             onChange={(e) => dashboardApi.changeChild(e)}
                         />
-                    </Stack>
+                    </Stack> */}
                     <Stack>
                         <Text>Filters</Text>
                         <DashboardFilter />

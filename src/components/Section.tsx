@@ -258,7 +258,7 @@ const Section = () => {
                 overflow="auto"
                 spacing={0}
             >
-                <SectionVisualization {...section} />
+                <SectionVisualization section={section} />
             </Stack>
             <Stack
                 maxH="calc(100vh - 150px)"

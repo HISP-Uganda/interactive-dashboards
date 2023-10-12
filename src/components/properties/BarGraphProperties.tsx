@@ -52,6 +52,8 @@ const BarGraphProperties = ({
         uniq(flatten(visualizationData.map((d) => Object.keys(d))))
     );
 
+    const specificValues: string[] = visualization.properties["specific"] || [];
+
     return (
         <Stack>
             <Checkbox
@@ -80,7 +82,7 @@ const BarGraphProperties = ({
             />
 
             {visualization.properties["category"] && (
-                <Scrollable height={300}>
+                <Scrollable height={"300px"}>
                     <Table variant="unstyled">
                         <Thead>
                             <Tr>
@@ -124,10 +126,11 @@ const BarGraphProperties = ({
             />
 
             {visualization.properties["series"] && (
-                <Scrollable height={300}>
+                <Scrollable height={"300px"}>
                     <Table variant="unstyled">
                         <Thead>
                             <Tr>
+                                <Th></Th>
                                 <Th>Column</Th>
                                 <Th>Rename</Th>
                                 <Th>Color</Th>
@@ -139,6 +142,44 @@ const BarGraphProperties = ({
                                 visualization.properties["series"]
                             ).map((row) => (
                                 <Tr key={row}>
+                                    <Td>
+                                        <Checkbox
+                                            isChecked={
+                                                specificValues.indexOf(row) !==
+                                                -1
+                                            }
+                                            onChange={(
+                                                e: ChangeEvent<HTMLInputElement>
+                                            ) => {
+                                                if (e.target.checked) {
+                                                    sectionApi.changeVisualizationProperties(
+                                                        {
+                                                            visualization:
+                                                                visualization.id,
+                                                            attribute:
+                                                                "specific",
+                                                            value: [
+                                                                ...specificValues,
+                                                                row,
+                                                            ],
+                                                        }
+                                                    );
+                                                } else {
+                                                    sectionApi.changeVisualizationProperties(
+                                                        {
+                                                            visualization:
+                                                                visualization.id,
+                                                            attribute:
+                                                                "specific",
+                                                            value: specificValues.filter(
+                                                                (i) => i !== row
+                                                            ),
+                                                        }
+                                                    );
+                                                }
+                                            }}
+                                        />
+                                    </Td>
                                     <Td>{row}</Td>
                                     <Td w="300px">
                                         <TextProperty
@@ -160,6 +201,11 @@ const BarGraphProperties = ({
                     </Table>
                 </Scrollable>
             )}
+            <SwitchProperty
+                attribute="percentages"
+                visualization={visualization}
+                title="Percentages"
+            />
 
             <SelectProperty
                 attribute="layout.barmode"

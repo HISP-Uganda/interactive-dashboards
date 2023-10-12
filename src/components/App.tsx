@@ -29,14 +29,21 @@ import { sizeApi, storeApi } from "../Events";
 import { LocationGenerics, ScreenSize } from "../interfaces";
 import { useInitials } from "../Queries";
 import { $settings } from "../Store";
-import { decodeFromBinary, encodeToBinary } from "../utils/utils";
+import {
+    decodeFromBinary,
+    encodeToBinary,
+    setHeaderbarVisible,
+} from "../utils/utils";
 import DashboardTemplateForm from "./forms/DashboardTemplateForm";
-import LoadingIndicator from "./LoadingIndicator";
-import Settings from "./Settings";
-import Presentations from "./lists/Presentations";
 import PresentationForm from "./forms/PresentationForm";
 import Presenter from "./forms/Presenter";
-// import IndicatorForm from "./forms/IndicatorForm";
+import ReportDesignForm from "./forms/ReportDesignForm";
+import ReportForm from "./forms/ReportForm";
+import ReportView from "./forms/ReportView";
+import Presentations from "./lists/Presentations";
+import Reports from "./lists/Reports";
+import LoadingIndicator from "./LoadingIndicator";
+import Settings from "./Settings";
 
 const history = createHashHistory();
 const location = new ReactLocation<LocationGenerics>({
@@ -88,6 +95,7 @@ const App = () => {
         {
             path: "/settings",
             element: <Settings />,
+
             children: [
                 {
                     path: "/",
@@ -174,6 +182,32 @@ const App = () => {
                     ],
                 },
                 {
+                    path: "/reports",
+                    children: [
+                        {
+                            path: "/",
+                            element: <Reports />,
+                            loader: () => {
+                                setHeaderbarVisible(true);
+                                return {};
+                            },
+                        },
+                        {
+                            path: ":reportId",
+                            children: [
+                                {
+                                    path: "/",
+                                    element: <ReportForm />,
+                                },
+                                {
+                                    path: "/design",
+                                    element: <ReportDesignForm />,
+                                },
+                            ],
+                        },
+                    ],
+                },
+                {
                     path: "/dashboards",
                     children: [
                         {
@@ -190,6 +224,15 @@ const App = () => {
                 {
                     path: "/",
                     element: <Presenter />,
+                },
+            ],
+        },
+        {
+            path: "/reports/:reportId",
+            children: [
+                {
+                    path: "/",
+                    element: <ReportView />,
                 },
             ],
         },

@@ -1,3 +1,110 @@
+:root {
+    /* control bar variables */
+    --user-rows-count: 1;
+    --controlbar-padding: 31px;
+    --row-height: 40px;
+    --min-rows-height: calc(
+        var(--controlbar-padding) + (1 * var(--row-height))
+    );
+    --max-rows-height: calc(
+        var(--controlbar-padding) + (10 * var(--row-height))
+    );
+    --user-rows-height: calc(
+        var(--controlbar-padding) + (var(--user-rows-count) * var(--row-height))
+    );
+    --sm-expanded-controlbar-height: calc(
+        (var(--vh, 1vh) * 100) - var(--headerbar-height) - 32px
+    );
+
+    /* item variables */
+    --item-header-margin-top: 8px;
+    --item-header-margin-bottom: 8px;
+    --item-content-padding: 4px;
+
+    /* print variables */
+    /* for A4 landscape (297x210mm) */
+    /* (29.7 /2.54) * 96 pixels/inch - 20px print margin */
+    /* changing this number could have consequences for a multipage printout */
+    --a4-landscape-width-px: 1102px;
+
+    --colors-blue900: #093371;
+    --colors-blue800: #0d47a1;
+    --colors-blue700: #1565c0;
+    --colors-blue600: #147cd7;
+    --colors-blue500: #2196f3;
+    --colors-blue400: #42a5f5;
+    --colors-blue300: #90caf9;
+    --colors-blue200: #c5e3fc;
+    --colors-blue100: #e3f2fd;
+    --colors-blue050: #f5fbff;
+    --colors-teal900: #00332b;
+    --colors-teal800: #004d40;
+    --colors-teal700: #00695c;
+    --colors-teal600: #00796b;
+    --colors-teal500: #00897b;
+    --colors-teal400: #009688;
+    --colors-teal300: #4db6ac;
+    --colors-teal200: #b2dfdb;
+    --colors-teal100: #e0f2f1;
+    --colors-teal050: #f1f9f9;
+    --colors-red900: #330202;
+    --colors-red800: #891515;
+    --colors-red700: #b71c1c;
+    --colors-red600: #c62828;
+    --colors-red500: #d32f2f;
+    --colors-red400: #f44336;
+    --colors-red300: #e57373;
+    --colors-red200: #ffcdd2;
+    --colors-red100: #ffe5e8;
+    --colors-red050: #fff5f6;
+    --colors-yellow900: #6f3205;
+    --colors-yellow800: #bb460d;
+    --colors-yellow700: #e56408;
+    --colors-yellow600: #ff8302;
+    --colors-yellow500: #ff9302;
+    --colors-yellow400: #ffa902;
+    --colors-yellow300: #ffc324;
+    --colors-yellow200: #ffe082;
+    --colors-yellow100: #ffecb3;
+    --colors-yellow050: #fff8e1;
+    --colors-green900: #103713;
+    --colors-green800: #1b5e20;
+    --colors-green700: #2e7d32;
+    --colors-green600: #388e3c;
+    --colors-green500: #43a047;
+    --colors-green400: #4caf50;
+    --colors-green300: #a5d6a7;
+    --colors-green200: #c8e6c9;
+    --colors-green100: #e8f5e9;
+    --colors-green050: #f4fbf4;
+    --colors-grey900: #212934;
+    --colors-grey800: #404b5a;
+    --colors-grey700: #4a5768;
+    --colors-grey600: #6c7787;
+    --colors-grey500: #a0adba;
+    --colors-grey400: #d5dde5;
+    --colors-grey300: #e8edf2;
+    --colors-grey200: #f3f5f7;
+    --colors-grey100: #f8f9fa;
+    --colors-grey050: #fbfcfd;
+    --colors-white: #ffffff;
+    --spacers-dp4: 4px;
+    --spacers-dp8: 8px;
+    --spacers-dp12: 12px;
+    --spacers-dp16: 16px;
+    --spacers-dp24: 24px;
+    --spacers-dp32: 32px;
+    --spacers-dp48: 48px;
+    --spacers-dp64: 64px;
+    --spacers-dp96: 96px;
+    --spacers-dp128: 128px;
+    --spacers-dp192: 192px;
+    --spacers-dp256: 256px;
+    --spacers-dp384: 384px;
+    --spacers-dp512: 512px;
+    --spacers-dp640: 640px;
+}
+
 .button.jsx-441677069 {
     background-color: rgb(230, 16, 16);
 }
@@ -9,14 +116,24 @@
     background-color: #fee300 !important;
 }
 
-table {
-    /* overflow: visible !important; */
+/* table {
+    page-break-before: always;
+    font-size: 100px;
+} */
+/* tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+} */
+
+/* table {
+    overflow: visible !important;
     border-spacing: 0;
     border-collapse: "collapse";
 }
-/* thead {
+thead {
     display: table-header-group;
-}
+} */
+/* 
 tfoot {
     display: table-row-group;
 }
@@ -44,3 +161,55 @@ td {
         page-break-before: always;
     }
 } */
+
+/* @media print {
+    .wrapper {
+        background-color: white;
+        height: auto !important;
+        overflow: visible !important;
+        padding-left: 0px;
+    }
+    header {
+        display: none;
+    }
+}
+
+.wrapper {
+    background-color: #f4f6f8;
+    padding-left: 44px;
+    overflow-y: auto;
+} */
+
+/* div {
+    background: white;
+    display: block;
+    margin: 0 auto;
+    margin-bottom: 0.5cm;
+    box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.5);
+}
+div[size="A4"] {
+    width: 21cm;
+    height: 29.7cm;
+}
+div[size="A4"][layout="portrait"] {
+    width: 29.7cm;
+    height: 21cm;
+}
+ */
+
+table,
+tr,
+td,
+th {
+    border-collapse: collapse;
+}
+
+tr.stickyth th:nth-of-type(n)::before {
+    content: "";
+    position: absolute;
+    width: 0.5px;
+    height: 100%;
+    top: 0;
+    left: -1px;
+    background-color: #eeeeee;
+}

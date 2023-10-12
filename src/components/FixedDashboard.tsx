@@ -142,7 +142,7 @@ export default function FixedDashboard({
                             }
                         }}
                     >
-                        <SectionVisualization {...section} />
+                        <SectionVisualization section={section} />
                     </GridItem>
                 );
             })}

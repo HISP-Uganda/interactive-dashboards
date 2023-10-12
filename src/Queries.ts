@@ -1927,6 +1927,140 @@ export const useTheme = (optionSetId: string) => {
     });
 };
 
+const queryTree = async (engine: any, dashboard: IDashboard) => {
+    let allData: DataNode[] = [];
+    if (dashboard.filters) {
+        for (const filter of dashboard.filters) {
+            const parents = allData.filter((f) => f.filter === filter.parent);
+            const children = dashboard.filters.filter(
+                (f) => f.parent === filter.id
+            );
+            if (parents.length > 0) {
+                const queries = fromPairs(
+                    parents.map(({ value }) => [
+                        value,
+                        {
+                            resource:
+                                String(filter.resource).indexOf("${q}") !== -1
+                                    ? String(filter.resource).replace(
+                                          "${q}",
+                                          value ?? ""
+                                      )
+                                    : filter.resource,
+                        },
+                    ])
+                );
+                const response: any = await engine.query(queries);
+                for (const { value, key, id: parentId } of parents) {
+                    const currentData = response[value ?? ""];
+                    if (currentData && currentData.options) {
+                        const current = currentData.options.map(
+                            ({ code, id, name }: any) => {
+                                const node: DataNode = {
+                                    pId: String(parentId),
+                                    nodeSource: {
+                                        search: filter.resourceKey,
+                                    },
+                                    key: `${id}${key}`,
+                                    value: code,
+                                    title: name,
+                                    filter: filter.id,
+                                    id,
+                                    isLeaf: children.length === 0,
+                                    checkable: false,
+                                    hasChildren: children.length === 0,
+                                    selectable: true,
+                                    actual: filter.dashboard,
+                                };
+                                return node;
+                            }
+                        );
+                        allData = [...allData, ...current];
+                    } else if (
+                        currentData &&
+                        currentData.dataElementGroupSets
+                    ) {
+                        const current =
+                            currentData.dataElementGroupSets.flatMap(
+                                ({
+                                    code: degsCode,
+                                    id: degsId,
+                                    name: degsName,
+                                    dataElementGroups,
+                                }: any) => {
+                                    if (
+                                        String(degsCode).split(".").length === 2
+                                    ) {
+                                        return dataElementGroups.map(
+                                            ({
+                                                code: degCode,
+                                                id: degId,
+                                                name: degName,
+                                            }: any) => {
+                                                const node: DataNode = {
+                                                    pId: String(parentId),
+                                                    nodeSource: {
+                                                        search: filter.resourceKey,
+                                                    },
+                                                    key: degId,
+                                                    value: degCode,
+                                                    title: degName,
+                                                    filter: filter.id,
+                                                    id: degId,
+                                                    isLeaf:
+                                                        children.length === 0,
+                                                    checkable: false,
+                                                    hasChildren:
+                                                        children.length === 0,
+                                                    selectable: true,
+                                                    actual: filter.dashboard,
+                                                };
+                                                return node;
+                                            }
+                                        );
+                                    }
+                                    return [];
+                                }
+                            );
+                        allData = [...allData, ...current];
+                    }
+                }
+            } else {
+                const q = {
+                    data: {
+                        resource: filter.resource,
+                    },
+                };
+                const { data } = await engine.query(q);
+
+                if (data && data.options) {
+                    const current = data.options.map(
+                        ({ code, id, name }: any) => {
+                            const node: DataNode = {
+                                pId: dashboard.id,
+                                nodeSource: { search: filter.resourceKey },
+                                key: id,
+                                value: code,
+                                title: name,
+                                id,
+                                filter: filter.id,
+                                isLeaf: children.length === 0,
+                                checkable: false,
+                                hasChildren: children.length === 0,
+                                selectable: true,
+                                actual: filter.dashboard,
+                            };
+                            return node;
+                        }
+                    );
+                    allData = [...allData, ...current];
+                }
+            }
+        }
+    }
+    return allData;
+};
+
 export const useFilterResources = (dashboards: IDashboard[]) => {
     let parents: DataNode[] = dashboards.map((dashboard) => {
         return {
@@ -1938,72 +2072,20 @@ export const useFilterResources = (dashboards: IDashboard[]) => {
             id: dashboard.id,
             checkable: false,
             isLeaf: dashboard.filters ? dashboard.filters.length === 0 : true,
+            order: dashboard.order,
         };
     });
+
     const engine = useDataEngine();
     return useQuery<DataNode[], Error>(
         ["filters", dashboards.map(({ id }) => id).join() || ""],
         async () => {
             for (const dashboard of dashboards) {
                 if (dashboard.filters) {
-                    const queries = fromPairs(
-                        dashboard.filters.map(({ id, resource }) => [
-                            id,
-                            {
-                                resource,
-                            },
-                        ])
-                    );
-                    const response: any = await engine.query(queries);
-                    const children = dashboard.filters.flatMap(
-                        ({ id, resourceKey }) => {
-                            const data = response[id];
-                            if (data && data.options) {
-                                return data.options.map(
-                                    ({ code, id, name }: any) => {
-                                        const node: DataNode = {
-                                            pId: dashboard.id,
-                                            nodeSource: { search: resourceKey },
-                                            key: id,
-                                            value: code,
-                                            title: name,
-                                            id,
-                                            isLeaf: true,
-                                            checkable: false,
-                                            hasChildren: false,
-                                            selectable: true,
-                                            actual: dashboard.child,
-                                        };
-                                        return node;
-                                    }
-                                );
-                            } else if (data && data.dataElementGroups) {
-                                return data.dataElementGroups.map(
-                                    ({ code, id, name }: any) => {
-                                        const node: DataNode = {
-                                            pId: dashboard.id,
-                                            nodeSource: { search: resourceKey },
-                                            key: id,
-                                            value: code,
-                                            title: name,
-                                            id,
-                                            isLeaf: true,
-                                            // checkable: true,
-                                            hasChildren: false,
-                                            selectable: true,
-                                            actual: dashboard.child,
-                                        };
-                                        return node;
-                                    }
-                                );
-                            }
-                            return [];
-                        }
-                    );
-                    parents = [...parents, ...children];
+                    const other = await queryTree(engine, dashboard);
+                    parents = [...parents, ...other];
                 }
             }
-
             return parents;
         }
     );

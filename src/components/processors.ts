@@ -595,7 +595,7 @@ export const processSingleValue = (
             } else if (uniqColumn && key) {
                 return uniqBy(uniqColumn, processed[key]).length;
             } else if (key) {
-                processed[key]?.length;
+                return processed[key]?.length;
             }
             return Object.keys(processed).length;
         } else if (aggregate) {
@@ -639,6 +639,9 @@ export const processGraphs = (
     let availableProperties: { [key: string]: any } = {};
     let allSeries: any[] = [];
     update(availableProperties, "data.orientation", () => "v");
+    const specific: string[] = options.dataProperties?.["specific"] || [];
+    const percentages: boolean =
+        options.dataProperties?.["percentages"] || false;
     Object.entries(options.dataProperties || {}).forEach(
         ([property, value]) => {
             availableProperties = update(
@@ -653,7 +656,17 @@ export const processGraphs = (
             if (options.series) {
                 const grouped = groupBy(data, options.series);
                 chartData = Object.entries(grouped).map(([key, values]) => {
-                    const groupedByTheme = groupBy(values, options.category);
+                    let currentValues = values;
+                    if (specific.length > 0) {
+                        currentValues = values.filter(
+                            (d: any) =>
+                                specific.indexOf(d[options.series || ""]) !== -1
+                        );
+                    }
+                    const groupedByTheme = groupBy(
+                        currentValues,
+                        options.category
+                    );
                     let others = {};
                     if (
                         options.metadata[`${key}.bg`] ||
@@ -680,7 +693,15 @@ export const processGraphs = (
                             ),
                         y: Object.keys(groupedByTheme)
                             .sort()
-                            .map((k) => groupedByTheme[k].length),
+                            .map((k) => {
+                                let current = groupedByTheme[k];
+                                if (percentages) {
+                                    return (
+                                        (current.length * 100) / values.length
+                                    );
+                                }
+                                return current.length;
+                            }),
                         name: key,
                         type: "bar",
                         ...availableProperties.data,
@@ -692,23 +713,44 @@ export const processGraphs = (
                         ...others,
                     };
                 });
-                allSeries = Object.keys(groupBy(data, options.series));
+                allSeries = Object.keys(
+                    groupBy(
+                        data.filter((d: any) => {
+                            if (specific.length > 0) {
+                                return (
+                                    specific.indexOf(
+                                        d[options.series || ""]
+                                    ) !== -1
+                                );
+                            }
+                            return true;
+                        }),
+                        options.series
+                    )
+                );
             } else {
                 const grouped2 = groupBy(data, options.category);
                 chartData = [
-                    // {
-                    //     x: Object.keys(grouped2).map((k) =>
-                    //         breakString(metadata[`${k}.name`] || k, 25)
-                    //     ),
-                    //     y: Object.values(grouped2).map((x) => x.length),
-                    //     type: "bar",
-                    //     ...availableProperties.data,
-                    //     textposition: "auto",
-                    //     texttemplate:
-                    //         availableProperties?.data?.orientation === "v"
-                    //             ? "%{y:.0f}"
-                    //             : "%{x:.0f}",
-                    // },
+                    {
+                        x: Object.keys(grouped2)
+                            .sort()
+                            .map((k) =>
+                                breakString(
+                                    options.metadata[`${k}.name`] ||
+                                        options.dataProperties[`${k}.name`] ||
+                                        k,
+                                    25
+                                )
+                            ),
+                        y: Object.values(grouped2).map((x) => x.length),
+                        type: "bar",
+                        ...availableProperties.data,
+                        textposition: "auto",
+                        texttemplate:
+                            availableProperties?.data?.orientation === "v"
+                                ? "%{y:.0f}"
+                                : "%{x:.0f}",
+                    },
                 ];
                 allSeries = Object.keys(grouped2);
             }

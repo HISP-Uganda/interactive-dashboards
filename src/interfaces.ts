@@ -138,6 +138,7 @@ export interface IVisualization extends INamed {
     rows?: number;
     columns?: number;
     isFullscreenable?: boolean;
+    displayTitle?: boolean;
 }
 export interface ISection extends BoxProps {
     id: string;
@@ -148,7 +149,6 @@ export interface ISection extends BoxProps {
     carouselOver: string;
     colSpan: number;
     rowSpan: number;
-    bg: string;
     height: string;
     headerBg: string;
     lg: ReactGridLayout.Layout;
@@ -159,12 +159,14 @@ export interface ISection extends BoxProps {
     spacing?: string;
     isPrintable?: boolean;
     isFullscreenable?: boolean;
+    displayTitle?: boolean;
 }
 export interface IFilter {
     id: string;
     resource: string;
     resourceKey: string;
-    child?: IFilter;
+    parent?: string;
+    dashboard?: string;
 }
 
 export interface IDashboard extends INamed {
@@ -212,6 +214,12 @@ export interface DataNode extends IDataNode {
     bg?: string;
     actual?: string;
     parent?: { [key: string]: any };
+    order?: string;
+    metadata?: Partial<{
+        rows: number;
+        columns: number;
+    }>;
+    filter?: string;
 }
 
 export interface Option extends OptionBase {
@@ -292,6 +300,8 @@ export type LocationGenerics = MakeGenerics<{
         visualizationQueryId: string;
         templateId: string;
         presentationId: string;
+        sectionId: string;
+        reportId: string;
     };
     Search: {
         category: string;
@@ -321,6 +331,7 @@ export interface ChartProps {
     data?: any;
     dimensions?: { [key: string]: string[] };
     metadata?: { [key: string]: string };
+    others?: { [key: string]: any };
 }
 
 export interface Threshold {
@@ -497,4 +508,15 @@ export type AttributeProps<T> = {
 export interface IPresentation extends INamed {
     items: DataNode[];
     speed: number;
+}
+export interface IPage extends INamed {
+    items: Array<DataNode>;
+}
+
+export type Size = "A3" | "A4" | "A5" | "legal" | "letter";
+
+export interface IReport extends INamed {
+    pages: Array<IPage>;
+    size: Size;
+    isLandscape: boolean;
 }

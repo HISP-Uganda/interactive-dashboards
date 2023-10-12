@@ -1,13 +1,12 @@
 import { Stack } from "@chakra-ui/react";
 import { useStore } from "effector-react";
-import React, { useState, MouseEvent, useEffect } from "react";
+import React, { useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import { dashboardApi, sectionApi } from "../Events";
-import { $dashboard, $size, isOpenApi, $store } from "../Store";
+import { dashboardApi } from "../Events";
+import { $dashboard, $size } from "../Store";
 import SectionVisualization from "./SectionVisualization";
-import VisualizationMenu from "./visualizations/VisualizationMenu";
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
 export default function DynamicDashboard() {
@@ -44,7 +43,7 @@ export default function DynamicDashboard() {
     function generateDOM() {
         return dashboard.sections.map((section) => (
             <Stack key={section.id} h="100%">
-                <SectionVisualization {...section} />
+                <SectionVisualization section={section} others={{}} />
             </Stack>
         ));
     }

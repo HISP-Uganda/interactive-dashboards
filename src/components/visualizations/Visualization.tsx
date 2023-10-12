@@ -47,6 +47,7 @@ import Tables from "./Tables";
 import TextVisualisation from "./TextVisualisation";
 import TreeMaps from "./TreeMaps";
 import DividerVisualization from "./DividerVisualization";
+import Tables2 from "./Tables2";
 
 type VisualizationProps = {
     visualization: IVisualization;
@@ -227,11 +228,10 @@ export const getVisualization = (
             />
         ),
         tables: (
-            <Tables
+            <Tables2
                 section={section}
                 data={data}
                 visualization={visualization}
-                {...otherProperties}
                 layoutProperties={layoutProperties}
                 dataProperties={dataProperties}
             />
@@ -310,7 +310,6 @@ const VisualizationMetaData = ({
     section: ISection;
 }) => {
     const { storage } = useStore($settings);
-
     const { isLoading, isSuccess, data, isError, error } =
         useVisualizationMetadata(visualization, storage);
 
@@ -338,7 +337,6 @@ const Visualization = ({
     const dashboard = useStore($dashboard);
     const calculated = useStore($calculated);
     const { affected, optionSet } = search;
-
     const { isLoading, isSuccess, data, isError, error } = useVisualization(
         metadata,
         dashboard.refreshInterval,

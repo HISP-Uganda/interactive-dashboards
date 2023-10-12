@@ -1,30 +1,31 @@
 import { Stack, Text } from "@chakra-ui/react";
-import { useMatch, useSearch } from "@tanstack/react-location";
+import { useMatch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { categoryApi } from "../../Events";
-import { LocationGenerics, ICategory } from "../../interfaces";
+import React from "react";
+import { reportApi } from "../../Events";
+import { IReport, LocationGenerics } from "../../interfaces";
 import { useSingleNamespace } from "../../Queries";
-import { $settings, $store, createCategory } from "../../Store";
+import { $settings, $store, createReport } from "../../Store";
 import { generalPadding, otherHeight } from "../constants";
 import LoadingIndicator from "../LoadingIndicator";
-import Category from "./Category";
+import ReportDesign from "./ReportDesign";
 
-export default function CategoryForm() {
+export default function ReportDesignForm() {
     const { storage } = useStore($settings);
     const store = useStore($store);
     const {
-        params: { categoryId },
+        params: { reportId },
         search: { action },
     } = useMatch<LocationGenerics>();
     const { isLoading, isSuccess, isError, error } =
-        useSingleNamespace<ICategory>(
+        useSingleNamespace<IReport>(
             storage,
-            categoryId,
+            reportId,
             store.systemId,
-            "i-categories",
+            "i-reports",
             action,
-            categoryApi.setCategory,
-            createCategory(categoryId)
+            reportApi.setReport,
+            createReport(reportId)
         );
     return (
         <Stack
@@ -40,7 +41,7 @@ export default function CategoryForm() {
             w="100%"
         >
             {isLoading && <LoadingIndicator />}
-            {isSuccess && <Category />}
+            {isSuccess && <ReportDesign />}
             {isError && <Text>{error?.message}</Text>}
         </Stack>
     );

@@ -62,11 +62,7 @@ export default function DashboardTree({
                 { id: "title", title: labels[info.node.key] || "" },
                 { id: "totalIndicators", title: "Indicators" },
             ]);
-            storeApi.setColumns([
-                { id: "a", title: "A", bg: "green" },
-                { id: "b", title: "MA", bg: "yellow" },
-                { id: "c", title: "NA", bg: "red" },
-            ]);
+
             const allElements = await db.dataElements.toArray();
 
             let elements: IDataElement[] = [];

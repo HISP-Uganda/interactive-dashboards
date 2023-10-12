@@ -20,6 +20,9 @@ import { deleteDocument, useNamespace } from "../../Queries";
 import { $settings, $store } from "../../Store";
 import { generateUid } from "../../utils/uid";
 import LoadingIndicator from "../LoadingIndicator";
+import TableHeader from "../TableHeader";
+import Scrollable from "../Scrollable";
+import { Popconfirm } from "antd";
 
 export default function Presentations() {
     const navigate = useNavigate<LocationGenerics>();
@@ -44,7 +47,7 @@ export default function Presentations() {
     }, [data]);
 
     return (
-        <Stack>
+        <Stack w="100%" h="100%">
             <Stack direction="row">
                 <Text fontSize="2xl" fontWeight="bold" p="2" color="blue.600">
                     Presentations
@@ -60,6 +63,7 @@ export default function Presentations() {
                             },
                         })
                     }
+                    size="sm"
                 >
                     <AddIcon mr="2" />
                     Add Presentation
@@ -69,72 +73,92 @@ export default function Presentations() {
                 justifyItems="center"
                 alignContent="center"
                 alignItems="center"
-                flex={1}
+                w="100%"
+                h="100%"
             >
                 {isLoading && <LoadingIndicator />}
                 {isSuccess && (
-                    <Table variant="striped" w="100%">
-                        <Thead>
-                            <Tr>
-                                <Th>Name</Th>
-                                <Th>Description</Th>
-                                <Th w="200px">Actions</Th>
-                            </Tr>
-                        </Thead>
-                        <Tbody>
-                            {response?.map((presentation: IPresentation) => (
-                                <Tr key={presentation.id}>
-                                    <Td>
-                                        <Link<LocationGenerics>
-                                            to={`/settings/presentations/${presentation.id}`}
-                                            search={{ action: "update" }}
-                                        >
-                                            {presentation.name}
-                                        </Link>
-                                    </Td>
-                                    <Td>{presentation.description}</Td>
-                                    <Td>
-                                        <Stack direction="row" spacing="5px">
-                                            <Button
-                                                colorScheme="green"
-                                                size="xs"
-                                                onClick={() =>
-                                                    navigate({
-                                                        to: `/presentations/${presentation.id}`,
-                                                    })
-                                                }
-                                            >
-                                                Present
-                                            </Button>
-                                            <Button
-                                                colorScheme="green"
-                                                size="xs"
-                                            >
-                                                Edit
-                                            </Button>
-                                            <Button size="xs">Duplicate</Button>
-                                            <Button
-                                                colorScheme="red"
-                                                size="xs"
-                                                isLoading={
-                                                    loading &&
-                                                    currentId ===
-                                                        presentation.id
-                                                }
-                                                onClick={() =>
-                                                    deleteResource(
-                                                        presentation.id
-                                                    )
-                                                }
-                                            >
-                                                Delete
-                                            </Button>
-                                        </Stack>
-                                    </Td>
+                    <Scrollable>
+                        <Table variant="striped" w="100%" size="sm">
+                            <TableHeader>
+                                <Tr>
+                                    <Th>Name</Th>
+                                    <Th>Description</Th>
+                                    <Th w="200px">Actions</Th>
                                 </Tr>
-                            ))}
-                        </Tbody>
-                    </Table>
+                            </TableHeader>
+                            <Tbody>
+                                {response?.map(
+                                    (presentation: IPresentation) => (
+                                        <Tr key={presentation.id}>
+                                            <Td>
+                                                <Link<LocationGenerics>
+                                                    to={`/settings/presentations/${presentation.id}`}
+                                                    search={{
+                                                        action: "update",
+                                                    }}
+                                                >
+                                                    {presentation.name}
+                                                </Link>
+                                            </Td>
+                                            <Td>{presentation.description}</Td>
+                                            <Td>
+                                                <Stack
+                                                    direction="row"
+                                                    spacing="5px"
+                                                >
+                                                    <Button
+                                                        colorScheme="green"
+                                                        size="xs"
+                                                        onClick={() =>
+                                                            navigate({
+                                                                to: `/presentations/${presentation.id}`,
+                                                            })
+                                                        }
+                                                    >
+                                                        Present
+                                                    </Button>
+                                                    <Button
+                                                        colorScheme="green"
+                                                        size="xs"
+                                                    >
+                                                        Edit
+                                                    </Button>
+                                                    <Button size="xs">
+                                                        Duplicate
+                                                    </Button>
+
+                                                    <Popconfirm
+                                                        title="Delete the presentation"
+                                                        description="Are you sure to delete this presentation?"
+                                                        onConfirm={() =>
+                                                            deleteResource(
+                                                                presentation.id
+                                                            )
+                                                        }
+                                                        okText="Yes"
+                                                        cancelText="No"
+                                                    >
+                                                        <Button
+                                                            colorScheme="red"
+                                                            size="xs"
+                                                            isLoading={
+                                                                loading &&
+                                                                currentId ===
+                                                                    presentation.id
+                                                            }
+                                                        >
+                                                            Delete
+                                                        </Button>
+                                                    </Popconfirm>
+                                                </Stack>
+                                            </Td>
+                                        </Tr>
+                                    )
+                                )}
+                            </Tbody>
+                        </Table>
+                    </Scrollable>
                 )}
                 {isError && <Text>No data/Error occurred</Text>}
             </Stack>

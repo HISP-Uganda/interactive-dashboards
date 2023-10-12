@@ -22,6 +22,8 @@ import {
     IFilter,
     IDashboardSetting,
     IPresentation,
+    IReport,
+    IPage,
 } from "./interfaces";
 import {
     $categories,
@@ -46,6 +48,9 @@ import {
     $visualizationDimensions,
     $presentation,
     $totals,
+    $report,
+    $page,
+    createPage,
 } from "./Store";
 
 export const loadDefaults = domain.createEvent<{
@@ -422,6 +427,7 @@ export const dashboardApi = createApi($dashboard, {
     ) => {
         return changeObjectAttribute<IDashboard>(state, { attribute, value });
     },
+    changeOrder: (state, order: string) => ({ ...state, order }),
 });
 
 export const indicatorApi = createApi($indicator, {
@@ -757,53 +763,104 @@ export const calculatedApi = createApi($calculated, {
 });
 
 export const presentationApi = createApi($presentation, {
-    setPresentation: (_, presentation: IPresentation) => {
-        console.log(presentation);
-        return presentation;
-    },
+    setPresentation: (_, presentation: IPresentation) => presentation,
 });
 
 export const totalsApi = createApi($totals, {
     set: (_, value: number) => value,
 });
 
-// export const updateVisualizationData = domain.createEvent<{
-//     visualizationId: string;
-//     data: any;
-// }>();
-//export const setDecreasing = domain.createEvent<string[]>();
-// export const setShowSider = domain.createEvent<boolean>();
-// export const setDataSources = domain.createEvent<IDataSource[]>();
-// export const setCategories = domain.createEvent<ICategory[]>();
-// export const setDashboards = domain.createEvent<IDashboard[]>();
-// export const setCurrentDashboard = domain.createEvent<IDashboard>();
-// export const addSection = domain.createEvent<ISection>();
-// export const addVisualization2Section = domain.createEvent<string>();
-// export const duplicateVisualization = domain.createEvent<IVisualization>();
-// export const deleteSection = domain.createEvent<string | undefined>();
-// export const deleteSectionVisualization = domain.createEvent<string>();
-// export const setCurrentSection = domain.createEvent<ISection>();
-// export const toggleDashboard = domain.createEvent<boolean>();
-// export const changeDashboardId = domain.createEvent<string>();
-// export const changeCategoryId = domain.createEvent<string>();
-// export const changeDataSourceId = domain.createEvent<string>();
-// export const changeAdministration = domain.createEvent<boolean>();
-// export const addPagination = domain.createEvent<{
-//     [key: string]: number;
-// }>();
+export const reportApi = createApi($report, {
+    setReport: (_, report: IReport) => report,
+    addPage: (state, page: IPage) => {
+        let pages = state.pages;
+        const search = pages.find((p) => p.id === page.id);
+        if (search) {
+            pages = pages.map((p) => {
+                if (p.id === page.id) {
+                    return page;
+                }
+                return p;
+            });
+        } else {
+            pages = [...pages, page];
+        }
+        return { ...state, pages };
+    },
+    updateReportItem: (
+        state,
+        {
+            page,
+            item,
+            metadata,
+        }: {
+            page: string;
+            item: string;
+            metadata: Partial<{ rows: number; columns: number }>;
+        }
+    ) => {
+        const pages = state.pages.map((currentPage) => {
+            if (currentPage.id === page) {
+                const items = currentPage.items.map((currentItem) => {
+                    if (currentItem.key == item) {
+                        return {
+                            ...currentItem,
+                            metadata: { ...currentItem.metadata, ...metadata },
+                        };
+                    }
+                    return currentItem;
+                });
+                return { ...currentPage, items };
+            }
+            return currentPage;
+        });
+        return { ...state, pages };
+    },
+    update: (
+        state,
+        { attribute, value }: { attribute: keyof IReport; value: any }
+    ) => {
+        return { ...state, [attribute]: value };
+    },
+});
 
-// export const changeDataSource = domain.createEvent<string | undefined>();
-// export const setDataSource = domain.createEvent<IDataSource>();
-// export const setCategory = domain.createEvent<ICategory>();
-// export const setIndicator = domain.createEvent<IIndicator>();
-
-// export const setDataElementGroups = domain.createEvent<string[]>();
-// export const setDataElementGroupSets = domain.createEvent<string[]>();
-// export const changeVisualizationOrder = domain.createEvent<{
-//     order: string;
-//     section: ISection;
-// }>();
-// export const changeVisualizationShow = domain.createEvent<{
-//     show: number;
-//     section: ISection;
-// }>();
+export const pageApi = createApi($page, {
+    update: (
+        state,
+        { attribute, value }: { attribute: keyof IPage; value: any }
+    ) => {
+        if (state) {
+            return { ...state, [attribute]: value };
+        }
+    },
+    updateItem: (
+        state,
+        {
+            item,
+            metadata,
+        }: {
+            item: string;
+            metadata: Partial<{ rows: number; columns: number }>;
+        }
+    ) => {
+        if (state) {
+            const items = state.items.map((currentItem) => {
+                if (currentItem.key == item) {
+                    return {
+                        ...currentItem,
+                        metadata: { ...currentItem.metadata, ...metadata },
+                    };
+                }
+                return currentItem;
+            });
+            return { ...state, items };
+        }
+    },
+    addItems: (state, items: DataNode[]) => {
+        if (state) {
+            return { ...state, items: [...(state.items || []), ...items] };
+        }
+    },
+    reset: () => createPage(),
+    set: (_, page: IPage | null) => page,
+});

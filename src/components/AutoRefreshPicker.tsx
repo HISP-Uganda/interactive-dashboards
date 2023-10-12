@@ -21,7 +21,7 @@ const periodTypes: Option[] = [
 const AutoRefreshPicker = () => {
     const dashboard = useStore($dashboard);
     return (
-        <Stack>
+        <Stack direction="row" alignItems="center">
             <Text>Auto Refresh Interval</Text>
             <Box w="110px">
                 <Select<Option, false, GroupBase<Option>>

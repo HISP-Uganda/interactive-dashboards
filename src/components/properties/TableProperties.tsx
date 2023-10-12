@@ -155,7 +155,7 @@ const TableProperties = ({
                     <TabPanels>
                         {selectedColumns.map((col, index) => (
                             <TabPanel key={col}>
-                                <Scrollable height={350}>
+                                <Scrollable height={"350px"}>
                                     <Tabs orientation="vertical">
                                         <TabList>
                                             {getNData(
@@ -240,7 +240,6 @@ const TableProperties = ({
                         isMulti
                     />
                 </Stack>
-
                 <Tabs>
                     <TabList>
                         {selectedRows.map((row) => (
@@ -249,8 +248,18 @@ const TableProperties = ({
                     </TabList>
                     <TabPanels>
                         {selectedRows.map((row, index) => (
-                            <TabPanel key={row}>
-                                <Scrollable height={350}>
+                            <TabPanel
+                                key={row}
+                                display="flex"
+                                flexDirection="column"
+                                rowGap="10px"
+                            >
+                                <TextProperty
+                                    visualization={visualization}
+                                    title="Rename"
+                                    attribute={`${row}.name`}
+                                />
+                                <Scrollable height={"350px"}>
                                     <Tabs orientation="vertical">
                                         <TabList>
                                             {getNData(
@@ -312,7 +321,7 @@ const TableProperties = ({
                     </TabPanels>
                 </Tabs>
 
-                {/* <Scrollable height={350}>
+                {/* <Scrollable height={"350px"}>
                     <Tabs orientation="vertical">
                         <TabList>
                             {lastRow.map((r) => (

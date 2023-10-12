@@ -1,16 +1,15 @@
-import { Stack, Text } from "@chakra-ui/react";
+import { Stack } from "@chakra-ui/react";
 import { useMatch, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
-import { useRef } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 import html2canvas from "html2canvas";
 import JsPDF from "jspdf";
+import { useRef } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { LocationGenerics } from "../../interfaces";
 import { $dashboard, $dashboardType, $settings, $store } from "../../Store";
 import AdminPanel from "../AdminPanel";
 import DynamicDashboard from "../DynamicDashboard";
 import FixedDashboard from "../FixedDashboard";
-import DashboardReport from "../DashboardReport";
 
 const Dashboard = () => {
     const tbl = useRef<HTMLDivElement>(null);
@@ -50,10 +49,6 @@ const Dashboard = () => {
         (store.isAdmin && dashboard.id === settings.template) || !templateId
             ? dashboard.spacing
             : 0;
-
-    if (display === "report") {
-        return <DashboardReport dashboard={dashboard} />;
-    }
     return (
         <Stack
             w={store.isFullScreen ? "100vw" : "100%"}
