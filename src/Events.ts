@@ -24,6 +24,7 @@ import {
     IPresentation,
     IReport,
     IPage,
+    IUserGroup,
 } from "./interfaces";
 import {
     $categories,
@@ -51,6 +52,7 @@ import {
     $report,
     $page,
     createPage,
+    $userGroup,
 } from "./Store";
 
 export const loadDefaults = domain.createEvent<{
@@ -863,4 +865,13 @@ export const pageApi = createApi($page, {
     },
     reset: () => createPage(),
     set: (_, page: IPage | null) => page,
+});
+
+export const userGroupApi = createApi($userGroup, {
+    update: (
+        state,
+        { attribute, value }: { attribute: keyof IUserGroup; value: any }
+    ) => {
+        return { ...state, [attribute]: value };
+    },
 });

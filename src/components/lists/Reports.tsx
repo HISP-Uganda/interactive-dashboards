@@ -118,9 +118,9 @@ export default function Reports() {
                                                 size="xs"
                                                 onClick={() =>
                                                     navigate({
-                                                        to: `/settings/reports/${report.id}`,
+                                                        to: `/settings/reports/${report.id}/design`,
                                                         search: {
-                                                            action: "view",
+                                                            action: "update",
                                                         },
                                                     })
                                                 }

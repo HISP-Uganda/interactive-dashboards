@@ -1,19 +1,36 @@
-import { Input, Stack, Table, Tbody, Th, Tr, Thead } from "@chakra-ui/react";
+import {
+    Checkbox,
+    Input,
+    Stack,
+    Table,
+    Tbody,
+    Td,
+    Th,
+    Thead,
+    Tr,
+} from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import React, { ChangeEvent, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import { sectionApi } from "../../Events";
-import { IDataSource, INamed, IVisualization } from "../../interfaces";
+import { INamed } from "../../interfaces";
 import { getDHIS2Resources2 } from "../../Queries";
 import Scrollable from "../Scrollable";
 
-export default function DHIS2Visualizations({
-    dataSource,
-    visualization,
+export default function DHIS2MetadataPicker<T extends INamed>({
+    resource,
+    fields = "id,name",
+    filter,
+    list,
+    callback,
+    valueField,
 }: {
-    dataSource: IDataSource;
-    visualization: IVisualization;
+    resource: string;
+    fields?: string;
+    filter?: string;
+    callback: (id: any, value: boolean) => void;
+    list: string[];
+    valueField: keyof T;
 }) {
     const { ref, inView } = useInView();
     const engine = useDataEngine();
@@ -39,21 +56,26 @@ export default function DHIS2Visualizations({
                 pageSize: number;
                 pageCount: number;
             };
-            data: Array<INamed & { type: string }>;
+            data: Array<T>;
         },
         Error
     >(
         ["projects", search],
         async ({ pageParam = 1 }) => {
-            let params: { [key: string]: any } = {
-                fields: "id,name,type",
-                page: pageParam,
-            };
-            if (search) {
-                params = { ...params, filter: `identifiable:token:${search}` };
+            let params: { [key: string]: any } = { page: pageParam, fields };
+            let filters: string[] = [];
+            if (filter) {
+                filters = [...filters, filter];
             }
-            const data = await getDHIS2Resources2<INamed & { type: string }>({
-                resource: "visualizations",
+            if (search) {
+                filters = [...filters, `identifiable:token:${search}`];
+            }
+
+            if (filters.length > 0) {
+                params = { ...params, filter: filters };
+            }
+            const data = await getDHIS2Resources2<T>({
+                resource,
                 params,
                 engine,
             });
@@ -94,40 +116,59 @@ export default function DHIS2Visualizations({
             ) : status === "error" ? (
                 <span>Error: {error?.message}</span>
             ) : (
-                <Scrollable height={"300px"}>
+                <Scrollable height={"calc(100vh - 384px)"}>
                     <Table size="md">
                         <Thead>
                             <Tr>
-                                <Th>Name</Th>
+                                <Th w="20px"></Th>
+                                {fields
+                                    .split(",")
+                                    .filter((field) => field !== "id")
+                                    .map((field) => (
+                                        <Th key={field}>{field}</Th>
+                                    ))}
                             </Tr>
                         </Thead>
                         <Tbody>
                             {data?.pages.map((page) => (
                                 <React.Fragment key={page.pager.page}>
                                     {page.data.map((d) => (
-                                        <Tr
-                                            key={d.id}
-                                            bg={
-                                                visualization.properties[
-                                                    "visualization"
-                                                ] === d.id
-                                                    ? "gray.400"
-                                                    : ""
-                                            }
-                                            onClick={() =>
-                                                sectionApi.changeVisualizationProperties(
-                                                    {
-                                                        visualization:
-                                                            visualization.id,
-                                                        attribute:
-                                                            "visualization",
-                                                        value: d.id,
+                                        <Tr key={`${d.id}${page.pager.page}`}>
+                                            <Td>
+                                                <Checkbox
+                                                    isChecked={
+                                                        list.indexOf(
+                                                            String(
+                                                                d[valueField]
+                                                            )
+                                                        ) !== -1
                                                     }
+                                                    onChange={(
+                                                        e: ChangeEvent<HTMLInputElement>
+                                                    ) =>
+                                                        callback(
+                                                            d[valueField],
+                                                            e.target.checked
+                                                        )
+                                                    }
+                                                />
+                                            </Td>
+                                            {fields
+                                                .split(",")
+                                                .filter(
+                                                    (field) => field !== "id"
                                                 )
-                                            }
-                                            cursor="pointer"
-                                        >
-                                            <Th>{d.name}</Th>
+                                                .map((field) => {
+                                                    const val =
+                                                        d[field as keyof T];
+                                                    return (
+                                                        <Td
+                                                            key={`${d.id}${field}`}
+                                                        >
+                                                            {String(val)}
+                                                        </Td>
+                                                    );
+                                                })}
                                         </Tr>
                                     ))}
                                 </React.Fragment>

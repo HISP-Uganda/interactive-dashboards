@@ -1,12 +1,7 @@
 header.hidden {
     display: none;
 }
-@page {
-    margin: 0;
-}
-body {
-    margin: 0;
-}
+
 .sheet {
     margin: 0;
     overflow: hidden;
@@ -36,7 +31,7 @@ body.A3.landscape .sheet {
 }
 body.A4 .sheet {
     width: 210mm;
-    height: 296mm;
+    height: 297mm;
 
     /* min-width: 210mm;
     max-width: 210mm;
@@ -45,7 +40,7 @@ body.A4 .sheet {
 }
 body.A4.landscape .sheet {
     width: 297mm;
-    height: 209mm;
+    height: 210mm;
 
     /* min-width: 297mm;
     max-width: 297mm;
@@ -159,4 +154,8 @@ body.legal.landscape .sheet {
     body.legal.landscape {
         width: 357mm;
     }
+}
+
+@page {
+    margin: 0;
 }

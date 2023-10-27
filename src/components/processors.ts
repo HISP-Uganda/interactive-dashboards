@@ -478,6 +478,7 @@ export const processTable = (
     data: any[],
     rows: string[],
     columns: string[],
+    otherColumns: string[],
     aggregation: keyof typeof calculation,
     thresholds: Threshold[],
     aggregationColumn: string,
@@ -512,7 +513,7 @@ export const processTable = (
                         .map((r) => d[r])
                         .join("")
                 );
-                const normal = Object.entries(groupedByColumn).map(
+                let normal = Object.entries(groupedByColumn).map(
                     ([columnKey, columnData]) => {
                         return {
                             key: `${key}${columnKey}`,
@@ -527,6 +528,21 @@ export const processTable = (
                         };
                     }
                 );
+
+                for (const otherColumn of otherColumns) {
+                    const currentGroup = values[0];
+                    normal = [
+                        ...normal,
+                        {
+                            key: `${key}${otherColumn}`,
+                            value: {
+                                bg: "",
+                                value: currentGroup[otherColumn],
+                                color: "",
+                            },
+                        },
+                    ];
+                }
 
                 return [
                     ...normal,
@@ -544,10 +560,11 @@ export const processTable = (
                 return [key, value];
             });
 
+        let grouping = fromPairs(finalData);
         return {
             finalColumns,
             finalRows,
-            finalData: fromPairs(finalData),
+            finalData: grouping,
         };
     }
     return { finalColumns: [], finalRows: [], finalData: {} };
@@ -656,6 +673,7 @@ export const processGraphs = (
             if (options.series) {
                 const grouped = groupBy(data, options.series);
                 chartData = Object.entries(grouped).map(([key, values]) => {
+                    console.log(values);
                     let currentValues = values;
                     if (specific.length > 0) {
                         currentValues = values.filter(

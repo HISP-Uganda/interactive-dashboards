@@ -93,7 +93,9 @@ export default function Show3() {
                                     key={item.id}
                                 >
                                     <SectionVisualization
-                                        {...(item.nodeSource as ISection)}
+                                        section={{
+                                            ...(item.nodeSource as ISection),
+                                        }}
                                     />
                                 </Stack>
                             );

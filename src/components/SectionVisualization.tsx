@@ -5,6 +5,7 @@ import {
     Stack,
     useBreakpointValue,
     useDisclosure,
+    Text,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { MouseEvent } from "react";

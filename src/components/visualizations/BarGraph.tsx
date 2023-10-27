@@ -1,9 +1,10 @@
 import { Stack, Text } from "@chakra-ui/react";
+import { useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import isEmpty from "lodash/isEmpty";
 import update from "lodash/update";
 import Plot from "react-plotly.js";
-import { ChartProps } from "../../interfaces";
+import { ChartProps, LocationGenerics } from "../../interfaces";
 import { $visualizationMetadata } from "../../Store";
 import { exclusions } from "../../utils/utils";
 import { processGraphs } from "../processors";
@@ -23,6 +24,7 @@ const BarGraph = ({
     data,
 }: BarGraphProps) => {
     const metadata = useStore($visualizationMetadata);
+    const { downloadable } = useSearch<LocationGenerics>();
     let availableProperties: { [key: string]: any } = {
         layout: {
             legend: { x: 0.5, y: -0.1, orientation: "h" },

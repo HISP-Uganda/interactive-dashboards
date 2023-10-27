@@ -47,6 +47,7 @@ import {
     IVisualization2,
     Storage,
     Threshold,
+    UserGroup,
 } from "./interfaces";
 import { createCategory, createDashboard, createDataSource } from "./Store";
 import {
@@ -757,19 +758,24 @@ export const getDHIS2Resources2 = async <T>({
     resource: string;
     engine: any;
 }>) => {
-    const { data }: any = await engine.query({
+    let query: any = {
         data: {
             resource,
-            params,
         },
-    });
+    };
+    if (!isEmpty(params)) {
+        query = {
+            data: { resource, params },
+        };
+    }
+    const { data }: any = await engine.query(query);
 
     const x: {
         pager: {
             total: number;
             page: number;
             pageSize: number;
-            totalPages: number;
+            pageCount: number;
         };
         data: Array<T>;
     } = { pager: data.pager, data: data[resource ?? ""] };
@@ -2164,4 +2170,22 @@ export const useDHIS2Visualization = (viz: IVisualization) => {
             };
         }
     );
+};
+
+export const useUsers = () => {
+    const params = {
+        paging: "false",
+        fields: "id,name,displayName",
+    };
+    const engine = useDataEngine();
+    return useQuery<Array<UserGroup>, Error>(["users"], async () => {
+        return getDHIS2Resources<UserGroup>({
+            isCurrentDHIS2: true,
+            resource: "userGroups.json",
+            params,
+            api,
+            resourceKey: "userGroups",
+            engine,
+        });
+    });
 };
