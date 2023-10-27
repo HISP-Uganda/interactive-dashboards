@@ -1,8 +1,8 @@
 const config = {
     type: "app",
-    name: "Manifesto Dashboard",
-    title: "Manifesto Dashboard",
-    description: "Manifesto Dashboard",
+    name: "Visualization Studio",
+    title: "Visualization Studio",
+    description: "Visualization Studio",
     entryPoints: {
         app: "./src/AppWrapper.js",
     },

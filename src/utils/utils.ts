@@ -1160,13 +1160,14 @@ const dataElementGroupElements = (data: any) => {
         code: dataElementGroupCode,
         dataElements,
     } = data;
-    return dataElements.flatMap(({ id, name, code }: any) => ({
+    return dataElements.flatMap(({ id, name, code, description }: any) => ({
         id,
         name,
         code,
         dataElementGroupId,
         dataElementGroupName,
         dataElementGroupCode,
+        description,
     }));
 };
 
@@ -1183,6 +1184,7 @@ export const datElementGroupSetsDataElementGroupsWithAttributes = (
             name,
             attributeValues: elementAttributes,
             dataElementGroups,
+            description,
         }: any) => {
             let subKeyResultArea: string = "";
             let keyResultArea: string = "";
@@ -1257,6 +1259,7 @@ export const datElementGroupSetsDataElementGroupsWithAttributes = (
                 shortName,
                 keyResultArea,
                 keyResultAreaCode,
+                description,
                 [attributeName]: value,
                 [deAttributeName]: deAttributeValue,
             };
@@ -1272,7 +1275,7 @@ const dataElementGroupsDataElements = (data: any) => {
             name: dataElementGroupName,
             code: dataElementGroupCode,
         }: any) => {
-            return dataElements.map(({ id, name, code }: any) => {
+            return dataElements.map(({ id, name, code, description }: any) => {
                 return {
                     id,
                     name,
@@ -1280,6 +1283,7 @@ const dataElementGroupsDataElements = (data: any) => {
                     dataElementGroupId,
                     dataElementGroupName,
                     dataElementGroupCode,
+                    description,
                 };
             });
         }

@@ -25,8 +25,11 @@ import LoadingIndicator from "../LoadingIndicator";
 import { useQueryClient } from "@tanstack/react-query";
 import Scrollable from "../Scrollable";
 import TableHeader from "../TableHeader";
+import { useElementSize } from "usehooks-ts";
 
 const Dashboards = () => {
+    const [squareRef, { height, width }] = useElementSize();
+
     const navigate = useNavigate<LocationGenerics>();
     const store = useStore($store);
     const { storage, template } = useStore($settings);
@@ -132,10 +135,16 @@ const Dashboards = () => {
                     New Fixed Dashboard
                 </Button>
             </Stack>
-            <Stack alignContent="center" alignItems="center" w="100%" h="100%">
+            <Stack
+                alignContent="center"
+                alignItems="center"
+                w="100%"
+                h="100%"
+                ref={squareRef}
+            >
                 {isLoading && <LoadingIndicator />}
                 {isSuccess && (
-                    <Scrollable whiteSpace="normal">
+                    <Scrollable whiteSpace="normal" height={`${height}px`}>
                         <Table variant="striped" w="100%" size="sm">
                             <TableHeader>
                                 <Tr>

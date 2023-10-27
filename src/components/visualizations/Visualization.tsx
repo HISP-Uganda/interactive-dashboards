@@ -299,6 +299,17 @@ export const getVisualization = (
         ),
         divider: <DividerVisualization />,
     };
+    if (visualization.properties["display"] === "multiple") {
+        return (
+            <Tables
+                section={section}
+                data={data}
+                visualization={visualization}
+                layoutProperties={layoutProperties}
+                dataProperties={dataProperties}
+            />
+        );
+    }
     return allTypes[visualization.type];
 };
 

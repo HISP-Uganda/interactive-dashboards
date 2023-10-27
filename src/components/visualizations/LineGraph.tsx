@@ -1,9 +1,8 @@
-import { Stack, Box } from "@chakra-ui/react";
-import { useStore } from "effector-react";
+import { Stack } from "@chakra-ui/react";
+import { useSearch } from "@tanstack/react-location";
 import update from "lodash/fp/update";
 import Plot from "react-plotly.js";
-import { ChartProps } from "../../interfaces";
-import { $visualizationMetadata } from "../../Store";
+import { ChartProps, LocationGenerics } from "../../interfaces";
 import { exclusions } from "../../utils/utils";
 import { processGraphs } from "../processors";
 import VisualizationTitle from "./VisualizationTitle";
@@ -21,6 +20,7 @@ const LineGraph = ({
     section,
     data,
 }: LineGraphProps) => {
+    const { downloadable } = useSearch<LocationGenerics>();
     let availableProperties: { [key: string]: any } = {
         layout: {
             legend: { x: 0.5, y: -0.3, orientation: "h" },

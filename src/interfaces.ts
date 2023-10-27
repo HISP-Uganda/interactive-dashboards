@@ -218,6 +218,7 @@ export interface DataNode extends IDataNode {
     metadata?: Partial<{
         rows: number;
         columns: number;
+        rowsPerPage: number;
     }>;
     filter?: string;
 }
@@ -315,6 +316,7 @@ export type LocationGenerics = MakeGenerics<{
         type: "fixed" | "dynamic";
         optionSet: string;
         affected: string;
+        downloadable: boolean;
     };
 }>;
 
@@ -514,9 +516,24 @@ export interface IPage extends INamed {
 }
 
 export type Size = "A3" | "A4" | "A5" | "legal" | "letter";
+export type UserGroup = INamed & { displayName: string };
+export interface User extends INamed {
+    email: string;
+    username: string;
+    displayName: string;
+}
 
 export interface IReport extends INamed {
     pages: Array<IPage>;
     size: Size;
+    emails: string;
     isLandscape: boolean;
+    schedule: string;
+    basedOnUserOrganization: boolean;
+    additionalDays: number;
+    rowsPerPage: number;
+}
+
+export interface IUserGroup extends INamed {
+    email: string[];
 }

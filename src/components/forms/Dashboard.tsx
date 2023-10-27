@@ -1,5 +1,5 @@
 import { Stack } from "@chakra-ui/react";
-import { useMatch, useSearch } from "@tanstack/react-location";
+import { useMatch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import html2canvas from "html2canvas";
 import JsPDF from "jspdf";
@@ -20,8 +20,6 @@ const Dashboard = () => {
     const {
         params: { templateId },
     } = useMatch<LocationGenerics>();
-
-    const { display } = useSearch<LocationGenerics>();
 
     useHotkeys("ctrl+p", async () => {
         if (tbl.current) {

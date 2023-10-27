@@ -34,7 +34,7 @@ export default function NumberField<T>({
                 min={min}
                 step={step}
                 size="sm"
-                w="80px"
+                w="100px"
                 onChange={(_, value2: number) =>
                     func({
                         attribute,

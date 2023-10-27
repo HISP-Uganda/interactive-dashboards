@@ -1,4 +1,11 @@
-import { Button, Grid, GridItem, Stack, Text } from "@chakra-ui/react";
+import {
+    Button,
+    Grid,
+    GridItem,
+    Stack,
+    Text,
+    useToast,
+} from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useNavigate } from "@tanstack/react-location";
 import { Collapse, InputNumber, Modal } from "antd";
@@ -27,10 +34,11 @@ import DashboardTreeCheck from "../DashboardTreeCheck";
 import FixedDashboard from "../FixedDashboard";
 import SectionVisualization from "../SectionVisualization";
 import Visualization from "../visualizations/Visualization";
-import "./dashboard-report.css";
+// import "./dashboard-report.css";
 
 const { Panel } = Collapse;
 export default function ReportDesign() {
+    const toast = useToast();
     const navigate = useNavigate<LocationGenerics>();
     const { storage } = useStore($settings);
     const engine = useDataEngine();
@@ -73,11 +81,24 @@ export default function ReportDesign() {
             engine,
             "update"
         );
+        toast({
+            title: "Report",
+            description: "Report saved successfully",
+            status: "success",
+            duration: 9000,
+            isClosable: true,
+        });
     };
 
     const view = () => {
         navigate({
             to: `/reports/${report.id}`,
+        });
+    };
+
+    const cancel = () => {
+        navigate({
+            to: `/settings/reports`,
         });
     };
     const updateMetadata = ({
@@ -87,7 +108,11 @@ export default function ReportDesign() {
     }: {
         page: string;
         item: string;
-        metadata: Partial<{ rows: number; columns: number }>;
+        metadata: Partial<{
+            rows: number;
+            columns: number;
+            rowsPerPage: number;
+        }>;
     }) => {
         reportApi.updateReportItem({ page, item, metadata });
         pageApi.updateItem({ item, metadata });
@@ -147,11 +172,7 @@ export default function ReportDesign() {
                                             }
                                             rowSpan={item.metadata?.rows || 24}
                                         >
-                                            <Stack
-                                                w="100%"
-                                                key={item.id}
-                                                h="100%"
-                                            >
+                                            <Stack w="100%" height="100%">
                                                 <SectionVisualization
                                                     section={{
                                                         ...(item.nodeSource as ISection),
@@ -203,74 +224,102 @@ export default function ReportDesign() {
                     >
                         {report.pages.map((page) => (
                             <Panel header={page.id} key={page.id}>
-                                <Button onClick={() => updatePage()}>
-                                    Edit
-                                </Button>
-                                <Collapse accordion>
-                                    {page.items.map((i) => (
-                                        <Panel
-                                            header={String(i.title)}
-                                            key={String(i.id || i.value)}
-                                        >
-                                            <Stack
-                                                direction="row"
-                                                alignItems="center"
+                                <Stack>
+                                    <Button onClick={() => updatePage()}>
+                                        Edit
+                                    </Button>
+
+                                    <Collapse accordion>
+                                        {page.items.map((i) => (
+                                            <Panel
+                                                header={String(i.title)}
+                                                key={String(i.id || i.value)}
                                             >
-                                                <Stack
-                                                    direction="row"
-                                                    alignItems="center"
-                                                >
-                                                    <Text>Rows</Text>
-                                                    <InputNumber
-                                                        onChange={(value) =>
-                                                            updateMetadata({
-                                                                page: page.id,
-                                                                item: String(
-                                                                    i.key
-                                                                ),
-                                                                metadata: value
-                                                                    ? {
-                                                                          rows: value,
-                                                                      }
-                                                                    : {},
-                                                            })
-                                                        }
-                                                        min={1}
-                                                        max={24}
-                                                        value={i.metadata?.rows}
-                                                    />
+                                                <Stack w="100%">
+                                                    <Stack>
+                                                        <Text>
+                                                            Rows Per Page
+                                                        </Text>
+                                                        <InputNumber
+                                                            onChange={(value) =>
+                                                                updateMetadata({
+                                                                    page: page.id,
+                                                                    item: String(
+                                                                        i.key
+                                                                    ),
+                                                                    metadata:
+                                                                        value
+                                                                            ? {
+                                                                                  rowsPerPage:
+                                                                                      value,
+                                                                              }
+                                                                            : {},
+                                                                })
+                                                            }
+                                                            min={1}
+                                                            value={
+                                                                i.metadata
+                                                                    ?.rowsPerPage
+                                                            }
+                                                        />
+                                                    </Stack>
+                                                    <Stack>
+                                                        <Text>Grid Rows</Text>
+                                                        <InputNumber
+                                                            onChange={(value) =>
+                                                                updateMetadata({
+                                                                    page: page.id,
+                                                                    item: String(
+                                                                        i.key
+                                                                    ),
+                                                                    metadata:
+                                                                        value
+                                                                            ? {
+                                                                                  rows: value,
+                                                                              }
+                                                                            : {},
+                                                                })
+                                                            }
+                                                            min={1}
+                                                            max={24}
+                                                            value={
+                                                                i.metadata?.rows
+                                                            }
+                                                        />
+                                                    </Stack>
+                                                    <Stack>
+                                                        <Text>
+                                                            Grid Columns
+                                                        </Text>
+                                                        <InputNumber
+                                                            min={1}
+                                                            max={24}
+                                                            value={
+                                                                i.metadata
+                                                                    ?.columns
+                                                            }
+                                                            onChange={(value) =>
+                                                                updateMetadata({
+                                                                    page: page.id,
+                                                                    item: String(
+                                                                        i.key
+                                                                    ),
+                                                                    metadata:
+                                                                        value
+                                                                            ? {
+                                                                                  columns:
+                                                                                      value,
+                                                                              }
+                                                                            : {},
+                                                                })
+                                                            }
+                                                        />
+                                                    </Stack>
                                                 </Stack>
-                                                <Stack
-                                                    direction="row"
-                                                    alignItems="center"
-                                                >
-                                                    <Text>Columns</Text>
-                                                    <InputNumber
-                                                        min={1}
-                                                        max={24}
-                                                        value={
-                                                            i.metadata?.columns
-                                                        }
-                                                        onChange={(value) =>
-                                                            updateMetadata({
-                                                                page: page.id,
-                                                                item: String(
-                                                                    i.key
-                                                                ),
-                                                                metadata: value
-                                                                    ? {
-                                                                          columns:
-                                                                              value,
-                                                                      }
-                                                                    : {},
-                                                            })
-                                                        }
-                                                    />
-                                                </Stack>
-                                            </Stack>
-                                        </Panel>
-                                    ))}
-                                </Collapse>
+                                            </Panel>
+                                        ))}
+                                    </Collapse>
+                                </Stack>
                             </Panel>
                         ))}
                     </Collapse>
@@ -284,6 +333,7 @@ export default function ReportDesign() {
 
                     <Stack direction="row">
                         <Button onClick={() => view()}>Preview</Button>
+                        <Button onClick={() => cancel()}>OK</Button>
                     </Stack>
                 </Stack>
             </Stack>

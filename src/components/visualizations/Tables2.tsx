@@ -34,6 +34,11 @@ const Tables2 = ({ visualization, data, dimensions }: TableProps) => {
     const columns = String(visualization.properties?.["columns"] ?? "").split(
         ","
     );
+    const otherColumns =
+        String(visualization.properties?.["normalColumns"] ?? "")
+            .split(",")
+            .filter((q) => !!q) || [];
+
     const generatePDF = () => {
         if (tbl.current) {
             const report = new JsPDF(
@@ -60,6 +65,7 @@ const Tables2 = ({ visualization, data, dimensions }: TableProps) => {
         flattenedData,
         rows,
         columns,
+        otherColumns,
         aggregation,
         thresholds,
         aggregationColumn,
@@ -76,284 +82,291 @@ const Tables2 = ({ visualization, data, dimensions }: TableProps) => {
     };
 
     return (
-        <Stack w="100%" h="100%" spacing={0}>
-            <Flex>
-                <Stack h="48px" fontSize="xl">
-                    <Button colorScheme="blue" onClick={() => generatePDF()}>
-                        Download Table
-                    </Button>
-                </Stack>
-            </Flex>
-            <Box h="100%" w="100%" ref={squareRef}>
-                <Box
-                    position="relative"
-                    overflow="auto"
-                    // whiteSpace="nowrap"
-                    h={display === "dashboard" ? `${height}px` : "100%"}
+        <Box h="100%" w="100%" ref={squareRef}>
+            <Box
+                position="relative"
+                overflow="auto"
+                // whiteSpace="nowrap"
+                h={display === "dashboard" ? `${height}px` : "100%"}
+                w="100%"
+            >
+                <Table
+                    variant="unstyled"
                     w="100%"
+                    bg="white"
+                    size={visualization.properties?.["cellHeight"] || "sm"}
+                    ref={tbl}
+                    height={height}
                 >
-                    <Table
-                        variant="unstyled"
-                        w="100%"
-                        bg="white"
-                        size={visualization.properties?.["cellHeight"] || "sm"}
-                        ref={tbl}
-                        // height={height}
-                    >
-                        {visualization.properties?.["showHeaders"] && (
-                            <Thead
-                                position="sticky"
-                                top={0}
-                                left={0}
-                                zIndex={10}
-                                bgColor="white"
-                                overflow="hidden"
-                            >
-                                {finalColumns.map((col, index) => (
-                                    <Tr key={index} className="stickyth">
-                                        {index === 0 && (
-                                            <>
-                                                {rows.map((row) => (
-                                                    <Th
-                                                        textTransform="none"
-                                                        borderColor="#DDDDDD"
-                                                        borderWidth="thin"
-                                                        fontWeight="extrabold"
-                                                        borderStyle="solid"
-                                                        rowSpan={
-                                                            finalColumns.length
-                                                        }
-                                                        key={`${row}${col[0].key}`}
-                                                    >
-                                                        {findLabel(
-                                                            visualization
-                                                                .properties[
-                                                                `${row}.name`
-                                                            ] || row
-                                                        )}
-                                                    </Th>
-                                                ))}
-                                            </>
-                                        )}
-                                        {index === 0 &&
-                                            columns
-                                                .filter(
-                                                    (c) =>
-                                                        SPECIAL_COLUMNS.indexOf(
-                                                            c
-                                                        ) !== -1
-                                                )
-                                                .map((c) => (
-                                                    <Th
-                                                        textTransform="none"
-                                                        fontWeight="extrabold"
-                                                        borderColor="#DDDDDD"
-                                                        borderWidth="thin"
-                                                        borderStyle="solid"
-                                                        key={c}
-                                                        textAlign={
-                                                            visualization
-                                                                .properties[
-                                                                "columnAlignment"
-                                                            ]
-                                                        }
-                                                        rowSpan={
-                                                            finalColumns.length
-                                                        }
-                                                    >
-                                                        {findLabel(
-                                                            visualization
-                                                                .properties[
-                                                                `${c}.name`
-                                                            ] || c
-                                                        )}
-                                                    </Th>
-                                                ))}
-                                        {col.map((col) => (
-                                            <Th
-                                                bg={
-                                                    visualization.properties[
-                                                        `${col.actual}.bg`
-                                                    ]
-                                                }
-                                                color={invertHex(
-                                                    visualization.properties[
-                                                        `${col.actual}.bg`
-                                                    ] || "#ffffff",
-                                                    true
-                                                )}
-                                                className="font-bold"
-                                                borderColor="#DDDDDD"
-                                                borderWidth="thin"
-                                                fontWeight="extrabold"
-                                                textTransform="none"
-                                                borderStyle="solid"
-                                                colSpan={col.span}
-                                                textAlign={
-                                                    visualization.properties[
-                                                        "columnAlignment"
-                                                    ] || "center"
-                                                }
-                                                key={col.value}
-                                            >
-                                                {findLabel(
-                                                    visualization.properties[
-                                                        `${col.actual}.name`
-                                                    ] || col.actual
-                                                )}
-                                            </Th>
-                                        ))}
-                                    </Tr>
-                                ))}
-                            </Thead>
-                        )}
+                    {visualization.properties?.["showHeaders"] && (
+                        <Thead
+                            position="sticky"
+                            top={0}
+                            left={0}
+                            zIndex={10}
+                            bgColor="white"
+                            overflow="hidden"
+                        >
+                            {finalColumns.map((col, index) => (
+                                <Tr key={index}>
+                                    {index === 0 && (
+                                        <>
+                                            {rows.map((row) => (
+                                                <Th
+                                                    textTransform="none"
+                                                    borderColor="#DDDDDD"
+                                                    borderWidth="thin"
+                                                    fontWeight="extrabold"
+                                                    borderStyle="solid"
+                                                    rowSpan={
+                                                        finalColumns.length
+                                                    }
+                                                    key={`${row}${col[0].key}`}
+                                                >
+                                                    {findLabel(
+                                                        visualization
+                                                            .properties[
+                                                            `${row}.name`
+                                                        ] || row
+                                                    )}
+                                                </Th>
+                                            ))}
+                                        </>
+                                    )}
 
-                        <Tbody>
-                            {finalRows[finalRows.length - 1].map(
-                                (row, index) => {
-                                    const currentKey = row.key.split("--");
-                                    let display: React.ReactNode = null;
-                                    for (let i = 0; i < finalRows.length; i++) {
-                                        if (
-                                            index % finalRows[i][0].span ===
-                                            0
-                                        ) {
-                                            display = (
-                                                <React.Fragment key={i}>
-                                                    {finalRows
-                                                        .slice(i)
-                                                        .map((i1, iw) => {
-                                                            const key =
-                                                                currentKey[
-                                                                    finalRows.length -
-                                                                        finalRows.slice(
-                                                                            i
-                                                                        )
-                                                                            .length +
-                                                                        iw
-                                                                ];
-                                                            return (
-                                                                <Td
-                                                                    borderColor="#DDDDDD"
-                                                                    borderWidth="thin"
-                                                                    borderStyle="solid"
-                                                                    key={`${i}${key}`}
-                                                                    verticalAlign="middle"
-                                                                    bg={
-                                                                        visualization
-                                                                            .properties[
-                                                                            `${key}.bg`
-                                                                        ]
-                                                                    }
-                                                                    color={invertHex(
-                                                                        visualization
-                                                                            .properties[
-                                                                            `${key}.bg`
-                                                                        ] ||
-                                                                            "#ffffff",
-                                                                        true
-                                                                    )}
-                                                                    rowSpan={
-                                                                        i1[i]
-                                                                            .span
-                                                                    }
-                                                                >
-                                                                    {visualization
-                                                                        .properties[
-                                                                        `${key}.name`
-                                                                    ] || key}
-                                                                </Td>
-                                                            );
-                                                        })}
-                                                </React.Fragment>
-                                            );
-                                            break;
-                                        }
-                                    }
-                                    return (
-                                        <Tr>
-                                            {display}
-                                            {columns
-                                                .filter(
-                                                    (c) =>
-                                                        SPECIAL_COLUMNS.indexOf(
-                                                            c
-                                                        ) !== -1
-                                                )
-                                                .map((c) => (
-                                                    <Td
-                                                        textTransform="none"
-                                                        fontWeight="extrabold"
-                                                        borderColor="#DDDDDD"
-                                                        borderWidth="thin"
-                                                        borderStyle="solid"
-                                                        key={c}
-                                                        textAlign={
-                                                            visualization
-                                                                .properties[
-                                                                "columnAlignment"
-                                                            ]
-                                                        }
-                                                    >
-                                                        {
-                                                            finalData[
-                                                                `${row.value}${c}`
-                                                            ]?.["value"]
-                                                        }
-                                                    </Td>
-                                                ))}
-                                            {finalColumns.length > 0 &&
-                                                finalColumns[
-                                                    finalColumns.length - 1
-                                                ].map((col) => {
+                                    {otherColumns.map((col) => (
+                                        <Th
+                                            textTransform="none"
+                                            borderColor="#DDDDDD"
+                                            borderWidth="thin"
+                                            fontWeight="extrabold"
+                                            borderStyle="solid"
+                                            rowSpan={finalColumns.length}
+                                            key={col}
+                                        >
+                                            {visualization.properties[
+                                                `${col}.name`
+                                            ] || col}
+                                        </Th>
+                                    ))}
+
+                                    {index === 0 &&
+                                        columns
+                                            .filter(
+                                                (c) =>
+                                                    SPECIAL_COLUMNS.indexOf(
+                                                        c
+                                                    ) !== -1
+                                            )
+                                            .map((c) => (
+                                                <Th
+                                                    textTransform="none"
+                                                    fontWeight="extrabold"
+                                                    borderColor="#DDDDDD"
+                                                    borderWidth="thin"
+                                                    borderStyle="solid"
+                                                    key={c}
+                                                    textAlign={
+                                                        visualization
+                                                            .properties[
+                                                            "columnAlignment"
+                                                        ]
+                                                    }
+                                                    rowSpan={
+                                                        finalColumns.length
+                                                    }
+                                                >
+                                                    {findLabel(
+                                                        visualization
+                                                            .properties[
+                                                            `${c}.name`
+                                                        ] || c
+                                                    )}
+                                                </Th>
+                                            ))}
+                                    {col.map((col) => (
+                                        <Th
+                                            bg={
+                                                visualization.properties[
+                                                    `${col.actual}.bg`
+                                                ]
+                                            }
+                                            color={invertHex(
+                                                visualization.properties[
+                                                    `${col.actual}.bg`
+                                                ] || "#ffffff",
+                                                true
+                                            )}
+                                            className="font-bold"
+                                            borderColor="#DDDDDD"
+                                            borderWidth="thin"
+                                            fontWeight="extrabold"
+                                            textTransform="none"
+                                            borderStyle="solid"
+                                            colSpan={col.span}
+                                            textAlign={
+                                                visualization.properties[
+                                                    "columnAlignment"
+                                                ] || "center"
+                                            }
+                                            key={col.value}
+                                        >
+                                            {findLabel(
+                                                visualization.properties[
+                                                    `${col.actual}.name`
+                                                ] || col.actual
+                                            )}
+                                        </Th>
+                                    ))}
+                                </Tr>
+                            ))}
+                        </Thead>
+                    )}
+
+                    <Tbody>
+                        {finalRows[finalRows.length - 1].map((row, index) => {
+                            const currentKey = row.key.split("--");
+                            let display: React.ReactNode = null;
+                            for (let i = 0; i < finalRows.length; i++) {
+                                if (index % finalRows[i][0].span === 0) {
+                                    display = (
+                                        <React.Fragment key={i}>
+                                            {finalRows
+                                                .slice(i)
+                                                .map((i1, iw) => {
+                                                    const key =
+                                                        currentKey[
+                                                            finalRows.length -
+                                                                finalRows.slice(
+                                                                    i
+                                                                ).length +
+                                                                iw
+                                                        ];
                                                     return (
                                                         <Td
-                                                            key={
-                                                                col.value +
-                                                                row.key
-                                                            }
                                                             borderColor="#DDDDDD"
                                                             borderWidth="thin"
                                                             borderStyle="solid"
-                                                            textAlign={
+                                                            key={`${i}${key}`}
+                                                            verticalAlign="middle"
+                                                            bg={
                                                                 visualization
                                                                     .properties[
-                                                                    "columnAlignment"
-                                                                ] || "center"
-                                                            }
-                                                            verticalAlign="middle"
-                                                            {...findOthers(col)}
-                                                            bg={
-                                                                finalData[
-                                                                    `${row.value}${col.value}`
-                                                                ]?.["bg"] ||
-                                                                "white"
+                                                                    `${key}.bg`
+                                                                ]
                                                             }
                                                             color={invertHex(
-                                                                finalData[
-                                                                    `${row.value}${col.value}`
-                                                                ]?.["bg"] ||
-                                                                    "white",
+                                                                visualization
+                                                                    .properties[
+                                                                    `${key}.bg`
+                                                                ] || "#ffffff",
                                                                 true
                                                             )}
+                                                            rowSpan={i1[i].span}
                                                         >
-                                                            {
-                                                                finalData[
-                                                                    `${row.value}${col.value}`
-                                                                ]?.["value"]
-                                                            }
+                                                            {visualization
+                                                                .properties[
+                                                                `${key}.name`
+                                                            ] || key}
                                                         </Td>
                                                     );
                                                 })}
-                                        </Tr>
+                                        </React.Fragment>
                                     );
+                                    break;
                                 }
-                            )}
-                        </Tbody>
-                    </Table>
-                </Box>
+                            }
+                            return (
+                                <Tr>
+                                    {display}
+                                    {otherColumns.map((col) => (
+                                        <Td
+                                            textTransform="none"
+                                            borderColor="#DDDDDD"
+                                            borderWidth="thin"
+                                            borderStyle="solid"
+                                            rowSpan={finalColumns.length}
+                                            key={col}
+                                        >
+                                            {
+                                                finalData[`${row.key}${col}`]?.[
+                                                    "value"
+                                                ]
+                                            }
+                                        </Td>
+                                    ))}
+                                    {columns
+                                        .filter(
+                                            (c) =>
+                                                SPECIAL_COLUMNS.indexOf(c) !==
+                                                -1
+                                        )
+                                        .map((c) => (
+                                            <Td
+                                                textTransform="none"
+                                                fontWeight="extrabold"
+                                                borderColor="#DDDDDD"
+                                                borderWidth="thin"
+                                                borderStyle="solid"
+                                                key={c}
+                                                textAlign={
+                                                    visualization.properties[
+                                                        "columnAlignment"
+                                                    ]
+                                                }
+                                            >
+                                                {
+                                                    finalData[
+                                                        `${row.value}${c}`
+                                                    ]?.["value"]
+                                                }
+                                            </Td>
+                                        ))}
+                                    {finalColumns.length > 0 &&
+                                        finalColumns[
+                                            finalColumns.length - 1
+                                        ].map((col) => {
+                                            return (
+                                                <Td
+                                                    key={col.value + row.key}
+                                                    borderColor="#DDDDDD"
+                                                    borderWidth="thin"
+                                                    borderStyle="solid"
+                                                    textAlign={
+                                                        visualization
+                                                            .properties[
+                                                            "columnAlignment"
+                                                        ] || "center"
+                                                    }
+                                                    verticalAlign="middle"
+                                                    {...findOthers(col)}
+                                                    bg={
+                                                        finalData[
+                                                            `${row.value}${col.value}`
+                                                        ]?.["bg"] || "white"
+                                                    }
+                                                    color={invertHex(
+                                                        finalData[
+                                                            `${row.value}${col.value}`
+                                                        ]?.["bg"] || "white",
+                                                        true
+                                                    )}
+                                                >
+                                                    {
+                                                        finalData[
+                                                            `${row.value}${col.value}`
+                                                        ]?.["value"]
+                                                    }
+                                                </Td>
+                                            );
+                                        })}
+                                </Tr>
+                            );
+                        })}
+                    </Tbody>
+                </Table>
             </Box>
-        </Stack>
+        </Box>
     );
 };
 

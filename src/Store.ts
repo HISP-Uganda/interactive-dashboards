@@ -19,6 +19,7 @@ import {
     IPresentation,
     IReport,
     IPage,
+    IUserGroup,
 } from "./interfaces";
 import { generateUid } from "./utils/uid";
 import { getRelativePeriods } from "./utils/utils";
@@ -115,6 +116,11 @@ export const createReport = (id = generateUid()): IReport => {
         name: "",
         isLandscape: true,
         size: "A4",
+        additionalDays: 0,
+        schedule: "0 0 * * additionalDays",
+        basedOnUserOrganization: false,
+        emails: "",
+        rowsPerPage: 10,
     };
 };
 
@@ -592,6 +598,11 @@ export const $hasTemplateSection = $settings.map((state) => {
         return `/templates/${state.template}/`;
     }
     return "/dashboards/";
+});
+
+export const $userGroup = domain.createStore<Partial<IUserGroup>>({
+    name: "",
+    description: "",
 });
 
 // $dashboard.watch((v) => console.log(v));
