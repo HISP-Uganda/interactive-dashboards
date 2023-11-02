@@ -570,6 +570,10 @@ export const useDashboardTemplate = (
                 engine,
                 systemId,
             });
+            settingsApi.changeAttribute({
+                attribute: "templatePadding",
+                value: dashboard.padding || 0,
+            });
             return dashboard;
         }
     );
@@ -1774,7 +1778,7 @@ export const useVisualization = (
             );
         },
         {
-            refetchInterval: currentInterval,
+            // refetchInterval: currentInterval,
             refetchIntervalInBackground: true,
             refetchOnWindowFocus: true,
         }
@@ -1828,8 +1832,8 @@ export const useMaps = (
         async () => {
             const { geojson, ...otherLevels }: any = await engine.query(query);
             return processMap(geojson, otherLevels, data, thresholds);
-        },
-        { refetchInterval: 5000 }
+        }
+        // { refetchInterval: 1000 && 60 }
     );
 };
 
@@ -2135,6 +2139,21 @@ export const useDHIS2Visualization = (viz: IVisualization) => {
                     data: { headers, rows, metaData },
                 }: any = await engine.query({
                     data: { resource: `analytics.json?${params}` },
+                });
+                let vals: { [key: string]: string[] } = {};
+
+                for (const [ke, values] of Object.entries(
+                    metaData.dimensions
+                )) {
+                    vals = {
+                        ...vals,
+                        [`${ke}-name`]: values as string[],
+                    };
+                }
+                console.log(visualization.id, vals);
+                visualizationDimensionsApi.updateVisualizationData({
+                    visualizationId: visualization.id,
+                    data: vals,
                 });
 
                 const currentVisualization: IVisualization = {

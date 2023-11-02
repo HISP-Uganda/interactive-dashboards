@@ -53,6 +53,7 @@ export interface IDashboardSetting extends INamed {
     defaultDashboard: string;
     template: string;
     storage: Storage;
+    templatePadding: string;
 }
 export interface Authentication {
     username: string;
@@ -197,6 +198,7 @@ export interface IDashboard extends INamed {
     excludeFromList: boolean;
     child?: string;
     spacing: number;
+    padding: number;
 }
 export interface Pagination {
     total: number;

@@ -24,23 +24,7 @@ export default function DashboardTemplateForm() {
     }
     if (isError) return <pre>{JSON.stringify(error)}</pre>;
     if (isSuccess && data) {
-        return (
-            <Stack w="100%" bg={data.bg} spacing="0" h="calc(100vh - 48px)">
-                {store.isAdmin && <AdminPanel />}
-                <Stack
-                    h={
-                        store.isAdmin
-                            ? "calc(100vh - 96px)"
-                            : "calc(100vh - 48px)"
-                    }
-                    p={`${data.spacing}px`}
-                    spacing="0"
-                >
-                    <DashboardTemplate dashboardTemplate={data} />
-                </Stack>
-                {/* </Stack> */}
-            </Stack>
-        );
+        return <DashboardTemplate dashboardTemplate={data} />;
     }
     return null;
 }

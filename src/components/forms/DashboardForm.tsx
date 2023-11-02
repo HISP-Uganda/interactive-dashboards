@@ -1,4 +1,3 @@
-import { Stack } from "@chakra-ui/react";
 import { useMatch, useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { LocationGenerics } from "../../interfaces";
@@ -22,18 +21,14 @@ export default function DashboardForm() {
         dashboardType,
         action
     );
-    return (
-        <Stack
-            alignItems="center"
-            justifyContent="center"
-            justifyItems="center"
-            alignContent="center"
-            h="100%"
-            w="100%"
-        >
-            {isLoading && <LoadingIndicator />}
-            {isSuccess && <Dashboard />}
-            {isError && <pre>{JSON.stringify(error)}</pre>}
-        </Stack>
-    );
+    if (isLoading) {
+        return <LoadingIndicator />;
+    }
+    if (isError) {
+        return <pre>{JSON.stringify(error)}</pre>;
+    }
+    if (isSuccess) {
+        return <Dashboard />;
+    }
+    return null;
 }

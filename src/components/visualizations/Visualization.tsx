@@ -47,7 +47,6 @@ import Tables from "./Tables";
 import TextVisualisation from "./TextVisualisation";
 import TreeMaps from "./TreeMaps";
 import DividerVisualization from "./DividerVisualization";
-import Tables2 from "./Tables2";
 
 type VisualizationProps = {
     visualization: IVisualization;
@@ -228,7 +227,7 @@ export const getVisualization = (
             />
         ),
         tables: (
-            <Tables2
+            <Tables
                 section={section}
                 data={data}
                 visualization={visualization}

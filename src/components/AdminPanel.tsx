@@ -1,4 +1,3 @@
-import React, { useState, ChangeEvent } from "react";
 import {
     Button,
     Checkbox,
@@ -9,29 +8,29 @@ import {
     Textarea,
     useDisclosure,
 } from "@chakra-ui/react";
+import { useDataEngine } from "@dhis2/app-runtime";
+import { useNavigate, useSearch } from "@tanstack/react-location";
 import { Modal } from "antd";
-import { NumberField, CheckboxField } from "./fields";
+import { useStore } from "effector-react";
+import React, { ChangeEvent, useState } from "react";
 import { dashboardApi, sectionApi, settingsApi, storeApi } from "../Events";
+import { ICategory, IDashboard, LocationGenerics } from "../interfaces";
+import { saveDocument } from "../Queries";
 import {
-    createSection,
-    isOpenApi,
-    $store,
-    $settings,
     $dashboard,
     $isOpen,
     $section,
+    $settings,
+    $store,
+    createSection,
+    isOpenApi,
 } from "../Store";
-import { IDashboard, LocationGenerics } from "../interfaces";
-import { saveDocument } from "../Queries";
-import Picker from "./Picker";
-import { useStore } from "effector-react";
-import { useDataEngine } from "@dhis2/app-runtime";
-import { useSearch, useNavigate } from "@tanstack/react-location";
-import Section from "./Section";
-import { Categories } from "./lists";
 import AutoRefreshPicker from "./AutoRefreshPicker";
-import DashboardDropDown from "./DashboardDropDown";
 import DashboardFilter from "./DashboardFilter";
+import { CheckboxField, NumberField } from "./fields";
+import ResourceField from "./fields/ResourceField";
+import Picker from "./Picker";
+import Section from "./Section";
 
 export default function AdminPanel() {
     const [loading, setLoading] = useState<boolean>(false);
@@ -110,6 +109,8 @@ export default function AdminPanel() {
     return (
         <Stack
             h="48px"
+            maxH="48px"
+            minH="48px"
             direction="row"
             alignItems="center"
             px={`${dashboard.spacing}px`}
@@ -118,6 +119,14 @@ export default function AdminPanel() {
             <NumberField<IDashboard>
                 title="Spacing"
                 attribute="spacing"
+                func={dashboardApi.changeAttribute}
+                obj={dashboard}
+                direction="row"
+                alignItems="center"
+            />
+            <NumberField<IDashboard>
+                title="Padding"
+                attribute="padding"
                 func={dashboardApi.changeAttribute}
                 obj={dashboard}
                 direction="row"
@@ -160,11 +169,11 @@ export default function AdminPanel() {
             </Button>
 
             <Modal
-                centered
                 width={"calc(100vw - 100px)"}
                 mask={false}
                 open={isOpen}
                 title="Title"
+                centered
                 onOk={() => isOpenApi.onClose()}
                 onCancel={() => isOpenApi.onClose()}
                 footer={[
@@ -180,9 +189,6 @@ export default function AdminPanel() {
                         Apply
                     </Button>,
                 ]}
-                bodyStyle={{
-                    height: "calc(100vh - 150px)",
-                }}
             >
                 <Section />
             </Modal>
@@ -205,10 +211,14 @@ export default function AdminPanel() {
                 ]}
             >
                 <Stack spacing="20px">
-                    <Stack>
-                        <Text>Category</Text>
-                        <Categories />
-                    </Stack>
+                    <ResourceField<IDashboard, ICategory>
+                        title="Category"
+                        resource="i-categories"
+                        attribute="category"
+                        func={dashboardApi.changeAttribute}
+                        obj={dashboard}
+                        multiple={false}
+                    />
                     <Stack>
                         <Text>Name</Text>
                         <Input
@@ -290,13 +300,6 @@ export default function AdminPanel() {
                             attribute="excludeFromList"
                         />
                     </Stack>
-                    {/* <Stack>
-                        <Text>Child Dashboard</Text>
-                        <DashboardDropDown
-                            value={dashboard.child || ""}
-                            onChange={(e) => dashboardApi.changeChild(e)}
-                        />
-                    </Stack> */}
                     <Stack>
                         <Text>Filters</Text>
                         <DashboardFilter />
