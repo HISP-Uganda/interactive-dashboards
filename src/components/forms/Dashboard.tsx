@@ -3,13 +3,14 @@ import { useMatch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import html2canvas from "html2canvas";
 import JsPDF from "jspdf";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { LocationGenerics } from "../../interfaces";
 import { $dashboard, $dashboardType, $settings, $store } from "../../Store";
 import AdminPanel from "../AdminPanel";
 import DynamicDashboard from "../DynamicDashboard";
 import FixedDashboard from "../FixedDashboard";
+import { changeBackground } from "../../utils/utils";
 
 const Dashboard = () => {
     const tbl = useRef<HTMLDivElement>(null);
@@ -45,12 +46,26 @@ const Dashboard = () => {
     });
     const padding =
         (store.isAdmin && dashboard.id === settings.template) || !templateId
-            ? dashboard.spacing
+            ? dashboard.padding || 0
             : 0;
+
+    useEffect(() => {
+        changeBackground(dashboard.bg);
+        return () => {
+            changeBackground("unset");
+        };
+    }, []);
+
     return (
         <Stack
             w={store.isFullScreen ? "100vw" : "100%"}
-            h={store.isFullScreen ? "100vh" : "100%"}
+            h={
+                store.isFullScreen
+                    ? "100vh"
+                    : templateId === undefined && store.isAdmin
+                    ? "calc(100vh - 48px)"
+                    : `calc(100vh - 48px - ${settings.templatePadding}px - ${settings.templatePadding}px)`
+            }
             bg={dashboard.bg}
             spacing="0"
             p={`${padding}px`}
@@ -58,11 +73,10 @@ const Dashboard = () => {
             ref={tbl}
             key={dashboard.id}
         >
-            {((store.isAdmin && dashboard.id === settings.template) ||
-                !templateId) && <AdminPanel />}
+            {templateId === undefined && store.isAdmin && <AdminPanel />}
 
             {dashboardType === "dynamic" ? (
-                <DynamicDashboard />
+                <DynamicDashboard dashboard={dashboard} />
             ) : (
                 <FixedDashboard dashboard={dashboard} />
             )}

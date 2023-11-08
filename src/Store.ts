@@ -174,6 +174,7 @@ export const createDashboard = (
         type,
         excludeFromList: false,
         spacing: 5,
+        padding: 5,
     };
 };
 export const $visualizationQuery = domain.createStore<IData>(
@@ -207,6 +208,7 @@ export const $settings = domain.createStore<IDashboardSetting>({
     name: "",
     id: "settings",
     template: "",
+    templatePadding: "",
 });
 
 export const $store = domain.createStore<IStore>({

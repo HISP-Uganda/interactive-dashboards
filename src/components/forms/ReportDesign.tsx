@@ -343,6 +343,7 @@ export default function ReportDesign() {
                 width="500px"
                 mask={false}
                 open={isOpen}
+                style={{ height: "auto" }}
                 title="Page Items"
                 onOk={() => isOpenApi.onClose()}
                 onCancel={() => isOpenApi.onClose()}
@@ -359,9 +360,6 @@ export default function ReportDesign() {
                         Apply
                     </Button>,
                 ]}
-                bodyStyle={{
-                    height: "auto",
-                }}
             >
                 <Stack>
                     <Text>Items</Text>

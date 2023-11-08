@@ -197,7 +197,7 @@ div[size="A4"][layout="portrait"] {
 }
  */
 
-table,
+/* table,
 tr,
 td,
 th {
@@ -212,4 +212,4 @@ tr.stickyth th:nth-of-type(n)::before {
     top: 0;
     left: -1px;
     background-color: #eeeeee;
-}
+} */

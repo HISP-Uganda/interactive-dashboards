@@ -111,7 +111,6 @@ const SectionVisualization = ({ section }: { section: ISection }) => {
                 templateColumns={templateColumns}
                 templateRows={templateRows}
                 gap={`${dashboard.spacing}px`}
-                flex={1}
                 // alignItems="center"
                 // justifyContent="center"
             >

@@ -24,6 +24,7 @@ import TextVisualisation from "./TextVisualisation";
 const getVisualization = (
     visualization: IVisualization,
     data: any,
+    metadata: any[],
     section: ISection
 ) => {
     const dataProperties = fromPairs(
@@ -218,7 +219,12 @@ export default function DHIS2Visualization({
             {isLoading && <LoadingIndicator />}
             {isSuccess &&
                 data &&
-                getVisualization(data.visualization, data.data, section)}
+                getVisualization(
+                    data.visualization,
+                    data.data,
+                    data.metadata,
+                    section
+                )}
             {isError && <Text>{error?.message}</Text>}
         </>
     );

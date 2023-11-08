@@ -2142,3 +2142,8 @@ export const setBody = (size: Size, isLandscape: boolean = true) => {
         header.classList.add("landscape");
     }
 };
+
+export const changeBackground = (color: string) => {
+    const body = document.getElementsByTagName("body")[0];
+    body.style.backgroundColor = color;
+};

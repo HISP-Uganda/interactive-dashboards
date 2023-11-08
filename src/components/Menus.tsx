@@ -7,7 +7,9 @@ import {
     MdOutlineDashboard,
     MdResetTv,
     MdQueryStats,
+    MdReport,
 } from "react-icons/md";
+import { HiOutlineDocumentReport } from "react-icons/hi";
 import { boolean } from "mathjs";
 
 const Menus = () => {
@@ -130,7 +132,12 @@ const Menus = () => {
                 }}
                 transition="ease-in-out 0.3s"
             >
-                <Icon as={MdResetTv} w={8} h={8} color="blue.600" />
+                <Icon
+                    as={HiOutlineDocumentReport}
+                    w={8}
+                    h={8}
+                    color="blue.600"
+                />
                 <Text>Reports</Text>
             </Stack>
         </Stack>

@@ -29,7 +29,7 @@ const Carousel = ({
     return (
         <Slider {...settings}>
             {section.visualizations.map((visualization) => (
-                <Stack h={`${height}px`}>
+                <Stack h={`${height}px`} key={visualization.id}>
                     <Visualization
                         key={visualization.id}
                         visualization={visualization}

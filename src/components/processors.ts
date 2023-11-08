@@ -1,8 +1,9 @@
+import type { ColumnsType } from "antd/es/table";
+import { fromPairs, groupBy, maxBy, minBy, orderBy, sum } from "lodash";
 import { uniqBy } from "lodash/fp";
-import { fromPairs, groupBy, orderBy, sum, maxBy, minBy } from "lodash";
 import uniq from "lodash/uniq";
 import update from "lodash/update";
-import { Column, Threshold } from "../interfaces";
+import { Threshold, Column } from "../interfaces";
 import { allMetadata } from "../utils/utils";
 import { SPECIAL_COLUMNS } from "./constants";
 
@@ -100,9 +101,7 @@ const calculation = {
         }>
     ) => {
         const value = data.length;
-
         const color = findColor(value, thresholds);
-
         return {
             bg: color,
             color: invertHex(color),
@@ -500,74 +499,62 @@ export const processTable = (
         const groupedData = groupBy(data, (d) =>
             rows.map((r) => d[r]).join("")
         );
-        const finalData = Object.entries(groupedData)
-            .flatMap(([key, values]) => {
-                let rows = values;
 
-                if (aggregationColumn) {
-                    rows = uniqBy(aggregationColumn, values);
-                }
-                const groupedByColumn = groupBy(values, (d) =>
-                    columns
-                        .filter((r) => SPECIAL_COLUMNS.indexOf(r) === -1)
-                        .map((r) => d[r])
-                        .join("")
-                );
-                let normal = Object.entries(groupedByColumn).map(
-                    ([columnKey, columnData]) => {
-                        return {
-                            key: `${key}${columnKey}`,
-                            value: calculation[aggregation](
-                                columnData,
-                                thresholds,
-                                {
-                                    aggregationColumn,
-                                    prevValue: rows.length,
-                                }
-                            ),
-                        };
-                    }
-                );
-
-                for (const otherColumn of otherColumns) {
-                    const currentGroup = values[0];
-                    normal = [
-                        ...normal,
+        const finalData = Object.entries(groupedData).map(([key, values]) => {
+            let rows = values;
+            if (aggregationColumn) {
+                rows = uniqBy(aggregationColumn, values);
+            }
+            const groupedByColumn = groupBy(values, (d) =>
+                columns
+                    .filter((r) => SPECIAL_COLUMNS.indexOf(r) === -1)
+                    .map((r) => d[r])
+                    .join("")
+            );
+            let currentObj: any = {};
+            Object.entries(groupedByColumn).forEach(
+                ([columnKey, columnData]) => {
+                    const calculated = calculation[aggregation](
+                        columnData,
+                        thresholds,
                         {
-                            key: `${key}${otherColumn}`,
-                            value: {
-                                bg: "",
-                                value: currentGroup[otherColumn],
-                                color: "",
-                            },
-                        },
-                    ];
+                            aggregationColumn,
+                            prevValue: rows.length,
+                        }
+                    );
+                    currentObj = {
+                        ...currentObj,
+                        [`${columnKey}`]: calculated.value,
+                        [`${columnKey}color`]: calculated.color,
+                        [`${columnKey}bg`]: calculated.bg,
+                        ...columnData[0],
+                        key,
+                    };
                 }
+            );
 
-                return [
-                    ...normal,
-                    {
-                        key: `${key}rowCount`,
-                        value: {
-                            bg: "",
-                            value: uniqBy("dx", rows).length,
-                            color: "",
-                        },
-                    },
-                ];
-            })
-            .map(({ key, value }) => {
-                return [key, value];
-            });
-
-        let grouping = fromPairs(finalData);
+            // for (const otherColumn of otherColumns) {
+            //     const currentGroup = values[0];
+            //     normal = [
+            //         ...normal,
+            //         {
+            //             key: `${key}${otherColumn}`,
+            //             bg: "",
+            //             value: currentGroup[otherColumn],
+            //             color: "",
+            //         },
+            //     ];
+            // }
+            return currentObj;
+        });
         return {
             finalColumns,
             finalRows,
-            finalData: grouping,
+            finalData,
         };
     }
-    return { finalColumns: [], finalRows: [], finalData: {} };
+
+    return { finalColumns: [], finalRows: [], finalData: [] };
 };
 
 export const processSingleValue = (
@@ -673,7 +660,6 @@ export const processGraphs = (
             if (options.series) {
                 const grouped = groupBy(data, options.series);
                 chartData = Object.entries(grouped).map(([key, values]) => {
-                    console.log(values);
                     let currentValues = values;
                     if (specific.length > 0) {
                         currentValues = values.filter(

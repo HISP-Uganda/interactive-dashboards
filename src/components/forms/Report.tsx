@@ -338,9 +338,7 @@ export default function Report() {
                         OK
                     </Button>,
                 ]}
-                bodyStyle={{
-                    height: dimensions.h,
-                }}
+                style={{ height: dimensions.h }}
             >
                 {component}
             </Modal>

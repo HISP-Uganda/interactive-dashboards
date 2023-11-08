@@ -94,41 +94,11 @@ const TableProperties = ({
 }: {
     visualization: IVisualization;
 }) => {
-    const [currentRowPage, setCurrentRowPage] = useState<number>(1);
-    const [currentColumnPage, setCurrentColumnPage] = useState<number>(1);
-
-    const lastRowPage = currentRowPage * NUMBER_PER_PAGE;
-    const lastColumnPage = currentColumnPage * NUMBER_PER_PAGE;
-
     const data = useStore($visualizationData)[visualization.id] || [];
     const dimensions = useStore($visualizationDimensions)[visualization.id];
-    const rows = String(visualization.properties["rows"] || "")
-        .split(",")
-        .filter((x) => !!x);
-    const columns1 = String(visualization.properties["columns"] || "")
-        .split(",")
-        .filter((x) => !!x);
-
     let normalColumns: string[] = [];
-
-    if (!isEmpty(dimensions)) {
-        normalColumns = [...Object.keys(dimensions), "value"];
-    }
-
-    const columns = uniqBy(
-        createOptions([...normalColumns, ...SPECIAL_COLUMNS]),
-        "value"
-    );
-
-    const actualData = flatten(data);
-
     const selectedColumns =
         String(visualization.properties["columns"])
-            .split(",")
-            .filter((x) => !!x) || [];
-
-    const normalTableColumns =
-        String(visualization.properties["normalColumns"] ?? "")
             .split(",")
             .filter((x) => !!x) || [];
 
@@ -137,12 +107,22 @@ const TableProperties = ({
             .split(",")
             .filter((x) => !!x) || [];
 
-    const [currentRowData, setCurrentRowData] = useState<string[]>(
-        selectedRows.slice(lastRowPage - NUMBER_PER_PAGE, lastRowPage)
+    const normalTableColumns =
+        String(visualization.properties["normalColumns"] ?? "")
+            .split(",")
+            .filter((x) => !!x) || [];
+    if (!isEmpty(dimensions)) {
+        normalColumns = [...Object.keys(dimensions), "value"];
+    } else {
+        normalColumns = [...selectedColumns, ...selectedRows];
+    }
+
+    const columns = uniqBy(
+        createOptions([...normalColumns, ...SPECIAL_COLUMNS]),
+        "value"
     );
-    const [currentColumnData, setCurrentColumnData] = useState<string[]>(
-        selectedColumns.slice(lastColumnPage - NUMBER_PER_PAGE, lastColumnPage)
-    );
+
+    const actualData = flatten(data);
 
     return (
         <Stack>

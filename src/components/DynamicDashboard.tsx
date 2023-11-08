@@ -5,14 +5,23 @@ import { Responsive, WidthProvider } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { dashboardApi } from "../Events";
-import { $dashboard, $size } from "../Store";
+import { $dashboard, $size, $store, $settings } from "../Store";
 import SectionVisualization from "./SectionVisualization";
+import { useMatch } from "@tanstack/react-location";
+import { LocationGenerics, IDashboard } from "../interfaces";
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
-export default function DynamicDashboard() {
-    const dashboard = useStore($dashboard);
+export default function DynamicDashboard({
+    dashboard,
+}: {
+    dashboard: IDashboard;
+}) {
+    const store = useStore($store);
+    const template = useStore($settings);
     const size = useStore($size);
-
+    const {
+        params: { templateId },
+    } = useMatch<LocationGenerics>();
     const settings: {
         className: string;
         rowHeight: number;
@@ -43,7 +52,7 @@ export default function DynamicDashboard() {
     function generateDOM() {
         return dashboard.sections.map((section) => (
             <Stack key={section.id} h="100%">
-                <SectionVisualization section={section} others={{}} />
+                <SectionVisualization section={section} />
             </Stack>
         ));
     }
@@ -51,19 +60,6 @@ export default function DynamicDashboard() {
     function onBreakpointChange(breakpoint: string, columns: number) {
         setCurrent((prev) => {
             return { ...prev, currentBreakpoint: breakpoint };
-        });
-    }
-
-    function onCompactTypeChange() {
-        const { compactType: oldCompactType } = current;
-        const compactType =
-            oldCompactType === "horizontal"
-                ? "vertical"
-                : oldCompactType === "vertical"
-                ? null
-                : "horizontal";
-        setCurrent((prev) => {
-            return { ...prev, compactType };
         });
     }
 
@@ -94,18 +90,21 @@ export default function DynamicDashboard() {
         });
         dashboardApi.setCurrentDashboard({ ...dashboard, sections });
     }
+
+    const padding: [number, number] =
+        (store.isAdmin && dashboard.id === template.template) || !templateId
+            ? [dashboard.padding || 0, dashboard.padding || 0]
+            : [0, 0];
     return (
-        <Stack>
+        <Stack overflow="auto" w="100%">
             <ResponsiveReactGridLayout
                 {...settings}
-                margin={[2, 2]}
+                margin={[dashboard.spacing, dashboard.spacing]}
+                containerPadding={padding}
                 layouts={current.layouts}
                 onBreakpointChange={onBreakpointChange}
                 onLayoutChange={onLayoutChange}
-                // WidthProvider option
                 measureBeforeMount={false}
-                // I like to have it animate on mount. If you don't, delete `useCSSTransforms` (it's default `true`)
-                // and set `measureBeforeMount={true}`.
                 useCSSTransforms={current.mounted}
                 compactType={current.compactType}
                 preventCollision={!current.compactType}
