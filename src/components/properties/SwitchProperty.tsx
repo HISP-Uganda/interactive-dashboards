@@ -1,4 +1,4 @@
-import { Stack, Switch, Text } from "@chakra-ui/react";
+import { Stack, Switch, Text, StackProps } from "@chakra-ui/react";
 import { sectionApi } from "../../Events";
 import { VizProps } from "../../interfaces";
 
@@ -6,9 +6,10 @@ export default function SwitchProperty({
     visualization,
     attribute,
     title,
-}: VizProps) {
+    ...rest
+}: VizProps & StackProps) {
     return (
-        <Stack>
+        <Stack {...rest}>
             <Text>{title}</Text>
             <Switch
                 isChecked={visualization.properties[attribute]}

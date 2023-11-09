@@ -500,7 +500,10 @@ export const processTable = (
             rows.map((r) => d[r]).join("")
         );
 
-        const finalData = Object.entries(groupedData).map(([key, values]) => {
+        const allKeys = Object.keys(groupedData);
+
+        const finalData = allKeys.sort().map((key) => {
+            const values = groupedData[key] || [];
             let rows = values;
             if (aggregationColumn) {
                 rows = uniqBy(aggregationColumn, values);
@@ -511,7 +514,12 @@ export const processTable = (
                     .map((r) => d[r])
                     .join("")
             );
-            let currentObj: any = {};
+            let currentObj: any = fromPairs(
+                otherColumns
+                    .filter((d) => !!d)
+                    .map((d) => [d, uniqBy("id", values).length])
+            );
+
             Object.entries(groupedByColumn).forEach(
                 ([columnKey, columnData]) => {
                     const calculated = calculation[aggregation](
@@ -532,19 +540,6 @@ export const processTable = (
                     };
                 }
             );
-
-            // for (const otherColumn of otherColumns) {
-            //     const currentGroup = values[0];
-            //     normal = [
-            //         ...normal,
-            //         {
-            //             key: `${key}${otherColumn}`,
-            //             bg: "",
-            //             value: currentGroup[otherColumn],
-            //             color: "",
-            //         },
-            //     ];
-            // }
             return currentObj;
         });
         return {
@@ -553,7 +548,6 @@ export const processTable = (
             finalData,
         };
     }
-
     return { finalColumns: [], finalRows: [], finalData: [] };
 };
 
@@ -646,6 +640,7 @@ export const processGraphs = (
     const specific: string[] = options.dataProperties?.["specific"] || [];
     const percentages: boolean =
         options.dataProperties?.["percentages"] || false;
+    const overall: boolean = options.dataProperties?.["overall"] || false;
     Object.entries(options.dataProperties || {}).forEach(
         ([property, value]) => {
             availableProperties = update(
@@ -657,20 +652,11 @@ export const processGraphs = (
     );
     if (data && data.length > 0 && options.category !== undefined) {
         if (options.summarize) {
+            const groupedByCategory = groupBy(data, options.category);
             if (options.series) {
                 const grouped = groupBy(data, options.series);
-                chartData = Object.entries(grouped).map(([key, values]) => {
+                chartData = Object.entries(grouped).flatMap(([key, values]) => {
                     let currentValues = values;
-                    if (specific.length > 0) {
-                        currentValues = values.filter(
-                            (d: any) =>
-                                specific.indexOf(d[options.series || ""]) !== -1
-                        );
-                    }
-                    const groupedByTheme = groupBy(
-                        currentValues,
-                        options.category
-                    );
                     let others = {};
                     if (
                         options.metadata[`${key}.bg`] ||
@@ -684,8 +670,72 @@ export const processGraphs = (
                             },
                         };
                     }
+
+                    if (specific.length > 0) {
+                        currentValues = values.filter(
+                            (d: any) =>
+                                specific.indexOf(d[options.series || ""]) !== -1
+                        );
+
+                        if (specific.indexOf(key) !== -1) {
+                            return {
+                                x: Object.keys(groupedByCategory)
+                                    .sort()
+                                    .map((k) =>
+                                        breakString(
+                                            options.metadata[`${k}.name`] ||
+                                                options.dataProperties[
+                                                    `${k}.name`
+                                                ] ||
+                                                k,
+                                            25
+                                        )
+                                    ),
+                                y: Object.keys(groupedByCategory)
+                                    .sort()
+                                    .map((k) => {
+                                        let current = currentValues.filter(
+                                            (val) =>
+                                                val[options.category || ""] ===
+                                                k
+                                        );
+                                        if (percentages && overall) {
+                                            return (
+                                                (current.length * 100) /
+                                                groupedByCategory[k].length
+                                            );
+                                        }
+                                        if (percentages) {
+                                            return (
+                                                (current.length * 100) /
+                                                groupedByCategory[k].filter(
+                                                    (x) =>
+                                                        x[
+                                                            options.series || ""
+                                                        ] === key
+                                                ).length
+                                            );
+                                        }
+                                        return current.length;
+                                    }),
+                                name: key,
+                                type: "bar",
+                                ...availableProperties.data,
+                                textposition: "auto",
+                                texttemplate:
+                                    availableProperties?.data?.orientation ===
+                                    "v"
+                                        ? "%{y:.0f}"
+                                        : "%{x:.0f}",
+                                ...others,
+                            };
+                        }
+
+                        return [];
+                    }
+
                     return {
-                        x: Object.keys(groupedByTheme)
+                        x: Object.keys(groupedByCategory)
                             .sort()
                             .map((k) =>
                                 breakString(
@@ -695,13 +745,25 @@ export const processGraphs = (
                                     25
                                 )
                             ),
-                        y: Object.keys(groupedByTheme)
+                        y: Object.keys(groupedByCategory)
                             .sort()
                             .map((k) => {
-                                let current = groupedByTheme[k];
+                                let current = currentValues.filter(
+                                    (val) => val[options.category || ""] === k
+                                );
+                                if (percentages && overall) {
+                                    return (
+                                        (current.length * 100) /
+                                        groupedByCategory[k].length
+                                    );
+                                }
                                 if (percentages) {
                                     return (
-                                        (current.length * 100) / values.length
+                                        (current.length * 100) /
+                                        groupedByCategory[k].filter(
+                                            (x) =>
+                                                x[options.series || ""] === key
+                                        ).length
                                     );
                                 }
                                 return current.length;
@@ -717,6 +779,7 @@ export const processGraphs = (
                         ...others,
                     };
                 });
+
                 allSeries = Object.keys(
                     groupBy(
                         data.filter((d: any) => {
