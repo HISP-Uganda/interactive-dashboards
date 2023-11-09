@@ -2,11 +2,11 @@ import { Stack } from "@chakra-ui/react";
 import { ConfigProvider, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { flatten, uniq } from "lodash";
-import React, { CSSProperties, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useElementSize } from "usehooks-ts";
-
 import { ChartProps, Column, Threshold } from "../../interfaces";
 import { columnTree } from "../../utils/components";
+import { SPECIAL_COLUMNS } from "../constants";
 import { processTable } from "../processors";
 
 const Tables = ({ visualization, data, dimensions, others }: ChartProps) => {
@@ -16,14 +16,12 @@ const Tables = ({ visualization, data, dimensions, others }: ChartProps) => {
     const columns = String(visualization.properties?.["columns"] ?? "").split(
         ","
     );
+
     const thresholds: Threshold[] =
         visualization.properties?.["data.thresholds"] ?? [];
     const aggregation = visualization.properties?.["aggregation"] ?? "count";
     const aggregationColumn =
         visualization.properties?.["aggregationColumn"] ?? "";
-    const otherColumns = String(
-        visualization.properties?.["normalColumns"] ?? ""
-    ).split(",");
 
     const [initial, setInitial] = useState<{
         finalColumns: Column[][];
@@ -33,8 +31,8 @@ const Tables = ({ visualization, data, dimensions, others }: ChartProps) => {
         processTable(
             flattenedData,
             rows,
-            columns,
-            otherColumns,
+            columns.filter((c) => SPECIAL_COLUMNS.indexOf(c) === -1),
+            columns.filter((c) => SPECIAL_COLUMNS.indexOf(c) !== -1),
             aggregation,
             thresholds,
             aggregationColumn,
@@ -42,29 +40,14 @@ const Tables = ({ visualization, data, dimensions, others }: ChartProps) => {
             visualization.properties
         )
     );
-
-    // let { finalData } = processTable(
-    //     flattenedData,
-    //     rows,
-    //     columns,
-    //     otherColumns,
-    //     aggregation,
-    //     thresholds,
-    //     aggregationColumn,
-    //     dimensions,
-    //     visualization.properties
-    // );
-
-    let styles: CSSProperties = {
-        overflow: "auto",
-    };
-
     const real: Array<ColumnsType<any>> = columns.map((a) => {
         return uniq(data.map((d: any) => d[a]))
             .filter((d: any) => !!d)
             .map((d) => {
                 return {
-                    title: String(d),
+                    title:
+                        visualization.properties[`${String(d)}.name`] ||
+                        String(d),
                     dataIndex: String(d),
                     key: String(d),
                 };
@@ -78,8 +61,8 @@ const Tables = ({ visualization, data, dimensions, others }: ChartProps) => {
             processTable(
                 flattenedData,
                 rows,
-                columns,
-                otherColumns,
+                columns.filter((c) => SPECIAL_COLUMNS.indexOf(c) === -1),
+                columns.filter((c) => SPECIAL_COLUMNS.indexOf(c) !== -1),
                 aggregation,
                 thresholds,
                 aggregationColumn,
@@ -95,33 +78,52 @@ const Tables = ({ visualization, data, dimensions, others }: ChartProps) => {
                 key: String(d),
                 ellipsis: true,
                 fixed: "left",
-                render: (value, _, index) => {
+                width: "auto",
+                onCell: (data, index) => {
+                    const value = data[String(d)];
                     const obj: any = {
-                        children: value,
-                        props: {},
+                        flex: 1,
                     };
-                    if (
-                        index >= 1 &&
-                        initial.finalData[index - 1] &&
-                        value === initial.finalData[index - 1][d]
-                    ) {
-                        obj.props.rowSpan = 0;
-                    } else {
-                        for (
-                            let i = 0;
-                            index + i !== initial.finalData.length &&
-                            initial.finalData[index + i] &&
-                            value === initial.finalData[index + i][d];
-                            i += 1
+                    if (index !== undefined) {
+                        if (
+                            index >= 1 &&
+                            initial.finalData[index - 1] &&
+                            value === initial.finalData[index - 1][d]
                         ) {
-                            obj.props.rowSpan = i + 1;
+                            obj.rowSpan = 0;
+                        } else {
+                            for (
+                                let i = 0;
+                                index + i !== initial.finalData.length &&
+                                initial.finalData[index + i] &&
+                                value === initial.finalData[index + i][d];
+                                i += 1
+                            ) {
+                                obj.rowSpan = i + 1;
+                            }
                         }
                     }
                     return obj;
                 },
             };
         });
-        setAvailable(() => [...othersColumns, ...allColumns[0]]);
+        const specialColumns: ColumnsType<any> = columns
+            .filter((c) => SPECIAL_COLUMNS.indexOf(c) !== -1)
+            .map((c) => ({
+                title: visualization.properties[`${c}.name`] || c,
+                dataIndex: String(c),
+                key: c,
+                ellipsis: true,
+                fixed: "left",
+                width: "auto",
+                align: "center",
+                render: (text, data) => data[String(c)],
+            }));
+        setAvailable(() => [
+            ...othersColumns,
+            ...specialColumns,
+            ...allColumns[0],
+        ]);
     }, [JSON.stringify(visualization.properties)]);
 
     return (

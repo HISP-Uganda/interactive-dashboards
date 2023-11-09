@@ -201,11 +201,20 @@ const BarGraphProperties = ({
                     </Table>
                 </Scrollable>
             )}
-            <SwitchProperty
-                attribute="percentages"
-                visualization={visualization}
-                title="Percentages"
-            />
+            <Stack direction="row" alignItems="center">
+                <SwitchProperty
+                    attribute="percentages"
+                    visualization={visualization}
+                    title="Percentages"
+                    direction="row-reverse"
+                />
+                <SwitchProperty
+                    attribute="overall"
+                    visualization={visualization}
+                    title="Overall"
+                    direction="row-reverse"
+                />
+            </Stack>
 
             <SelectProperty
                 attribute="layout.barmode"

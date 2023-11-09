@@ -1,9 +1,9 @@
 import { Box, Stack, Text } from "@chakra-ui/react";
-
-import { chakraComponents, GroupBase, OptionProps } from "chakra-react-select";
-import { Option } from "../interfaces";
 import { ColumnsType } from "antd/es/table";
+import { chakraComponents, GroupBase, OptionProps } from "chakra-react-select";
 import { invertHex } from "../components/processors";
+import { Option } from "../interfaces";
+
 export const customComponents = {
     Option: ({
         children,
@@ -33,18 +33,19 @@ export function columnTree(
             list[0].map((a) => {
                 return {
                     ...a,
-                    render(text, record) {
+                    onHeaderCell: () => {
                         return {
-                            props: {
-                                style: {
-                                    background: record[`${a.key}bg`],
-                                    color: invertHex(
-                                        record[`${a.key}bg`],
-                                        true
-                                    ),
-                                },
+                            style: {
+                                backgroundColor: properties[`${a.key}.bg`],
                             },
-                            children: text,
+                        };
+                    },
+                    onCell: (cell) => {
+                        return {
+                            style: {
+                                backgroundColor: cell[`${a.key}bg`],
+                                color: invertHex(cell[`${a.key}bg`], true),
+                            },
                         };
                     },
                 };
@@ -57,19 +58,26 @@ export function columnTree(
                     return {
                         ...a,
                         children: list[1].map((b) => {
-                            console.log(b);
                             return {
                                 ...b,
                                 dataIndex: `${a.key}${b.key}`,
-                                render(text, record) {
+                                onHeaderCell: () => {
                                     return {
-                                        props: {
-                                            style: {
-                                                background:
-                                                    record[`${b.key}.bg`],
-                                            },
+                                        style: {
+                                            backgroundColor:
+                                                properties[`${b.key}.bg`],
                                         },
-                                        children: text,
+                                    };
+                                },
+                                onCell: (cell) => {
+                                    return {
+                                        style: {
+                                            backgroundColor: cell[`${a.key}bg`],
+                                            color: invertHex(
+                                                cell[`${a.key}bg`],
+                                                true
+                                            ),
+                                        },
                                     };
                                 },
                             };

@@ -18,10 +18,10 @@ const onProxyRes = (proxyRes) => {
 // proxy middleware options
 const options = {
     // target: "https://eidsr.health.go.ug",
-    // target: "https://dev.ndpme.go.ug/ndpdb",
+    target: "https://dev.ndpme.go.ug/ndpdb",
     // target: "http://localhost:8080",
     // target: "https://tests.dhis2.hispuganda.org/hmis/",
-    target: "https://hmis-tests.health.go.ug",
+    // target: "https://hmis-tests.health.go.ug",
     // target: "https://hmis-repo.health.go.ug/repo",
     // target: "https://tests.dhis2.stephocay.com/sia",
     // target: "https://etracker.moh.gov.rw/individualrecords",
