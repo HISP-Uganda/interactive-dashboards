@@ -1,4 +1,4 @@
-import { Button, Flex, Stack, Text, Box } from "@chakra-ui/react";
+import { Button, Flex, Stack, Grid, Text, Box } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { GroupBase, Select } from "chakra-react-select";
 import { useState } from "react";
@@ -162,37 +162,57 @@ const DHIS2 = ({
                             />
                         </Box>
                     </Stack>
-                    <Flex
-                        gap="5px"
-                        flexWrap="wrap"
-                        bgColor="white"
-                        p="5px"
-                        alignContent="flex-start"
-                    >
-                        {list.map(({ id, name }) => (
-                            <Button
-                                key={id}
-                                cursor="pointer"
-                                variant="outline"
-                                colorScheme={active === id ? "teal" : "gray"}
-                                onClick={() => setActive(() => id)}
-                            >
-                                {name}
-                            </Button>
-                        ))}
-                        {data?.map((item: any) => (
-                            <Button
-                                key={item.id}
-                                cursor="pointer"
-                                variant="outline"
-                                colorScheme={
-                                    active === item.id ? "teal" : "gray"
-                                }
-                                onClick={() => setActive(() => item.id)}
-                            >
-                                {item.name}
-                            </Button>
-                        ))}
+                    <Stack direction="row" alignItems="center" flex={1}>
+                        <Text mt="5px" color="blue.400" fontWeight="bold" fontSize="lg">Main Query Dimensions</Text>
+                    </Stack>
+                    <Flex gap="5px" bgColor="white" p="5px">
+                        <Grid
+                            templateColumns='repeat(4, 1fr)'
+                            gap="10px"
+                            width="100%"
+                            height="100%"
+                        >
+                            {list.map(({ id, name }) => (
+                                <Button
+                                    key={id}
+                                    cursor="pointer"
+                                    variant="outline"
+                                    colorScheme={active === id ? "teal" : "gray"}
+                                    onClick={() => setActive(() => id)}
+                                    width="100%"
+                                    justifyContent="left"
+                                    justifyItems="left"
+                                >
+                                    {name}
+                                </Button>
+                            ))}
+                        </Grid>
+                    </Flex>
+                    <Stack direction="row" alignItems="center" flex={1}>
+                        <Text mt="5px" color="blue.400" fontWeight="bold" fontSize="lg">Other Query Dimensions</Text>
+                    </Stack>
+                    <Flex gap="5px" bgColor="white" p="5px">
+                        <Grid
+                            templateColumns='repeat(4, 1fr)'
+                            gap="10px"
+                            width="100%"
+                            height="100%"
+                        >
+                            {data?.map((item: any) => (
+                                <Button
+                                    key={item.id}
+                                    cursor="pointer"
+                                    variant="outline"
+                                    colorScheme={active === item.id ? "teal" : "gray"}
+                                    onClick={() => setActive(() => item.id)}
+                                    width="100%"
+                                    justifyContent="left"
+                                    justifyItems="left"
+                                >
+                                    {item.name}
+                                </Button>
+                            ))}
+                        </Grid>
                     </Flex>
                     <Stack w="100%" h="100%" ref={squareRef}>
                         {list.map(
