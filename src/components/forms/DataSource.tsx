@@ -235,6 +235,7 @@ const DataSource = () => {
                                     Password
                                 </FormLabel>
                                 <Input
+                                    type="password"
                                     id="authentication.password"
                                     placeholder="password"
                                     {...register("authentication.password")}

@@ -42,22 +42,6 @@ const Menus = () => {
                 alignContent="center"
                 direction="row"
                 cursor="pointer"
-                onClick={() => navigate({ to: "/settings/categories" })}
-                _hover={{
-                    color: "blue.600",
-                    fontWeight: "bold",
-                    transform: "scale(1.1)",
-                }}
-                transition="ease-in-out 0.3s"
-            >
-                <Icon as={BsFolderPlus} w={8} h={8} color="blue.600" />
-                <Text>Categories</Text>
-            </Stack>
-            <Stack
-                alignItems="center"
-                alignContent="center"
-                direction="row"
-                cursor="pointer"
                 onClick={() =>
                     navigate({ to: "/settings/visualization-queries" })
                 }
@@ -102,6 +86,22 @@ const Menus = () => {
             >
                 <Icon as={MdOutlineDashboard} w={8} h={8} color="blue.600" />
                 <Text>Dashboards</Text>
+            </Stack>
+            <Stack
+                alignItems="center"
+                alignContent="center"
+                direction="row"
+                cursor="pointer"
+                onClick={() => navigate({ to: "/settings/categories" })}
+                _hover={{
+                    color: "blue.600",
+                    fontWeight: "bold",
+                    transform: "scale(1.1)",
+                }}
+                transition="ease-in-out 0.3s"
+            >
+                <Icon as={BsFolderPlus} w={8} h={8} color="blue.600" />
+                <Text>Thematic Areas</Text>
             </Stack>
             <Stack
                 alignItems="center"
