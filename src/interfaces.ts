@@ -140,6 +140,7 @@ export interface IVisualization extends INamed {
     columns?: number;
     isFullscreenable?: boolean;
     displayTitle?: boolean;
+    dataSource?: IDataSource;
 }
 export interface ISection extends BoxProps {
     id: string;

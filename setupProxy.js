@@ -19,7 +19,7 @@ const onProxyRes = (proxyRes) => {
 const options = {
     // target: "https://eidsr.health.go.ug",
     // target: "https://dev.ndpme.go.ug/ndpdb",
-    // target: "http://localhost:8080",
+    target: "http://localhost:8080",
     // target: "https://tests.dhis2.hispuganda.org/hmis/",
     // target: "https://hmis-tests.health.go.ug",
     // target: "https://hmis-repo.health.go.ug/repo",
@@ -28,7 +28,7 @@ const options = {
     // target: "https://epivac.health.go.ug",
     // target: "https://train.ndpme.go.ug/ndpdb",
     // target: "https://play.dhis2.org/2.38.4.3",
-    target: "https://emisuganda.org/emis",
+    // target: "https://emisuganda.org/emis",
     onProxyReq,
     onProxyRes,
     changeOrigin: true, // needed for virtual hosted sites

@@ -1,4 +1,5 @@
-import { Stack, Text } from "@chakra-ui/react";
+import { Text } from "@chakra-ui/react";
+import { Tabs } from "antd";
 import { useStore } from "effector-react";
 import React from "react";
 import { IDataSource, IVisualization } from "../../interfaces";
@@ -37,17 +38,21 @@ export default function DHIS2VisualizationProperties({
     if (isLoading) return <LoadingIndicator />;
     if (isSuccess && data)
         return (
-            <Stack>
-                {data
-                    .filter((d) => d.type === "DHIS2" && d.isCurrentDHIS2)
-                    .map((ds) => (
-                        <DashboardItems
-                            key={ds.id}
-                            dataSource={ds}
-                            visualization={visualization}
-                        />
-                    ))}
-            </Stack>
+            <Tabs
+                items={data
+                    .filter((d) => d.type === "DHIS2")
+                    .map((ds) => ({
+                        label: ds.name,
+                        key: ds.id,
+                        children: (
+                            <DashboardItems
+                                key={ds.id}
+                                dataSource={ds}
+                                visualization={visualization}
+                            />
+                        ),
+                    }))}
+            />
         );
     return null;
 }
