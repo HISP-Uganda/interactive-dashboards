@@ -58,6 +58,7 @@ import {
     merge2DataSources,
     processAnalyticsData,
     processMap,
+    createAxios,
 } from "./utils/utils";
 
 type QueryProps = {
@@ -842,6 +843,140 @@ export const getDHIS2Resources = async <T>({
         return data;
     }
     return [];
+};
+
+export const getDHIS2Resource = async <T>({
+    isCurrentDHIS2,
+    params,
+    resource,
+    api,
+    engine,
+}: Partial<{
+    params: { [key: string]: string };
+    resource: string;
+    isCurrentDHIS2: boolean | undefined | null;
+    api: AxiosInstance | undefined | null;
+    engine: any;
+}>) => {
+    if (isCurrentDHIS2 && resource) {
+        const { data }: any = await engine.query({
+            data: {
+                resource,
+                params,
+            },
+        });
+
+        return data as T;
+    } else if (api && resource) {
+        const { data } = await api.get<T>(resource, {
+            params,
+            string: "",
+        });
+        return data;
+    }
+    return {} as T;
+};
+
+export const getDHIS2ResourcesWithPager = async <T>({
+    isCurrentDHIS2,
+    params,
+    resource,
+    resourceKey,
+    api,
+    engine,
+}: Partial<{
+    params: { [key: string]: string };
+    resource: string;
+    isCurrentDHIS2: boolean | undefined | null;
+    resourceKey: string;
+    api: AxiosInstance | undefined | null;
+    engine: any;
+}>) => {
+    if (isCurrentDHIS2 && resource && resourceKey) {
+        const { data }: any = await engine.query({
+            data: {
+                resource,
+                params,
+            },
+        });
+        const actual = getOr<T[]>([], resourceKey, data);
+
+        const x: {
+            pager: {
+                total: number;
+                page: number;
+                pageSize: number;
+                pageCount: number;
+            };
+            data: Array<T>;
+        } = { pager: data.pager, data: actual };
+
+        return x;
+    } else if (isCurrentDHIS2 && resource) {
+        const { data }: any = await engine.query({
+            data: {
+                resource,
+                params,
+            },
+        });
+        const x: {
+            pager: {
+                total: number;
+                page: number;
+                pageSize: number;
+                pageCount: number;
+            };
+            data: Array<T>;
+        } = { pager: data.pager, data: data[resource ?? ""] };
+
+        return x;
+    } else if (api && resource && resourceKey) {
+        const { data } = await api.get<any>(resource, {
+            params,
+            string: "",
+        });
+        const actual = getOr<T[]>([], resourceKey, data);
+
+        const x: {
+            pager: {
+                total: number;
+                page: number;
+                pageSize: number;
+                pageCount: number;
+            };
+            data: Array<T>;
+        } = { pager: data.pager, data: actual };
+
+        return x;
+    } else if (api && resource) {
+        const { data } = await api.get<any>(resource, {
+            params,
+            string: "",
+        });
+
+        const x: {
+            pager: {
+                total: number;
+                page: number;
+                pageSize: number;
+                pageCount: number;
+            };
+            data: Array<T>;
+        } = { pager: data.pager, data: data[resource ?? ""] };
+
+        return x;
+    }
+    const x: {
+        pager: {
+            total: number;
+            page: number;
+            pageSize: number;
+            pageCount: number;
+        };
+        data: Array<T>;
+    } = { pager: { total: 0, page: 1, pageCount: 0, pageSize: 50 }, data: [] };
+
+    return x;
 };
 
 export const useDimensions = (
@@ -2113,17 +2248,17 @@ export const useDHIS2Visualization = (viz: IVisualization) => {
     >(
         ["dhis2-visualization", viz.id, viz.properties["visualization"]],
         async () => {
-            if (viz.properties?.["visualization"]) {
-                const query = {
-                    visualization: {
-                        resource: `visualizations/${viz.properties["visualization"]}.json`,
-                        params: {
-                            fields: "aggregationType,axes,colSubTotals,colTotals,colorSet,columns[dimension,filter,legendSet[id,name,displayName,displayShortName],items[dimensionItem~rename(id),name,displayName,displayShortName,dimensionItemType]],completedOnly,created,cumulative,cumulativeValues,description,digitGroupSeparator,displayDensity,displayDescription,displayName,displayShortName,favorite,favorites,filters[dimension,filter,legendSet[id,name,displayName,displayShortName],items[dimensionItem~rename(id),name,displayName,displayShortName,dimensionItemType]],fixColumnHeaders,fixRowHeaders,fontSize,fontStyle,hideEmptyColumns,hideEmptyRowItems,hideEmptyRows,hideSubtitle,hideTitle,href,id,interpretations[id,created],lastUpdated,lastUpdatedBy,legend[showKey,style,strategy,set[id,name,displayName,displayShortName,legends[endValue,color,startValue,id]]],measureCriteria,name,noSpaceBetweenColumns,numberType,outlierAnalysis,parentGraphMap,percentStackedValues,publicAccess,regression,regressionType,reportingParams,rowSubTotals,rowTotals,rows[dimension,filter,legendSet[id,name,displayName,displayShortName],items[dimensionItem~rename(id),name,displayName,displayShortName,dimensionItemType]],series,seriesKey,shortName,showData,showDimensionLabels,showHierarchy,skipRounding,sortOrder,subscribed,subscribers,subtitle,timeField,title,topLimit,translations,type,user[name,displayName,displayShortName,userCredentials[username]],userAccesses,userGroupAccesses,yearlySeries,!attributeDimensions,!attributeValues,!category,!categoryDimensions,!categoryOptionGroupSetDimensions,!code,!columnDimensions,!dataDimensionItems,!dataElementDimensions,!dataElementGroupSetDimensions,!externalAccess,!filterDimensions,!itemOrganisationUnitGroups,!organisationUnitGroupSetDimensions,!organisationUnitLevels,!organisationUnits,!periods,!programIndicatorDimensions,!relativePeriods,!rowDimensions,!userOrganisationUnit,!userOrganisationUnitChildren,!userOrganisationUnitGrandChildren",
-                        },
+            if (viz.dataSource && viz.properties?.["visualization"]) {
+                const api = createAxios(viz.dataSource.authentication);
+                const visualization = await getDHIS2Resource<any>({
+                    isCurrentDHIS2: viz.dataSource.isCurrentDHIS2,
+                    api,
+                    engine,
+                    resource: `visualizations/${viz.properties["visualization"]}.json`,
+                    params: {
+                        fields: "aggregationType,axes,colSubTotals,colTotals,colorSet,columns[dimension,filter,legendSet[id,name,displayName,displayShortName],items[dimensionItem~rename(id),name,displayName,displayShortName,dimensionItemType]],completedOnly,created,cumulative,cumulativeValues,description,digitGroupSeparator,displayDensity,displayDescription,displayName,displayShortName,favorite,favorites,filters[dimension,filter,legendSet[id,name,displayName,displayShortName],items[dimensionItem~rename(id),name,displayName,displayShortName,dimensionItemType]],fixColumnHeaders,fixRowHeaders,fontSize,fontStyle,hideEmptyColumns,hideEmptyRowItems,hideEmptyRows,hideSubtitle,hideTitle,href,id,interpretations[id,created],lastUpdated,lastUpdatedBy,legend[showKey,style,strategy,set[id,name,displayName,displayShortName,legends[endValue,color,startValue,id]]],measureCriteria,name,noSpaceBetweenColumns,numberType,outlierAnalysis,parentGraphMap,percentStackedValues,publicAccess,regression,regressionType,reportingParams,rowSubTotals,rowTotals,rows[dimension,filter,legendSet[id,name,displayName,displayShortName],items[dimensionItem~rename(id),name,displayName,displayShortName,dimensionItemType]],series,seriesKey,shortName,showData,showDimensionLabels,showHierarchy,skipRounding,sortOrder,subscribed,subscribers,subtitle,timeField,title,topLimit,translations,type,user[name,displayName,displayShortName,userCredentials[username]],userAccesses,userGroupAccesses,yearlySeries,!attributeDimensions,!attributeValues,!category,!categoryDimensions,!categoryOptionGroupSetDimensions,!code,!columnDimensions,!dataDimensionItems,!dataElementDimensions,!dataElementGroupSetDimensions,!externalAccess,!filterDimensions,!itemOrganisationUnitGroups,!organisationUnitGroupSetDimensions,!organisationUnitLevels,!organisationUnits,!periods,!programIndicatorDimensions,!relativePeriods,!rowDimensions,!userOrganisationUnit,!userOrganisationUnitChildren,!userOrganisationUnitGrandChildren",
                     },
-                };
-
-                const { visualization }: any = await engine.query(query);
+                });
                 const params = getAnalyticsQuery(visualization);
                 const availableColors =
                     visualization.legend?.set?.legends || [];
@@ -2135,10 +2270,15 @@ export const useDHIS2Visualization = (viz: IVisualization) => {
                         color,
                     })
                 );
-                const {
-                    data: { headers, rows, metaData },
-                }: any = await engine.query({
-                    data: { resource: `analytics.json?${params}` },
+                const { headers, rows, metaData } = await getDHIS2Resource<{
+                    headers: Array<any>;
+                    rows: string[][];
+                    metaData: any;
+                }>({
+                    resource: `analytics.json?${params}`,
+                    api,
+                    engine,
+                    isCurrentDHIS2: viz.dataSource.isCurrentDHIS2,
                 });
                 let vals: { [key: string]: string[] } = {};
 
@@ -2150,7 +2290,6 @@ export const useDHIS2Visualization = (viz: IVisualization) => {
                         [`${ke}-name`]: values as string[],
                     };
                 }
-                console.log(visualization.id, vals);
                 visualizationDimensionsApi.updateVisualizationData({
                     visualizationId: visualization.id,
                     data: vals,

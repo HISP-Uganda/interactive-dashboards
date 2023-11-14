@@ -24,10 +24,9 @@ export default function Scrollable({
     return (
         <Box h="100%" w="100%" ref={squareRef}>
             <Box
-                position="relative"
                 overflow="auto"
                 h={calculatedHeight !== 0 ? `${calculatedHeight}px` : height}
-                w={calculatedWidth !== 0 ? `${calculatedWidth}px` : height}
+                w={calculatedWidth !== 0 ? `${calculatedWidth}px` : width}
                 whiteSpace={whiteSpace}
             >
                 {children}

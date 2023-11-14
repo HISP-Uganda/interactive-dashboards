@@ -1,11 +1,12 @@
-import { Input, Stack, Table, Tbody, Th, Tr, Thead } from "@chakra-ui/react";
+import { Input, Stack, Table, Tbody, Th, Thead, Tr } from "@chakra-ui/react";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import React, { ChangeEvent, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { sectionApi } from "../../Events";
 import { IDataSource, INamed, IVisualization } from "../../interfaces";
-import { getDHIS2Resources2 } from "../../Queries";
+import { getDHIS2ResourcesWithPager } from "../../Queries";
+import { createAxios } from "../../utils/utils";
 import Scrollable from "../Scrollable";
 
 export default function DHIS2Visualizations({
@@ -52,10 +53,15 @@ export default function DHIS2Visualizations({
             if (search) {
                 params = { ...params, filter: `identifiable:token:${search}` };
             }
-            const data = await getDHIS2Resources2<INamed & { type: string }>({
+            const data = await getDHIS2ResourcesWithPager<
+                INamed & { type: string }
+            >({
                 resource: "visualizations",
                 params,
                 engine,
+                isCurrentDHIS2: dataSource.isCurrentDHIS2,
+                api: createAxios(dataSource.authentication),
+                resourceKey: "visualizations",
             });
             return data;
         },
@@ -75,8 +81,24 @@ export default function DHIS2Visualizations({
             fetchNextPage();
         }
     }, [inView]);
+
+    const onClick = (
+        visualization: IVisualization,
+        d: INamed & { type: string }
+    ) => {
+        sectionApi.changeVisualizationAttribute({
+            attribute: "dataSource",
+            value: dataSource,
+            visualization: visualization.id,
+        });
+        sectionApi.changeVisualizationProperties({
+            visualization: visualization.id,
+            attribute: "visualization",
+            value: d.id,
+        });
+    };
     return (
-        <Stack>
+        <Stack w="100%">
             <Input
                 size="sm"
                 value={q}
@@ -94,7 +116,7 @@ export default function DHIS2Visualizations({
             ) : status === "error" ? (
                 <span>Error: {error?.message}</span>
             ) : (
-                <Scrollable height={"300px"}>
+                <Scrollable height={"300px"} width="100%">
                     <Table size="md">
                         <Thead>
                             <Tr>
@@ -115,15 +137,7 @@ export default function DHIS2Visualizations({
                                                     : ""
                                             }
                                             onClick={() =>
-                                                sectionApi.changeVisualizationProperties(
-                                                    {
-                                                        visualization:
-                                                            visualization.id,
-                                                        attribute:
-                                                            "visualization",
-                                                        value: d.id,
-                                                    }
-                                                )
+                                                onClick(visualization, d)
                                             }
                                             cursor="pointer"
                                         >

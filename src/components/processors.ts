@@ -1,9 +1,8 @@
-import type { ColumnsType } from "antd/es/table";
 import { fromPairs, groupBy, maxBy, minBy, orderBy, sum } from "lodash";
 import { uniqBy } from "lodash/fp";
 import uniq from "lodash/uniq";
 import update from "lodash/update";
-import { Threshold, Column } from "../interfaces";
+import { Column, Threshold } from "../interfaces";
 import { allMetadata } from "../utils/utils";
 import { SPECIAL_COLUMNS } from "./constants";
 
