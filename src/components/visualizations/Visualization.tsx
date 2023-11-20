@@ -57,7 +57,8 @@ type VisualizationProps = {
 export const getVisualization = (
     visualization: IVisualization,
     data: any,
-    section: ISection
+    section: ISection,
+    metadata?: IVisualization2
 ) => {
     const dataProperties = fromPairs(
         Object.entries(visualization.properties || {}).filter(([key]) =>
@@ -108,6 +109,7 @@ export const getVisualization = (
         ),
         map: (
             <MapChartLeaflet
+                vizDetails={metadata}
                 data={data}
                 section={section}
                 visualization={visualization}
@@ -365,7 +367,12 @@ const Visualization = ({
                 <>
                     {isLoading && <LoadingIndicator />}
                     {isSuccess &&
-                        getVisualization(visualization, data, section)}
+                        getVisualization(
+                            visualization,
+                            data,
+                            section,
+                            metadata
+                        )}
                     {isError && <Text>{error?.message}</Text>}
                 </>
             )}

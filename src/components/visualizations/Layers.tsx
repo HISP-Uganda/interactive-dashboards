@@ -25,7 +25,6 @@ const Layers = ({
         setGeoJson((geoJson: any) => {
             const newGeoJson = processMap(
                 geoJson,
-                otherParams.levels,
                 data,
                 otherParams.thresholds
             );
