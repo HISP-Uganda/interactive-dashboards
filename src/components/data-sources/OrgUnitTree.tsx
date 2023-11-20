@@ -1,10 +1,10 @@
 import { Stack } from "@chakra-ui/react";
 import { useState } from "react";
-import { computeGlobalParams, globalIds } from "../../utils/utils";
-import GlobalSearchFilter from "./GlobalSearchFilter";
-import { MetadataAPI } from "../../interfaces";
-import OUTree from "../OUTree";
 import { datumAPi } from "../../Events";
+import { MetadataAPI } from "../../interfaces";
+import { computeGlobalParams, globalIds } from "../../utils/utils";
+import OUTree from "../OUTree";
+import GlobalSearchFilter from "./GlobalSearchFilter";
 
 const OrgUnitTree = ({ api }: MetadataAPI) => {
     const [q, setQ] = useState<string>("");
@@ -34,8 +34,8 @@ const OrgUnitTree = ({ api }: MetadataAPI) => {
                         datumAPi.changeDimension({
                             id,
                             type,
-                            dimension: "pe",
-                            resource: "pe",
+                            dimension: "ou",
+                            resource: "ou",
                         });
                     })
                 }

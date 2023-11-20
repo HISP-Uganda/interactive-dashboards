@@ -89,7 +89,7 @@ const Categories = () => {
                                     <Th>Name</Th>
                                     <Th>Description</Th>
                                     <Th>Order</Th>
-                                    <Th>Actions</Th>
+                                    <Th w="200px">Actions</Th>
                                 </Tr>
                             </Thead>
                             <Tbody>

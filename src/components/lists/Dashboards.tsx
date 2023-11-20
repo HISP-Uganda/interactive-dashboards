@@ -153,7 +153,9 @@ const Dashboards = () => {
                                     <Th>Published</Th>
                                     <Th>Refresh Interval</Th>
                                     <Th>Description</Th>
-                                    <Th>Actions</Th>
+                                    <Th w="200px" bg="red.400">
+                                        Actions
+                                    </Th>
                                 </Tr>
                             </TableHeader>
                             <Tbody>
