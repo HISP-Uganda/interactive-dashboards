@@ -54,11 +54,11 @@ const Layers = ({
                 };
                 return options;
             }}
-            // eventHandlers={{
-            //     add: (e) => {
-            //         map.fitBounds(e.target.getBounds());
-            //     },
-            // }}
+            eventHandlers={{
+                add: (e) => {
+                    map.fitBounds(e.target.getBounds());
+                },
+            }}
         />
     );
 };
