@@ -1,7 +1,7 @@
 import { Stack, Text, useDimensions } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { useRef } from "react";
-import { ChartProps, Threshold } from "../../interfaces";
+import { ChartProps, Threshold, IVisualization2 } from "../../interfaces";
 import { findLevelsAndOus, useMaps } from "../../Queries";
 import { $globalFilters, $store } from "../../Store";
 import LoadingIndicator from "../LoadingIndicator";
@@ -15,11 +15,11 @@ const MapChartLeaflet = ({
     dataProperties,
     section,
     data,
-}: ChartProps) => {
+    vizDetails,
+}: ChartProps & { vizDetails?: IVisualization2 }) => {
     const elementRef = useRef<any>();
     const dimensions = useDimensions(elementRef);
     const indicator = visualization.indicators[0];
-    // TODO Fix this as any
     const { levels, ous } = findLevelsAndOus(indicator as any);
     const levelIsGlobal = levels.findIndex((l) => l === "GQhi6pRnTKF");
     const ouIsGlobal = ous.findIndex((l) => l === "mclvD0Z9mfT");
@@ -36,18 +36,22 @@ const MapChartLeaflet = ({
         isSuccess,
         error,
         data: metadata,
-    } = useMaps(
-        levelIsGlobal !== -1 || levels.length === 0 ? store.levels : levels,
-        ouIsGlobal !== -1 ? store.organisations.map((k) => String(k)) : ous,
+    } = useMaps({
+        visualization,
+        vizDetails,
+        levels:
+            levelIsGlobal !== -1 || levels.length === 0 ? store.levels : levels,
+        parents:
+            ouIsGlobal !== -1 ? store.organisations.map((k) => String(k)) : ous,
         data,
         thresholds,
-        [
+        otherKeys: [
             visualization.id,
             ...Object.keys(globalFilters).flatMap((v) => {
                 return v;
             }),
-        ]
-    );
+        ],
+    });
 
     const withoutBaseline = orderBy(
         thresholds.flatMap((val) => {

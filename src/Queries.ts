@@ -48,6 +48,7 @@ import {
     Storage,
     Threshold,
     UserGroup,
+    Authentication,
 } from "./interfaces";
 import { createCategory, createDashboard, createDataSource } from "./Store";
 import {
@@ -1920,13 +1921,54 @@ export const useVisualization = (
     );
 };
 
-export const useMaps = (
-    levels: string[],
-    parents: string[],
-    data: any[],
-    thresholds: Threshold[],
-    otherKeys: string[]
-) => {
+export const useMaps = ({
+    vizDetails,
+    otherKeys,
+    thresholds,
+    data,
+}: {
+    vizDetails?: IVisualization2;
+    visualization: IVisualization;
+    levels: string[];
+    parents: string[];
+    data: any[];
+    thresholds: Threshold[];
+    otherKeys: string[];
+}) => {
+    let parents: string[] = [];
+    let levels: string[] = [];
+    let authentication: Authentication | undefined = undefined;
+    if (vizDetails) {
+        authentication =
+            vizDetails.indicators[0]?.numerator?.dataSource?.authentication;
+        parents = vizDetails.indicators.flatMap((i) => {
+            if (i.numerator && i.numerator.dataDimensions) {
+                return Object.entries(i.numerator.dataDimensions).flatMap(
+                    ([key, val]) => {
+                        if (val.resource === "ou") {
+                            return key;
+                        }
+                        return [];
+                    }
+                );
+            }
+            return [];
+        });
+        levels = vizDetails.indicators.flatMap((i) => {
+            if (i.numerator && i.numerator.dataDimensions) {
+                return Object.entries(i.numerator.dataDimensions).flatMap(
+                    ([key, val]) => {
+                        if (val.resource === "oul") {
+                            return key;
+                        }
+                        return [];
+                    }
+                );
+            }
+            return [];
+        });
+    }
+
     const engine = useDataEngine();
     const parent = parents
         .map((p) => {
@@ -1943,30 +1985,28 @@ export const useMaps = (
     if (level) {
         resource = `organisationUnits.geojson?${parent}&${level}`;
     }
-    let query = {
+    let query: { [key: string]: any } = {
         geojson: {
             resource,
         },
     };
 
-    const levelsQuery = levels.map((l) => [
-        `level${l}`,
-        {
-            resource: "organisationUnits.json",
-            params: {
-                level: l,
-                fields: "id,name",
-                paging: false,
-            },
-        },
-    ]);
-
-    query = { ...query, ...fromPairs(levelsQuery) };
     return useQuery<any, Error>(
-        ["maps", ...levels, ...parents, ...otherKeys],
+        ["maps", ...levels, ...parents, ...otherKeys, vizDetails?.id],
         async () => {
-            const { geojson, ...otherLevels }: any = await engine.query(query);
-            return processMap(geojson, otherLevels, data, thresholds);
+            if (vizDetails) {
+                if (authentication) {
+                    const api = createAxios(authentication);
+                    if (api) {
+                        const { data: geojson } = await api.get(resource);
+                        return processMap(geojson, data, thresholds);
+                    }
+                } else {
+                    const { geojson }: any = await engine.query(query);
+                    return processMap(geojson, data, thresholds);
+                }
+            }
+            return { geojson: {}, mapCenter: [], organisationUnits: [] };
         }
         // { refetchInterval: 1000 && 60 }
     );

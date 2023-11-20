@@ -759,14 +759,14 @@ export const allMetadata: { [key: string]: string } = {
 
 export const processMap = (
     geojson: any,
-    otherLevels: any,
     data: any[],
     thresholds: Threshold[]
 ) => {
+    const organisationUnits: any[] = geojson.features.map((a: any) => ({
+        id: a.id,
+        name: a.properties.name,
+    }));
     const mapCenter = center(geojson).geometry.coordinates;
-    const organisationUnits = Object.values(otherLevels).flatMap(
-        ({ organisationUnits }: any) => organisationUnits
-    );
     const { features, ...rest } = geojson;
     const processedData = fromPairs(
         data.map((d) => {
