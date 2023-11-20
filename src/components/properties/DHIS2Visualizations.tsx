@@ -40,28 +40,38 @@ export default function DHIS2Visualizations({
                 pageSize: number;
                 pageCount: number;
             };
-            data: Array<INamed & { type: string }>;
+            data: Array<{
+                id: string;
+                dashboardItems: Array<{
+                    visualization?: INamed & { type: string };
+                    map?: INamed;
+                }>;
+            }>;
         },
         Error
     >(
         ["projects", search],
         async ({ pageParam = 1 }) => {
             let params: { [key: string]: any } = {
-                fields: "id,name,type",
+                fields: "id,dashboardItems[id,type,visualization[id,name,type],map[id,name]]",
                 page: pageParam,
             };
             if (search) {
                 params = { ...params, filter: `identifiable:token:${search}` };
             }
-            const data = await getDHIS2ResourcesWithPager<
-                INamed & { type: string }
-            >({
-                resource: "visualizations",
+            const data = await getDHIS2ResourcesWithPager<{
+                id: string;
+                dashboardItems: Array<{
+                    visualization?: INamed & { type: string };
+                    map?: INamed;
+                }>;
+            }>({
+                resource: "dashboards",
                 params,
                 engine,
                 isCurrentDHIS2: dataSource.isCurrentDHIS2,
                 api: createAxios(dataSource.authentication),
-                resourceKey: "visualizations",
+                resourceKey: "dashboards",
             });
             return data;
         },
@@ -89,6 +99,11 @@ export default function DHIS2Visualizations({
         sectionApi.changeVisualizationAttribute({
             attribute: "dataSource",
             value: dataSource,
+            visualization: visualization.id,
+        });
+        sectionApi.changeVisualizationAttribute({
+            attribute: "actualType",
+            value: d.type,
             visualization: visualization.id,
         });
         sectionApi.changeVisualizationProperties({
@@ -121,29 +136,55 @@ export default function DHIS2Visualizations({
                         <Thead>
                             <Tr>
                                 <Th>Name</Th>
+                                <Th>Type</Th>
                             </Tr>
                         </Thead>
                         <Tbody>
                             {data?.pages.map((page) => (
                                 <React.Fragment key={page.pager.page}>
-                                    {page.data.map((d) => (
-                                        <Tr
-                                            key={d.id}
-                                            bg={
-                                                visualization.properties[
-                                                    "visualization"
-                                                ] === d.id
-                                                    ? "gray.400"
-                                                    : ""
-                                            }
-                                            onClick={() =>
-                                                onClick(visualization, d)
-                                            }
-                                            cursor="pointer"
-                                        >
-                                            <Th>{d.name}</Th>
-                                        </Tr>
-                                    ))}
+                                    {page.data
+                                        .flatMap((d) => {
+                                            return d.dashboardItems.flatMap(
+                                                (dx) => {
+                                                    if (
+                                                        dx.visualization &&
+                                                        dx.visualization.id
+                                                    ) {
+                                                        return dx.visualization;
+                                                    } else if (
+                                                        dx.map &&
+                                                        dx.map.id
+                                                    ) {
+                                                        return {
+                                                            ...dx.map,
+                                                            type: "MAP",
+                                                        };
+                                                    }
+                                                    return [];
+                                                }
+                                            );
+                                        })
+                                        .map((d) => (
+                                            <Tr
+                                                key={d.id}
+                                                bg={
+                                                    visualization.properties[
+                                                        "visualization"
+                                                    ] === d.id &&
+                                                    visualization.dataSource
+                                                        ?.id === dataSource.id
+                                                        ? "gray.400"
+                                                        : ""
+                                                }
+                                                onClick={() =>
+                                                    onClick(visualization, d)
+                                                }
+                                                cursor="pointer"
+                                            >
+                                                <Th>{d.name}</Th>
+                                                <Th>{d.type}</Th>
+                                            </Tr>
+                                        ))}
                                 </React.Fragment>
                             ))}
                         </Tbody>

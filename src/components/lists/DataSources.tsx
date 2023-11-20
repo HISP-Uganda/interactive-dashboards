@@ -83,7 +83,7 @@ const DataSources = () => {
                                 <Tr>
                                     <Th>Name</Th>
                                     <Th>Description</Th>
-                                    <Th>Actions</Th>
+                                    <Th w="200px">Actions</Th>
                                 </Tr>
                             </TableHeader>
                             <Tbody>

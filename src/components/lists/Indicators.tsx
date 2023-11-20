@@ -130,7 +130,7 @@ const Indicators = () => {
                                         <Th>Name</Th>
                                         <Th>Factor</Th>
                                         <Th>Description</Th>
-                                        <Th>Actions</Th>
+                                        <Th w="200px">Actions</Th>
                                     </Tr>
                                 </TableHeader>
                                 <Tbody>

@@ -1,8 +1,9 @@
-import { Button, Flex, Stack, Grid, Text, Box } from "@chakra-ui/react";
-import { useStore } from "effector-react";
+import { Box, Button, Flex, Grid, Stack, Text } from "@chakra-ui/react";
 import { GroupBase, Select } from "chakra-react-select";
+import { useStore } from "effector-react";
 import { useState } from "react";
 import { useElementSize } from "usehooks-ts";
+import { datumAPi } from "../../Events";
 import { IDataSource, Option } from "../../interfaces";
 import { useDimensions } from "../../Queries";
 import { $visualizationQuery } from "../../Store";
@@ -21,7 +22,6 @@ import OrgUnitTree from "./OrgUnitTree";
 import Periods from "./Periods";
 import ProgramIndicators from "./ProgramIndicators";
 import SQLViews from "./SQLViews";
-import { datumAPi } from "../../Events";
 
 const availableOptions: Option[] = createOptions([
     "SUM",
@@ -163,11 +163,18 @@ const DHIS2 = ({
                         </Box>
                     </Stack>
                     <Stack direction="row" alignItems="center" flex={1}>
-                        <Text mt="5px" color="blue.400" fontWeight="bold" fontSize="lg">Main Query Dimensions</Text>
+                        <Text
+                            mt="5px"
+                            color="blue.400"
+                            fontWeight="bold"
+                            fontSize="lg"
+                        >
+                            Main Query Dimensions
+                        </Text>
                     </Stack>
                     <Flex gap="5px" bgColor="white" p="5px">
                         <Grid
-                            templateColumns='repeat(4, 1fr)'
+                            templateColumns="repeat(4, 1fr)"
                             gap="10px"
                             width="100%"
                             height="100%"
@@ -177,7 +184,9 @@ const DHIS2 = ({
                                     key={id}
                                     cursor="pointer"
                                     variant="outline"
-                                    colorScheme={active === id ? "teal" : "gray"}
+                                    colorScheme={
+                                        active === id ? "teal" : "gray"
+                                    }
                                     onClick={() => setActive(() => id)}
                                     width="100%"
                                     justifyContent="left"
@@ -189,11 +198,18 @@ const DHIS2 = ({
                         </Grid>
                     </Flex>
                     <Stack direction="row" alignItems="center" flex={1}>
-                        <Text mt="5px" color="blue.400" fontWeight="bold" fontSize="lg">Other Query Dimensions</Text>
+                        <Text
+                            mt="5px"
+                            color="blue.400"
+                            fontWeight="bold"
+                            fontSize="lg"
+                        >
+                            Other Query Dimensions
+                        </Text>
                     </Stack>
                     <Flex gap="5px" bgColor="white" p="5px">
                         <Grid
-                            templateColumns='repeat(4, 1fr)'
+                            templateColumns="repeat(4, 1fr)"
                             gap="10px"
                             width="100%"
                             height="100%"
@@ -203,7 +219,9 @@ const DHIS2 = ({
                                     key={item.id}
                                     cursor="pointer"
                                     variant="outline"
-                                    colorScheme={active === item.id ? "teal" : "gray"}
+                                    colorScheme={
+                                        active === item.id ? "teal" : "gray"
+                                    }
                                     onClick={() => setActive(() => item.id)}
                                     width="100%"
                                     justifyContent="left"

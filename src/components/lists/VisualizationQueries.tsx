@@ -156,7 +156,7 @@ export default function VisualizationQueries() {
                                         <Th>Name</Th>
                                         <Th>Data Source</Th>
                                         <Th>Description</Th>
-                                        <Th>Actions</Th>
+                                        <Th w="200px">Actions</Th>
                                     </Tr>
                                 </TableHeader>
                                 <Tbody>
