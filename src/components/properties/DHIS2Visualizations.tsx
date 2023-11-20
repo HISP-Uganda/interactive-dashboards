@@ -43,7 +43,8 @@ export default function DHIS2Visualizations({
             data: Array<{
                 id: string;
                 dashboardItems: Array<{
-                    visualization: INamed & { type: string };
+                    visualization?: INamed & { type: string };
+                    map?: INamed;
                 }>;
             }>;
         },
@@ -52,7 +53,7 @@ export default function DHIS2Visualizations({
         ["projects", search],
         async ({ pageParam = 1 }) => {
             let params: { [key: string]: any } = {
-                fields: "id,dashboardItems[visualization[id,name,type]]",
+                fields: "id,dashboardItems[id,type,visualization[id,name,type],map[id,name]]",
                 page: pageParam,
             };
             if (search) {
@@ -61,7 +62,8 @@ export default function DHIS2Visualizations({
             const data = await getDHIS2ResourcesWithPager<{
                 id: string;
                 dashboardItems: Array<{
-                    visualization: INamed & { type: string };
+                    visualization?: INamed & { type: string };
+                    map?: INamed;
                 }>;
             }>({
                 resource: "dashboards",
@@ -99,6 +101,11 @@ export default function DHIS2Visualizations({
             value: dataSource,
             visualization: visualization.id,
         });
+        sectionApi.changeVisualizationAttribute({
+            attribute: "actualType",
+            value: d.type,
+            visualization: visualization.id,
+        });
         sectionApi.changeVisualizationProperties({
             visualization: visualization.id,
             attribute: "visualization",
@@ -129,6 +136,7 @@ export default function DHIS2Visualizations({
                         <Thead>
                             <Tr>
                                 <Th>Name</Th>
+                                <Th>Type</Th>
                             </Tr>
                         </Thead>
                         <Tbody>
@@ -141,8 +149,17 @@ export default function DHIS2Visualizations({
                                                     if (
                                                         dx.visualization &&
                                                         dx.visualization.id
-                                                    )
+                                                    ) {
                                                         return dx.visualization;
+                                                    } else if (
+                                                        dx.map &&
+                                                        dx.map.id
+                                                    ) {
+                                                        return {
+                                                            ...dx.map,
+                                                            type: "MAP",
+                                                        };
+                                                    }
                                                     return [];
                                                 }
                                             );
@@ -153,7 +170,9 @@ export default function DHIS2Visualizations({
                                                 bg={
                                                     visualization.properties[
                                                         "visualization"
-                                                    ] === d.id
+                                                    ] === d.id &&
+                                                    visualization.dataSource
+                                                        ?.id === dataSource.id
                                                         ? "gray.400"
                                                         : ""
                                                 }
@@ -163,6 +182,7 @@ export default function DHIS2Visualizations({
                                                 cursor="pointer"
                                             >
                                                 <Th>{d.name}</Th>
+                                                <Th>{d.type}</Th>
                                             </Tr>
                                         ))}
                                 </React.Fragment>

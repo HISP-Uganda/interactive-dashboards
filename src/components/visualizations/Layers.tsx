@@ -1,7 +1,7 @@
 import { Feature, Geometry } from "geojson";
 import { useState, useEffect } from "react";
 import { Layer } from "leaflet";
-import { GeoJSON, useMap } from "react-leaflet";
+import { GeoJSON, useMap, Tooltip } from "react-leaflet";
 import { generateUid } from "../../utils/uid";
 import { Threshold } from "../../interfaces";
 import { processMap } from "../../utils/utils";
@@ -34,15 +34,11 @@ const Layers = ({
         setGeoJsonKey(() => newKey);
     }, [JSON.stringify(data)]);
     const onEachCountry = (country: Feature<Geometry, any>, layer: Layer) => {
-        layer.on("mouseover", (e) => {
-            const name = country.properties.name;
-            const confirmedText = country.properties.value;
-            e.target.bindPopup(`${name}: ${confirmedText}`).openPopup();
-        });
-        layer.on("mouseout", (e) => {
-            e.target.setStyle({ fillOpacity: 1 });
-            e.target.unbindPopup().closePopup();
-        });
+        const name = country.properties.name;
+        const confirmedText = country.properties.value;
+        const tooltipChildren = `${name}: ${confirmedText}`;
+        const popupContent = `<Tooltip> ${tooltipChildren} </Tooltip>`;
+        layer.bindTooltip(popupContent);
     };
     return (
         <GeoJSON
@@ -58,11 +54,11 @@ const Layers = ({
                 };
                 return options;
             }}
-            eventHandlers={{
-                add: (e) => {
-                    map.fitBounds(e.target.getBounds());
-                },
-            }}
+            // eventHandlers={{
+            //     add: (e) => {
+            //         map.fitBounds(e.target.getBounds());
+            //     },
+            // }}
         />
     );
 };
