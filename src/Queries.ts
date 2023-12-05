@@ -1361,7 +1361,7 @@ const getDHIS2Query = (
     if (query.type === "ANALYTICS") {
         let params = makeDHIS2Query(query, globalFilters, overrides);
         if (query.aggregationType) {
-            params = `${params}&aggregationType=${query.aggregationType}`;
+            params = `${params}&aggregationType=${query.aggregationType}&skipRounding=true`;
         }
         return `analytics.json?${params}`;
     }

@@ -74,11 +74,14 @@ const Tables = ({ visualization, data, dimensions, others }: ChartProps) => {
         const othersColumns: ColumnsType<any> = rows.map((d, index) => {
             return {
                 title: visualization.properties[`${d}.name`] || d,
-                dataIndex: String(d),
                 key: String(d),
-                ellipsis: true,
+                // ellipsis: true,
                 fixed: "left",
-                width: "auto",
+                // width: "400px",
+                render: (text, data) => {
+                    const value = data[String(d)];
+                    return visualization.properties[`${value}.name`] || value;
+                },
                 onCell: (data, index) => {
                     const value = data[String(d)];
                     const obj: any = {
@@ -113,7 +116,7 @@ const Tables = ({ visualization, data, dimensions, others }: ChartProps) => {
                 title: visualization.properties[`${c}.name`] || c,
                 dataIndex: String(c),
                 key: c,
-                ellipsis: true,
+                // ellipsis: true,
                 fixed: "left",
                 width: "auto",
                 align: "center",
@@ -154,7 +157,6 @@ const Tables = ({ visualization, data, dimensions, others }: ChartProps) => {
                     bordered
                     pagination={false}
                     rowKey="key"
-                    scroll={{ x: true }}
                     sticky
                 />
             </ConfigProvider>
