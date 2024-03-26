@@ -16,7 +16,7 @@ const HeatMap = ({ visualization }: HeatMapProps) => {
     const metadata = useStore($visualizationMetadata)?.[visualization.id];
 
     const data = Object.values(visualizationData || {}).map((i) => ({
-        name: metadata?.[i.pe]?.name || "",
+        name: metadata?.[i.pe] || "",
         value: parseFloat(i.value),
     }));
 
@@ -27,7 +27,10 @@ const HeatMap = ({ visualization }: HeatMapProps) => {
         y: labels,
         z: [values],
         type: "heatmap",
-        colorscale: [[0, visualization.properties?.color?.[0] || "#4287f5"], [1, "#ffffff"]],
+        colorscale: [
+            [0, visualization.properties?.color?.[0] || "#4287f5"],
+            [1, "#ffffff"],
+        ],
         text: labels,
         hoverinfo: "text",
         name: "Heatmap",

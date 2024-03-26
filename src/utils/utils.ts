@@ -87,6 +87,16 @@ export const globalIds: Option[] = [
         value: "HdiJ61vwqTX",
         id: "degs",
     },
+    {
+        label: "Attribution Categories",
+        value: "DCtmg8VKCTI",
+        id: "ac",
+    },
+    {
+        label: "Attribution Options",
+        value: "ZqQdTbcqQhJ",
+        id: "ao",
+    },
 ];
 
 export const convertTime = (value: string) => {

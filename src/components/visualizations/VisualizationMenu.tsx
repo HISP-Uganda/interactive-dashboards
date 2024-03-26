@@ -114,7 +114,7 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
                     h="2.7vh"
                     variant="ghost"
                 />
-                <MenuList zIndex={100000}>
+                <MenuList>
                     <MenuItem
                         fontSize="18px"
                         // onClick={() =>

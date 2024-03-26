@@ -50,7 +50,7 @@ const SunburstChart = ({ visualization }: SunBurstProps) => {
     // use map to iterate over the data and metadata to populate the sunburst chart
     visualizationData?.map((dataItem) => {
         const metadataItem = visualizationMetadata?.[dataItem.dx];
-        data.labels.push(metadataItem?.name);
+        data.labels.push(metadataItem);
         data.parents.push("Doses Given");
         data.values.push(parseFloat(dataItem?.value));
     });

@@ -28,8 +28,12 @@ import {
     Period,
     PickerProps,
     RelativePeriodType,
-} from "../interfaces";
-import { createOptions2, fixedPeriods, relativePeriods } from "../utils/utils";
+} from "../../interfaces";
+import {
+    createOptions2,
+    fixedPeriods,
+    relativePeriods,
+} from "../../utils/utils";
 const { RangePicker } = DatePicker;
 
 const rangePresets: {
@@ -82,7 +86,7 @@ const fixedPeriodTypeOptions = createOptions2(
     fixedPeriods
 );
 
-const PeriodPicker = ({ selectedPeriods, onChange }: PickerProps) => {
+const PeriodSelector = ({ selectedPeriods, onChange }: PickerProps) => {
     const onRangeChange = (
         dates: null | (Dayjs | null)[],
         dateStrings: string[]
@@ -255,7 +259,7 @@ const PeriodPicker = ({ selectedPeriods, onChange }: PickerProps) => {
                                 </Stack>
                             </Stack>
                         </TabPanel>
-                        <TabPanel zIndex={1000}>
+                        <TabPanel>
                             <Stack>
                                 <Text>Select Date Range</Text>
                                 <RangePicker
@@ -347,4 +351,4 @@ const PeriodPicker = ({ selectedPeriods, onChange }: PickerProps) => {
     );
 };
 
-export default PeriodPicker;
+export default PeriodSelector;

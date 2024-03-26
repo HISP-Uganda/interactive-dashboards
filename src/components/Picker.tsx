@@ -1,5 +1,6 @@
 import { ColorPicker, Divider } from "antd";
 import { swatchColors } from "../utils/utils";
+import { Color } from "antd/es/color-picker";
 
 export default function Picker({
     color,
@@ -14,7 +15,7 @@ export default function Picker({
         <ColorPicker
             allowClear
             value={color}
-            onChange={(_, hex) => onChange(hex)}
+            onChange={(value: Color, hex: string) => onChange(hex)}
             styles={{
                 popupOverlayInner: {
                     width: 468 + 24,

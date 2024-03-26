@@ -2,7 +2,7 @@ import { Stack } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { datumAPi } from "../../Events";
 import { computeGlobalParams, globalIds } from "../../utils/utils";
-import PeriodPicker from "../PeriodPicker";
+import PeriodPicker from "../filters/PeriodSelector";
 import GlobalSearchFilter from "./GlobalSearchFilter";
 
 const Periods = () => {

@@ -1,4 +1,4 @@
-import { Text } from "@chakra-ui/react";
+import { Text, Stack } from "@chakra-ui/react";
 import { useSearch } from "@tanstack/react-location";
 import { useStore } from "effector-react";
 import { fromPairs } from "lodash";
@@ -272,7 +272,7 @@ export const getVisualization = (
                 dataProperties={dataProperties}
             />
         ),
-        filters: <Filters />,
+        filters: <Filters visualization={visualization} />,
         dashboardTitle: (
             <DashboardTitle section={section} visualization={visualization} />
         ),
@@ -373,7 +373,7 @@ const Visualization = ({
                             section,
                             metadata
                         )}
-                    {isError && <Text>{error?.message}</Text>}
+                    {isError && <Text>ERR</Text>}
                 </>
             )}
         </>

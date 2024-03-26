@@ -89,7 +89,7 @@ export default function Show2() {
     if (item.type === "dashboard") {
         return <FixedDashboard dashboard={item.nodeSource as IDashboard} />;
     } else if (item.type === "section") {
-        return <SectionVisualization {...(item.nodeSource as ISection)} />;
+        return <SectionVisualization section={item.nodeSource as ISection} />;
     } else if (item.type === "visualization") {
         return (
             <Visualization
@@ -122,7 +122,6 @@ export default function Show2() {
     //         position="fixed"
     //         top="52px"
     //         right={["16px", "16px", "16px", "16px", "16px"]}
-    //         zIndex={2}
     //     >
     //         Toggle fullscreen!
     //     </Button>

@@ -1083,6 +1083,57 @@ export const useSQLViews = (
     );
 };
 
+export const useDHIS2CategoryCombos = (
+    isCurrentDHIS2: boolean | undefined | null,
+    api: AxiosInstance | undefined | null
+) => {
+    const params = {
+        paging: "false",
+        fields: "id,name",
+        filter: "dataDimensionType:eq:ATTRIBUTE",
+    };
+    const engine = useDataEngine();
+    return useQuery<Array<INamed>, Error>(["category-combos"], async () => {
+        return getDHIS2Resources<INamed>({
+            isCurrentDHIS2,
+            resource: "categoryCombos.json",
+            params,
+            api,
+            resourceKey: "categoryCombos",
+            engine,
+        });
+    });
+};
+
+export const useDHIS2CategoryCombo = (
+    isCurrentDHIS2: boolean | undefined | null,
+    api: AxiosInstance | undefined | null,
+    id: string
+) => {
+    const params = {
+        fields: "categories[id,name,categoryOptions[id,name]]",
+    };
+    const engine = useDataEngine();
+    return useQuery<
+        INamed & {
+            categories: Array<INamed & { categoryOptions: Array<INamed> }>;
+        },
+        Error
+    >(["category-combo", id], async () => {
+        return getDHIS2Resource<
+            INamed & {
+                categories: Array<INamed & { categoryOptions: Array<INamed> }>;
+            }
+        >({
+            isCurrentDHIS2,
+            params,
+            api,
+            resource: `categoryCombos/${id}.json`,
+            engine,
+        });
+    });
+};
+
 export const useDHIS2Visualizations = (
     isCurrentDHIS2: boolean | undefined | null,
     api: AxiosInstance | undefined | null,
@@ -1914,7 +1965,7 @@ export const useVisualization = (
             );
         },
         {
-            // refetchInterval: currentInterval,
+            refetchInterval: currentInterval,
             refetchIntervalInBackground: true,
             refetchOnWindowFocus: true,
         }

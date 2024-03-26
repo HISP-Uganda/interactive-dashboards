@@ -34,12 +34,19 @@ const SQLViews = ({ api, isCurrentDHIS2 }: MetadataAPI) => {
                                     ).indexOf(pt.value) !== -1
                             )}
                         onChange={(e) => {
+                            const sqlView = data.find(
+                                ({ id }) => id === e?.value
+                            );
                             datumAPi.changeDimension({
                                 id: e?.value || "",
                                 type: "dimension",
                                 resource: "v",
                                 dimension: "",
                                 replace: true,
+                            });
+                            datumAPi.changeAttribute({
+                                attribute: "query",
+                                value: sqlView?.sqlQuery,
                             });
                         }}
                         options={data.map((d) => {
