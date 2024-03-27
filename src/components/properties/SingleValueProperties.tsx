@@ -196,9 +196,9 @@ const SingleValueProperties = ({
             />
             <NumberProperty
                 visualization={visualization}
-                max={4}
-                min={0}
-                step={1}
+                max={1000}
+                min={100}
+                step={100}
                 attribute="data.format.fontWeight"
                 title="Value Font Weight"
             />

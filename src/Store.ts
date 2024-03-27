@@ -265,6 +265,8 @@ export const $presentation = domain.createStore<IPresentation>(
     createPresentation()
 );
 
+export const $attribution = domain.createStore<{ [key: string]: string }>({});
+
 export const $categoryDashboards = combine(
     $dashboards,
     $store,
@@ -464,7 +466,8 @@ export const $globalFilters = combine(
     $categoryOptionCombo,
     $dashboard,
     $targetCategoryOptionCombo,
-    (store, categoryOptionCombo, dashboard, target) => {
+    $attribution,
+    (store, categoryOptionCombo, dashboard, target, attribution) => {
         const periods = store.periods.flatMap((period) => {
             if (period.type === "relative") {
                 return getRelativePeriods(period.value).map((x: string) => x);
@@ -511,6 +514,17 @@ export const $globalFilters = combine(
             filters = {
                 ...filters,
                 HdiJ61vwqTX: store.dataElementGroupSets,
+            };
+        }
+
+        const attributionKeys = Object.keys(attribution);
+        const attributionValues = Object.values(attribution);
+
+        if (attributionKeys.length > 0 && attributionValues.length > 0) {
+            filters = {
+                ...filters,
+                DCtmg8VKCTI: attributionKeys,
+                ZqQdTbcqQhJ: attributionValues.flatMap((a) => a.split(",")),
             };
         }
         return filters;

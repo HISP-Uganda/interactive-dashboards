@@ -79,12 +79,7 @@ const Categories = () => {
                 {isSuccess && (
                     <Scrollable>
                         <Table variant="striped" w="100%" size="sm">
-                            <Thead
-                                position="sticky"
-                                top="0"
-                                bgColor="white"
-                                zIndex={1}
-                            >
+                            <Thead position="sticky" top="0" bgColor="white">
                                 <Tr>
                                     <Th>Name</Th>
                                     <Th>Description</Th>

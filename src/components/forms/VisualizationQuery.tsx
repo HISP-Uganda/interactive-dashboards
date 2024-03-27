@@ -185,7 +185,6 @@ export default function VisualizationQuery() {
                             (record) => (
                                 <Tr key={record}>
                                     <Td>
-                                        <Text>{record}</Text>
                                         <Input readOnly value={record} />
                                     </Td>
                                     <Td textAlign="center">

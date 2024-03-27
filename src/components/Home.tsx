@@ -10,7 +10,6 @@ export default function Home() {
     const settings = useStore($settings);
     return (
         <Stack>
-
             {store.isAdmin ? (
                 <Navigate to="/settings/data-sources" />
             ) : settings.defaultDashboard ? (
@@ -29,33 +28,33 @@ export default function Home() {
                         }}
                     />
                 ) : (
-                        <Navigate<LocationGenerics>
-                            to={`/dashboards/${settings.defaultDashboard}`}
-                            search={{
-                                category: store.selectedCategory,
-                                periods: store.periods.map((i) => String(i.id)),
-                                organisations: store.organisations.map((k: Key) =>
-                                    String(k)
-                                ),
-                                groups: store.groups,
-                                levels: store.levels,
-                            }}
-                        />
-                    )
+                    <Navigate<LocationGenerics>
+                        to={`/dashboards/${settings.defaultDashboard}`}
+                        search={{
+                            category: store.selectedCategory,
+                            periods: store.periods.map((i) => String(i.id)),
+                            organisations: store.organisations.map((k: Key) =>
+                                String(k)
+                            ),
+                            groups: store.groups,
+                            levels: store.levels,
+                        }}
+                    />
+                )
             ) : (
-                        <Flex
-                            w="100vw"
-                            alignItems="center"
-                            justifyContent="center"
-                            justifyItems="center"
-                            alignContent="center"
-                            h="calc(100vh - 48px)"
-                        >
-                            <Text fontSize="3vh">
-                                No dashboards have been created yet
+                <Flex
+                    w="100vw"
+                    alignItems="center"
+                    justifyContent="center"
+                    justifyItems="center"
+                    alignContent="center"
+                    h="calc(100vh - 48px)"
+                >
+                    <Text fontSize="3vh">
+                        No dashboards have been created yet
                     </Text>
-                        </Flex>
-                    )}
+                </Flex>
+            )}
         </Stack>
     );
 }

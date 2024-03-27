@@ -40,7 +40,7 @@ export default function Show() {
                     id: item.key || item.id,
                     renderItem: (
                         <SectionVisualization
-                            {...(item.nodeSource as ISection)}
+                            section={item.nodeSource as ISection}
                         />
                     ),
                     renderThumb: item.key,
@@ -93,7 +93,6 @@ export default function Show() {
                 position="fixed"
                 top="52px"
                 right={["16px", "16px", "16px", "16px", "16px"]}
-                zIndex={2}
             >
                 Toggle fullscreen!
             </Button>

@@ -2,6 +2,7 @@ import { ColorPicker, Divider } from "antd";
 import React from "react";
 import { IVisualization } from "../interfaces";
 import { swatchColors } from "../utils/utils";
+import { Color } from "antd/es/color-picker";
 import { sectionApi } from "../Events";
 
 type ColorPalletProps = {
@@ -14,7 +15,7 @@ const ColorPalette = ({ visualization, attribute }: ColorPalletProps) => {
         <ColorPicker
             allowClear
             value={visualization.properties[attribute]}
-            onChange={(_, hex) =>
+            onChange={(value: Color, hex: string) =>
                 sectionApi.changeVisualizationProperties({
                     visualization: visualization.id,
                     attribute: attribute,

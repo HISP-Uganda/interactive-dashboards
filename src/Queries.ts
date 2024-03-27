@@ -285,7 +285,7 @@ export const useInitials = (storage: "data-store" | "es") => {
             },
         },
         levels: {
-            resource: "filledOrganisationUnitLevels.json",
+            resource: "organisationUnitLevels.json",
             params: {
                 fields: "id,level~rename(value),name~rename(label)",
             },
@@ -316,10 +316,14 @@ export const useInitials = (storage: "data-store" | "es") => {
                     authorities,
                     userRoles,
                 },
-                levels: organisationUnitLevels,
+                levels: { organisationUnitLevels },
                 groups: { organisationUnitGroups },
                 dataSets: { dataSets },
             }: any = await engine.query(ouQuery);
+
+            const actualLevel = min<number>(
+                organisationUnits.map(({ level }: any) => level)
+            );
             const isAdmin =
                 authorities.indexOf("IDVT_ADMINISTRATION") !== -1 ||
                 authorities.indexOf("ALL") !== -1 ||
@@ -331,15 +335,13 @@ export const useInitials = (storage: "data-store" | "es") => {
             const facilities: string[] = organisationUnits.map(
                 (unit: any) => unit.id
             );
-            const maxLevel =
-                organisationUnitLevels.length > 0
-                    ? organisationUnitLevels[0].value
-                    : 1;
+
             const levels = organisationUnitLevels.map(
                 ({ value }: any) => value
             );
-            const minLevel: number | null | undefined = min(levels);
-            const minSublevel: number | null | undefined = max(levels);
+
+            const minLevel = min<number>(levels);
+            const maxLevel = max<number>(levels);
 
             const availableUnits = organisationUnits.map((unit: any) => {
                 return {
@@ -362,22 +364,32 @@ export const useInitials = (storage: "data-store" | "es") => {
                 storeApi.changeSelectedDashboard(settings[0].defaultDashboard);
                 settingsApi.set(settings[0]);
             }
-            if (minSublevel && minSublevel + 1 <= maxLevel) {
-                storeApi.setMinSublevel(minSublevel + 1);
-            } else {
-                storeApi.setMinSublevel(maxLevel);
+            if (maxLevel && minLevel && actualLevel) {
+                storeApi.setMaxLevel(maxLevel);
+                if (actualLevel + 1 <= maxLevel) {
+                    storeApi.setMinSublevel(actualLevel + 1);
+                } else {
+                    storeApi.setMinSublevel(maxLevel);
+                }
+
+                storeApi.setLevels([
+                    actualLevel === 1
+                        ? "3"
+                        : `${
+                              actualLevel !== maxLevel
+                                  ? actualLevel + 1
+                                  : actualLevel
+                          }`,
+                ]);
             }
+
             storeApi.setSystemId(systemId);
             storeApi.setSystemName(systemName);
             dataSetsApi.setDataSets(dataSets);
             storeApi.setInstanceBaseUrl(instanceBaseUrl);
             storeApi.setOrganisations(facilities);
-            storeApi.setMaxLevel(maxLevel);
             storeApi.changeAdministration(isAdmin);
-            storeApi;
-            storeApi.setLevels([
-                minLevel === 1 ? "3" : `${minLevel ? minLevel + 1 : 4}`,
-            ]);
+
             await db.systemInfo.bulkPut([
                 { id: "1", systemId, systemName, instanceBaseUrl },
             ]);
@@ -1081,6 +1093,57 @@ export const useSQLViews = (
             });
         }
     );
+};
+
+export const useDHIS2CategoryCombos = (
+    isCurrentDHIS2: boolean | undefined | null,
+    api: AxiosInstance | undefined | null
+) => {
+    const params = {
+        paging: "false",
+        fields: "id,name",
+        filter: "dataDimensionType:eq:ATTRIBUTE",
+    };
+    const engine = useDataEngine();
+    return useQuery<Array<INamed>, Error>(["category-combos"], async () => {
+        return getDHIS2Resources<INamed>({
+            isCurrentDHIS2,
+            resource: "categoryCombos.json",
+            params,
+            api,
+            resourceKey: "categoryCombos",
+            engine,
+        });
+    });
+};
+
+export const useDHIS2CategoryCombo = (
+    isCurrentDHIS2: boolean | undefined | null,
+    api: AxiosInstance | undefined | null,
+    id: string
+) => {
+    const params = {
+        fields: "categories[id,name,categoryOptions[id,name]]",
+    };
+    const engine = useDataEngine();
+    return useQuery<
+        INamed & {
+            categories: Array<INamed & { categoryOptions: Array<INamed> }>;
+        },
+        Error
+    >(["category-combo", id], async () => {
+        return getDHIS2Resource<
+            INamed & {
+                categories: Array<INamed & { categoryOptions: Array<INamed> }>;
+            }
+        >({
+            isCurrentDHIS2,
+            params,
+            api,
+            resource: `categoryCombos/${id}.json`,
+            engine,
+        });
+    });
 };
 
 export const useDHIS2Visualizations = (
@@ -1914,7 +1977,7 @@ export const useVisualization = (
             );
         },
         {
-            // refetchInterval: currentInterval,
+            refetchInterval: currentInterval,
             refetchIntervalInBackground: true,
             refetchOnWindowFocus: true,
         }
@@ -1926,6 +1989,8 @@ export const useMaps = ({
     otherKeys,
     thresholds,
     data,
+    levels,
+    parents,
 }: {
     vizDetails?: IVisualization2;
     visualization: IVisualization;
@@ -1935,38 +2000,42 @@ export const useMaps = ({
     thresholds: Threshold[];
     otherKeys: string[];
 }) => {
-    let parents: string[] = [];
-    let levels: string[] = [];
+    // let parents: string[] = [];
+    // let levels: string[] = [];
     let authentication: Authentication | undefined = undefined;
     if (vizDetails) {
         authentication =
             vizDetails.indicators[0]?.numerator?.dataSource?.authentication;
-        parents = vizDetails.indicators.flatMap((i) => {
-            if (i.numerator && i.numerator.dataDimensions) {
-                return Object.entries(i.numerator.dataDimensions).flatMap(
-                    ([key, val]) => {
-                        if (val.resource === "ou") {
-                            return key;
+        if (parents.length === 0) {
+            parents = vizDetails.indicators.flatMap((i) => {
+                if (i.numerator && i.numerator.dataDimensions) {
+                    return Object.entries(i.numerator.dataDimensions).flatMap(
+                        ([key, val]) => {
+                            if (val.resource === "ou") {
+                                return key;
+                            }
+                            return [];
                         }
-                        return [];
-                    }
-                );
-            }
-            return [];
-        });
-        levels = vizDetails.indicators.flatMap((i) => {
-            if (i.numerator && i.numerator.dataDimensions) {
-                return Object.entries(i.numerator.dataDimensions).flatMap(
-                    ([key, val]) => {
-                        if (val.resource === "oul") {
-                            return key;
+                    );
+                }
+                return [];
+            });
+        }
+        if (levels.length === 0) {
+            levels = vizDetails.indicators.flatMap((i) => {
+                if (i.numerator && i.numerator.dataDimensions) {
+                    return Object.entries(i.numerator.dataDimensions).flatMap(
+                        ([key, val]) => {
+                            if (val.resource === "oul") {
+                                return key;
+                            }
+                            return [];
                         }
-                        return [];
-                    }
-                );
-            }
-            return [];
-        });
+                    );
+                }
+                return [];
+            });
+        }
     }
 
     const engine = useDataEngine();
@@ -1991,11 +2060,17 @@ export const useMaps = ({
         },
     };
 
+    console.log(level, parent);
+
     return useQuery<any, Error>(
         ["maps", ...levels, ...parents, ...otherKeys, vizDetails?.id],
         async () => {
             if (vizDetails) {
-                if (authentication) {
+                if (
+                    authentication &&
+                    authentication.username &&
+                    authentication.password
+                ) {
                     const api = createAxios(authentication);
                     if (api) {
                         const { data: geojson } = await api.get(resource);

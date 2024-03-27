@@ -5,11 +5,11 @@ export default function LoadingIndicator() {
     return (
         <Stack w="100%" h="100%" alignItems="center" justifyContent="center">
             <Spinner
-            // thickness="4px"
-            // speed="0.65s"
-            // emptyColor="gray.200"
-            // color="red"
-            // size="lg"
+                thickness="2px"
+                speed="0.65s"
+                // emptyColor="gray.200"
+                // color="red"
+                size="sm"
             />
         </Stack>
     );

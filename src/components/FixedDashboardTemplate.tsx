@@ -96,7 +96,7 @@ export default function FixedDashboardTemplate({
                         }
                     }}
                 >
-                    <SectionVisualization {...section} />
+                    <SectionVisualization section={section} />
                 </GridItem>
             ))}
             <Outlet />

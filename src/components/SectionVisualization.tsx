@@ -5,7 +5,6 @@ import {
     Stack,
     useBreakpointValue,
     useDisclosure,
-    Text,
 } from "@chakra-ui/react";
 import { useStore } from "effector-react";
 import { MouseEvent } from "react";
@@ -111,8 +110,6 @@ const SectionVisualization = ({ section }: { section: ISection }) => {
                 templateColumns={templateColumns}
                 templateRows={templateRows}
                 gap={`${dashboard.spacing}px`}
-                // alignItems="center"
-                // justifyContent="center"
             >
                 {section.visualizations.map((visualization) => {
                     return (
@@ -171,7 +168,7 @@ const SectionVisualization = ({ section }: { section: ISection }) => {
                 </Stack>
             </Stack>
         ),
-        tab: <TabPanelVisualization section={section} />,
+        tabs: <TabPanelVisualization section={section} />,
     };
 
     const {
@@ -188,7 +185,7 @@ const SectionVisualization = ({ section }: { section: ISection }) => {
             onContextMenu={displayMenu}
             w="100%"
             h="100%"
-            overflow="auto"
+            // overflow="auto"
             spacing={0}
             ref={squareRef}
             id={section.id}

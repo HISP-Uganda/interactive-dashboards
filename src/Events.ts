@@ -53,6 +53,7 @@ import {
     $page,
     createPage,
     $userGroup,
+    $attribution,
 } from "./Store";
 
 export const loadDefaults = domain.createEvent<{
@@ -874,4 +875,8 @@ export const userGroupApi = createApi($userGroup, {
     ) => {
         return { ...state, [attribute]: value };
     },
+});
+
+export const attributionApi = createApi($attribution, {
+    add: (state, data: { [key: string]: string }) => ({ ...state, ...data }),
 });

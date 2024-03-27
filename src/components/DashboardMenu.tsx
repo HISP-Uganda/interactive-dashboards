@@ -72,7 +72,7 @@ import {
 import { generateUid } from "../utils/uid";
 import AutoRefreshPicker from "./AutoRefreshPicker";
 import OUTree from "./OUTree";
-import PeriodPicker from "./PeriodPicker";
+import PeriodPicker from "./filters/PeriodSelector";
 import { useDataEngine } from "@dhis2/app-runtime";
 
 const searchOptions: Option[] = [

@@ -49,7 +49,7 @@ export default function DynamicDashboardTemplate({
     function generateDOM() {
         return dashboard.sections.map((section) => (
             <Stack key={section.id} h="100%">
-                <SectionVisualization {...section} />
+                <SectionVisualization section={section} />
             </Stack>
         ));
     }

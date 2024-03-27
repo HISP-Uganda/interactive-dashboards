@@ -19,13 +19,12 @@ const MultipleChartTypes = ({
     return (
         <Plot
             data={
-                processGraphs(
-                    data,
-                    "scatter",
+                processGraphs(data, {
+                    type: "scatter",
                     category,
                     series,
-                    metadata[visualization.id]
-                ) as any
+                    metadata: metadata[visualization.id],
+                }) as any
             }
             layout={{
                 // title: visualization.name,

@@ -19,8 +19,8 @@ const MapChartLeaflet = ({
 }: ChartProps & { vizDetails?: IVisualization2 }) => {
     const elementRef = useRef<any>();
     const dimensions = useDimensions(elementRef);
-    const indicator = visualization.indicators[0];
-    const { levels, ous } = findLevelsAndOus(indicator as any);
+    const indicator = vizDetails?.indicators[0];
+    const { levels, ous } = findLevelsAndOus(indicator);
     const levelIsGlobal = levels.findIndex((l) => l === "GQhi6pRnTKF");
     const ouIsGlobal = ous.findIndex((l) => l === "mclvD0Z9mfT");
     const globalFilters = useStore($globalFilters);
@@ -100,7 +100,6 @@ const MapChartLeaflet = ({
                     </Stack>
                     <Stack h="20px" direction="row" spacing="0">
                         {thresholds.find(({ id }) => id === "baseline")?.color}
-
                         <Text
                             key="baseline"
                             backgroundColor={
