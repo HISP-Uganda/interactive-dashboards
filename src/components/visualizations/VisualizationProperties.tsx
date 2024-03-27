@@ -8,6 +8,7 @@ import GaugeChartProperties from "../properties/GaugeChartProperties";
 import HeatMapProperties from "../properties/HeatMapProperties";
 import HistogramProperties from "../properties/HistogramProperties";
 import ImageProperties from "../properties/ImageProperties";
+import MicroPlanningProperties from "../properties/MicroPlanningProperties";
 import LineGraphProperties from "../properties/LineGraphProperties";
 import MapChartProperties from "../properties/MapChartProperties";
 import OptionSetProperties from "../properties/OptionSetProperties";
@@ -23,58 +24,51 @@ import DashboardTitleProperties from "../properties/DashboardTitleProperties";
 import { Stack } from "@chakra-ui/react";
 import DashboardListProperties from "../properties/DashboardListProperties";
 type VizProps = {
-    visualization: IVisualization;
+  visualization: IVisualization;
 };
 
 const VisualizationProperties = ({ visualization }: VizProps) => {
-    const displayProperties = (visualizationType: string | undefined) => {
-        const allTypes: any = {
-            single: <SingleValueProperties visualization={visualization} />,
-            bar: <BarGraphProperties visualization={visualization} />,
-            line: <LineGraphProperties visualization={visualization} />,
-            pie: <PieChartProperties visualization={visualization} />,
-            map: <MapChartProperties visualization={visualization} />,
-            histogram: <HistogramProperties visualization={visualization} />,
-            scatterplot: <ScatterProperties visualization={visualization} />,
-            sunburst: <SunburstGraphProperties visualization={visualization} />,
-            gauge: <GaugeChartProperties visualization={visualization} />,
-            radar: <RadarGraphProperties visualization={visualization} />,
-            stackedarea: (
-                <StackedAreaChartProperties visualization={visualization} />
-            ),
-            imageVisualization: (
-                <ImageProperties visualization={visualization} />
-            ),
-            filters: <FiltersProperties visualization={visualization} />,
-            tables: <TableProperties visualization={visualization} />,
-            optionSet: <OptionSetProperties visualization={visualization} />,
-            text: <TextVisualisationProperties visualization={visualization} />,
-            clock: <ClockProperties />,
-            heatmap: <HeatMapProperties />,
-            categoryList: (
-                <CategoryListProperties visualization={visualization} />
-            ),
-            dhis2: (
-                <DHIS2VisualizationProperties visualization={visualization} />
-            ),
-            dashboardTitle: (
-                <DashboardTitleProperties visualization={visualization} />
-            ),
-            dashboardList: (
-                <DashboardListProperties visualization={visualization} />
-            ),
-        };
-        if (visualizationType) {
-            return allTypes[visualizationType] || null;
-        }
-        return null;
+  const displayProperties = (visualizationType: string | undefined) => {
+    const allTypes: any = {
+      single: <SingleValueProperties visualization={visualization} />,
+      bar: <BarGraphProperties visualization={visualization} />,
+      line: <LineGraphProperties visualization={visualization} />,
+      pie: <PieChartProperties visualization={visualization} />,
+      map: <MapChartProperties visualization={visualization} />,
+      histogram: <HistogramProperties visualization={visualization} />,
+      scatterplot: <ScatterProperties visualization={visualization} />,
+      sunburst: <SunburstGraphProperties visualization={visualization} />,
+      gauge: <GaugeChartProperties visualization={visualization} />,
+      radar: <RadarGraphProperties visualization={visualization} />,
+      stackedarea: <StackedAreaChartProperties visualization={visualization} />,
+      imageVisualization: <ImageProperties visualization={visualization} />,
+      filters: <FiltersProperties visualization={visualization} />,
+      tables: <TableProperties visualization={visualization} />,
+      optionSet: <OptionSetProperties visualization={visualization} />,
+      text: <TextVisualisationProperties visualization={visualization} />,
+      microPlanningDashboard: (
+        <MicroPlanningProperties visualization={visualization} />
+      ),
+      clock: <ClockProperties />,
+      heatmap: <HeatMapProperties />,
+      categoryList: <CategoryListProperties visualization={visualization} />,
+      dhis2: <DHIS2VisualizationProperties visualization={visualization} />,
+      dashboardTitle: (
+        <DashboardTitleProperties visualization={visualization} />
+      ),
+      dashboardList: <DashboardListProperties visualization={visualization} />,
     };
-    return (
-        <Stack spacing="30px">
-            {displayProperties(visualization.type)}
-            {displayProperties(visualization.properties["type"])}
-        </Stack>
-    );
+    if (visualizationType) {
+      return allTypes[visualizationType] || null;
+    }
+    return null;
+  };
+  return (
+    <Stack spacing="30px">
+      {displayProperties(visualization.type)}
+      {displayProperties(visualization.properties["type"])}
+    </Stack>
+  );
 };
 
 export default VisualizationProperties;

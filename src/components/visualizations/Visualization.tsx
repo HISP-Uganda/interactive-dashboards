@@ -47,6 +47,7 @@ import Tables from "./Tables";
 import TextVisualisation from "./TextVisualisation";
 import TreeMaps from "./TreeMaps";
 import DividerVisualization from "./DividerVisualization";
+import MicroPlanning from "./MicroPlanning";
 
 type VisualizationProps = {
     visualization: IVisualization;
@@ -264,6 +265,16 @@ export const getVisualization = (
         ),
         imageVisualization: (
             <ImageVisualization
+                section={section}
+                data={data}
+                visualization={visualization}
+                {...otherProperties}
+                layoutProperties={layoutProperties}
+                dataProperties={dataProperties}
+            />
+        ),
+        microPlanningDashboard: (
+            <MicroPlanning
                 section={section}
                 data={data}
                 visualization={visualization}
