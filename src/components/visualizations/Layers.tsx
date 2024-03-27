@@ -1,9 +1,9 @@
 import { Feature, Geometry } from "geojson";
-import { useState, useEffect } from "react";
 import { Layer } from "leaflet";
-import { GeoJSON, useMap, Tooltip } from "react-leaflet";
-import { generateUid } from "../../utils/uid";
+import { useEffect, useState } from "react";
+import { GeoJSON, useMap } from "react-leaflet";
 import { Threshold } from "../../interfaces";
+import { generateUid } from "../../utils/uid";
 import { processMap } from "../../utils/utils";
 
 const Layers = ({
@@ -19,7 +19,6 @@ const Layers = ({
     const [geoJson, setGeoJson] = useState<any>(metadata.geojson);
     const [geoJsonKey, setGeoJsonKey] = useState<string>(generateUid());
     const map = useMap();
-
     useEffect(() => {
         const newKey = generateUid();
         setGeoJson((geoJson: any) => {

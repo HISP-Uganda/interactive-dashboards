@@ -168,7 +168,7 @@ const SectionVisualization = ({ section }: { section: ISection }) => {
                 </Stack>
             </Stack>
         ),
-        tab: <TabPanelVisualization section={section} />,
+        tabs: <TabPanelVisualization section={section} />,
     };
 
     const {

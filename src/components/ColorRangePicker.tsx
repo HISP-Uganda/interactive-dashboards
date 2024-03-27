@@ -121,6 +121,7 @@ export default function ({ visualization }: { visualization: IVisualization }) {
                                                 value2
                                             )
                                         }
+                                        step={0.1}
                                     >
                                         <NumberInputField />
                                         <NumberInputStepper>
