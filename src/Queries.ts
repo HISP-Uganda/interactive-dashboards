@@ -29,6 +29,7 @@ import {
     visualizationDataApi,
     visualizationDimensionsApi,
     visualizationMetadataApi,
+    attributionApi,
 } from "./Events";
 import {
     DataNode,
@@ -1123,18 +1124,32 @@ export const useDHIS2CategoryCombo = (
     id: string
 ) => {
     const params = {
-        fields: "categories[id,name,categoryOptions[id,name]]",
+        fields: "categories[id,name,shortName,categoryOptions[id,name,startDate,endDate]]",
     };
     const engine = useDataEngine();
     return useQuery<
         INamed & {
-            categories: Array<INamed & { categoryOptions: Array<INamed> }>;
+            categories: Array<
+                INamed & {
+                    categoryOptions: Array<
+                        INamed & { startDate?: string; endDate?: string }
+                    >;
+                    shortName: string;
+                }
+            >;
         },
         Error
     >(["category-combo", id], async () => {
-        return getDHIS2Resource<
+        const categoryCombo = await getDHIS2Resource<
             INamed & {
-                categories: Array<INamed & { categoryOptions: Array<INamed> }>;
+                categories: Array<
+                    INamed & {
+                        categoryOptions: Array<
+                            INamed & { startDate?: string; endDate?: string }
+                        >;
+                        shortName: string;
+                    }
+                >;
             }
         >({
             isCurrentDHIS2,
@@ -1143,6 +1158,18 @@ export const useDHIS2CategoryCombo = (
             resource: `categoryCombos/${id}.json`,
             engine,
         });
+
+        categoryCombo.categories.forEach((c) => {
+            const valid = c.categoryOptions.filter(
+                (a) => a.endDate === undefined
+            );
+            if (valid.length !== c.categoryOptions.length) {
+                attributionApi.add({
+                    [c.id]: valid.map((e) => e.id).join(","),
+                });
+            }
+        });
+        return categoryCombo;
     });
 };
 

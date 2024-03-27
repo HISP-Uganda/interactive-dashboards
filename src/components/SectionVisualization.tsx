@@ -151,6 +151,7 @@ const SectionVisualization = ({ section }: { section: ISection }) => {
                 <Stack
                     alignItems={section.alignItems}
                     justifyContent={section.justifyContent || "space-around"}
+                    justifyItems="center"
                     direction={section.direction}
                     w="100%"
                     h="100%"
