@@ -632,6 +632,7 @@ export const chartTypes: Option[] = [
     { value: "filters", label: "Dashboard Filter" },
     { value: "imageVisualization", label: "Image" },
     { value: "dashboardTitle", label: "Dashboard Title" },
+    {value : "microPlanningDashboard", label: "Micro Planning Dashboard"},
     { value: "optionSet", label: "Option Set" },
     { value: "text", label: "Text" },
     { value: "clock", label: "Clock" },
