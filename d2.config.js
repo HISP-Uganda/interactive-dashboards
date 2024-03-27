@@ -1,8 +1,8 @@
 const config = {
     type: "app",
-    name: "Visualization Studio",
-    title: "Visualization Studio",
-    description: "Visualization Studio",
+    name: "Campaign Dashboards",
+    title: "Campaign Dashboards",
+    description: "Campaign Dashboards",
     entryPoints: {
         app: "./src/AppWrapper.js",
     },
