@@ -642,7 +642,7 @@ export const chartTypes: Option[] = [
     { value: "filters", label: "Dashboard Filter" },
     { value: "imageVisualization", label: "Image" },
     { value: "dashboardTitle", label: "Dashboard Title" },
-    {value : "microPlanningDashboard", label: "Micro Planning Dashboard"},
+    { value: "microPlanningDashboard", label: "Micro Planning Dashboard" },
     { value: "optionSet", label: "Option Set" },
     { value: "text", label: "Text" },
     { value: "clock", label: "Clock" },
@@ -1313,7 +1313,27 @@ export const processDirectives = (data: any) => {
     );
 };
 
-const allOptions: Partial<{ [key: string]: (data: any) => any[] }> = {
+export const divideTargets = (
+    data: any,
+    { divide, dividingString }: { divide: boolean; dividingString: string }
+) => {
+    if (divide && dividingString && data) {
+        return data.flatMap(({ value, ...rest }: any) => {
+            const diviser = dividingString.split(",");
+
+            return diviser.map((s) => ({
+                ...rest,
+                value: Number(value) / diviser.length,
+                c: s,
+            }));
+        });
+    }
+    return data;
+};
+
+const allOptions: Partial<{
+    [key: string]: (data: any) => any[];
+}> = {
     events,
     dataElementGroupElements,
     datElementGroupSetsDataElementGroupsWithAttributes,
@@ -1451,6 +1471,8 @@ export const flattenDHIS2Data = (
         includeEmpty: boolean;
         flatteningOption: string;
         valueIfEmpty: string;
+        divide: boolean;
+        dividingString: string;
     }>
 ) => {
     if (data && (data.headers || data.listGrid)) {
@@ -1506,6 +1528,12 @@ export const flattenDHIS2Data = (
     }
     if (options.flatteningOption) {
         return allOptions[options.flatteningOption]?.(data) || data;
+    }
+    if (options.divide && options.dividingString) {
+        return divideTargets(data, {
+            divide: options.divide,
+            dividingString: options.dividingString,
+        });
     }
     return data;
 };

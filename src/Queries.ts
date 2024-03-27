@@ -1494,6 +1494,8 @@ const queryData = async (
             flatteningOption: vq?.flatteningOption,
             includeEmpty: vq?.includeEmpty,
             valueIfEmpty: vq?.valueIfEmpty,
+            divide: vq?.divide,
+            dividingString: vq?.dividingString,
         }),
         {
             flatteningOption: vq?.flatteningOption,
@@ -1501,6 +1503,8 @@ const queryData = async (
                 flatteningOption: vq?.joinTo?.flatteningOption,
                 includeEmpty: vq?.joinTo?.includeEmpty,
                 valueIfEmpty: vq?.joinTo?.valueIfEmpty,
+                divide: vq?.divide,
+                dividingString: vq?.dividingString,
             }),
             otherFilters,
             fromColumn: vq?.fromColumn,
@@ -1736,7 +1740,10 @@ const processVisualization = async (
         )
     );
 
-    const actualData = data.flatMap(({ data }) => data);
+    let actualData = data.map(({ data }) => data);
+    if (actualData.length === 1) {
+        actualData = actualData[0];
+    }
     let finalDimensions: { [key: string]: string[] } = {};
     let finalMetadata: { [key: string]: string } = {};
     data.forEach(({ dimensions, metadata }) => {
@@ -1877,6 +1884,8 @@ export const useVisualizationMetadata = (
                                 aggregationType: joiner.aggregationType,
                                 valueIfEmpty: joiner.valueIfEmpty,
                                 includeEmpty: joiner.includeEmpty,
+                                divide: joiner.divide,
+                                dividingString: joiner.dividingString,
                                 dataSource: dataSources.find(
                                     (ds) => ds.id === joiner?.dataSource
                                 ),
@@ -1898,6 +1907,8 @@ export const useVisualizationMetadata = (
                             aggregationType: numerator1.aggregationType,
                             valueIfEmpty: numerator1.valueIfEmpty,
                             includeEmpty: numerator1.includeEmpty,
+                            divide: numerator1.divide,
+                            dividingString: numerator1.dividingString,
                             dataSource: dataSources.find(
                                 (ds) => ds.id === numerator1?.dataSource
                             ),
@@ -1926,6 +1937,8 @@ export const useVisualizationMetadata = (
                                 query: joiner.query,
                                 dataDimensions: joiner.dataDimensions,
                                 aggregationType: joiner.aggregationType,
+                                divide: joiner.divide,
+                                dividingString: joiner.dividingString,
                                 dataSource: dataSources.find(
                                     (ds) => ds.id === joiner?.dataSource
                                 ),
@@ -1945,6 +1958,8 @@ export const useVisualizationMetadata = (
                             query: denominator1.query,
                             dataDimensions: denominator1.dataDimensions,
                             aggregationType: denominator1.aggregationType,
+                            divide: denominator1.divide,
+                            dividingString: denominator1.dividingString,
                             dataSource: dataSources.find(
                                 (ds) => ds.id === denominator1?.dataSource
                             ),
@@ -2086,9 +2101,6 @@ export const useMaps = ({
             resource,
         },
     };
-
-    console.log(level, parent);
-
     return useQuery<any, Error>(
         ["maps", ...levels, ...parents, ...otherKeys, vizDetails?.id],
         async () => {
