@@ -5,6 +5,7 @@ import { useDashboard } from "../../Queries";
 import { $dashboardType, $settings, $store } from "../../Store";
 import LoadingIndicator from "../LoadingIndicator";
 import Dashboard from "./Dashboard";
+import { Stack } from "@chakra-ui/react";
 
 export default function DashboardForm() {
     const store = useStore($store);
@@ -22,7 +23,11 @@ export default function DashboardForm() {
         action
     );
     if (isLoading) {
-        return <LoadingIndicator />;
+        return (
+            <Stack w="100%" h="100%">
+                <LoadingIndicator />
+            </Stack>
+        );
     }
     if (isError) {
         return <pre>{JSON.stringify(error)}</pre>;

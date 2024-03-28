@@ -1,4 +1,4 @@
-import { Box, useMediaQuery } from "@chakra-ui/react";
+import { Box, useMediaQuery, Stack } from "@chakra-ui/react";
 import {
     createHashHistory,
     Outlet,
@@ -262,7 +262,11 @@ const App = () => {
 
     return (
         <>
-            {isLoading && <LoadingIndicator />}
+            {isLoading && (
+                <Stack w="100%" h="100%">
+                    <LoadingIndicator />
+                </Stack>
+            )}
             {isSuccess && (
                 <Router
                     location={location}

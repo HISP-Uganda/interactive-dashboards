@@ -1,4 +1,12 @@
-import { fromPairs, groupBy, maxBy, minBy, orderBy, sum } from "lodash";
+import {
+    fromPairs,
+    groupBy,
+    maxBy,
+    minBy,
+    orderBy,
+    sum,
+    isArray,
+} from "lodash";
 import { uniqBy } from "lodash/fp";
 import uniq from "lodash/uniq";
 import update from "lodash/update";
@@ -821,19 +829,20 @@ export const processGraphs = (
                 allSeries = Object.keys(grouped2);
             }
         } else {
-            // if (order) {
-            //     data = orderBy(data, "value", [order as "asc" | "desc"]);
-            // }
-            // if (show) {
-            //     data = data.slice(0, show);
-            // }
-            const x = uniq(data.map((num: any) => num[options.category || ""]));
-            const columns = x.map((c: any) => {
-                return {
-                    id: c,
-                    name: allMetadata[c] || options.metadata?.[c]?.name || c,
-                };
-            });
+            const x = uniq(
+                data.flat().map((num: any) => num[options.category || ""])
+            );
+            const columns = orderBy(
+                x.map((c: any) => {
+                    return {
+                        id: c,
+                        name:
+                            allMetadata[c] || options.metadata?.[c]?.name || c,
+                    };
+                }),
+                "name",
+                "asc"
+            );
 
             const realColumns = columns.map(({ name }) => name);
             if (options.series) {
@@ -877,9 +886,11 @@ export const processGraphs = (
                     };
                 });
             } else {
-                allSeries = [];
-                chartData = [
-                    {
+                if (data.length > 0 && isArray(data[0])) {
+                    allSeries = data.map((d: any, i: number) =>
+                        i === 0 ? "Performance" : "Target"
+                    );
+                    chartData = data.map((a: any[], i: number) => ({
                         x:
                             availableProperties?.data?.orientation === "v"
                                 ? realColumns
@@ -893,7 +904,7 @@ export const processGraphs = (
                         y:
                             availableProperties?.data?.orientation === "v"
                                 ? columns.map(({ id }) => {
-                                      const r = data.find(
+                                      const r = a.find(
                                           (num: any) =>
                                               num[options.category || ""] === id
                                       );
@@ -907,13 +918,54 @@ export const processGraphs = (
                             availableProperties?.data?.orientation === "v"
                                 ? "%{y:.2f}"
                                 : "%{x:.2f}",
-                    },
-                ];
+                    }));
+                } else {
+                    allSeries = [];
+                    chartData = [
+                        {
+                            x:
+                                availableProperties?.data?.orientation === "v"
+                                    ? realColumns
+                                    : columns.map(({ id }) => {
+                                          const r = data.find(
+                                              (num: any) =>
+                                                  num[
+                                                      options.category || ""
+                                                  ] === id
+                                          );
+                                          return (
+                                              r?.count || r?.value || r?.total
+                                          );
+                                      }),
+                            y:
+                                availableProperties?.data?.orientation === "v"
+                                    ? columns.map(({ id }) => {
+                                          const r = data.find(
+                                              (num: any) =>
+                                                  num[
+                                                      options.category || ""
+                                                  ] === id
+                                          );
+                                          return (
+                                              r?.count || r?.value || r?.total
+                                          );
+                                      })
+                                    : realColumns,
+                            type: options.type,
+                            ...availableProperties.data,
+                            textposition: "auto",
+                            texttemplate:
+                                availableProperties?.data?.orientation === "v"
+                                    ? "%{y:.2f}"
+                                    : "%{x:.2f}",
+                        },
+                    ];
+                }
             }
         }
     }
     return {
-        chartData: orderBy(chartData, "name", "desc"),
+        chartData,
         allSeries,
     };
 };
@@ -1068,4 +1120,3 @@ export const processThreeDimensions = (
     }
     return value;
 };
-

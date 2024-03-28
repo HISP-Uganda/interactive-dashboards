@@ -345,31 +345,62 @@ export default function VisualizationQuery() {
                             }
                         />
                     </Stack>
-                    <Stack direction="row">
-                        <Text>Include Empty</Text>
-                        <Switch
-                            isChecked={visualizationQuery.includeEmpty}
-                            onChange={(e) =>
-                                datumAPi.changeAttribute({
-                                    attribute: "includeEmpty",
-                                    value: e.target.checked,
-                                })
-                            }
-                        />
+                    <Stack direction="row" spacing="20px" alignItems="center">
+                        <Stack direction="row">
+                            <Text>Include Empty</Text>
+                            <Switch
+                                isChecked={visualizationQuery.includeEmpty}
+                                onChange={(e) =>
+                                    datumAPi.changeAttribute({
+                                        attribute: "includeEmpty",
+                                        value: e.target.checked,
+                                    })
+                                }
+                            />
+                        </Stack>
+
+                        <Stack direction="row" flex={1} alignItems="center">
+                            <Text>Value if Empty</Text>
+                            <Input
+                                flex={1}
+                                value={visualizationQuery.valueIfEmpty}
+                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                    datumAPi.changeAttribute({
+                                        attribute: "valueIfEmpty",
+                                        value: e.target.value,
+                                    })
+                                }
+                            />
+                        </Stack>
                     </Stack>
 
-                    <Stack direction="row" flex={1} alignItems="center">
-                        <Text>Value if Empty</Text>
-                        <Input
-                            flex={1}
-                            value={visualizationQuery.valueIfEmpty}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                datumAPi.changeAttribute({
-                                    attribute: "valueIfEmpty",
-                                    value: e.target.value,
-                                })
-                            }
-                        />
+                    <Stack direction="row" spacing="20px" alignItems="center">
+                        <Stack direction="row">
+                            <Text>Divide</Text>
+                            <Switch
+                                isChecked={visualizationQuery.divide}
+                                onChange={(e) =>
+                                    datumAPi.changeAttribute({
+                                        attribute: "divide",
+                                        value: e.target.checked,
+                                    })
+                                }
+                            />
+                        </Stack>
+
+                        <Stack direction="row" flex={1} alignItems="center">
+                            <Text>Dividing String</Text>
+                            <Input
+                                flex={1}
+                                value={visualizationQuery.dividingString}
+                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                    datumAPi.changeAttribute({
+                                        attribute: "dividingString",
+                                        value: e.target.value,
+                                    })
+                                }
+                            />
+                        </Stack>
                     </Stack>
                 </SimpleGrid>
             )}

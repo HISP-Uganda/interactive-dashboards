@@ -113,6 +113,8 @@ export interface IData extends INamed {
         | "VARIANCE"
         | "MIN"
         | "MAX";
+    dividingString?: string;
+    divide?: boolean;
 }
 
 export interface IIndicator extends INamed {
