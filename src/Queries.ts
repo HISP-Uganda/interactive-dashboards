@@ -30,6 +30,7 @@ import {
     visualizationDimensionsApi,
     visualizationMetadataApi,
     attributionApi,
+    dashboardCategoryComboApi,
 } from "./Events";
 import {
     DataNode,
@@ -50,6 +51,7 @@ import {
     Threshold,
     UserGroup,
     Authentication,
+    CategoryCombo,
 } from "./interfaces";
 import { createCategory, createDashboard, createDataSource } from "./Store";
 import {
@@ -1124,34 +1126,11 @@ export const useDHIS2CategoryCombo = (
     id: string
 ) => {
     const params = {
-        fields: "categories[id,name,shortName,categoryOptions[id,name,startDate,endDate]]",
+        fields: "categories[id,name,shortName,categoryOptions[id,name,startDate,endDate]],categoryOptionCombos[id,categoryOptions]",
     };
     const engine = useDataEngine();
-    return useQuery<
-        INamed & {
-            categories: Array<
-                INamed & {
-                    categoryOptions: Array<
-                        INamed & { startDate?: string; endDate?: string }
-                    >;
-                    shortName: string;
-                }
-            >;
-        },
-        Error
-    >(["category-combo", id], async () => {
-        const categoryCombo = await getDHIS2Resource<
-            INamed & {
-                categories: Array<
-                    INamed & {
-                        categoryOptions: Array<
-                            INamed & { startDate?: string; endDate?: string }
-                        >;
-                        shortName: string;
-                    }
-                >;
-            }
-        >({
+    return useQuery<CategoryCombo, Error>(["category-combo", id], async () => {
+        const categoryCombo = await getDHIS2Resource<CategoryCombo>({
             isCurrentDHIS2,
             params,
             api,
@@ -1159,15 +1138,15 @@ export const useDHIS2CategoryCombo = (
             engine,
         });
 
+        dashboardCategoryComboApi.set(categoryCombo);
+
         categoryCombo.categories.forEach((c) => {
             const valid = c.categoryOptions.filter(
                 (a) => a.endDate === undefined
             );
-            if (valid.length !== c.categoryOptions.length) {
-                attributionApi.add({
-                    [c.id]: valid.map((e) => e.id).join(","),
-                });
-            }
+            attributionApi.add({
+                [c.id]: valid.map((e) => e.id).join(","),
+            });
         });
         return categoryCombo;
     });
