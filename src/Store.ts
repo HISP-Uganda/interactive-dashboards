@@ -20,9 +20,10 @@ import {
     IReport,
     IPage,
     IUserGroup,
+    CategoryCombo,
 } from "./interfaces";
 import { generateUid } from "./utils/uid";
-import { getRelativePeriods } from "./utils/utils";
+import { getRelativePeriods, arrayCombinations } from "./utils/utils";
 export const createSection = (id = generateUid()): ISection => {
     return {
         id,
@@ -266,6 +267,9 @@ export const $presentation = domain.createStore<IPresentation>(
 );
 
 export const $attribution = domain.createStore<{ [key: string]: string }>({});
+export const $dashboardCategoryCombo = domain.createStore<
+    Partial<CategoryCombo>
+>({});
 
 export const $categoryDashboards = combine(
     $dashboards,
@@ -463,39 +467,26 @@ export const $targetCategoryOptionCombo = $dashboard.map(
 
 export const $globalFilters = combine(
     $store,
-    $categoryOptionCombo,
-    $dashboard,
-    $targetCategoryOptionCombo,
     $attribution,
-    (store, categoryOptionCombo, dashboard, target, attribution) => {
+    $dashboardCategoryCombo,
+    (store, attribution, dashboardCategoryCombo) => {
         const periods = store.periods.flatMap((period) => {
             if (period.type === "relative") {
                 return getRelativePeriods(period.value).map((x: string) => x);
             }
             return [period.value];
         });
+        console.log(store.minSublevel);
         let filters: { [key: string]: any } = {
             m5D13FqKZwN: periods,
             GQhi6pRnTKF: [store.levels.sort()[store.levels.length - 1]],
             mclvD0Z9mfT: store.organisations,
             ww1uoD3DsYg: [store.minSublevel],
         };
-
         if (store.groups.length > 0) {
             filters = { ...filters, of2WvtwqbHR: store.groups };
         }
-        if (dashboard.dataSet && categoryOptionCombo.current.length > 0) {
-            filters = {
-                ...filters,
-                WSiMOMi4QWh: categoryOptionCombo.current,
-            };
-        }
-        if (dashboard.dataSet && categoryOptionCombo.prev.length > 0) {
-            filters = { ...filters, IK4jwzIuqNO: categoryOptionCombo.prev };
-        }
-        if (dashboard.targetCategoryCombo && target.length > 0) {
-            return { ...filters, OOhWJ4gfZy1: target };
-        }
+
         if (store.dataElements.length > 0) {
             filters = {
                 ...filters,
@@ -520,6 +511,26 @@ export const $globalFilters = combine(
         const attributionKeys = Object.keys(attribution);
         const attributionValues = Object.values(attribution);
 
+        if (
+            dashboardCategoryCombo.categories?.length === attributionKeys.length
+        ) {
+            const combos = Object.entries(attribution).map(([_, value]) =>
+                value.split(",")
+            );
+            const combinations = arrayCombinations<string>(...combos);
+            const all = combinations.flatMap((c) => {
+                const val = dashboardCategoryCombo.categoryOptionCombos?.find(
+                    (a) =>
+                        a.categoryOptions.every(({ id }) =>
+                            c.flat().includes(id)
+                        )
+                );
+                if (val) return val.id;
+                return [];
+            });
+            filters = { ...filters, WSiMOMi4QWh: all };
+        }
+
         if (attributionKeys.length > 0 && attributionValues.length > 0) {
             filters = {
                 ...filters,
@@ -527,6 +538,7 @@ export const $globalFilters = combine(
                 ZqQdTbcqQhJ: attributionValues.flatMap((a) => a.split(",")),
             };
         }
+
         return filters;
     }
 );

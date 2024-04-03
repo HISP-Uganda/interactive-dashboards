@@ -2186,3 +2186,19 @@ export const changeBackground = (color: string) => {
     const body = document.getElementsByTagName("body")[0];
     body.style.backgroundColor = color;
 };
+
+export function arrayCombinations<T>(...arrays: T[][]): T[][] {
+    if (arrays.length === 0) return [[]];
+    return arrays.reduce(
+        (accumulator: T[][], currentArray: T[]) => {
+            const combinations: T[][] = [];
+            accumulator.forEach((accItem: T[]) => {
+                currentArray.forEach((currentItem: T) => {
+                    combinations.push([...accItem, currentItem]);
+                });
+            });
+            return combinations;
+        },
+        [[]] as T[][]
+    );
+}

@@ -25,6 +25,7 @@ import {
     IReport,
     IPage,
     IUserGroup,
+    CategoryCombo,
 } from "./interfaces";
 import {
     $categories,
@@ -54,6 +55,7 @@ import {
     createPage,
     $userGroup,
     $attribution,
+    $dashboardCategoryCombo,
 } from "./Store";
 
 export const loadDefaults = domain.createEvent<{
@@ -879,4 +881,8 @@ export const userGroupApi = createApi($userGroup, {
 
 export const attributionApi = createApi($attribution, {
     add: (state, data: { [key: string]: string }) => ({ ...state, ...data }),
+});
+
+export const dashboardCategoryComboApi = createApi($dashboardCategoryCombo, {
+    set: (_, payload: Partial<CategoryCombo>) => payload,
 });

@@ -220,6 +220,7 @@ export interface DataNode extends IDataNode {
     actual?: string;
     parent?: { [key: string]: any };
     order?: string;
+    level?: number;
     metadata?: Partial<{
         rows: number;
         columns: number;
@@ -541,4 +542,32 @@ export interface IReport extends INamed {
 
 export interface IUserGroup extends INamed {
     email: string[];
+}
+
+export interface CategoryCombo {
+    categories: Category[];
+    categoryOptionCombos: CategoryOptionCombo[];
+}
+
+export interface CategoryOptionCombo {
+    id: string;
+    categoryOptions: CategoryOption2[];
+}
+
+export interface CategoryOption2 {
+    id: string;
+}
+
+export interface Category {
+    name: string;
+    id: string;
+    shortName: string;
+    categoryOptions: CategoryOption[];
+}
+
+export interface CategoryOption {
+    name: string;
+    id: string;
+    endDate?: string;
+    startDate?: string;
 }
