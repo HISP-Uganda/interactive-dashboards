@@ -117,12 +117,6 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
                 <MenuList>
                     <MenuItem
                         fontSize="18px"
-                        // onClick={() =>
-                        //     dashboardApi.changeVisualizationType({
-                        //         section,
-                        //         visualization: "bar",
-                        //     })
-                        // }
                         icon={<AiOutlineBarChart />}
                         onClick={() => handleDownloadClick()}
                     >
@@ -244,8 +238,6 @@ const VisualizationMenu = ({ section }: VisualizationMenuProps) => {
                 </ModalContent>
             </Modal>
             <Modal
-                // initialFocusRef={initialRef}
-                // finalFocusRef={finalRef}
                 isOpen={isOpen1}
                 onClose={onClose1}
                 closeOnOverlayClick={false}

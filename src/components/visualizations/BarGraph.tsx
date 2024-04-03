@@ -55,6 +55,7 @@ const BarGraph = ({
         series: series,
         type: "bar",
         metadata: metadata,
+        indicators: visualization.indicators,
     });
 
     return (

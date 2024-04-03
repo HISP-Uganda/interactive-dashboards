@@ -36,6 +36,7 @@ import SelectProperty from "./SelectProperty";
 import SwitchProperty from "./SwitchProperty";
 import TextProperty from "./TextProperty";
 import ColorProperty from "./ColorProperty";
+import NumberProperty from "./NumberProperty";
 
 const barModes = createOptions(["stack", "group", "overlay", "relative"]);
 
@@ -380,6 +381,26 @@ const BarGraphProperties = ({
                         ))}
                     </TabPanels>
                 </Tabs>
+            )}
+            <NumberProperty
+                title="Decimal Places"
+                visualization={visualization}
+                attribute="decimalPlaces"
+                min={0}
+                max={3}
+                step={1}
+            />
+
+            {visualization.indicators.length > 1 && (
+                <>
+                    {visualization.indicators.map((i) => (
+                        <TextProperty
+                            visualization={visualization}
+                            title={i}
+                            attribute={i}
+                        />
+                    ))}
+                </>
             )}
         </Stack>
     );

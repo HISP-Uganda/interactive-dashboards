@@ -476,28 +476,16 @@ export const $globalFilters = combine(
             }
             return [period.value];
         });
+        console.log(store.minSublevel);
         let filters: { [key: string]: any } = {
             m5D13FqKZwN: periods,
             GQhi6pRnTKF: [store.levels.sort()[store.levels.length - 1]],
             mclvD0Z9mfT: store.organisations,
             ww1uoD3DsYg: [store.minSublevel],
         };
-
         if (store.groups.length > 0) {
             filters = { ...filters, of2WvtwqbHR: store.groups };
         }
-        // if (dashboard.dataSet && categoryOptionCombo.current.length > 0) {
-        //     filters = {
-        //         ...filters,
-        //         WSiMOMi4QWh: categoryOptionCombo.current,
-        //     };
-        // }
-        // if (dashboard.dataSet && categoryOptionCombo.prev.length > 0) {
-        //     filters = { ...filters, IK4jwzIuqNO: categoryOptionCombo.prev };
-        // }
-        // if (dashboard.targetCategoryCombo && target.length > 0) {
-        //     return { ...filters, OOhWJ4gfZy1: target };
-        // }
 
         if (store.dataElements.length > 0) {
             filters = {

@@ -638,6 +638,7 @@ export const processGraphs = (
         series: string;
         metadata?: any;
         type: string;
+        indicators: string[];
     }>
 ) => {
     let chartData: any = [];
@@ -645,6 +646,7 @@ export const processGraphs = (
     let allSeries: any[] = [];
     update(availableProperties, "data.orientation", () => "v");
     const specific: string[] = options.dataProperties?.["specific"] || [];
+    const decimalPlaces = options.dataProperties?.["decimalPlaces"] || "0";
     const percentages: boolean =
         options.dataProperties?.["percentages"] || false;
     const overall: boolean = options.dataProperties?.["overall"] || false;
@@ -732,8 +734,8 @@ export const processGraphs = (
                                 texttemplate:
                                     availableProperties?.data?.orientation ===
                                     "v"
-                                        ? "%{y:.0f}"
-                                        : "%{x:.0f}",
+                                        ? `%{y:.${decimalPlaces}f}`
+                                        : `%{x:.${decimalPlaces}f}`,
                                 ...others,
                             };
                         }
@@ -781,8 +783,8 @@ export const processGraphs = (
                         textposition: "auto",
                         texttemplate:
                             availableProperties?.data?.orientation === "v"
-                                ? "%{y:.0f}"
-                                : "%{x:.0f}",
+                                ? `%{y:.${decimalPlaces}f}`
+                                : `%{x:.${decimalPlaces}f}`,
                         ...others,
                     };
                 });
@@ -822,8 +824,8 @@ export const processGraphs = (
                         textposition: "auto",
                         texttemplate:
                             availableProperties?.data?.orientation === "v"
-                                ? "%{y:.0f}"
-                                : "%{x:.0f}",
+                                ? `%{y:.${decimalPlaces}f}`
+                                : `%{x:.${decimalPlaces}f}`,
                     },
                 ];
                 allSeries = Object.keys(grouped2);
@@ -881,15 +883,16 @@ export const processGraphs = (
                         textposition: "auto",
                         texttemplate:
                             availableProperties?.data?.orientation === "v"
-                                ? "%{y:.1f}"
-                                : "%{x:.1f}",
+                                ? `%{y:.${decimalPlaces}f}`
+                                : `%{x:.${decimalPlaces}f}`,
                     };
                 });
             } else {
                 if (data.length > 0 && isArray(data[0])) {
-                    allSeries = data.map((d: any, i: number) =>
-                        i === 0 ? "Performance" : "Target"
-                    );
+                    allSeries =
+                        options.indicators?.map(
+                            (i) => options.dataProperties[i] || i
+                        ) || [];
                     chartData = data.map((a: any[], i: number) => ({
                         x:
                             availableProperties?.data?.orientation === "v"
@@ -916,8 +919,8 @@ export const processGraphs = (
                         textposition: "auto",
                         texttemplate:
                             availableProperties?.data?.orientation === "v"
-                                ? "%{y:.2f}"
-                                : "%{x:.2f}",
+                                ? `%{y:.${decimalPlaces}f}`
+                                : `%{x:.${decimalPlaces}f}`,
                     }));
                 } else {
                     allSeries = [];
@@ -956,8 +959,8 @@ export const processGraphs = (
                             textposition: "auto",
                             texttemplate:
                                 availableProperties?.data?.orientation === "v"
-                                    ? "%{y:.2f}"
-                                    : "%{x:.2f}",
+                                    ? `%{y:.${decimalPlaces}f}`
+                                    : `%{x:.${decimalPlaces}f}`,
                         },
                     ];
                 }

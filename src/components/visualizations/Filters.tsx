@@ -3,23 +3,23 @@ import { DropdownButton } from "@dhis2/ui";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
 import React from "react";
-import { storeApi, attributionApi } from "../../Events";
-import {
-    INamed,
-    IVisualization,
-    Period,
-    Category,
-    CategoryOption,
-} from "../../interfaces";
+import { attributionApi, storeApi } from "../../Events";
+import { CategoryOption, IVisualization, Period } from "../../interfaces";
 import { useDHIS2CategoryCombo } from "../../Queries";
-import { $store, $attribution } from "../../Store";
+import { $attribution, $store } from "../../Store";
 import OrgUnitPicker from "../filters/OrgUnitPicker";
 import PeriodPicker from "../filters/PeriodPicker";
 import PeriodSelector from "../filters/PeriodSelector";
 import OrganisationUnitLevels from "../OrganisationUnitLevels";
 import OUTree from "../OUTree";
 
-const Categories = ({ id }: { id: string }) => {
+const Categories = ({
+    id,
+    direction,
+}: {
+    id: string;
+    direction: "row" | "column";
+}) => {
     const attribution = useStore($attribution);
     const { isLoading, isSuccess, isError, error, data } =
         useDHIS2CategoryCombo(true, null, id);
@@ -29,38 +29,42 @@ const Categories = ({ id }: { id: string }) => {
 
     if (isSuccess && data)
         return (
-            <Stack direction="row" w="100%" spacing="20px">
-                {data.categories.map(({ name, id, categoryOptions }) => {
-                    return (
-                        <Stack key={id} direction="row" alignItems="center">
-                            <Text fontWeight="bold">{name}</Text>
-                            <Box minW="200px">
-                                <Select<
-                                    CategoryOption,
-                                    true,
-                                    GroupBase<CategoryOption>
-                                >
-                                    isMulti
-                                    options={categoryOptions}
-                                    getOptionLabel={(d) => d.name ?? ""}
-                                    getOptionValue={(d) => d.id}
-                                    value={categoryOptions.filter(
-                                        (a) =>
-                                            attribution[id] &&
-                                            attribution[id]
-                                                .split(",")
-                                                .indexOf(a.id) !== -1
-                                    )}
-                                    onChange={(e) =>
-                                        attributionApi.add({
-                                            [id]: e.map((e) => e.id).join(","),
-                                        })
-                                    }
-                                />
-                            </Box>
-                        </Stack>
-                    );
-                })}
+            <Stack direction={direction} w="100%" spacing="20px">
+                {data.categories.map(
+                    ({ name, id, categoryOptions, shortName }) => {
+                        return (
+                            <Stack key={id} direction="row" alignItems="center">
+                                <Text fontWeight="bold">{shortName}</Text>
+                                <Box minW="200px">
+                                    <Select<
+                                        CategoryOption,
+                                        true,
+                                        GroupBase<CategoryOption>
+                                    >
+                                        isMulti
+                                        options={categoryOptions}
+                                        getOptionLabel={(d) => d.name ?? ""}
+                                        getOptionValue={(d) => d.id}
+                                        value={categoryOptions.filter(
+                                            (a) =>
+                                                attribution[id] &&
+                                                attribution[id]
+                                                    .split(",")
+                                                    .indexOf(a.id) !== -1
+                                        )}
+                                        onChange={(e) =>
+                                            attributionApi.add({
+                                                [id]: e
+                                                    .map((e) => e.id)
+                                                    .join(","),
+                                            })
+                                        }
+                                    />
+                                </Box>
+                            </Stack>
+                        );
+                    }
+                )}
             </Stack>
         );
 
@@ -120,11 +124,16 @@ export default function Filters({
                                     );
                                 }
                                 if (i === "organisations-levels") {
+                                    return <OrganisationUnitLevels />;
+                                }
+
+                                if (i === "category-combo" && cc) {
                                     return (
-                                        <>
-                                            <Text>Level</Text>
-                                            <OrganisationUnitLevels />
-                                        </>
+                                        <Categories
+                                            id={cc}
+                                            key={i}
+                                            direction="column"
+                                        />
                                     );
                                 }
                                 return null;
@@ -155,7 +164,7 @@ export default function Filters({
                 }
 
                 if (i === "category-combo" && cc) {
-                    return <Categories id={cc} key={i} />;
+                    return <Categories id={cc} key={i} direction="row" />;
                 }
                 return null;
             })}

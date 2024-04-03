@@ -220,6 +220,7 @@ export interface DataNode extends IDataNode {
     actual?: string;
     parent?: { [key: string]: any };
     order?: string;
+    level?: number;
     metadata?: Partial<{
         rows: number;
         columns: number;

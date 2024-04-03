@@ -354,8 +354,10 @@ export const useInitials = (storage: "data-store" | "es") => {
                     title: unit.name,
                     key: unit.id,
                     isLeaf: unit.leaf,
+                    level: unit.level,
                 };
             });
+
             const settings = await getIndex<IDashboardSetting>(storage, {
                 namespace: "i-dashboard-settings",
                 systemId,
@@ -372,7 +374,7 @@ export const useInitials = (storage: "data-store" | "es") => {
                 if (actualLevel + 1 <= maxLevel) {
                     storeApi.setMinSublevel(actualLevel + 1);
                 } else {
-                    storeApi.setMinSublevel(maxLevel);
+                    storeApi.setMinSublevel(minLevel);
                 }
 
                 storeApi.setLevels([
