@@ -29,6 +29,8 @@ const options = {
     // target: "https://train.ndpme.go.ug/ndpdb",
     // target: "https://play.im.dhis2.org/dev",
     // target: "https://emisuganda.org/emis",
+    // target: "https://dev.emisuganda.org/emisdev",
+    // target: "https://play.dhis2.org/40.3.0",
     onProxyReq,
     onProxyRes,
     changeOrigin: true, // needed for virtual hosted sites

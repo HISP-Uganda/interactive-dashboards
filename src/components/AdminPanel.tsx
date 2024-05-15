@@ -14,7 +14,7 @@ import { Modal } from "antd";
 import { useStore } from "effector-react";
 import React, { ChangeEvent, useState } from "react";
 import { dashboardApi, sectionApi, settingsApi, storeApi } from "../Events";
-import { ICategory, IDashboard, LocationGenerics } from "../interfaces";
+import { ICategory, IDashboard, LocationGenerics, Option } from "../interfaces";
 import { saveDocument } from "../Queries";
 import {
     $dashboard,
@@ -27,10 +27,11 @@ import {
 } from "../Store";
 import AutoRefreshPicker from "./AutoRefreshPicker";
 import DashboardFilter from "./DashboardFilter";
-import { CheckboxField, NumberField } from "./fields";
+import { CheckboxField, NumberField, SelectField } from "./fields";
 import ResourceField from "./fields/ResourceField";
 import Picker from "./Picker";
 import Section from "./Section";
+import CategoryComboFilter from "./visualizations/CategoryComboFilter";
 
 export default function AdminPanel() {
     const [loading, setLoading] = useState<boolean>(false);
@@ -300,6 +301,17 @@ export default function AdminPanel() {
                             attribute="excludeFromList"
                         />
                     </Stack>
+                    <CategoryComboFilter
+                        api={null}
+                        isCurrentDHIS2={true}
+                        value={dashboard.categoryCombo}
+                        onChange={(val) =>
+                            dashboardApi.changeAttribute({
+                                attribute: "categoryCombo",
+                                value: val,
+                            })
+                        }
+                    />
                     <Stack>
                         <Text>Filters</Text>
                         <DashboardFilter />

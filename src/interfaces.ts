@@ -185,10 +185,8 @@ export interface IDashboard extends INamed {
     dataSet: string;
     categorization: { [key: string]: any[] };
     availableCategories: any[];
-    availableCategoryOptionCombos: any[];
     bg: string;
-    targetCategoryCombo: string;
-    targetCategoryOptionCombos: any[];
+    categoryCombo: string;
     hasChildren?: boolean;
     nodeSource: Partial<{
         resource: string;
@@ -516,6 +514,7 @@ export type AttributeProps<T> = {
 export interface IPresentation extends INamed {
     items: DataNode[];
     speed: number;
+    autoplaySpeed: number;
 }
 export interface IPage extends INamed {
     items: Array<DataNode>;

@@ -16,11 +16,11 @@ function RealTree({
 }: {
     dashboards: IDashboard[];
     onChange: (data: DataNode[]) => void;
-    value: { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[];
+    value: DataNode[];
 }) {
-    // const [checkedKeys, setCheckedKeys] = useState<
-    //     { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[]
-    // >(value.map((x: any) => x.key));
+    const [checkedKeys, setCheckedKeys] = useState<
+        { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[]
+    >(value.map((x: any) => x.key));
     const processed = dashboards.map((dashboard) => {
         const dashboardChildren = dashboard.sections.map((section) => {
             const sectionNode: DataNode = {
@@ -64,7 +64,7 @@ function RealTree({
         checkedKeysValue,
         info
     ) => {
-        // setCheckedKeys(checkedKeysValue);
+        setCheckedKeys(checkedKeysValue);
         onChange(info?.checkedNodes.map(({ children, ...rest }) => rest));
     };
     return (
@@ -75,7 +75,7 @@ function RealTree({
             showLine
             selectable={false}
             onCheck={onCheck}
-            checkedKeys={value}
+            checkedKeys={checkedKeys}
             style={{
                 maxHeight: "800px",
                 overflow: "auto",
@@ -89,7 +89,7 @@ export default function DashboardTreeCheck({
     value,
     onChange,
 }: {
-    value: { checked: React.Key[]; halfChecked: React.Key[] } | React.Key[];
+    value: DataNode[];
     onChange: (e: DataNode[]) => void;
 }) {
     const store = useStore($store);

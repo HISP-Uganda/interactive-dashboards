@@ -102,42 +102,80 @@ export default function Presentation() {
                             {errors.name && errors.name.message}
                         </FormErrorMessage>
                     </FormControl>
-                    <Controller
-                        control={control}
-                        name="items"
-                        render={({
-                            field: { onChange, onBlur, value, ref },
-                        }) => (
-                            <DashboardTreeCheck
-                                value={value}
-                                onChange={onChange}
-                            />
-                        )}
-                    />
-                    <Controller
-                        control={control}
-                        name="speed"
-                        render={({
-                            field: { onChange, onBlur, value, ref },
-                        }) => (
-                            <NumberInput
-                                value={value}
-                                // max={}
-                                min={500}
-                                step={100}
-                                size="sm"
-                                onChange={(_, value2: number) =>
-                                    onChange(value2)
-                                }
-                            >
-                                <NumberInputField />
-                                <NumberInputStepper>
-                                    <NumberIncrementStepper />
-                                    <NumberDecrementStepper />
-                                </NumberInputStepper>
-                            </NumberInput>
-                        )}
-                    />
+                    <FormControl isInvalid={!!errors.items}>
+                        <FormLabel htmlFor="description">
+                            Presentation Items
+                        </FormLabel>
+                        <Controller
+                            control={control}
+                            name="items"
+                            render={({ field: { onChange, value } }) => {
+                                return (
+                                    <DashboardTreeCheck
+                                        value={value}
+                                        onChange={onChange}
+                                    />
+                                );
+                            }}
+                        />
+                    </FormControl>
+
+                    <FormControl isInvalid={!!errors.items}>
+                        <FormLabel htmlFor="speed">Animation speed</FormLabel>
+
+                        <Controller
+                            control={control}
+                            name="speed"
+                            render={({ field: { onChange, value } }) => (
+                                <NumberInput
+                                    value={value}
+                                    // max={}
+                                    min={500}
+                                    step={100}
+                                    size="sm"
+                                    onChange={(_, value2: number) =>
+                                        onChange(value2)
+                                    }
+                                >
+                                    <NumberInputField />
+                                    <NumberInputStepper>
+                                        <NumberIncrementStepper />
+                                        <NumberDecrementStepper />
+                                    </NumberInputStepper>
+                                </NumberInput>
+                            )}
+                        />
+                    </FormControl>
+
+                    <FormControl isInvalid={!!errors.items}>
+                        <FormLabel htmlFor="autoplaySpeed">
+                            Autoplay speed
+                        </FormLabel>
+
+                        <Controller
+                            control={control}
+                            name="autoplaySpeed"
+                            render={({ field: { onChange, value } }) => (
+                                <NumberInput
+                                    value={value}
+                                    // max={}
+                                    min={500}
+                                    step={100}
+                                    size="sm"
+                                    onChange={(_, value2: number) =>
+                                        onChange(value2)
+                                    }
+                                >
+                                    <NumberInputField />
+                                    <NumberInputStepper>
+                                        <NumberIncrementStepper />
+                                        <NumberDecrementStepper />
+                                    </NumberInputStepper>
+                                </NumberInput>
+                            )}
+                        />
+                    </FormControl>
+
                     <Stack spacing="30px" direction="row">
                         <Button
                             colorScheme="red"

@@ -70,7 +70,7 @@ const BarGraph = ({
                     title={visualization.name}
                 />
             )}
-            <Stack flex={1} direction="column" spacing={0} w="100%" h="100%">
+            <Stack direction="column" spacing={0} w="100%" h="100%">
                 <Stack flex={1} spacing={0}>
                     <Plot
                         data={chartData as any}

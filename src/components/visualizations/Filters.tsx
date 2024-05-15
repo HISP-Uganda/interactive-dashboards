@@ -1,4 +1,4 @@
-import { Box, Progress, Stack, Text } from "@chakra-ui/react";
+import { Box, Progress, Stack, Text, Spinner } from "@chakra-ui/react";
 import { DropdownButton } from "@dhis2/ui";
 import { GroupBase, Select } from "chakra-react-select";
 import { useStore } from "effector-react";
@@ -6,12 +6,13 @@ import React from "react";
 import { attributionApi, storeApi } from "../../Events";
 import { CategoryOption, IVisualization, Period } from "../../interfaces";
 import { useDHIS2CategoryCombo } from "../../Queries";
-import { $attribution, $store } from "../../Store";
+import { $attribution, $store, $dashboard } from "../../Store";
 import OrgUnitPicker from "../filters/OrgUnitPicker";
 import PeriodPicker from "../filters/PeriodPicker";
 import PeriodSelector from "../filters/PeriodSelector";
 import OrganisationUnitLevels from "../OrganisationUnitLevels";
 import OUTree from "../OUTree";
+import LoadingIndicator from "../LoadingIndicator";
 
 const Categories = ({
     id,
@@ -25,7 +26,7 @@ const Categories = ({
         useDHIS2CategoryCombo(true, null, id);
 
     if (isError) return <pre>{JSON.stringify(error)}</pre>;
-    if (isLoading) return <Progress />;
+    if (isLoading) return <LoadingIndicator />;
 
     if (isSuccess && data)
         return (
@@ -80,11 +81,12 @@ export default function Filters({
     const onChangePeriods = (periods: Period[]) => {
         storeApi.changePeriods(periods);
     };
+    const dashboard = useStore($dashboard);
     const grouped = visualization.properties["grouped"];
     const items = visualization.properties["layout.items"];
     const alignment: "row" | "column" =
         visualization.properties["layout.alignment"] ?? "row";
-    const cc: string = visualization.properties["cc"];
+    const cc: string = dashboard.categoryCombo;
     if (grouped)
         return (
             <Stack justifyContent="center">
