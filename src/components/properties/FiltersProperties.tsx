@@ -1,24 +1,21 @@
-import React from "react";
 import {
-    Stack,
-    Text,
     Checkbox,
     CheckboxGroup,
     Radio,
     RadioGroup,
+    Stack,
+    Text,
 } from "@chakra-ui/react";
-import { IVisualization } from "../../interfaces";
+import React from "react";
 import { sectionApi } from "../../Events";
+import { IVisualization } from "../../interfaces";
 import SwitchProperty from "./SwitchProperty";
-import CategoryComboFilter from "../visualizations/CategoryComboFilter";
 
 export default function FiltersProperties({
     visualization,
 }: {
     visualization: IVisualization;
 }) {
-    const items = visualization.properties["layout.items"] ?? [];
-    const value = visualization.properties["cc"];
     return (
         <Stack>
             <Stack>
@@ -48,21 +45,6 @@ export default function FiltersProperties({
                     </Stack>
                 </CheckboxGroup>
             </Stack>
-
-            {items.indexOf("category-combo") !== -1 && (
-                <CategoryComboFilter
-                    api={null}
-                    isCurrentDHIS2={true}
-                    value={value}
-                    onChange={(val) =>
-                        sectionApi.changeVisualizationProperties({
-                            visualization: visualization.id,
-                            attribute: "cc",
-                            value: val,
-                        })
-                    }
-                />
-            )}
 
             <SwitchProperty
                 visualization={visualization}

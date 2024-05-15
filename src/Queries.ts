@@ -548,6 +548,9 @@ export const useDashboard = (
     action: "view" | "create" | "update" | undefined
 ) => {
     const engine = useDataEngine();
+    const params = {
+        fields: "categories[id,name,shortName,categoryOptions[id,name,startDate,endDate]],categoryOptionCombos[id,categoryOptions]",
+    };
     return useQuery<IDashboard, Error>(
         ["i-dashboards", id],
         async ({ signal }) => {
@@ -563,6 +566,28 @@ export const useDashboard = (
                 dashboardApi.setCurrentDashboard(dashboard);
                 storeApi.changeSelectedDashboard(dashboard.id);
                 storeApi.changeSelectedCategory(dashboard.category || "");
+                if (dashboard.categoryCombo) {
+                    const categoryCombo = await getDHIS2Resource<CategoryCombo>(
+                        {
+                            isCurrentDHIS2: true,
+                            params,
+                            api,
+                            resource: `categoryCombos/${dashboard.categoryCombo}.json`,
+                            engine,
+                        }
+                    );
+
+                    dashboardCategoryComboApi.set(categoryCombo);
+
+                    categoryCombo.categories.forEach((c) => {
+                        const valid = c.categoryOptions.filter(
+                            (a) => a.endDate === undefined
+                        );
+                        attributionApi.add({
+                            [c.id]: valid.map((e) => e.id).join(","),
+                        });
+                    });
+                }
                 return dashboard;
             }
             dashboardTypeApi.set(dashboardType);
@@ -1324,6 +1349,7 @@ const makeSQLViewsQueries = (
             const keys = Object.keys(globalFilters).some(
                 (e) => String(val.value).indexOf(e) !== -1
             );
+
             if (keys) {
                 Object.entries(globalFilters).forEach(
                     ([globalId, globalValue]) => {
@@ -1991,7 +2017,7 @@ export const useVisualization = (
             ...Object.values(overrides),
             ...Object.values(otherFilters || {}),
         ],
-        async ({ signal }) => {
+        async () => {
             return processVisualization(
                 engine,
                 visualization,

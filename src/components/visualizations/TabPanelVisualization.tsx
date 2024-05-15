@@ -21,7 +21,13 @@ const TabPanelVisualization = ({ section }: { section: ISection }) => {
     useInterval(increment, 1000 * 20);
 
     return (
-        <Stack h="100%" w="100%" flexDirection="column" key={section.id}>
+        <Stack
+            h="100%"
+            w="100%"
+            flexDirection="column"
+            key={section.id}
+            spacing="0"
+        >
             {section.title && (
                 <VisualizationTitle section={section} title={section.title} />
             )}
@@ -55,7 +61,13 @@ const TabPanelVisualization = ({ section }: { section: ISection }) => {
 
                     <TabPanels h="100%">
                         {section.visualizations.map((visualization) => (
-                            <TabPanel key={visualization.id} h="100%" w="100%">
+                            <TabPanel
+                                key={visualization.id}
+                                h="100%"
+                                w="100%"
+                                p="0"
+                                m="0"
+                            >
                                 <Stack
                                     alignItems="center"
                                     alignContent="center"

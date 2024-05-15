@@ -29,6 +29,7 @@ export default function Show3() {
         pauseOnHover: false,
         easing: "cubic-bezier",
         lazyLoad: "ondemand",
+        autoplaySpeed: presentation.autoplaySpeed,
     };
 
     useEffect(() => {

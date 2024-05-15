@@ -3,6 +3,7 @@ import { isEqual, sortBy } from "lodash";
 import { headerHeight, padding, sideWidth } from "./components/constants";
 import { domain } from "./Domain";
 import {
+    CategoryCombo,
     DataNode,
     ICategory,
     IDashboard,
@@ -10,20 +11,19 @@ import {
     IData,
     IDataSource,
     IIndicator,
+    IPage,
     IPagination,
+    IPresentation,
+    IReport,
     ISection,
     IStore,
+    IUserGroup,
     Option,
     Playlist,
     ScreenSize,
-    IPresentation,
-    IReport,
-    IPage,
-    IUserGroup,
-    CategoryCombo,
 } from "./interfaces";
 import { generateUid } from "./utils/uid";
-import { getRelativePeriods, arrayCombinations } from "./utils/utils";
+import { arrayCombinations, getRelativePeriods } from "./utils/utils";
 export const createSection = (id = generateUid()): ISection => {
     return {
         id,
@@ -90,6 +90,7 @@ export const createPresentation = (id = generateUid()): IPresentation => {
         description: "",
         items: [],
         speed: 1000,
+        autoplaySpeed: 30000,
     };
 };
 
@@ -166,10 +167,8 @@ export const createDashboard = (
         dataSet: "",
         categorization: {},
         availableCategories: [],
-        availableCategoryOptionCombos: [],
         bg: "#CBD5E0",
-        targetCategoryCombo: "",
-        targetCategoryOptionCombos: [],
+        categoryCombo: "",
         nodeSource: {},
         tag: "Example tag",
         type,
@@ -365,28 +364,12 @@ export const $dashboardCategory = combine(
 );
 
 export const $categoryOptionCombo = $dashboard.map(
-    ({
-        availableCategories,
-        categorization,
-        availableCategoryOptionCombos,
-    }) => {
+    ({ availableCategories, categorization }) => {
         const combos: any[] = availableCategories
             .map(({ id }) => categorization[id])
             .filter((v) => !!v);
         let availableCombos: any[] = [];
         let result = { prev: [], current: [] };
-        if (availableCategoryOptionCombos) {
-            availableCombos = availableCategoryOptionCombos.map(
-                ({ categoryOptions, id }: any) => {
-                    return {
-                        id,
-                        categoryOptions: categoryOptions.map(
-                            ({ id }: any) => id
-                        ),
-                    };
-                }
-            );
-        }
 
         if (combos.length === 2) {
             const [{ categoryOptions }] = availableCategories;
@@ -435,32 +418,7 @@ export const $categoryOptionCombo = $dashboard.map(
 );
 
 export const $targetCategoryOptionCombo = $dashboard.map(
-    ({ categorization, availableCategories, targetCategoryOptionCombos }) => {
-        if (
-            availableCategories &&
-            availableCategories.length > 0 &&
-            targetCategoryOptionCombos &&
-            targetCategoryOptionCombos.length > 0
-        ) {
-            const categoryId = availableCategories[0].id;
-            const categories = categorization[categoryId];
-
-            return categories.flatMap(({ value }) => {
-                const targetCOC: any = targetCategoryOptionCombos.find(
-                    ({ categoryOptions }) => {
-                        return (
-                            categoryOptions
-                                .map(({ id }: any) => id)
-                                .join("") === value
-                        );
-                    }
-                );
-                if (targetCOC) {
-                    return [targetCOC.id];
-                }
-                return [];
-            });
-        }
+    ({ categorization, availableCategories }) => {
         return [];
     }
 );
@@ -476,7 +434,6 @@ export const $globalFilters = combine(
             }
             return [period.value];
         });
-        console.log(store.minSublevel);
         let filters: { [key: string]: any } = {
             m5D13FqKZwN: periods,
             GQhi6pRnTKF: [store.levels.sort()[store.levels.length - 1]],
